@@ -272,14 +272,20 @@ function renderPlay(){
 }
 async function make(p){
   const N=NATIONS[me.n];
-  await roomRef(me.room).child('nations/'+me.n).transaction(nat=>{
-    if(!nat||!canMake(nat,p)||(nat.made&&nat.made[p]))return nat;
+  let did=false;
+  const r=await roomRef(me.room).child('nations/'+me.n).transaction(nat=>{
+    did=false;
+    if(!nat)return nat;
+    if(!canMake(nat,p)||(nat.made&&nat.made[p]))return;
     Object.entries(PROD[p].need).forEach(([r,c])=>nat.inv[r]-=c);
     nat.made=nat.made||{};nat.made[p]=Date.now();
     if(N.m.every(x=>nat.made[x]))nat.doneAt=Date.now();
-    return nat;},undefined,false);
+    did=true;return nat;},undefined,false);
+  // 만들기를 두 번 눌러도 무역 소식에는 한 번만 올라가요
+  if(!r.committed||!did)return;
   roomRef(me.room).child('feed').push({t:Date.now(),k:'make',n:me.n,p});
   window._msg={t:'ok',s:`${PROD[p].k} 완성!`};
+  if(view==='main'&&NAT&&!NAT.doneAt)renderPlay();
 }
 function sendView(){
   view='send';const N=NATIONS[me.n];let to=0,res=0;
