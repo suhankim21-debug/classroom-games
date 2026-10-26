@@ -172,6 +172,17 @@ const img=(k,cls='')=>`<img src="${IC[k]}" alt="" class="${cls}">`;
 const eul=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;return w+((c>=0&&c%28)?'을':'를');};
 function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
 
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭에 안내받은 규칙이 <b>게시</b>되었는지 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있거나, 데이터베이스가 아직 만들어지지 않았을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">Firebase에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>teacherView(); $('#home').onclick=()=>startView();
+}
+window.addEventListener('unhandledrejection',ev=>{showError(ev.reason);});
 firebase.initializeApp(FIREBASE_CONFIG);
 const db=firebase.database();
 const roomRef=code=>db.ref('rooms/'+code);
@@ -213,7 +224,7 @@ function joinView(){
   $('#home').onclick=startView;
   $('#enter').onclick=async()=>{
     const code=$('#rm').value, names=[$('#p1').value.trim(),$('#p2').value.trim()].filter(Boolean);
-    const room=await roomRef(code).child('open').get();
+    let room;try{room=await withTimeout(roomRef(code).child('open').get());}catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return;}
     if(!room.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return;}
     const ref=roomRef(code).child('nations/'+pick);
     const r=await ref.transaction(cur=>cur?undefined:freshNation(pick,names));
@@ -312,12 +323,16 @@ function winView(){
 let T=null,tick=null,tUnsub=null,ROOMDATA={};
 async function teacherView(){
   if(unsub){unsub();unsub=null;}
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2><p class="muted">잠시만 기다려 주세요.</p></div>';
   let code=store('rt-teacher-room');
-  if(!code||!(await roomRef(code).child('open').get()).exists()){
-    code=String(Math.floor(1000+Math.random()*9000));
-    await roomRef(code).set({open:Date.now(),timer:{min:5,left:300,endAt:0}});
-    store('rt-teacher-room',code);
-  }
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),timer:{min:5,left:300,endAt:0}}));
+      store('rt-teacher-room',code);
+    }
+  }catch(e){ return showError(e); }
   ROOM=code;
   const url=location.origin+location.pathname+'?room='+code;
   $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
