@@ -227,7 +227,7 @@ function joinView(){
     let room;try{room=await withTimeout(roomRef(code).child('open').get());}catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return;}
     if(!room.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return;}
     const ref=roomRef(code).child('nations/'+pick);
-    const r=await ref.transaction(cur=>cur?undefined:freshNation(pick,names));
+    const r=await ref.transaction(cur=>cur?undefined:freshNation(pick,names),undefined,false);
     if(!r.committed){
       const cur=r.snapshot.val();
       // 같은 모둠이 새로고침/다른 기기로 다시 들어오는 경우: 이름이 같으면 이어서 하기
@@ -241,7 +241,11 @@ let NAT=null;
 function playView(msg){
   if(unsub)unsub();
   const ref=roomRef(me.room).child('nations/'+me.n);
-  const h=ref.on('value',s=>{NAT=s.val();if(!NAT){store('rt-student',null);me=null;return joinView();}renderPlay();});
+  const h=ref.on('value',async s=>{const v=s.val();if(!v){
+    // 잠깐 비어 보이는 경우가 있어 서버에서 한 번 더 확인한 뒤에만 처음 화면으로 돌아가요
+    const again=await ref.get().catch(()=>null);if(again&&again.exists())return;
+    if(unsub){unsub();unsub=null;}store('rt-student',null);me=null;return joinView();}
+    NAT=v;renderPlay();});
   unsub=()=>ref.off('value',h);
   window._msg=msg;
 }
@@ -273,7 +277,7 @@ async function make(p){
     Object.entries(PROD[p].need).forEach(([r,c])=>nat.inv[r]-=c);
     nat.made=nat.made||{};nat.made[p]=Date.now();
     if(N.m.every(x=>nat.made[x]))nat.doneAt=Date.now();
-    return nat;});
+    return nat;},undefined,false);
   roomRef(me.room).child('feed').push({t:Date.now(),k:'make',n:me.n,p});
   window._msg={t:'ok',s:`${PROD[p].k} 완성!`};
 }
@@ -292,18 +296,22 @@ function sendView(){
     $('#cancel').onclick=()=>{view='main';renderPlay();};
     $('#go').onclick=async()=>{
       $('#go').disabled=true;
-      const r=await roomRef(me.room).child('nations').transaction(all=>{
-        if(!all||!all[me.n])return all;
-        if(!all[to])return; // 받는 나라가 아직 없음 → 취소
-        if((all[me.n].inv[res]||0)<1)return;
-        all[me.n].inv[res]--;all[me.n].out=(all[me.n].out||0)+1;
-        all[to].inv[res]=(all[to].inv[res]||0)+1;all[to].in=(all[to].in||0)+1;
-        return all;});
+      const base=roomRef(me.room).child('nations');
+      let ok=false;
+      try{
+        const target=await withTimeout(base.child(to+'/names').get());
+        if(!target.exists()){view='main';window._msg={t:'bad',s:`${NATIONS[to].n}는 아직 참여하지 않았어요`};return renderPlay();}
+        const r1=await withTimeout(base.child(me.n+'/inv/'+res).transaction(c=>{if(c===null)return c;if(c<1)return;return c-1;},undefined,false));
+        if(r1.committed&&r1.snapshot.val()!==null){
+          await withTimeout(base.child(to+'/inv/'+res).transaction(c=>(c||0)+1,undefined,false));
+          base.child(me.n+'/out').transaction(c=>(c||0)+1);
+          base.child(to+'/in').transaction(c=>(c||0)+1);
+          roomRef(me.room).child('feed').push({t:Date.now(),k:'trade',from:me.n,to,res});
+          ok=true;
+        }
+      }catch(e){}
       view='main';
-      if(r.committed&&r.snapshot.val()&&r.snapshot.val()[to]){
-        roomRef(me.room).child('feed').push({t:Date.now(),k:'trade',from:me.n,to,res});
-        window._msg={t:'ok',s:`${NATIONS[to].n}에 ${eul(RES[res].k)} 수출했어요`};
-      }else window._msg={t:'bad',s:`${NATIONS[to].n}가 아직 참여하지 않았어요`};
+      window._msg=ok?{t:'ok',s:`${NATIONS[to].n}에 ${eul(RES[res].k)} 수출했어요`}:{t:'bad',s:'보내지 못했어요. 창고를 확인하고 다시 해 봐요.'};
       renderPlay();
     };
   };
