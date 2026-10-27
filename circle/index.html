@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>원의 둘레와 넓이 실험실</title>
+<style>
+:root{--bg:#F2EEE3;--card:#fff;--ink:#1D2A33;--navy:#0E3B5C;--line:#D8D1C0;--red:#E4572E;--blue:#2E86C1;--green:#2E9E5B;--orange:#F98F6E;--yellow:#F4C542}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;background:var(--navy);color:#fff}
+header h1{margin:0;font-size:1.4rem;flex:1 1 auto}
+header button{background:transparent;color:#fff;border:2px solid #ffffff88;border-radius:10px;padding:6px 12px;font:inherit;cursor:pointer}
+nav{display:flex;gap:8px;padding:12px 16px 0;flex-wrap:wrap}
+nav button{flex:1 1 180px;font:inherit;font-size:1.05rem;padding:10px 12px;border-radius:14px 14px 0 0;border:2px solid var(--line);border-bottom:none;background:#E7E1D2;color:var(--navy);cursor:pointer;text-align:left}
+nav button small{display:block;font-size:.8rem;color:#6b6457}
+nav button.on{background:var(--card);font-weight:bold}
+main{margin:0 16px 16px;background:var(--card);border:2px solid var(--line);border-radius:0 0 14px 14px;padding:14px}
+section{display:none}section.on{display:block}
+.q{font-size:1.25rem;font-weight:bold;color:var(--navy);margin:0 0 10px}
+.q span{background:var(--yellow);color:var(--ink);border-radius:8px;padding:0 8px;margin-right:6px;font-size:1rem}
+canvas{display:block;width:100%;height:min(56vh,52vw);min-height:260px;background:#FBFAF6;border:1px solid var(--line);border-radius:12px;touch-action:none}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:12px;font-size:1.05rem}
+.ctl button{font:inherit;font-weight:bold;padding:10px 18px;border-radius:12px;border:none;background:var(--navy);color:#fff;cursor:pointer}
+.ctl button.sub{background:#E7E1D2;color:var(--navy)}
+.ctl button.pick{background:#E7E1D2;color:var(--navy);font-weight:normal}
+.ctl button.pick.on{background:var(--orange);color:#fff;font-weight:bold}
+.ctl label{display:flex;align-items:center;gap:8px}
+.ctl input[type=range]{width:180px;accent-color:var(--navy)}
+.ctl input[type=checkbox]{width:22px;height:22px;accent-color:var(--navy)}
+.ctl b.val{min-width:3.5em;display:inline-block}
+.say{margin-top:12px;padding:12px 14px;border-radius:12px;background:#FFF6D9;font-size:1.2rem;line-height:1.6;min-height:3.2em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.box{border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.box h3{margin:0 0 8px;font-size:1.05rem;color:var(--navy)}
+table{width:100%;border-collapse:collapse;font-size:1.05rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:center}
+th{color:#6b6457;font-weight:normal}
+td.pi{font-weight:bold;color:var(--red)}
+.calc{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:1.1rem;margin:6px 0}
+.calc input{width:5.5em;font:inherit;padding:4px 6px;border:2px solid var(--line);border-radius:8px}
+.calc output{font-weight:bold;color:var(--red)}
+.steps{margin:0;padding-left:1.4em;font-size:1.2rem;line-height:1.8}
+.steps li{display:none}.steps li.show{display:list-item}
+.hl{color:var(--red);font-weight:bold}
+.mute{color:#6b6457;font-size:.95rem}
+#graph{height:220px;min-height:220px}
+a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
+</style></head>
+<body>
+<header><h1>⭕ 원의 둘레와 넓이 실험실</h1><button id="fs">전체 화면</button></header>
+<nav>
+  <button data-t="s1" class="on">① 원 굴리기<small>원주와 지름의 관계 (2차시)</small></button>
+  <button data-t="s2">② 원주율 찾기<small>원주율 · 원주와 지름 구하기 (3~4차시)</small></button>
+  <button data-t="s3">③ 넓이 어림하기<small>모눈과 정사각형 (5차시)</small></button>
+  <button data-t="s4">④ 잘라 붙이기<small>원의 넓이 구하는 방법 (6차시)</small></button>
+</nav>
+<main>
+<!-- ① 원 굴리기 -->
+<section id="s1" class="on">
+  <p class="q"><span>질문</span>원을 한 바퀴 굴리면, 지름 몇 개만큼 갈까요?</p>
+  <canvas id="c1"></canvas>
+  <div class="ctl">
+    <button id="r1play">▶ 한 바퀴 굴리기</button>
+    <button id="r1reset" class="sub">↺ 처음으로</button>
+    <button id="r1mode" class="sub">정육각형·정사각형과 비교</button>
+    <label>지름 <input id="r1d" type="range" min="2" max="10" step="1" value="4"><b class="val" id="r1dv">4 cm</b></label>
+    <label><input id="r1ruler" type="checkbox" checked> 지름 눈금</label>
+    <label><input id="r1trace" type="checkbox"> 빨간 점이 지나간 길</label>
+  </div>
+  <div class="say" id="say1">원 위의 빨간 점이 바닥에 닿은 곳에서 출발해요. 한 바퀴 굴러서 빨간 점이 다시 바닥에 닿을 때까지 간 거리가 바로 <b>원의 둘레(원주)</b>예요.</div>
+</section>
+
+<!-- ② 원주율 찾기 -->
+<section id="s2">
+  <p class="q"><span>질문</span>큰 원이든 작은 원이든, (원주) ÷ (지름)은 늘 같을까요?</p>
+  <canvas id="c2"></canvas>
+  <div class="ctl" id="objs"></div>
+  <div class="ctl">
+    <label>직접 정하기: 지름 <input id="r2d" type="range" min="1" max="100" step="1" value="15"><b class="val" id="r2dv">15 cm</b></label>
+    <button id="r2custom">▶ 이 원으로 재기</button>
+    <button id="r2clear" class="sub">표 지우기</button>
+  </div>
+  <div class="say" id="say2">물건을 하나 골라 보세요. 원을 굴려 원주를 펼친 다음, 지름 막대로 몇 번 들어가는지 재어 봐요.</div>
+  <div class="grid2">
+    <div class="box"><h3>📋 잰 결과</h3>
+      <table><thead><tr><th>물건</th><th>지름(cm)</th><th>원주(cm)</th><th>원주 ÷ 지름</th></tr></thead><tbody id="tb"></tbody></table>
+      <p class="mute">원주는 자로 잰 것처럼 소수 첫째 자리까지, 원주 ÷ 지름은 소수 둘째 자리까지 나타냈어요.</p>
+    </div>
+    <div class="box"><h3>📈 지름이 커지면 원주는?</h3><canvas id="graph"></canvas></div>
+  </div>
+  <div class="box" style="margin-top:14px"><h3>🧮 원주율(3.14)로 구하기</h3>
+    <div class="calc">지름 <input id="cd" type="number" min="0" step="0.1" value="10"> cm → 원주 = 지름 × 3.14 = <output id="cdo"></output></div>
+    <div class="calc">원주 <input id="cc" type="number" min="0" step="0.1" value="31.4"> cm → 지름 = 원주 ÷ 3.14 = <output id="cco"></output></div>
+    <div class="calc">반지름 <input id="cr" type="number" min="0" step="0.1" value="5"> cm → 원주 = 반지름 × 2 × 3.14 = <output id="cro"></output></div>
+  </div>
+</section>
+
+<!-- ③ 넓이 어림하기 -->
+<section id="s3">
+  <p class="q"><span>질문</span>원의 넓이는 모눈 몇 칸쯤일까요?</p>
+  <canvas id="c3"></canvas>
+  <div class="ctl">
+    <label>반지름 <input id="r3r" type="range" min="3" max="10" step="1" value="6"><b class="val" id="r3rv">6 cm</b></label>
+    <label><input id="g_out" type="checkbox"> 바깥 정사각형</label>
+    <label><input id="g_in" type="checkbox"> 안쪽 정사각형</label>
+    <label><input id="g_full" type="checkbox"> 원 안 모눈</label>
+    <label><input id="g_part" type="checkbox"> 걸친 모눈</label>
+    <label><input id="g_sq" type="checkbox"> 반지름 정사각형</label>
+  </div>
+  <div class="say" id="say3"></div>
+</section>
+
+<!-- ④ 잘라 붙이기 -->
+<section id="s4">
+  <p class="q"><span>질문</span>원을 잘라서 이어 붙이면 어떤 도형이 될까요?</p>
+  <canvas id="c4"></canvas>
+  <div class="ctl">
+    <button id="r4play">▶ 잘라서 이어 붙이기</button>
+    <button id="r4back" class="sub">↺ 원으로 돌아가기</button>
+    <label>조각 수 <input id="r4n" type="range" min="0" max="8" step="1" value="2"><b class="val" id="r4nv">8조각</b></label>
+    <label><input id="r4lab" type="checkbox" checked> 길이 표시</label>
+  </div>
+  <div class="grid2">
+    <div class="box"><h3>✏️ 원의 넓이 구하는 방법 <button id="r4next" style="float:right;font:inherit;font-size:.95rem;padding:4px 12px;border-radius:10px;border:none;background:var(--navy);color:#fff;cursor:pointer">다음 단계 ▶</button></h3>
+      <ol class="steps" id="steps">
+        <li>원을 <b>잘게 자를수록</b> 이어 붙인 모양이 <b>직사각형</b>에 가까워져요.</li>
+        <li>직사각형의 <span style="color:var(--red)">가로</span> = 원주의 ½ = 지름 × 3.14 × ½ = <b>반지름 × 3.14</b></li>
+        <li>직사각형의 <span style="color:var(--blue)">세로</span> = <b>반지름</b></li>
+        <li>원의 넓이 = 가로 × 세로 = 반지름 × 3.14 × 반지름<br>= <span class="hl">반지름 × 반지름 × 3.14</span></li>
+      </ol>
+    </div>
+    <div class="box"><h3>🧮 바로 구해 보기</h3>
+      <div class="calc">반지름 <input id="ar" type="number" min="0" step="0.1" value="5"> cm → <output id="aro"></output></div>
+      <div class="calc">지름 <input id="ad" type="number" min="0" step="0.1" value="20"> cm → <output id="ado"></output></div>
+    </div>
+  </div>
+</section>
+</main>
+<a class="home" href="../">← 우리 반 웹 게임 목록</a>
+
+<script>
+const $ = s => document.querySelector(s);
+const PI = Math.PI, TAU = 2 * Math.PI;
+const COL = { red: '#E4572E', blue: '#2E86C1', green: '#2E9E5B', orange: '#F98F6E', navy: '#0E3B5C', ink: '#1D2A33', mute: '#8a8273', line: '#D8D1C0', yellow: '#F4C542' };
+const FONT = "'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif";
+const fmt = (x, k = 2) => (+x.toFixed(k)).toString();
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+function prep(cv) {
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  return { c, w, h };
+}
+function text(c, s, x, y, { size = 18, color = COL.ink, align = 'center', base = 'middle', bold = false } = {}) {
+  c.font = `${bold ? 'bold ' : ''}${size}px ${FONT}`; c.fillStyle = color; c.textAlign = align; c.textBaseline = base; c.fillText(s, x, y);
+}
+function line(c, x1, y1, x2, y2, color, w = 2, dash) {
+  c.beginPath(); c.setLineDash(dash || []); c.moveTo(x1, y1); c.lineTo(x2, y2); c.strokeStyle = color; c.lineWidth = w; c.stroke(); c.setLineDash([]);
+}
+function bar(c, x, y, len, hgt, color, label, lc = '#fff') {
+  c.fillStyle = color; c.fillRect(x, y, len, hgt); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.strokeRect(x, y, len, hgt);
+  if (label && len > 26) text(c, label, x + len / 2, y + hgt / 2 + 1, { size: Math.min(16, hgt - 4), color: lc, bold: true });
+}
+// 원이 바닥 위를 굴러가는 그림 (①, ② 공통)
+function drawRoll(c, w, h, d, phi, opt = {}) {
+  const m = 30, top = opt.top || 40;
+  const s = Math.min((w - 2 * m) / (PI * d + d), (h - top - 110) / d);
+  const R = d / 2 * s, x0 = m + R, gy = h - 78;
+  const cx = x0 + R * phi, cy = gy - R;
+  // 바닥과 지름 눈금
+  line(c, m - 10, gy, w - m + 10, gy, '#9b927f', 2);
+  if (opt.ruler !== false) {
+    for (let k = 0; k < 4; k++) {
+      const bx = x0 + k * d * s; if (bx + 2 > w) break;
+      const len = Math.min(d * s, w - m - bx);
+      bar(c, bx, gy + 10, len, 22, k % 2 ? '#7FB3D5' : COL.blue, `지름 ${k + 1}`);
+    }
+  }
+  if (opt.sticks != null) { // 원주 위에 지름 막대를 차례로 놓기
+    const n = opt.sticks;
+    for (let k = 0; k < Math.ceil(n); k++) {
+      const frac = Math.min(1, n - k), full = Math.min(d * s, PI * d * s - k * d * s);
+      const len = Math.max(0, Math.min(full, d * s * frac));
+      const bx = x0 + k * d * s;
+      bar(c, bx, gy + 10, len, 22, k === 3 ? COL.yellow : (k % 2 ? '#7FB3D5' : COL.blue), k === 3 ? '' : `지름 ${k + 1}`);
+    }
+  }
+  // 굴러간 거리(원주) 칠하기
+  const dist = R * phi;
+  if (dist > 0) line(c, x0, gy, x0 + dist, gy, COL.red, 7);
+  line(c, x0, gy - 8, x0, gy + 8, COL.red, 3);
+  // 빨간 점 자취
+  if (opt.trace) {
+    c.beginPath();
+    for (let a = 0; a <= phi + 1e-9; a += 0.02) { const px = x0 + R * a - R * Math.sin(a), py = gy - R + R * Math.cos(a); a === 0 ? c.moveTo(px, py) : c.lineTo(px, py); }
+    c.strokeStyle = '#E4572E88'; c.lineWidth = 2; c.setLineDash([6, 5]); c.stroke(); c.setLineDash([]);
+  }
+  // 원
+  c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = '#FDEBD0'; c.fill(); c.strokeStyle = COL.navy; c.lineWidth = 3; c.stroke();
+  if (phi > 0) { c.beginPath(); c.arc(cx, cy, R, PI / 2, PI / 2 + Math.min(phi, TAU)); c.strokeStyle = COL.red; c.lineWidth = 7; c.stroke(); }
+  // 지름(같이 돈다)
+  const a = PI / 2 + phi + PI / 2;
+  line(c, cx - R * Math.cos(a), cy - R * Math.sin(a), cx + R * Math.cos(a), cy + R * Math.sin(a), COL.blue, 4);
+  c.beginPath(); c.arc(cx, cy, 4, 0, TAU); c.fillStyle = COL.navy; c.fill();
+  const px = cx + R * Math.cos(PI / 2 + phi), py = cy + R * Math.sin(PI / 2 + phi);
+  c.beginPath(); c.arc(px, py, 8, 0, TAU); c.fillStyle = COL.red; c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
+  if (opt.name) text(c, opt.name, cx, cy - R - 16, { size: 18, bold: true, color: COL.navy });
+  return { x0, gy, s, R };
+}
+
+/* ---------- 탭 ---------- */
+const sims = {};
+let cur = 's1';
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('main section').forEach(x => x.classList.toggle('on', x.id === b.dataset.t));
+  cur = b.dataset.t; sims[cur].draw();
+});
+$('#fs').onclick = () => { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); };
+addEventListener('resize', () => sims[cur].draw());
+function animate(dur, step, done) {
+  let t0 = null, id = { stop: false };
+  const f = ts => { if (id.stop) return; t0 ??= ts; const t = Math.min(1, (ts - t0) / dur); step(t); t < 1 ? requestAnimationFrame(f) : done && done(); };
+  requestAnimationFrame(f); return id;
+}
+
+/* ---------- ① 원 굴리기 ---------- */
+sims.s1 = (() => {
+  const cv = $('#c1'); let phi = 0, mode = 'roll', anim = null;
+  const d = () => +$('#r1d').value;
+  function draw() {
+    const { c, w, h } = prep(cv);
+    if (mode === 'roll') {
+      const g = drawRoll(c, w, h, d(), phi, { ruler: $('#r1ruler').checked, trace: $('#r1trace').checked });
+      text(c, `지름 ${d()} cm`, 20, 22, { align: 'left', size: 18, color: COL.blue, bold: true });
+      if (phi > 0) text(c, `굴러간 거리 ${fmt(d() / 2 * phi, 1)} cm`, w - 20, 22, { align: 'right', size: 18, color: COL.red, bold: true });
+      if (phi >= TAU - 1e-6 && $('#r1ruler').checked) {
+        const x3 = g.x0 + 3 * d() * g.s, xe = g.x0 + PI * d() * g.s;
+        line(c, x3, g.gy - 30, x3, g.gy + 40, COL.navy, 2, [5, 4]);
+        text(c, '조금 더!', (x3 + xe) / 2, g.gy + 55, { size: 16, bold: true, color: COL.red });
+      }
+    } else drawCompare(c, w, h);
+  }
+  function drawCompare(c, w, h) {
+    const left = Math.min(w * 0.38, h - 40), R = left / 2 - 20, cx = 30 + R, cy = h / 2;
+    // 바깥 정사각형
+    c.strokeStyle = COL.red; c.lineWidth = 3; c.strokeRect(cx - R, cy - R, 2 * R, 2 * R);
+    // 원
+    c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = '#FDEBD033'; c.fill(); c.strokeStyle = COL.navy; c.lineWidth = 4; c.stroke();
+    // 안쪽 정육각형 + 반지름
+    c.beginPath(); for (let k = 0; k <= 6; k++) { const a = k * TAU / 6; k ? c.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a)) : c.moveTo(cx + R, cy); }
+    c.strokeStyle = COL.green; c.lineWidth = 3; c.stroke();
+    for (let k = 0; k < 6; k++) { const a = k * TAU / 6; line(c, cx, cy, cx + R * Math.cos(a), cy + R * Math.sin(a), '#2E9E5B66', 1.5, [4, 4]); }
+    line(c, cx - R, cy, cx + R, cy, COL.blue, 3);
+    text(c, '지름', cx, cy - 12, { color: COL.blue, bold: true, size: 16 });
+    // 오른쪽 막대 비교
+    const bx = cx + R + 50, unit = Math.min((w - bx - 120) / 4, 140), bh = 30;
+    const rows = [
+      ['정육각형의 둘레', COL.green, 3, '지름 × 3'],
+      ['원의 둘레(원주)', COL.red, PI, '지름 × 3.14…'],
+      ['정사각형의 둘레', COL.red, 4, '지름 × 4'],
+    ];
+    rows.forEach(([name, col, k, cap], i) => {
+      const y = cy - 110 + i * 90;
+      text(c, name, bx, y - 18, { align: 'left', bold: true, color: i === 1 ? COL.navy : col, size: 18 });
+      if (i === 1) { c.fillStyle = COL.red; c.fillRect(bx, y, unit * k, bh); text(c, cap, bx + unit * k + 10, y + bh / 2, { align: 'left', size: 17, bold: true, color: COL.red }); }
+      else {
+        for (let j = 0; j < k; j++) bar(c, bx + j * unit, y, unit, bh, j % 2 ? '#7FB3D5' : COL.blue, `지름`);
+        c.strokeStyle = col; c.lineWidth = 3; c.strokeRect(bx, y - 3, unit * k, bh + 6);
+        text(c, cap, bx + unit * k + 10, y + bh / 2, { align: 'left', size: 17, bold: true, color: col });
+      }
+    });
+    text(c, '정육각형의 한 변 = 반지름  →  여섯 변 = 반지름 6개 = 지름 3개', bx, cy + 170 > h - 16 ? h - 16 : cy + 170, { align: 'left', size: 15, color: COL.mute });
+  }
+  function say() {
+    $('#say1').innerHTML = mode === 'compare'
+      ? '원 <b>안</b>에 있는 정육각형의 둘레는 <b>지름의 3배</b>, 원 <b>밖</b>에 있는 정사각형의 둘레는 <b>지름의 4배</b>예요.<br>그래서 원주는 <b class="hl">지름의 3배보다 길고, 4배보다 짧아요.</b>'
+      : phi >= TAU - 1e-6
+        ? `한 바퀴 굴러간 거리(원주)는 <b>${fmt(d() * PI, 2)} cm</b>예요. 지름 ${d()} cm를 <b>3번</b> 놓고도 <b>조금 남아요.</b><br>👉 원주는 <b class="hl">지름의 3배보다 조금 길어요.</b> 지름을 바꿔서 또 굴려 보세요!`
+        : '원 위의 빨간 점이 바닥에 닿은 곳에서 출발해요. 한 바퀴 굴러서 빨간 점이 다시 바닥에 닿을 때까지 간 거리가 바로 <b>원의 둘레(원주)</b>예요.';
+  }
+  $('#r1play').onclick = () => {
+    if (mode !== 'roll') { mode = 'roll'; $('#r1mode').textContent = '정육각형·정사각형과 비교'; }
+    if (anim) anim.stop = true; phi = 0; say();
+    anim = animate(4200, t => { phi = TAU * ease(t); draw(); }, () => { phi = TAU; draw(); say(); });
+  };
+  $('#r1reset').onclick = () => { if (anim) anim.stop = true; phi = 0; mode = 'roll'; $('#r1mode').textContent = '정육각형·정사각형과 비교'; draw(); say(); };
+  $('#r1mode').onclick = () => { if (anim) anim.stop = true; mode = mode === 'roll' ? 'compare' : 'roll'; $('#r1mode').textContent = mode === 'roll' ? '정육각형·정사각형과 비교' : '원 굴리기로 돌아가기'; draw(); say(); };
+  $('#r1d').oninput = () => { $('#r1dv').textContent = d() + ' cm'; if (anim) anim.stop = true; phi = 0; draw(); say(); };
+  $('#r1ruler').onchange = $('#r1trace').onchange = draw;
+  return { draw };
+})();
+
+/* ---------- ② 원주율 찾기 ---------- */
+sims.s2 = (() => {
+  const cv = $('#c2'), gv = $('#graph');
+  const OBJ = [['🪙 100원 동전', 2.4], ['💿 CD', 12], ['🍽️ 접시', 20], ['🕰️ 벽시계', 30], ['🛞 굴렁쇠', 60], ['⭕ 훌라후프', 80]];
+  let st = { d: 12, name: '', phi: 0, sticks: null }, rows = [], anim = null;
+  const box = $('#objs');
+  OBJ.forEach(([n, d]) => { const b = document.createElement('button'); b.className = 'pick'; b.textContent = n; b.onclick = () => run(n, d, b); box.appendChild(b); });
+  function draw() {
+    const { c, w, h } = prep(cv);
+    const g = drawRoll(c, w, h, st.d, st.phi, { ruler: false, sticks: st.sticks, name: st.name });
+    text(c, `지름 ${fmt(st.d, 1)} cm`, 20, 22, { align: 'left', size: 18, color: COL.blue, bold: true });
+    if (st.phi > 0) text(c, `원주 ${fmt(st.d / 2 * st.phi, 1)} cm`, w - 20, 22, { align: 'right', size: 18, color: COL.red, bold: true });
+    if (st.sticks != null && st.sticks > 3) {
+      const x3 = g.x0 + 3 * st.d * g.s, xe = g.x0 + PI * st.d * g.s;
+      line(c, xe, g.gy - 10, xe, g.gy + 40, COL.red, 2);
+      text(c, '0.14', (x3 + xe) / 2, g.gy + 52, { size: 16, bold: true, color: '#B7950B' });
+      if (st.sticks >= 3.99) text(c, `${fmt(Math.round(st.d * PI * 10) / 10, 1)} ÷ ${fmt(st.d, 1)} = ${fmt(Math.round(st.d * PI * 10) / 10 / st.d, 2)}`, w / 2, 56, { size: 26, bold: true, color: COL.navy });
+    }
+    drawGraph();
+  }
+  function drawGraph() {
+    const { c, w, h } = prep(gv); const L = 46, B = h - 30, T = 14, Rg = w - 16;
+    const xmax = Math.max(100, ...rows.map(r => r.d)), ymax = xmax * 3.2;
+    const X = v => L + (Rg - L) * v / xmax, Y = v => B - (B - T) * v / ymax;
+    line(c, L, B, Rg, B, '#9b927f'); line(c, L, B, L, T, '#9b927f');
+    for (let v = 0; v <= xmax; v += 20) { text(c, v, X(v), B + 14, { size: 12, color: COL.mute }); }
+    for (let v = 0; v <= ymax; v += 50) { text(c, v, L - 6, Y(v), { size: 12, color: COL.mute, align: 'right' }); line(c, L, Y(v), Rg, Y(v), '#eee8db', 1); }
+    text(c, '지름(cm)', Rg, B - 10, { size: 12, align: 'right', color: COL.blue });
+    text(c, '원주(cm)', L + 4, T + 2, { size: 12, align: 'left', color: COL.red });
+    if (rows.length >= 2) line(c, X(0), Y(0), X(xmax), Y(xmax * PI), '#E4572E77', 2, [6, 5]);
+    rows.forEach(r => { c.beginPath(); c.arc(X(r.d), Y(r.c), 6, 0, TAU); c.fillStyle = COL.red; c.fill(); });
+    if (rows.length >= 2) text(c, '원주는 늘 지름의 약 3.14배!', (L + Rg) / 2, T + 6, { size: 14, bold: true, color: COL.red });
+  }
+  function table() {
+    $('#tb').innerHTML = rows.map(r => `<tr><td>${r.n}</td><td>${fmt(r.d, 1)}</td><td>${fmt(r.c, 1)}</td><td class="pi">${(r.c / r.d).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="4" class="mute">아직 잰 물건이 없어요</td></tr>';
+  }
+  function run(n, d, btn) {
+    box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+    if (anim) anim.stop = true;
+    st = { d, name: n, phi: 0, sticks: null };
+    $('#say2').innerHTML = `<b>${n}</b>(지름 ${fmt(d, 1)} cm)을 한 바퀴 굴려서 원주를 펼쳐요…`;
+    anim = animate(3200, t => { st.phi = TAU * ease(t); draw(); }, () => {
+      st.phi = TAU; st.sticks = 0;
+      $('#say2').innerHTML = `이제 펼친 원주 위에 <b style="color:var(--blue)">지름 막대</b>를 하나씩 놓아 볼게요. 몇 개 들어갈까요?`;
+      anim = animate(3600, t => { st.sticks = t * PI; draw(); }, () => {
+        st.sticks = 4; draw();
+        const cm = Math.round(d * PI * 10) / 10;
+        rows = rows.filter(r => r.n !== n); rows.push({ n, d, c: cm }); rows.sort((a, b) => a.d - b.d); table(); drawGraph();
+        $('#say2').innerHTML = `지름 막대가 <b>3개</b> 들어가고 <b>조금(약 0.14개) 남았어요.</b> 원주 ${fmt(cm, 1)} cm ÷ 지름 ${fmt(d, 1)} cm = <b class="hl">${(cm / d).toFixed(2)}</b><br>` +
+          (rows.length >= 3 ? '👉 어떤 원이든 (원주) ÷ (지름)은 <b class="hl">약 3.14</b>로 같아요. 이 값을 <b>원주율</b>이라고 해요.' : '다른 물건도 재어 보세요. 크기가 달라도 값이 비슷할까요?');
+      });
+    });
+  }
+  $('#r2d').oninput = () => $('#r2dv').textContent = $('#r2d').value + ' cm';
+  $('#r2custom').onclick = () => run(`내가 정한 원 ${$('#r2d').value}cm`, +$('#r2d').value, null);
+  $('#r2clear').onclick = () => { rows = []; table(); drawGraph(); };
+  const calc = () => {
+    const v = id => parseFloat($(id).value);
+    $('#cdo').textContent = isNaN(v('#cd')) ? '' : fmt(v('#cd') * 3.14, 4) + ' cm';
+    $('#cco').textContent = isNaN(v('#cc')) ? '' : fmt(v('#cc') / 3.14, 4) + ' cm';
+    $('#cro').textContent = isNaN(v('#cr')) ? '' : fmt(v('#cr') * 2 * 3.14, 4) + ' cm';
+  };
+  ['#cd', '#cc', '#cr'].forEach(id => $(id).oninput = calc); calc(); table();
+  return { draw };
+})();
+
+/* ---------- ③ 넓이 어림하기 ---------- */
+sims.s3 = (() => {
+  const cv = $('#c3'); const r = () => +$('#r3r').value;
+  function count(R) {
+    let full = 0, part = 0; const cells = [];
+    for (let i = -R; i < R; i++) for (let j = -R; j < R; j++) {
+      const far = Math.max(...[[i, j], [i + 1, j], [i, j + 1], [i + 1, j + 1]].map(([x, y]) => Math.hypot(x, y)));
+      const nx = Math.max(i, Math.min(0, i + 1)), ny = Math.max(j, Math.min(0, j + 1)), near = Math.hypot(nx, ny);
+      if (far <= R + 1e-9) { full++; cells.push([i, j, 1]); } else if (near < R - 1e-9) { part++; cells.push([i, j, 0]); }
+    }
+    return { full, part, cells };
+  }
+  function draw() {
+    const { c, w, h } = prep(cv); const R = r(), N = 2 * R + 2;
+    const u = Math.min((h - 30) / N, (w * 0.62) / N), ox = 20 + u, oy = (h - N * u) / 2 + u;
+    const cx = ox + R * u, cy = oy + R * u, P = (i, j) => [cx + i * u, cy + j * u];
+    // 모눈
+    for (let k = -R - 1; k <= R + 1; k++) { line(c, cx + k * u, oy - u, cx + k * u, oy + (2 * R + 1) * u, '#e3ddcf', 1); line(c, ox - u, cy + k * u, ox + (2 * R + 1) * u, cy + k * u, '#e3ddcf', 1); }
+    const { full, part, cells } = count(R);
+    const showF = $('#g_full').checked, showP = $('#g_part').checked;
+    cells.forEach(([i, j, f]) => {
+      if (f && showF) { c.fillStyle = '#F4C542aa'; c.fillRect(cx + i * u, cy + j * u, u, u); }
+      if (!f && showP) { c.fillStyle = '#7FB3D566'; c.fillRect(cx + i * u, cy + j * u, u, u); }
+    });
+    if ($('#g_sq').checked) { c.fillStyle = '#2E86C155'; c.fillRect(cx, cy - R * u, R * u, R * u); c.strokeStyle = COL.blue; c.lineWidth = 3; c.strokeRect(cx, cy - R * u, R * u, R * u); text(c, '반지름', cx + R * u / 2, cy - R * u / 2 - 10, { size: Math.max(12, Math.min(18, R * u / 6)), bold: true, color: COL.navy }); text(c, '× 반지름', cx + R * u / 2, cy - R * u / 2 + 12, { size: Math.max(12, Math.min(18, R * u / 6)), bold: true, color: COL.navy }); }
+    if ($('#g_out').checked) { c.strokeStyle = COL.red; c.lineWidth = 4; c.strokeRect(cx - R * u, cy - R * u, 2 * R * u, 2 * R * u); }
+    if ($('#g_in').checked) { c.beginPath(); c.moveTo(cx, cy - R * u); c.lineTo(cx + R * u, cy); c.lineTo(cx, cy + R * u); c.lineTo(cx - R * u, cy); c.closePath(); c.strokeStyle = COL.green; c.lineWidth = 4; c.stroke(); }
+    c.beginPath(); c.arc(cx, cy, R * u, 0, TAU); c.strokeStyle = COL.navy; c.lineWidth = 4; c.stroke();
+    line(c, cx, cy, cx - R * u, cy, COL.blue, 3); c.beginPath(); c.arc(cx, cy, 4, 0, TAU); c.fillStyle = COL.navy; c.fill();
+    text(c, `반지름 ${R}cm`, cx - R * u / 2, cy + 14, { size: 14, bold: true, color: COL.blue });
+    // 오른쪽: 반지름 정사각형 몇 개?
+    const bx = ox + (2 * R + 1) * u + 30, bw = w - bx - 20;
+    if (bw > 160) {
+      const unit = Math.min(bw / 4.4, 80), bh = 30, y0 = h / 2 - 90, A = R * R;
+      text(c, '반지름 정사각형 몇 개만큼?', bx, y0 - 52, { align: 'left', bold: true, color: COL.navy, size: 18 });
+      const rws = [['안쪽 정사각형', COL.green, 2, `${2 * A}칸`], ['원', COL.navy, PI, `약 ${fmt(3.14 * A, 2)}칸`], ['바깥 정사각형', COL.red, 4, `${4 * A}칸`]];
+      rws.forEach(([n, col, k, cap], i) => {
+        const y = y0 + i * 72;
+        text(c, n, bx, y - 4, { align: 'left', size: 16, bold: true, color: col, base: 'bottom' });
+        for (let j = 0; j < Math.ceil(k); j++) { const len = unit * Math.min(1, k - j); bar(c, bx + j * unit, y, len, bh, j % 2 ? '#7FB3D5' : COL.blue, len > 30 ? `${j + 1}` : ''); }
+        c.strokeStyle = col; c.lineWidth = 3; c.strokeRect(bx, y - 2, unit * k, bh + 4);
+        text(c, i === 1 ? '3.14개' : `${k}개`, bx + unit * k + 8, y + bh / 2, { align: 'left', size: 16, bold: true, color: col });
+        text(c, cap, bx + unit * k + 8, y + bh / 2 + 20, { align: 'left', size: 13, color: COL.mute });
+      });
+    }
+    say(full, part);
+  }
+  function say(full, part) {
+    const R = r(), A = R * R, s = [];
+    if ($('#g_out').checked || $('#g_in').checked) s.push(`<span style="color:var(--green)">안쪽 정사각형</span> = 지름 × 지름 ÷ 2 = <b>${2 * A}칸</b>, <span style="color:var(--red)">바깥 정사각형</span> = 지름 × 지름 = <b>${4 * A}칸</b> → 원의 넓이는 <b>${2 * A}칸보다 크고 ${4 * A}칸보다 작아요.</b>`);
+    if ($('#g_full').checked || $('#g_part').checked) s.push(`<span style="background:#F4C542aa;padding:0 4px">원 안 모눈</span> <b>${full}칸</b>, <span style="background:#7FB3D566;padding:0 4px">걸친 모눈</span> <b>${part}칸</b> → 원의 넓이는 <b>${full}칸보다 크고 ${full + part}칸보다 작아요.</b> (걸친 모눈은 반쯤 친다면 약 ${fmt(full + part / 2, 1)}칸)`);
+    if ($('#g_sq').checked) s.push(`원의 넓이는 <span style="color:var(--blue)">반지름 정사각형(${A}칸)</span>의 2배보다 크고 4배보다 작아요. 사실은 <b class="hl">약 3.14배 = ${fmt(3.14 * A, 2)}칸</b>이에요!`);
+    $('#say3').innerHTML = s.join('<br>') || '아래 칸을 하나씩 켜 보세요. 먼저 <b>바깥 정사각형</b>과 <b>안쪽 정사각형</b>으로 원의 넓이가 얼마쯤일지 어림해 봐요.';
+  }
+  ['#g_out', '#g_in', '#g_full', '#g_part', '#g_sq'].forEach(id => $(id).onchange = draw);
+  $('#r3r').oninput = () => { $('#r3rv').textContent = r() + ' cm'; draw(); };
+  return { draw };
+})();
+
+/* ---------- ④ 잘라 붙이기 ---------- */
+sims.s4 = (() => {
+  const cv = $('#c4'), NS = [4, 6, 8, 12, 16, 24, 32, 48, 64];
+  let t = 0, anim = null, step = 0;
+  const n = () => NS[+$('#r4n').value];
+  function sector(c, R, th, fill) {
+    c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, R, -th / 2, th / 2); c.closePath();
+    c.fillStyle = fill; c.fill(); c.strokeStyle = '#fff'; c.lineWidth = n() > 32 ? 0.6 : 1.5; c.stroke();
+  }
+  function draw() {
+    const { c, w, h } = prep(cv); const N = n(), th = TAU / N;
+    const R = Math.min((w - 80) / (PI + 0.35), (h - 70) / 2, 230);
+    const C = [w / 2, h / 2], s = R * Math.sin(th / 2), yb = h / 2 + R / 2 + 4, yt = yb - R * Math.cos(th / 2);
+    const a0 = w / 2 - (N - 1) * s / 2, e = ease(t), pop = Math.sin(PI * t) * 14;
+    let up = 0, dn = 0;
+    const slot = [];
+    for (let i = N / 2; i < N; i++) slot[i] = { k: 2 * (up++), ang: 1.5 * PI }; // 위쪽 반원 → 호가 위로
+    for (let i = N / 2 - 1; i >= 0; i--) slot[i] = { k: 2 * (dn++) + 1, ang: PI / 2 };  // 아래쪽 반원 → 호가 아래로
+    for (let i = 0; i < N; i++) {
+      const a = (i + 0.5) * th, { k, ang } = slot[i];
+      const tx = a0 + k * s, ty = k % 2 ? yt : yb;
+      const x = C[0] + (tx - C[0]) * e + Math.cos(a) * pop, y = C[1] + (ty - C[1]) * e + Math.sin(a) * pop;
+      const top = i >= N / 2, fill = top ? (i % 2 ? '#F98F6E' : '#F6B39B') : (i % 2 ? '#2E86C1' : '#7FB3D5');
+      c.save(); c.translate(x, y); c.rotate(a + (ang - a) * e); sector(c, R, th, fill); c.restore();
+    }
+    if (t === 0) { line(c, C[0], C[1], C[0] + R, C[1], COL.navy, 3); text(c, '반지름', C[0] + R / 2, C[1] - 14, { bold: true, color: COL.navy, size: 16 }); }
+    if (t === 1 && $('#r4lab').checked) {
+      const L = a0 - s, Rr = a0 + (N - 1) * s + s, topY = yb - R, botY = yt + R;
+      // 가로
+      line(c, L, topY - 16, Rr, topY - 16, COL.red, 3); line(c, L, topY - 24, L, topY - 8, COL.red, 3); line(c, Rr, topY - 24, Rr, topY - 8, COL.red, 3);
+      text(c, '가로 = 원주의 ½ (주황 부분)', (L + Rr) / 2, topY - 34, { bold: true, color: COL.red, size: 18 });
+      text(c, '원주의 ½ (파랑 부분)', (L + Rr) / 2, botY + 18, { bold: true, color: COL.blue, size: 16 });
+      // 세로
+      const vx = Rr + 22; line(c, vx, yb, vx, yb - R, COL.blue, 3);
+      line(c, vx - 7, yb, vx + 7, yb, COL.blue, 3); line(c, vx - 7, yb - R, vx + 7, yb - R, COL.blue, 3);
+      c.save(); c.translate(vx + 18, yb - R / 2); c.rotate(PI / 2); text(c, '세로 = 반지름', 0, 0, { bold: true, color: COL.blue, size: 17 }); c.restore();
+    }
+    text(c, `${N}조각`, 16, 20, { align: 'left', bold: true, color: COL.navy, size: 18 });
+  }
+  function go(to) {
+    if (anim) anim.stop = true; const from = t;
+    anim = animate(2600 * Math.abs(to - from) + 1, k => { t = from + (to - from) * k; draw(); }, () => { t = to; draw(); if (to === 1 && step === 0) next(); });
+  }
+  function next() { step = Math.min(4, step + 1); document.querySelectorAll('#steps li').forEach((li, i) => li.classList.toggle('show', i < step)); }
+  $('#r4play').onclick = () => go(1);
+  $('#r4back').onclick = () => go(0);
+  $('#r4next').onclick = next;
+  $('#r4n').oninput = () => { $('#r4nv').textContent = n() + '조각'; draw(); };
+  $('#r4lab').onchange = draw;
+  const calc = () => {
+    const r = parseFloat($('#ar').value), d = parseFloat($('#ad').value);
+    $('#aro').innerHTML = isNaN(r) ? '' : `넓이 = ${fmt(r, 2)} × ${fmt(r, 2)} × 3.14 = <b class="hl">${fmt(r * r * 3.14, 4)} cm²</b>`;
+    $('#ado').innerHTML = isNaN(d) ? '' : `반지름 ${fmt(d / 2, 2)} cm → 넓이 = ${fmt(d / 2, 2)} × ${fmt(d / 2, 2)} × 3.14 = <b class="hl">${fmt(d * d / 4 * 3.14, 4)} cm²</b>`;
+  };
+  $('#ar').oninput = $('#ad').oninput = calc; calc();
+  return { draw };
+})();
+
+sims.s1.draw();
+</script>
+</body></html>
