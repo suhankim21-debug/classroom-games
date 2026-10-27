@@ -174,34 +174,36 @@ const FIREBASE_CONFIG = {
 const STAGES=[null,
   {k:'과정 알기',t:'AI가 만들어지는 과정',tm:6},
   {k:'데이터 모으기',t:'데이터 모으기',tm:8},
-  {k:'학습·테스트',t:'학습시키고 테스트하기',tm:10},
+  {k:'학습·평가',t:'모델 학습하고 평가하기',tm:10},
   {k:'퀴즈 대결',t:'AI 퀴즈 대결',tm:6}];
-// AI가 알아맞힐 그림 세 가지 (모양이 뚜렷하게 다른 것으로 골랐어요)
-const CLS=[{id:'fish',e:'🐟',n:'물고기'},{id:'house',e:'🏠',n:'집'},{id:'sun',e:'☀️',n:'해'}];
+// AI가 알아맞힐 그림 세 가지 (교과서 74~76쪽 '모양 분류'와 같은 삼각형·사각형·원)
+const CLS=[{id:'tri',e:'🔺',n:'삼각형',j:'을'},{id:'sq',e:'🟦',n:'사각형',j:'을'},{id:'cir',e:'🟡',n:'원',j:'을'}];
 const CN=Object.fromEntries(CLS.map(c=>[c.id,c]));
 const GOAL=3;      // 학생 한 명이 그림마다 그릴 개수
 const FEW=3;       // '조금 배운 AI'가 쓰는 그림 개수 (그림마다)
+// 교과서 74~76쪽의 인공지능이 만들어지는 과정
 const PROC=[
-  {e:'🎯',n:'문제 정하기',d:'무엇을 하는 AI를 만들까?'},
-  {e:'🗂️',n:'데이터 모으기',d:'예시를 모으고 이름표 붙이기'},
-  {e:'🧠',n:'학습시키기',d:'AI가 데이터에서 특징 찾기'},
-  {e:'🔍',n:'테스트하고 고치기',d:'새 데이터로 확인하고 더 좋게'}];
-// 1단계: 장면을 보고 몇 단계인지 고르기
+  {e:'🗂️',n:'데이터 수집하기',d:'예시를 모으고 이름표(클래스) 붙이기'},
+  {e:'🧠',n:'모델 학습하기',d:'AI가 데이터에서 규칙 찾기'},
+  {e:'🧩',n:'프로그래밍하기',d:'학습한 모델로 동작하는 프로그램 만들기'},
+  {e:'🔍',n:'모델 평가하기',d:'새 데이터로 확인하고, 틀리면 데이터 더 넣기'}];
+// 1단계: 장면을 보고 몇 단계인지 고르기 (쓰레기 분류 AI)
 const SCENE=[
-  {id:'s1',q:'쓰레기를 자동으로 나누는 AI를 만들기로 했어요.',a:'문제 정하기'},
-  {id:'s2',q:'페트병 사진 500장을 찍고 "페트병" 이름표를 붙였어요.',a:'데이터 모으기'},
-  {id:'s3',q:'컴퓨터가 사진들을 보며 페트병의 특징을 스스로 찾아요.',a:'학습시키기'},
-  {id:'s4',q:'처음 보는 페트병 사진을 보여 주고 잘 맞히는지 확인해요.',a:'테스트하고 고치기'}].map(s=>({...s,o:PROC.map(p=>p.n).filter(n=>n!==s.a)}));
+  {id:'s1',q:'페트병과 캔 사진을 많이 찍어 "페트병", "캔" 이름표를 붙였어요.',a:'데이터 수집하기'},
+  {id:'s2',q:'컴퓨터가 사진들을 보며 페트병과 캔의 특징을 스스로 찾아요.',a:'모델 학습하기'},
+  {id:'s3',q:'"분류 결과가 캔이면 캔 통을 열어라" 블록을 조립했어요.',a:'프로그래밍하기'},
+  {id:'s4',q:'처음 보는 캔 사진을 보여 주고 바르게 판단하는지 확인해요.',a:'모델 평가하기'}].map(s=>({...s,o:PROC.map(p=>p.n).filter(n=>n!==s.a)}));
 // 4단계 퀴즈 대결
 const GAME=[
-  {id:'g1',e:'🎯',q:'AI를 만들 때 가장 먼저 할 일은?',a:'무엇을 하는 AI인지 정하기',o:['컴퓨터 사기','테스트하기','데이터 지우기']},
+  {id:'g1',e:'🗂️',q:'인공지능이 만들어지는 과정의 첫 단계는?',a:'데이터 수집하기',o:['모델 평가하기','프로그래밍하기','모델 학습하기']},
   {id:'g2',e:'🐶',q:'고양이와 강아지를 구분하는 AI에게 필요한 데이터는?',a:'이름표가 붙은 고양이·강아지 사진',o:['자동차 사진','이름표 없는 하늘 사진','고양이 사진 1장']},
-  {id:'g3',e:'🏷️',q:'사진마다 "고양이", "강아지" 이름을 붙이는 일을 무엇이라고 할까요?',a:'이름표 붙이기(라벨링)',o:['테스트하기','그림 그리기','전원 켜기']},
+  {id:'g3',e:'🏷️',q:'사진마다 "고양이", "강아지" 이름을 붙이는 일을 무엇이라고 할까요?',a:'이름표 붙이기(라벨링)',o:['모델 평가하기','그림 그리기','전원 켜기']},
   {id:'g4',e:'📚',q:'데이터가 많고 다양하면 AI는 어떻게 될까요?',a:'더 정확해져요',o:['더 느려지기만 해요','항상 틀려요','변화가 없어요']},
   {id:'g5',e:'❌',q:'고양이 사진에 "강아지" 이름표가 잔뜩 붙어 있으면?',a:'AI가 틀린 답을 배워요',o:['AI가 알아서 고쳐요','더 정확해져요','아무 일도 없어요']},
-  {id:'g6',e:'🔍',q:'AI가 잘 맞히는지 처음 보는 데이터로 확인하는 단계는?',a:'테스트하기',o:['문제 정하기','데이터 모으기','이름표 붙이기']},
-  {id:'g7',e:'🐱',q:'물고기·집·해만 배운 AI에게 고양이 그림을 보여 주면?',a:'배운 것 중 하나로 잘못 답해요',o:['"고양이"라고 맞혀요','스스로 고양이를 배워요','화면이 꺼져요']},
-  {id:'g8',e:'⚖️',q:'AI를 만드는 사람이 꼭 생각해야 할 것은?',a:'데이터가 고르고 정확한지',o:['그림이 예쁜지','컴퓨터 색깔','AI 이름이 멋진지']}];
+  {id:'g6',e:'🔍',q:'AI가 잘 맞히는지 처음 보는 데이터로 확인하는 단계는?',a:'모델 평가하기',o:['데이터 수집하기','프로그래밍하기','모델 학습하기']},
+  {id:'g7',e:'⭐',q:'삼각형·사각형·원만 배운 AI에게 별을 보여 주면?',a:'배운 것 중 하나로 잘못 답해요',o:['"별"이라고 맞혀요','스스로 별을 배워요','화면이 꺼져요']},
+  {id:'g8',e:'🧩',q:'"분류 결과가 원이면 원 모양과 비슷하다고 말하기"를 만드는 단계는?',a:'프로그래밍하기',o:['데이터 수집하기','모델 학습하기','모델 평가하기']},
+  {id:'g9',e:'📉',q:'평가해 보니 AI가 자꾸 틀려요. 어떻게 할까요?',a:'데이터를 더 모아 다시 학습시켜요',o:['AI를 버려요','그대로 써요','화면을 크게 해요']}];
 const GQ=Object.fromEntries(GAME.map(g=>[g.id,g]));
 
 const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
@@ -301,7 +303,7 @@ function startView(){
   clearOffs();clearInterval(tick);
   $('#sub').textContent='6학년 실과 · 인공지능이 만들어지는 과정';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>우리 반 그림으로<br>AI를 만들어요</h1>
-   <p>친구들과 그림 데이터를 모으고, AI를 학습시키고, 잘 맞히는지 테스트해 봐요. 인공지능이 만들어지는 과정을 직접 체험해요!</p></div>
+   <p>친구들과 삼각형·사각형·원 그림 데이터를 모으고, AI 모델을 학습시키고, 잘 맞히는지 평가해 봐요. 인공지능이 만들어지는 과정을 직접 체험해요!</p></div>
    <div class="panel"><div class="flow" style="grid-template-columns:1fr 1fr">${PROC.map((p,i)=>`<div><span class="emoji">${p.e}</span><b>${i+1}. ${p.n}</b></div>`).join('')}</div></div></section>
    <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
   $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
@@ -442,7 +444,7 @@ function procDone(){
    <div class="big">AI는 이렇게 만들어져요</div>
    <div class="flow" style="width:100%">${PROC.map((p,i)=>`<div><span class="emoji">${p.e}</span><b>${i+1}. ${p.n}</b><small>${p.d}</small></div>`).join('')}</div>
    <p>장면 문제 ${SCENE.length}개 중 <b>${(ME.proc||{}).first||0}개</b>를 한 번에 맞혔어요.</p>
-   <div class="rules" style="text-align:left;width:100%"><b>오늘 우리가 만들 AI</b><ul><li>🎯 문제: 그림을 보고 <b>🐟 물고기, 🏠 집, ☀️ 해</b> 중 무엇인지 알아맞히는 AI</li><li>선생님이 2단계를 열면 AI가 공부할 그림 데이터를 모아요.</li></ul></div></div>`);
+   <div class="rules" style="text-align:left;width:100%"><b>오늘 우리가 만들 AI</b><ul><li>그림을 보고 <b>🔺 삼각형, 🟦 사각형, 🟡 원</b> 중 무엇과 비슷한지 알려 주는 <b>모양 분류 AI</b> (교과서 74쪽)</li><li>선생님이 2단계를 열면 AI가 공부할 그림 데이터를 모아요.</li></ul></div></div>`);
 }
 
 /* ---------- 2. 데이터 모으기 ---------- */
@@ -454,10 +456,10 @@ function stage2(){
      <div class="row" style="justify-content:center"><button id="send" disabled>AI에게 데이터 주기 ▶</button></div><div class="msg" id="dm" role="status"></div></div>
     <div class="panel grid"><h2>내가 모은 데이터</h2><div class="cls" id="mine"></div><div id="goal"></div>
      <div class="rules"><b>좋은 데이터를 만드는 법</b><ul><li>화면 <b>가운데</b>에 <b>크게</b> 그려요.</li><li>한 장에 <b>한 가지</b>만 그려요.</li><li>친구마다 조금씩 다르게 그려도 좋아요. 여러 모양을 보면 AI가 더 잘 배워요.</li></ul></div>
-     <p class="muted" style="font-size:.95rem">다 그린 그림에는 이름표(물고기·집·해)가 자동으로 붙어요. 이렇게 이름표를 붙이는 것을 <b>라벨링</b>이라고 해요.</p></div></div>`);
+     <p class="muted" style="font-size:.95rem">다 그린 그림에는 이름표(삼각형·사각형·원)가 자동으로 붙어요. 이 이름표 묶음을 <b>클래스</b>라고 하고, 이름표를 붙이는 것을 <b>라벨링</b>이라고 해요.</p></div></div>`);
   const pad=mountPad($('#padbox'),{onChange:ink=>{$('#send').disabled=!ink;}});
   window.__pad=pad;
-  const ask=()=>{$('#ask').innerHTML=`<span>${target.e}</span> <b>${target.n}</b>을(를) 그려요`;};
+  const ask=()=>{$('#ask').innerHTML=`<span>${target.e}</span> <b>${target.n}</b>${target.j} 그려요`;};
   const mine=()=>{
     $('#mine').innerHTML=CLS.map(c=>`<span class="${myCount(c.id)>=GOAL?'ok':''}">${c.e} ${c.n} ${myCount(c.id)}/${GOAL}</span>`).join('');
     const done=CLS.every(c=>myCount(c.id)>=GOAL);
@@ -476,21 +478,21 @@ function stage2(){
   ask();mine();
 }
 
-/* ---------- 3. 학습·테스트 ---------- */
+/* ---------- 3. 학습·평가 ---------- */
 let testLabel=null;
 function stage3(){
   if(!TRAINED){
-    shell(`<div class="panel train"><span class="band">3단계 · 학습시키기</span><div class="emoji">🧠</div><div class="big">선생님이 TV에서 AI를 학습시키면 시작해요</div><p class="muted">AI가 우리 반 그림 데이터 ${DATA.length}개를 보며 물고기·집·해의 특징을 찾아요.</p></div>`);
+    shell(`<div class="panel train"><span class="band">3단계 · 모델 학습하기</span><div class="emoji">🧠</div><div class="big">선생님이 TV에서 AI를 학습시키면 시작해요</div><p class="muted">AI가 우리 반 그림 데이터 ${DATA.length}개를 보며 삼각형·사각형·원의 특징을 찾아요.</p></div>`);
     return;
   }
   const n=(ME.tests||0);
-  shell(`<div class="two"><div class="panel pad"><div><span class="band">3단계 · 테스트하기</span></div>
+  shell(`<div class="two"><div class="panel pad"><div><span class="band">3단계 · 모델 평가하기</span></div>
      <div class="ask">무엇을 그려서 AI에게 보여 줄까요?</div>
      <div class="pick" id="pick">${CLS.map(c=>`<button data-l="${c.id}" aria-pressed="false"><b>${c.e}</b>${c.n}</button>`).join('')}<button data-l="other" aria-pressed="false"><b>❓</b>배우지 않은 것</button></div>
      <div id="padbox" class="pad"></div>
      <div class="row" style="justify-content:center"><button id="test" disabled>AI에게 보여 주기 ▶</button></div><div class="msg" id="tm2" role="status"></div></div>
-    <div class="panel grid"><h2>AI의 대답</h2><div id="res"><p class="muted">그림을 그리고 <b>AI에게 보여 주기</b>를 눌러요.<br>❓를 고르면 고양이, 자동차처럼 AI가 배우지 않은 것을 그려 봐요.</p></div>
-     <p class="muted" id="cnt3">테스트 ${n}번 · 4번 이상 해 봐요</p></div></div>`);
+    <div class="panel grid"><h2>AI의 대답</h2><div id="res"><p class="muted">그림을 그리고 <b>AI에게 보여 주기</b>를 눌러요.<br>그린 그림은 AI가 처음 보는 <b>평가용 데이터</b>예요.<br>❓를 고르면 별, 하트처럼 AI가 배우지 않은 것을 그려 봐요.</p></div>
+     <p class="muted" id="cnt3">평가 ${n}번 · 4번 이상 해 봐요</p></div></div>`);
   const pad=mountPad($('#padbox'),{onChange:()=>upd()});
   window.__pad=pad;
   const upd=()=>{$('#test').disabled=!(testLabel&&pad.ink);};
@@ -503,15 +505,15 @@ function stage3(){
     const many=predict(v,all),few=predict(v,fewData(all));
     if(!many){$('#tm2').className='msg bad';$('#tm2').textContent='AI가 공부한 데이터가 없어요. 2단계에서 그림을 더 모아요.';return;}
     const card=(t,r)=>{const c=CN[r.l],ok=testLabel==='other'?null:r.l===testLabel;
-      return `<div class="card ${ok===null?'':ok?'ok':'no'}"><h3>${t}<br><small>공부한 그림 ${r.n}개</small></h3><div class="ans">${c.e} ${c.n}!</div><div class="conf" title="확신"><div style="width:${pct(r.c)}%"></div></div><small>확신 ${pct(r.c)}% ${ok===null?'':ok?'· 맞았어요 ⭕':'· 틀렸어요 ❌'}</small></div>`;};
+      return `<div class="card ${ok===null?'':ok?'ok':'no'}"><h3>${t}<br><small>공부한 그림 ${r.n}개</small></h3><div class="ans">${c.e} ${c.n}!</div><div>🤖 "${c.n} 모양과 비슷해요."</div><div class="conf" title="확신"><div style="width:${pct(r.c)}%"></div></div><small>확신 ${pct(r.c)}% ${ok===null?'':ok?'· 맞았어요 ⭕':'· 틀렸어요 ❌'}</small></div>`;};
     const lbl=testLabel==='other'?'배우지 않은 것':CN[testLabel].e+' '+CN[testLabel].n;
     $('#res').innerHTML=`<p>내가 그린 것: <b>${lbl}</b></p><div class="guess pop">${card('많이 배운 AI',many)}${card('조금 배운 AI',few)}</div>
-      <div class="rules" style="margin-top:12px">${testLabel==='other'?'<b>AI는 배운 것 중에서만 골라요!</b> 처음 보는 것도 물고기·집·해 중 하나라고 답해요.':'<b>생각해 봐요</b> 두 AI의 대답이 왜 다를까요? 공부한 그림 수를 비교해 봐요.'}</div>`;
+      <div class="rules" style="margin-top:12px">${testLabel==='other'?'<b>AI는 배운 것 중에서만 골라요!</b> 처음 보는 것도 삼각형·사각형·원 중 하나라고 답해요.':'<b>생각해 봐요</b> 두 AI의 대답이 왜 다를까요? 공부한 그림 수를 비교해 봐요.'}</div>`;
     const tests=(ME.tests||0)+1;
     await roomRef(me.room).child('tests').push({n:me.num,l:testLabel,v,many:{p:many.l,c:Math.round(many.c*100)},few:{p:few.l,c:Math.round(few.c*100)},at:Date.now()});
     await roomRef(me.room).child('students/'+me.num).update({tests,tested:tests>=4});
     ME.tests=tests;ME.tested=tests>=4;drawSteps();
-    $('#cnt3').textContent=`테스트 ${tests}번`+(tests>=4?' · 잘했어요! 더 해 봐도 좋아요':' · 4번 이상 해 봐요');
+    $('#cnt3').textContent=`평가 ${tests}번`+(tests>=4?' · 잘했어요! 더 해 봐도 좋아요':' · 4번 이상 해 봐요');
     pad.clear();
   };
 }
@@ -557,7 +559,7 @@ async function gameDone(){
   if(cur!==4)return;
   shell(`<div class="panel quiz pop"><div><span class="band">대결 끝</span></div><h2 style="font-size:2rem">AI 연구원 인증!</h2>
    <div class="score" style="font-size:2rem">${Gm.score||0}점</div>${rankTxt}
-   <div class="rules" style="text-align:left;width:100%"><b>오늘 알게 된 것</b><ul><li>AI는 <b>문제 정하기 → 데이터 모으기 → 학습시키기 → 테스트하고 고치기</b> 순서로 만들어져요.</li><li>데이터가 <b>많고, 다양하고, 이름표가 정확할수록</b> AI가 잘 맞혀요.</li><li>AI는 <b>배운 것 안에서만</b> 답할 수 있어요.</li></ul></div>
+   <div class="rules" style="text-align:left;width:100%"><b>오늘 알게 된 것</b><ul><li>AI는 <b>데이터 수집하기 → 모델 학습하기 → 프로그래밍하기 → 모델 평가하기</b> 순서로 만들어져요.</li><li>데이터가 <b>많고, 다양하고, 이름표가 정확할수록</b> AI가 잘 맞혀요.</li><li>AI는 <b>배운 것 안에서만</b> 답할 수 있어요.</li></ul></div>
    <p class="muted">${ROOMV.award?'TV에서 시상식을 봐요!':'TV에서 시상식을 기다려요.'}</p></div>`);
 }
 function ranking(all){
@@ -633,7 +635,7 @@ function tv1(main,S){
     <div class="flow">${PROC.map((p,i)=>`<div><span class="emoji">${p.e}</span><b>${i+1}. ${p.n}</b><small>${p.d}</small></div>`).join('')}</div></div>
    <div class="panel grid"><h3>장면 문제를 한 번에 맞힌 친구</h3><div class="bars">${SCENE.map(w=>{const c=done.filter(x=>x.proc.right&&x.proc.right[w.id]).length;
       return `<div class="bar"><span style="font-size:.95rem">${esc(w.q)}</span><div class="track"><div style="width:${done.length?c/done.length*100:0}%"></div></div><span>${c}명</span></div>`;}).join('')}</div></div>
-   <div class="rules"><b>함께 이야기해요</b><ul><li>AI는 처음부터 똑똑할까요? 무엇이 AI를 똑똑하게 만들까요?</li><li>오늘 만들 AI: 그림을 보고 🐟 물고기, 🏠 집, ☀️ 해를 알아맞히는 AI</li></ul></div>`;
+   <div class="rules"><b>함께 이야기해요</b><ul><li>AI는 처음부터 똑똑할까요? 무엇이 AI를 똑똑하게 만들까요?</li><li>오늘 만들 AI: 그림을 보고 🔺 삼각형, 🟦 사각형, 🟡 원 중 무엇과 비슷한지 알려 주는 모양 분류 AI</li><li>학습용 데이터와 평가용 데이터는 왜 따로 둘까요?</li></ul></div>`;
 }
 function gallery(list,del){
   const box=document.createElement('div');box.className='gal';
@@ -658,15 +660,15 @@ function tv3(main){
   const lab=T.filter(t=>t.l!=='other'),oth=T.filter(t=>t.l==='other');
   const acc=k=>lab.length?lab.filter(t=>t[k].p===t.l).length/lab.length:0;
   const fewN=fewData(D.filter(d=>d.at<=tr)).length;
-  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">학습시키고 테스트하기</h2>
-     <button id="trainBtn">${tr?'다시 학습시키기 🧠':'AI 학습시키기 🧠'}</button></div>
-     <p class="muted" style="margin:0">${tr?`AI가 공부한 그림 ${used}개${fresh>0?` · 새로 모인 그림 ${fresh}개는 <b>다시 학습시키기</b>를 누르면 배워요`:''}`:`우리 반 그림 ${D.length}개를 AI에게 학습시켜요. 버튼을 누르면 학생 태블릿에서 테스트가 열려요.`}</p></div>
-   ${tr?`<div class="two"><div class="panel grid"><h2>AI 정확도 <small class="muted">(테스트 ${lab.length}번)</small></h2>
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">모델 학습하고 평가하기</h2>
+     <button id="trainBtn">${tr?'다시 학습시키기 🧠':'모델 학습시키기 🧠'}</button></div>
+     <p class="muted" style="margin:0">${tr?`AI가 공부한 그림 ${used}개${fresh>0?` · 새로 모인 그림 ${fresh}개는 <b>다시 학습시키기</b>를 누르면 배워요`:''}`:`우리 반 그림 ${D.length}개를 AI에게 학습시켜요. 버튼을 누르면 학생 태블릿에서 평가가 열려요.`}</p></div>
+   ${tr?`<div class="two"><div class="panel grid"><h2>AI 정확도 <small class="muted">(평가 ${lab.length}번)</small></h2>
       <div class="bars"><div class="bar"><span>많이 배운 AI<br><small class="muted">그림 ${used}개</small></span><div class="track"><div style="width:${pct(acc('many'))}%"></div></div><span>${pct(acc('many'))}%</span></div>
       <div class="bar"><span>조금 배운 AI<br><small class="muted">그림 ${fewN}개</small></span><div class="track"><div style="width:${pct(acc('few'))}%;background:var(--gold)"></div></div><span>${pct(acc('few'))}%</span></div></div>
       <div class="rules"><b>함께 이야기해요</b><ul><li>어느 AI가 더 잘 맞혔나요? 왜 그럴까요?</li><li>AI가 틀린 그림은 어떤 그림이었나요? 어떻게 고치면 될까요?</li></ul></div></div>
-     <div class="panel grid"><h2>배우지 않은 것을 보여 줬더니</h2>${oth.length?`<p class="big" style="font-size:1.5rem">${oth.length}번 모두 물고기·집·해 중 하나로 답했어요</p><div class="cls">${CLS.map(c=>`<span>${c.e} ${c.n}라고 답함 ${oth.filter(t=>t.many.p===c.id).length}번</span>`).join('')}</div><p>AI는 <b>배운 것 안에서만</b> 답할 수 있어요.</p>`:'<p class="muted">❓를 고르고 고양이, 자동차처럼 배우지 않은 것을 그려 보게 해요.</p>'}</div></div>
-    <div class="panel grid"><h2>최근 테스트</h2><div id="recent"></div></div>`:''}`;
+     <div class="panel grid"><h2>배우지 않은 것을 보여 줬더니</h2>${oth.length?`<p class="big" style="font-size:1.5rem">${oth.length}번 모두 삼각형·사각형·원 중 하나로 답했어요</p><div class="cls">${CLS.map(c=>`<span>${c.e} ${c.n}(이)라고 답함 ${oth.filter(t=>t.many.p===c.id).length}번</span>`).join('')}</div><p>AI는 <b>배운 것 안에서만</b> 답할 수 있어요.</p>`:'<p class="muted">❓를 고르고 별, 하트처럼 배우지 않은 것을 그려 보게 해요.</p>'}</div></div>
+    <div class="panel grid"><h2>최근 평가</h2><div id="recent"></div></div>`:''}`;
   $('#trainBtn').onclick=()=>trainAnim(main,D);
   if(tr){const R=T.slice(0,24).map(t=>({v:t.v,cap:`${t.l==='other'?'❓':CN[t.l].e}→${CN[t.many.p]?CN[t.many.p].e:''}${t.l==='other'?'':t.many.p===t.l?'⭕':'❌'}`}));
     const el=$('#recent',main);if(R.length)el.appendChild(gallery(R,false));else el.innerHTML='<p class="muted">아직 없어요</p>';}
@@ -675,7 +677,7 @@ function tv3(main){
 function trainAnim(main,D){
   if(!D.length){alert('먼저 2단계에서 그림 데이터를 모아요.');return;}
   training=true;
-  main.innerHTML=`<div class="panel train"><span class="band">학습 중</span><div id="flick" style="width:160px"></div><div class="big" id="tcount">0 / ${D.length}</div><p>AI가 그림을 하나씩 보며 물고기·집·해의 특징을 찾고 있어요…</p></div>`;
+  main.innerHTML=`<div class="panel train"><span class="band">학습 중</span><div id="flick" style="width:160px"></div><div class="big" id="tcount">0 / ${D.length}</div><p>AI가 그림을 하나씩 보며 삼각형·사각형·원의 특징을 찾고 있어요…</p></div>`;
   const list=shuffle(D),dur=RM?300:Math.min(4000,600+D.length*40),t0=performance.now();
   const step=now=>{
     const p=Math.min(1,(now-t0)/dur),k=Math.max(1,Math.round(p*list.length));
