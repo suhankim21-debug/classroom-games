@@ -1,6 +1,6 @@
 // 우리 반 AI 연구소 자동 테스트: 교사 화면 1개 + 학생 8명이 실제 Firebase 방에서 1~4단계를 끝까지 해 봐요.
-// 2단계에서는 학생마다 물고기·집·해를 손으로 그린 것처럼 조금씩 다르게 그려 데이터를 모으고,
-// 3단계에서 학습시킨 AI가 새 그림을 얼마나 맞히는지(많이 배운 AI가 조금 배운 AI보다 잘 맞히는지) 확인해요.
+// 2단계에서는 학생마다 삼각형·사각형·원을 손으로 그린 것처럼 조금씩 다르게 그려 데이터를 모으고,
+// 3단계에서 학습시킨 AI가 새 그림(평가용 데이터)을 얼마나 맞히는지(많이 배운 AI가 조금 배운 AI보다 잘 맞히는지) 확인해요.
 // 실행: node tests/ai-e2e.js   (다른 주소: URL=http://localhost:8000/ai/ node tests/ai-e2e.js)
 // 끝나면 테스트로 만든 방은 지워요.
 const { chromium } = require('playwright');
@@ -16,14 +16,15 @@ const SHAPES = () => {
   const ell = (cx, cy, rx, ry, a0 = 0, a1 = Math.PI * 2, n = 28) => Array.from({ length: n + 1 }, (_, i) => jit([cx + rx * Math.cos(a0 + (a1 - a0) * i / n), cy + ry * Math.sin(a0 + (a1 - a0) * i / n)]));
   const line = (...ps) => ps.map(jit);
   return {
-    fish() { const cx = R(110, 150), cy = R(120, 160), rx = R(55, 80), ry = rx * R(0.4, 0.6), t = cx + rx;
-      return [ell(cx, cy, rx, ry), line([t - 5, cy], [t + R(30, 45), cy - ry * R(0.7, 1)], [t + R(30, 45), cy + ry * R(0.7, 1)], [t - 5, cy]), ell(cx - rx * 0.55, cy - ry * 0.2, 4, 4, 0, 6.3, 8)]; },
-    house() { const x = R(60, 100), w = R(110, 150), y = R(120, 150), h = w * R(0.7, 1), top = y - w * R(0.45, 0.7);
-      return [line([x, y], [x, y + h], [x + w, y + h], [x + w, y], [x, y]), line([x - 10, y], [x + w / 2, top], [x + w + 10, y]), line([x + w * 0.4, y + h], [x + w * 0.4, y + h * 0.55], [x + w * 0.6, y + h * 0.55], [x + w * 0.6, y + h])]; },
-    sun() { const cx = R(120, 160), cy = R(120, 160), r = R(35, 50), k = Math.round(R(7, 10)), a = R(0, 1);
-      return [ell(cx, cy, r, r)].concat(Array.from({ length: k }, (_, i) => { const th = a + i * 2 * Math.PI / k; return line([cx + (r + 10) * Math.cos(th), cy + (r + 10) * Math.sin(th)], [cx + (r + R(35, 50)) * Math.cos(th), cy + (r + R(35, 50)) * Math.sin(th)]); })); },
-    other() { // 배우지 않은 것: 자동차
-      const x = R(50, 80), y = R(120, 150); return [line([x, y + 40], [x, y], [x + 50, y], [x + 70, y - 35], [x + 130, y - 35], [x + 150, y], [x + 180, y], [x + 180, y + 40], [x, y + 40]), ell(x + 40, y + 45, 18, 18), ell(x + 140, y + 45, 18, 18)]; },
+    tri() { const cx = R(110, 170), by = R(190, 230), w = R(130, 190), h = w * R(0.75, 1.0);
+      return [line([cx - w / 2, by], [cx, by - h], [cx + w / 2, by], [cx - w / 2, by])]; },
+    sq() { const x = R(50, 90), y = R(50, 90), w = R(120, 170), h = w * R(0.8, 1.15);
+      return [line([x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y])]; },
+    cir() { const cx = R(120, 160), cy = R(120, 160), r = R(55, 85);
+      return [ell(cx, cy, r, r * R(0.85, 1.1))]; },
+    other() { // 배우지 않은 것: 별
+      const cx = R(120, 160), cy = R(120, 160), r = R(70, 95);
+      return [line(...Array.from({ length: 6 }, (_, i) => { const th = -Math.PI / 2 + i * 4 * Math.PI / 5; return [cx + r * Math.cos(th), cy + r * Math.sin(th)]; }))]; },
   };
 };
 (async () => {
@@ -83,11 +84,11 @@ const SHAPES = () => {
 
     // 2단계: 그림마다 3개씩 그려 보내요
     await stage(2);
-    const KIND = { '물고기': 'fish', '집': 'house', '해': 'sun' };
+    const KIND = { '삼각형': 'tri', '사각형': 'sq', '원': 'cir' };
     await Promise.all(Object.values(S).map(async p => {
       await p.waitForSelector('#padbox canvas', { timeout: 10000 });
       for (let k = 0; k < 9; k++) {
-        const ask = await p.textContent('#ask'); const name = Object.keys(KIND).find(x => ask.includes(x));
+        const ask = await p.textContent('#ask'); const name = Object.keys(KIND).find(x => new RegExp(' ' + x + '을').test(ask));
         await draw(p, KIND[name]);
         await p.click('#send');
         await p.waitForFunction(nm => document.querySelector('#dm').textContent.includes(nm) && !document.querySelector('#ask').textContent.includes('__'), name, { timeout: 10000 });
@@ -107,13 +108,13 @@ const SHAPES = () => {
     await S[1].waitForSelector('.train', { timeout: 10000 });
     await T.click('#trainBtn');
     await Promise.all(Object.values(S).map(p => p.waitForSelector('#pick', { timeout: 20000 })));
-    const kinds = ['fish', 'house', 'sun', 'fish', 'other'];
+    const kinds = ['tri', 'sq', 'cir', 'sq', 'other'];
     await Promise.all(Object.values(S).map(async p => {
       for (let i = 0; i < kinds.length; i++) {
         await p.click(`#pick button[data-l="${kinds[i]}"]`);
         await draw(p, kinds[i]);
         await p.click('#test');
-        await p.waitForFunction(i => document.querySelector('#cnt3').textContent.includes(`테스트 ${i}번`), i + 1, { timeout: 10000 });
+        await p.waitForFunction(i => document.querySelector('#cnt3').textContent.includes(`평가 ${i}번`), i + 1, { timeout: 10000 });
       }
     }));
     await T.waitForFunction(n => new RegExp(`이 단계 끝 ${n}명`).test(document.querySelector('#cnt').textContent), N, { timeout: 15000 }).catch(() => fail('3단계 끝이 TV에 안 보임'));
@@ -121,13 +122,13 @@ const SHAPES = () => {
     console.log('정확도 많이 배운 AI', accs[0] + '%', '· 조금 배운 AI', accs[1] + '%');
     if (!(accs[0] >= 75)) fail('많이 배운 AI 정확도가 낮음: ' + accs[0]);
     if (!(accs[0] >= accs[1])) fail('많이 배운 AI가 조금 배운 AI보다 못함');
-    if (!/모두 물고기·집·해 중 하나로/.test(await T.textContent('#main'))) fail('배우지 않은 것 결과가 TV에 안 보임');
+    if (!/모두 삼각형·사각형·원 중 하나로/.test(await T.textContent('#main'))) fail('배우지 않은 것 결과가 TV에 안 보임');
     await shot(S[2], 's3'); await shot(T, 't3');
     console.log('3단계 OK');
 
     // 4단계: 퀴즈 대결 → 시상식
     await stage(4);
-    await Promise.all(Object.entries(S).map(([n, p]) => solve(p, '#gz', 8, +n === 4)));
+    await Promise.all(Object.entries(S).map(([n, p]) => solve(p, '#gz', 9, +n === 4)));
     await T.waitForFunction(n => new RegExp(`이 단계 끝 ${n}명`).test(document.querySelector('#cnt').textContent), N, { timeout: 15000 }).catch(() => fail('4단계 끝이 TV에 안 보임'));
     await T.click('#awon');
     await T.waitForSelector('.podium', { timeout: 10000 });
