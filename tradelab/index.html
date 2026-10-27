@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>무역 실험실</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>body{margin:0}
+/* Same classroom notice-board look as 원주 탐험대·우리말 지킴이. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+button.okb{background:var(--ok)} button.badb{background:#fff;color:var(--bad);border:2px solid var(--bad)}
+input,select{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.9em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+/* 나라 고르기 */
+.nations{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.nations button{background:#fff;color:var(--ink);border:2px solid var(--line);text-align:left;display:grid;gap:4px;font-family:var(--text);font-size:1rem;padding:12px 14px}
+.nations button b{font-family:var(--display);font-weight:400;font-size:1.35rem}
+.nations button[aria-pressed="true"]{border-color:var(--coral);background:#FFF4DF}
+.nations button small{color:var(--muted)}
+/* 생산 */
+.ncard{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:#FFF4DF;border-radius:16px;padding:12px 16px;border:2px solid var(--coral)}
+.ncard .flag{font-size:3.2rem;line-height:1}
+.ncard h2{font-size:1.7rem}
+.prod{display:grid;gap:8px}
+.prod .p{display:grid;grid-template-columns:3em 1fr auto 5.5em;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px 12px}
+.prod .p.best{border-color:var(--gold);background:#FFF9E8}
+.prod .p.zero{opacity:.65}
+.prod .ge{font-size:2rem;text-align:center}
+.prod .nm{font-family:var(--display);font-size:1.2rem;line-height:1.2}
+.prod .nm small{display:block;font-family:var(--text);font-size:.9rem;color:var(--muted)}
+.prod .ctl{display:flex;align-items:center;gap:6px}
+.prod .ctl button{width:2.4em;height:2.4em;padding:0;font-size:1.3rem;border-radius:50%}
+.prod .ctl span{font-family:var(--display);font-size:1.4rem;min-width:1.6em;text-align:center}
+.prod .out{font-family:var(--display);font-size:1.2rem;text-align:right}
+.hands{display:flex;gap:4px;flex-wrap:wrap;font-size:1.6rem}
+.hands span.used{opacity:.25}
+/* 창고 */
+.inv{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.inv div{background:#fff;border:2px solid var(--line);border-radius:14px;text-align:center;padding:8px 4px}
+.inv div.low{border-color:var(--bad);background:#FCEDE8}
+.inv div b{display:block;font-family:var(--display);font-weight:400;font-size:1.7rem;font-variant-numeric:tabular-nums}
+.inv div span{font-size:1.7rem}
+.inv div small{display:block;color:var(--muted);font-size:.85rem}
+.sets{display:flex;align-items:center;gap:14px;justify-content:center;background:var(--cream);border-radius:16px;padding:10px 16px;flex-wrap:wrap}
+.sets b{font-family:var(--display);font-weight:400;font-size:2.6rem;color:var(--coral2);font-variant-numeric:tabular-nums}
+.closed{background:#EFE7D3;border:2px dashed var(--muted);border-radius:14px;padding:12px 16px;text-align:center;font-family:var(--display);font-size:1.15rem;color:var(--muted)}
+/* 무역 */
+.offer{display:grid;gap:10px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px}
+.offer .pick{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center}
+.offer .pick label{font-family:var(--display);font-size:1.1rem}
+.gpick{display:flex;gap:6px;flex-wrap:wrap}
+.gpick button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:.35em .6em;font-size:1.5rem;line-height:1}
+.gpick button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.gpick button[aria-pressed="true"] span{color:#fff}
+.num{display:flex;align-items:center;gap:6px}
+.num button{width:2.2em;height:2.2em;padding:0;border-radius:50%;font-size:1.2rem}
+.num span{font-family:var(--display);font-size:1.5rem;min-width:1.8em;text-align:center}
+.olist{display:grid;gap:8px}
+.olist .o{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border-left:6px solid var(--blue);border-radius:12px;padding:10px 14px}
+.olist .o.in{border-left-color:var(--coral)}
+.olist .o .t{font-family:var(--display);font-size:1.15rem;line-height:1.35}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+/* 1단계 */
+.ifcard{display:grid;justify-items:center;gap:6px}
+.ifcard .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.45em .9em;font-family:var(--text);font-size:1.05rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.ntable{width:100%;border-collapse:separate;border-spacing:0 6px;font-variant-numeric:tabular-nums}
+.ntable th{font-family:var(--display);font-weight:400;color:var(--muted);font-size:1rem;text-align:center;padding:0 6px}
+.ntable td{background:#fff;text-align:center;padding:8px 6px;font-family:var(--display);font-size:1.25rem}
+.ntable td:first-child{text-align:left;border-radius:12px 0 0 12px;padding-left:14px}
+.ntable td:last-child{border-radius:0 12px 12px 0}
+.ntable td.best{background:#FFF1CC}
+.ntable td.z{color:var(--bad)}
+.ntable td.sets{color:var(--coral2);font-size:1.6rem;background:var(--cream)}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.bigsum{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;text-align:center}
+.bigsum div{background:#fff;border-radius:16px;padding:10px 22px;border:2px solid var(--line)}
+.bigsum b{display:block;font-family:var(--display);font-weight:400;font-size:3rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 11em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.bar .track{height:30px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--coral);border-radius:10px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+@media (max-width:820px){
+  .hero,.tv,.two{grid-template-columns:1fr}
+  .choose,.opts{grid-template-columns:1fr}
+  .steps button{font-size:.85rem}
+  .prod .p{grid-template-columns:2.4em 1fr auto;}.prod .out{grid-column:2/4;text-align:left}
+  .inv{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.inv div b{font-size:1.3rem}.inv div span{font-size:1.3rem}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+  .offer .pick{grid-template-columns:1fr}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>⚖</i> 무역 실험실</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const STAGES=[null,
+  {k:'만약에',t:'만약에 카드 (교과서 97쪽)',tm:6},
+  {k:'혼자 만들기',t:'1라운드: 우리 나라 혼자 만들기',tm:5},
+  {k:'잘하는 것+무역',t:'2라운드: 잘하는 것 만들고 무역하기',tm:12},
+  {k:'정리 퀴즈',t:'정리 퀴즈 대결',tm:6}];
+const HANDS=10;
+// 생활 꾸러미 = 다섯 가지 상품을 한 개씩 모은 것
+const GOODS=[
+  {id:'rice',e:'🌾',n:'쌀'},
+  {id:'cloth',e:'👕',n:'옷'},
+  {id:'gas',e:'🔥',n:'천연가스'},
+  {id:'phone',e:'📱',n:'스마트폰'},
+  {id:'fish',e:'🐟',n:'생선'}];
+const GN=Object.fromEntries(GOODS.map(g=>[g.id,g]));
+// 나라마다 자연환경·자원·자본·기술이 달라서 일손 1명이 만드는 양이 달라요 (교과서 99쪽)
+const NATIONS=[
+  {id:'n1',e:'🌾',n:'들판나라',why:'넓은 들판과 따뜻한 날씨',kind:'자연환경',r:{rice:4,cloth:1,gas:1,phone:1,fish:1}},
+  {id:'n2',e:'🧵',n:'솜씨나라',why:'목화가 잘 자라고 옷 만드는 솜씨가 좋아요',kind:'자연환경·기술',r:{rice:1,cloth:4,gas:1,phone:1,fish:1}},
+  {id:'n3',e:'🏜️',n:'사막나라',why:'땅속에 천연가스가 가득, 하지만 비가 안 와 쌀이 자라지 않아요',kind:'자원',r:{rice:0,cloth:1,gas:4,phone:1,fish:1}},
+  {id:'n4',e:'🏭',n:'기술나라',why:'높은 기술과 큰 공장(자본)이 있어요',kind:'기술·자본',r:{rice:1,cloth:2,gas:1,phone:4,fish:1}},
+  {id:'n5',e:'🌊',n:'바다나라',why:'넓은 바다와 큰 항구가 있어요',kind:'자연환경',r:{rice:1,cloth:1,gas:1,phone:1,fish:4}}];
+const NN=Object.fromEntries(NATIONS.map(x=>[x.id,x]));
+const bestOf=nat=>Object.entries(nat.r).sort((a,b)=>b[1]-a[1])[0][0];
+
+// 1단계: 교과서 97쪽 스스로 활동 (한 나라가 이런 상황이라면?)
+const IFS=[
+  {id:'i1',e:'✈️',q:'비행기를 만드는 기술이 없다면?',a:'비행기를 이용할 수 없어 여행이나 교류가 불편해져요',o:['기차가 저절로 더 빨라져요','아무 문제도 생기지 않아요']},
+  {id:'i2',e:'🔥',q:'천연가스를 생산할 수 없다면?',a:'난방을 하지 못하고 차량을 운행하기 어려워져요',o:['여름이 더 시원해져요','쌀을 더 많이 거둘 수 있어요']},
+  {id:'i3',e:'🍌',q:'날씨가 추워서 바나나가 자라지 않는다면?',a:'바나나를 먹기 어려워져요',o:['바나나가 겨울에 저절로 자라요','사과도 자라지 않게 돼요']},
+  {id:'i4',e:'💊',q:'꼭 필요한 약을 만드는 기술이 없다면?',a:'아픈 사람이 약을 구하기 어려워져요',o:['병이 저절로 나아요','약값이 아주 싸져요']}];
+const WHY_START='무역이 필요한 까닭은 ';
+const WHY_EASY=['한 나라에서 모든 것을 다 만들 수 없기 때문이에요.','나라마다 잘 만드는 것이 다르기 때문이에요.','다른 나라에 더 좋고 값싼 물건이 있기 때문이에요.'];
+
+// 4단계 정리 퀴즈 (교과서 97~99쪽, 지도서 221~223쪽)
+const QUIZ=[
+  {id:'q1',e:'🌍',q:'무역이 이루어지는 까닭은?',a:'나라마다 자연환경, 자원, 자본, 기술이 달라서',o:['나라마다 쓰는 말이 같아서','모든 나라가 똑같은 물건을 잘 만들어서','무역을 하면 돈이 저절로 생겨서']},
+  {id:'q2',e:'📦',q:'한 나라 안에서 구할 수 있는 물건도 다른 나라에서 수입하기도 해요.',a:'⭕ 맞아요',o:['❌ 틀려요'],easy:1},
+  {id:'q3',e:'🚢',q:'각 나라는 효율적으로 잘 만드는 상품을 ( )해요.',a:'수출',o:['수입','버리기','숨기기'],easy:1},
+  {id:'q4',e:'🛬',q:'잘 만들기 어렵거나 부족한 상품은 다른 나라에서 ( )해요.',a:'수입',o:['수출','생산','저축'],easy:1},
+  {id:'q5',e:'✏️',q:'흑연은 어디에 쓰이는 자원일까요?',a:'연필, 스마트폰, 배터리의 원료',o:['쌀과 밀가루의 원료','옷감과 실의 원료','종이와 책의 원료']},
+  {id:'q6',e:'⛏️',q:'우리나라가 흑연을 거의 생산하지 않게 된 까닭은?',a:'다른 나라에서 저렴한 흑연을 수입해서',o:['흑연이 더는 필요 없어져서','흑연을 쓰는 것이 금지되어서','흑연이 모두 금으로 바뀌어서']},
+  {id:'q7',e:'🔋',q:'우리나라는 수입한 흑연으로 무엇을 만들어 수출할까요?',a:'전기차 배터리',o:['쌀','바나나','천연가스']},
+  {id:'q8',e:'👕',q:'㉮ 나라는 기술 수준이 높아요. 쌀과 옷 중 무엇을 만들어 수출하면 더 유리할까요?',a:'옷',o:['쌀'],easy:1},
+  {id:'q9',e:'🌾',q:'㉯ 나라는 쌀 재배에 알맞은 환경이에요. 무엇을 만들어 수출하면 더 유리할까요?',a:'쌀',o:['옷'],easy:1},
+  {id:'q10',e:'🤝',q:'두 나라가 각자 잘 만드는 상품을 만들어 무역하면?',a:'두 나라 모두 더 풍족해질 수 있어요',o:['한 나라만 손해를 봐요','두 나라 모두 가난해져요','아무 변화가 없어요']},
+  {id:'q11',e:'🏜️',q:'게임에서 사막나라가 혼자서는 꾸러미를 만들 수 없었던 까닭은?',a:'쌀이 자라지 않아 쌀을 구할 수 없어서',o:['일손이 하나도 없어서','천연가스가 너무 적어서','생선을 너무 많이 먹어서']},
+  {id:'q12',e:'📈',q:'게임에서 2라운드에 꾸러미가 더 많아진 까닭은?',a:'잘 만드는 것에 일손을 모으고 서로 바꿨기 때문',o:['일손이 두 배로 늘어서','상품이 하늘에서 떨어져서','무역을 하지 않았기 때문']}];
+const QQ=Object.fromEntries(QUIZ.map(g=>[g.id,g]));
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sets=inv=>inv?Math.min(...GOODS.map(g=>inv[g.id]||0)):0;
+const zeroInv=()=>Object.fromEntries(GOODS.map(g=>[g.id,0]));
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);
+  $('#sub').textContent='6학년 사회 · 2. 시장경제와 국가 간 거래';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>무역은<br>왜 할까?</h1>
+   <p>짝과 함께 한 나라가 되어요. 1라운드는 우리 나라 혼자 모든 것을 만들고, 2라운드는 잘 만드는 것을 만들어 다른 나라와 바꿔요. 어느 쪽이 더 풍족할까요?</p></div>
+   <div class="panel grid"><div class="nations" style="grid-template-columns:repeat(5,1fr)">${NATIONS.map(x=>`<div style="text-align:center"><div class="emoji" style="font-size:2.6rem">${x.e}</div><div style="font-family:var(--display)">${x.n}</div></div>`).join('')}</div>
+   <p style="margin:0;text-align:center">${GOODS.map(g=>g.e).join(' + ')} = 생활 꾸러미 1개</p></div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- student: join ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null, MYC={}, CALL={}, OFFERS={};
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store('tl-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  let pick='';
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="panel grid"><h2>짝과 함께 고른 우리 나라</h2><p class="muted" style="margin:0">짝과 같은 나라를 골라요. 태블릿 두 대로 같은 나라에 들어와도 돼요.</p>
+    <div class="nations" id="nat">${NATIONS.map(x=>`<button data-n="${x.id}" aria-pressed="false"><b>${x.e} ${x.n}</b><small>${esc(x.why)}</small></button>`).join('')}</div></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value)&&pick);};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $$('#nat button').forEach(b=>b.onclick=()=>{pick=b.dataset.n;$$('#nat button').forEach(x=>x.setAttribute('aria-pressed',x===b));chk();});
+  $('#home').onclick=startView;
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,c:pick,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}
+        if(c.c!==pick)await roomRef(code).child('students/'+p.num+'/c').set(pick);}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('tl-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+const myNat=()=>NN[ME.c]||NATIONS[0];
+function enterRoom(){
+  clearOffs();
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;MYC={};CALL={};OFFERS={};
+  const cref=roomRef(me.room).child('c');
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('tl-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    $('#sub').textContent=`${me.num}번 ${me.name} · ${myNat().e} ${myNat().n}`;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  listen(cref,s=>{CALL=s.val()||{};MYC=CALL[ME.c]||{};if(ready&&typeof onNat==='function')onNat();});
+  listen(roomRef(me.room).child('offers'),s=>{OFFERS=s.val()||{};if(ready&&typeof onOffers==='function')onOffers();});
+  listen(roomRef(me.room).child('award'),s=>{ROOMV.award=!!s.val();if(ready&&cur===4&&ME.quiz&&ME.quiz.done)quizDone();});
+}
+let onNat=null,onOffers=null;
+function stepDone(n){return n===1?!!(ME.s1&&ME.s1.done):n===2?!!(MYC.r1&&MYC.r1.done):n===3?!!(MYC.r2&&MYC.r2.done):!!(ME.quiz&&ME.quiz.done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n>ROOMV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store('tl-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+function renderStage(){
+  onMe=()=>drawSteps();onNat=null;onOffers=null;
+  if(cur===1)return stage1();
+  if(cur===2)return stageProd(1);
+  if(cur===3)return stageProd(2);
+  return stage4();
+}
+// 차례로 문제를 내고, 맞혀야 다음으로 넘어가요
+function runQuiz(box,qs,{band,title,fig,onRight,onWrong,onEnd,progress,few}){
+  let i=0,missed=false;
+  const draw=()=>{
+    const q=qs[i];const opts=shuffle([q.a,...(few?shuffle(q.o).slice(0,1):q.o)]);missed=false;const t0=Date.now();
+    box.innerHTML=`<div><span class="band">${band}</span></div>${title?`<h2>${title}</h2>`:''}
+     <div class="prog">${qs.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     ${progress?progress():''}<div class="pop" style="width:100%">${fig?fig(q):''}</div><div class="q">${esc(q.q)}</div>
+     <div class="opts">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+     <div class="msg" id="qm" role="status"></div>`;
+    $$('.opts button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.o===q.a){
+        b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);
+        $('#qm',box).className='msg ok';
+        const extra=onRight?await onRight(q,!missed,(Date.now()-t0)/1000,i):'';
+        $('#qm',box).textContent='맞았어요!'+(extra||'');
+        await new Promise(r=>setTimeout(r,650));
+        i++;if(i<qs.length)return draw();
+        onEnd();
+      }else{
+        missed=true;b.classList.add('wrong');b.disabled=true;
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#qm',box).className='msg bad';$('#qm',box).textContent='다시 골라 봐요';
+        if(onWrong)onWrong(q);
+      }
+    });
+  };
+  draw();
+}
+
+/* ---------- 1. 만약에 카드 ---------- */
+function stage1(){
+  if(ME.s1&&ME.s1.done)return s1Done();
+  if(ME.s1&&ME.s1.cards)return s1Why();
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  let first=0;
+  runQuiz($('#qz'),IFS,{band:'1단계 · 만약에 카드',title:'한 나라가 이런 상황이라면 어떤 문제가 생길까요?',fig:q=>`<div class="emoji" aria-hidden="true">${q.e}</div>`,
+    onRight:(q,ok)=>{if(ok)first++;},
+    onEnd:async()=>{
+      await roomRef(me.room).child('students/'+me.num+'/s1').set({cards:true,first,at:Date.now()});
+      ME.s1={cards:true,first};s1Why();
+    }});
+}
+function s1Why(){
+  shell(`<div class="panel grid"><div><span class="band">1단계 · 무역이 필요한 까닭</span></div>
+   <h2 style="font-size:1.6rem">만약에 카드를 바탕으로, 무역이 필요한 까닭을 써 봐요</h2>
+   <p class="muted" style="margin:0">교과서 97쪽 ②번에도 같은 내용을 써요.</p>
+   <div class="fld grid"><label for="why" style="font-family:var(--display);font-size:1.2rem">${WHY_START}…</label>
+    <input id="why" maxlength="80" placeholder="예) 한 나라에서 구하기 어려운 물건이 있기 때문이에요." autocomplete="off"></div>
+   <details><summary style="cursor:pointer;font-family:var(--display)">쓰기 어려우면 골라요</summary><div class="chips" style="justify-content:flex-start;margin-top:8px">${WHY_EASY.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></details>
+   <div class="row"><button id="send" disabled>TV로 보내기</button></div><div class="msg" id="wm" role="status"></div></div>`);
+  const chk=()=>{$('#send').disabled=$('#why').value.trim().length<4;};
+  $('#why').oninput=chk;
+  $$('.chips button').forEach(b=>b.onclick=()=>{$('#why').value=b.dataset.w;$$('.chips button').forEach(x=>x.setAttribute('aria-pressed',x===b));chk();});
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    const why=$('#why').value.trim().slice(0,80);
+    await roomRef(me.room).child('students/'+me.num+'/s1').update({done:true,why,at:Date.now()});
+    ME.s1={...ME.s1,done:true,why};s1Done();
+  };
+}
+function s1Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">보냈어요!</span></div>
+   <div class="big">${esc(WHY_START+(ME.s1.why||''))}</div>
+   <div class="rules" style="text-align:left;width:100%"><b>생각해 봐요</b><ul><li>한 나라에서 <b>구할 수 있는</b> 물건이라도 다른 나라에서 사 오는 경우가 있을까요?</li><li>운동화, 닭고기, 바나나… 우리 집 물건을 떠올려요.</li></ul></div>
+   <p class="muted">선생님이 2단계를 열면 우리 나라를 운영해요.</p></div>`);
+}
+
+/* ---------- 2·3. 생산과 무역 ---------- */
+function natCard(nat){
+  return `<div class="ncard"><div class="flag" aria-hidden="true">${nat.e}</div><div><h2>${nat.n}</h2><div>${esc(nat.why)} <span class="muted">(${nat.kind})</span></div></div></div>`;
+}
+function invView(inv,label){
+  inv=inv||zeroInv();const s=sets(inv);
+  return `<div class="grid"><div class="inv">${GOODS.map(g=>`<div class="${(inv[g.id]||0)===s?'low':''}"><span aria-hidden="true">${g.e}</span><b>${inv[g.id]||0}</b><small>${g.n}</small></div>`).join('')}</div>
+   <div class="sets"><span style="font-family:var(--display);font-size:1.2rem">${label||'생활 꾸러미'}</span><b>${s}</b><span class="muted">가장 적은 상품(빨간 칸)만큼 꾸러미를 만들 수 있어요</span></div></div>`;
+}
+function stageProd(R){
+  const nat=myNat(), key='r'+R;
+  const mine=()=>MYC[key]||{};
+  const draft=store('tl-draft-'+me.room+'-'+key)||zeroInv();
+  const draw=()=>{
+    const d=mine();
+    if(R===1&&d.done)return r1Done();
+    if(R===2&&d.made)return tradeView();
+    const used=GOODS.reduce((s,g)=>s+(draft[g.id]||0),0);
+    const out=Object.fromEntries(GOODS.map(g=>[g.id,(draft[g.id]||0)*nat.r[g.id]]));
+    const best=bestOf(nat);
+    shell(`<div class="panel grid"><div><span class="band">${R===1?'1라운드 · 우리 나라 혼자 만들기':'2라운드 · 잘하는 것 만들고 무역하기'}</span></div>
+     ${natCard(nat)}
+     ${R===1?`<div class="closed">🚫 1라운드는 국경이 닫혀 있어요. 다른 나라와 바꿀 수 없어요!</div>`:`<div class="rules"><b>2라운드는 무역을 할 수 있어요!</b> 만든 다음 다른 나라와 상품을 바꿀 수 있어요. 그렇다면 일손을 어디에 쓰는 게 좋을까요? 짝과 의논해요.</div>`}
+     <div class="row" style="justify-content:space-between"><h3 style="font-size:1.3rem">일손 ${HANDS}명을 나눠 보내요</h3><div class="hands" aria-label="남은 일손 ${HANDS-used}명">${Array.from({length:HANDS},(_,k)=>`<span class="${k<used?'used':''}">🧑‍🌾</span>`).join('')}</div></div>
+     <div class="prod">${GOODS.map(g=>{const r=nat.r[g.id];return `<div class="p ${g.id===best?'best':''} ${r===0?'zero':''}"><div class="ge" aria-hidden="true">${g.e}</div>
+       <div class="nm">${g.n}${g.id===best?' ⭐':''}<small>${r===0?'우리 나라에서는 만들 수 없어요':`일손 1명 → ${r}개`}</small></div>
+       <div class="ctl"><button class="ghost" data-m="${g.id}" aria-label="${g.n} 일손 빼기" ${!(draft[g.id]>0)?'disabled':''}>－</button><span>${draft[g.id]||0}</span><button data-p="${g.id}" aria-label="${g.n} 일손 더하기" ${used>=HANDS||r===0?'disabled':''}>＋</button></div>
+       <div class="out">${out[g.id]}개</div></div>`;}).join('')}</div>
+     <div class="sets"><span style="font-family:var(--display);font-size:1.2rem">이대로 만들면 꾸러미</span><b>${sets(out)}</b><span class="muted">${GOODS.map(g=>g.e).join('')} 한 개씩 = 꾸러미 1개</span></div>
+     <div class="row"><button id="make" ${used<HANDS?'disabled':''}>${used<HANDS?`일손 ${HANDS-used}명을 더 보내요`:'이대로 생산하기 ▶'}</button><span class="muted">짝과 합의하고 눌러요. 한 번 만들면 바꿀 수 없어요.</span></div>
+     <div class="msg" id="pm" role="status"></div></div>`);
+    $$('[data-p]').forEach(b=>b.onclick=()=>{draft[b.dataset.p]=(draft[b.dataset.p]||0)+1;store('tl-draft-'+me.room+'-'+key,draft);draw();});
+    $$('[data-m]').forEach(b=>b.onclick=()=>{draft[b.dataset.m]=Math.max(0,(draft[b.dataset.m]||0)-1);store('tl-draft-'+me.room+'-'+key,draft);draw();});
+    $('#make').onclick=async()=>{
+      $('#make').disabled=true;
+      const rec={a:{...draft},inv:out,start:sets(out),by:me.num,at:Date.now()};
+      if(R===1)rec.done=true; else rec.made=true;
+      const r=await roomRef(me.room).child('c/'+ME.c+'/'+key).transaction(c=>(c&&(c.done||c.made))?undefined:rec);
+      if(!r.committed&&$('#pm'))$('#pm').textContent='짝이 먼저 생산했어요!';
+    };
+  };
+  onNat=()=>{const d=mine();if((R===1&&d.done)||(R===2&&d.made)){draw();}else drawSteps();};
+  draw();
+}
+function r1Done(){
+  const d=MYC.r1||{};
+  shell(`<div class="panel grid pop"><div><span class="band">1라운드 결과</span></div>${natCard(myNat())}
+    ${invView(d.inv,'우리 나라 꾸러미')}
+    ${sets(d.inv)===0?`<div class="rules"><b>꾸러미를 하나도 못 만들었어요!</b> 우리 나라에서 만들 수 없는 상품이 있으면 어떻게 해야 할까요?</div>`:''}
+    <div class="rules"><b>생각해 봐요</b><ul><li>우리 나라가 가장 잘 만드는 상품(⭐)은 무엇인가요? 그 까닭은?</li><li>혼자 모두 만들 때 어떤 점이 불편했나요?</li></ul></div>
+    <p class="muted">선생님이 2라운드를 열 때까지 기다려요.</p></div>`);
+  onNat=()=>{};
+}
+function offerText(o,side){
+  const f=NN[o.from],t=NN[o.to];
+  const give=`${GN[o.give.g].e} ${GN[o.give.g].n} ${o.give.n}개`, get=`${GN[o.get.g].e} ${GN[o.get.g].n} ${o.get.n}개`;
+  if(side==='in')return `${f.e} ${f.n}: "${give}를 줄게요. ${get}를 주세요."`;
+  return `${t.e} ${t.n}에게: ${give} 주고 ${get} 받기`;
+}
+function tradeView(){
+  const nat=myNat();
+  let to='',give='',get='',gn=4,tn=4;
+  const others=()=>NATIONS.filter(x=>x.id!==ME.c&&CALL[x.id]&&CALL[x.id].r2&&CALL[x.id].r2.made);
+  const draw=()=>{
+    const d=MYC.r2||{},inv=d.inv||zeroInv();
+    const ins=Object.entries(OFFERS).filter(([,o])=>o.to===ME.c&&o.st==='open');
+    const outs=Object.entries(OFFERS).filter(([,o])=>o.from===ME.c&&o.st==='open');
+    const done=Object.values(OFFERS).filter(o=>(o.from===ME.c||o.to===ME.c)&&o.st==='ok').length;
+    const oth=others();
+    if(to&&!oth.find(x=>x.id===to))to='';
+    const maxGive=give?(inv[give]||0):0;if(give)gn=Math.min(Math.max(1,gn),Math.max(1,maxGive));
+    shell(`<div class="panel grid"><div class="row" style="justify-content:space-between"><span class="band">2라운드 · 무역하기</span><span class="muted">무역 성공 ${done}번 · 처음 꾸러미 ${d.start||0}개</span></div>
+     <h2 style="font-size:1.4rem">${nat.e} ${nat.n} 창고</h2>${invView(inv)}
+     ${ins.length?`<h3 style="font-size:1.3rem">📨 우리 나라에 온 제안</h3><div class="olist">${ins.map(([id,o])=>{const can=(inv[o.get.g]||0)>=o.get.n;return `<div class="o in"><div class="t">${esc(offerText(o,'in'))}${can?'':'<br><small class="muted">우리 창고에 줄 상품이 모자라요</small>'}</div><div class="row"><button class="okb" data-ok="${id}" ${can?'':'disabled'}>바꿔요</button><button class="badb" data-no="${id}">싫어요</button></div></div>`;}).join('')}</div>`:''}
+     <div class="offer"><h3 style="font-size:1.3rem">🤝 다른 나라에 무역 제안하기</h3>
+      ${oth.length?`<div class="pick"><label>어느 나라와?</label><div class="gpick">${oth.map(x=>`<button data-to="${x.id}" aria-pressed="${x.id===to}" title="${x.n}">${x.e}<span style="font-size:.9rem;font-family:var(--display)"> ${x.n}</span></button>`).join('')}</div>
+       <label>우리가 줄 것</label><div class="row"><div class="gpick">${GOODS.map(g=>`<button data-give="${g.id}" aria-pressed="${g.id===give}" ${(inv[g.id]||0)<1?'disabled':''} aria-label="${g.n}">${g.e}</button>`).join('')}</div><div class="num"><button class="ghost" id="gm" aria-label="줄 개수 빼기">－</button><span id="gnv">${gn}</span><button class="ghost" id="gp" aria-label="줄 개수 더하기">＋</button></div></div>
+       <label>받고 싶은 것</label><div class="row"><div class="gpick">${GOODS.map(g=>`<button data-get="${g.id}" aria-pressed="${g.id===get}" ${g.id===give?'disabled':''} aria-label="${g.n}">${g.e}</button>`).join('')}</div><div class="num"><button class="ghost" id="tm-" aria-label="받을 개수 빼기">－</button><span id="tnv">${tn}</span><button class="ghost" id="tp" aria-label="받을 개수 더하기">＋</button></div></div></div>
+       <div class="row"><button id="propose" ${to&&give&&get&&maxGive>=gn?'':'disabled'}>제안 보내기 ▶</button><span class="muted">상대 나라가 "바꿔요"를 누르면 바로 바뀌어요.</span></div>`
+       :`<p class="muted" style="margin:0">아직 생산을 마친 다른 나라가 없어요. 조금만 기다려요.</p>`}
+      <div class="msg" id="om" role="status"></div></div>
+     ${outs.length?`<h3 style="font-size:1.2rem">보낸 제안 (기다리는 중)</h3><div class="olist">${outs.map(([id,o])=>`<div class="o"><div class="t">${esc(offerText(o,'out'))}</div><button class="ghost" data-cancel="${id}">취소</button></div>`).join('')}</div>`:''}
+     <div class="rules"><b>약속</b><ul><li>말로 먼저 부탁하고 제안을 보내요. "쌀 4개 줄게, 옷 4개 줄래?"</li><li>우리 나라만이 아니라 <b>모든 나라</b>가 꾸러미를 많이 만들수록 우리 반이 풍족해져요.</li></ul></div></div>`);
+    $$('[data-to]').forEach(b=>b.onclick=()=>{to=b.dataset.to;draw();});
+    $$('[data-give]').forEach(b=>b.onclick=()=>{give=b.dataset.give;if(get===give)get='';draw();});
+    $$('[data-get]').forEach(b=>b.onclick=()=>{get=b.dataset.get;draw();});
+    if($('#gm')){
+      $('#gm').onclick=()=>{gn=Math.max(1,gn-1);draw();};$('#gp').onclick=()=>{gn=give?Math.min(maxGive||1,gn+1):gn+1;draw();};
+      $('#tm-').onclick=()=>{tn=Math.max(1,tn-1);draw();};$('#tp').onclick=()=>{tn=Math.min(40,tn+1);draw();};
+      $('#propose').onclick=async()=>{
+        $('#propose').disabled=true;
+        await roomRef(me.room).child('offers').push({from:ME.c,to,give:{g:give,n:gn},get:{g:get,n:tn},st:'open',by:me.num,at:Date.now()});
+        give='';get='';gn=4;tn=4;draw();
+        const om=$('#om');if(om){om.className='msg ok';om.textContent='제안을 보냈어요! 상대 나라가 답할 때까지 기다려요.';}
+      };
+    }
+    $$('[data-cancel]').forEach(b=>b.onclick=()=>roomRef(me.room).child('offers/'+b.dataset.cancel).transaction(o=>o&&o.st==='open'?{...o,st:'cancel'}:undefined));
+    $$('[data-no]').forEach(b=>b.onclick=()=>roomRef(me.room).child('offers/'+b.dataset.no).transaction(o=>o&&o.st==='open'?{...o,st:'no'}:undefined));
+    $$('[data-ok]').forEach(b=>b.onclick=()=>{b.disabled=true;acceptOffer(b.dataset.ok);});
+  };
+  onNat=draw;onOffers=draw;
+  draw();
+}
+async function acceptOffer(id){
+  const oref=roomRef(me.room).child('offers/'+id);
+  // 먼저 제안을 잡아 두어 짝과 동시에 눌러도 한 번만 바뀌게 해요
+  const lock=await oref.transaction(o=>o&&o.st==='open'?{...o,st:'busy'}:undefined);
+  if(!lock.committed)return;
+  const o=lock.snapshot.val();
+  const sw=await roomRef(me.room).child('c').transaction(C=>{
+    if(!C)return C;
+    const A=C[o.from]&&C[o.from].r2&&C[o.from].r2.inv, B=C[o.to]&&C[o.to].r2&&C[o.to].r2.inv;
+    if(!A||!B||(A[o.give.g]||0)<o.give.n||(B[o.get.g]||0)<o.get.n)return;
+    A[o.give.g]-=o.give.n;B[o.give.g]=(B[o.give.g]||0)+o.give.n;
+    B[o.get.g]-=o.get.n;A[o.get.g]=(A[o.get.g]||0)+o.get.n;
+    const f=C[o.from].r2,t=C[o.to].r2;f.ex=(f.ex||0)+o.give.n;f.im=(f.im||0)+o.get.n;t.ex=(t.ex||0)+o.get.n;t.im=(t.im||0)+o.give.n;
+    return C;
+  });
+  await oref.update({st:sw.committed?'ok':'fail',done:Date.now()});
+  if(sw.committed){
+    const f=NN[o.from],t=NN[o.to];
+    roomRef(me.room).child('log').push({t:`${f.e}${f.n} ${GN[o.give.g].e}${o.give.n}개 ⇄ ${t.e}${t.n} ${GN[o.get.g].e}${o.get.n}개`,at:Date.now()});
+  }
+}
+
+/* ---------- 4. 정리 퀴즈 ---------- */
+async function stage4(){
+  if(ME.quiz&&ME.quiz.done)return quizDone();
+  let G=ME.quiz;
+  if(!G||!G.order){
+    shell(`<div class="panel grid quiz"><div><span class="band">4단계 · 정리 퀴즈 대결</span></div><h2 style="font-size:1.8rem">오늘 배운 내용으로 대결해요</h2>
+     <p>${QUIZ.length}문제. 한 번에 맞히면 100점 + 빠르기 보너스. 틀리면 다시 골라야 넘어가요.</p>
+     <div class="row" style="justify-content:center"><button id="qs">시작하기</button><button class="ghost" id="qe">보기 2개로 하기</button></div></div>`);
+    const go=async easy=>{
+      G={order:shuffle(QUIZ.map(g=>g.id)),i:0,score:0,easy,started:Date.now()};
+      await roomRef(me.room).child('students/'+me.num+'/quiz').set(G);ME.quiz=G;stage4();
+    };
+    $('#qs').onclick=()=>go(false);$('#qe').onclick=()=>go(true);
+    return;
+  }
+  if(cur!==4)return;
+  const rest=G.order.slice(G.i||0).map(id=>QQ[id]).filter(Boolean);
+  shell(`<div class="panel quiz" id="gz"></div>`);
+  if(!rest.length)return finishQuiz();
+  let score=G.score||0,idx=G.i||0;
+  runQuiz($('#gz'),rest,{band:'4단계 · 정리 퀴즈 대결',few:G.easy,fig:q=>`<div class="emoji" aria-hidden="true">${q.e}</div>`,
+    progress:()=>`<div class="score">점수 <b>${score}</b>점 · ${idx+1}/${QUIZ.length}번째 문제</div>`,
+    onRight:async(q,ok,sec)=>{
+      const pts=ok?100+Math.round(50*Math.max(0,Math.min(1,1-(sec-3)/17))):0;
+      score+=pts;idx++;
+      await roomRef(me.room).child('students/'+me.num+'/quiz').update({i:idx,score});
+      ME.quiz={...ME.quiz,i:idx,score};
+      return pts?` +${pts}점`:' (두 번째 도전은 점수 없이 넘어가요)';
+    },
+    onWrong:q=>{roomRef(me.room).child(`students/${me.num}/quiz/wrong/${q.id}`).transaction(v=>(v||0)+1);},
+    onEnd:finishQuiz});
+}
+async function finishQuiz(){
+  await roomRef(me.room).child('students/'+me.num+'/quiz').update({done:true,at:Date.now()});
+  ME.quiz={...ME.quiz,done:true};drawSteps();quizDone();
+}
+async function quizDone(){
+  const G=ME.quiz||{};
+  let rankTxt='';
+  if(ROOMV.award){
+    const all=(await roomRef(me.room).child('students').get()).val()||{};
+    const L=ranking(all);const k=L.findIndex(x=>x.n===me.num);
+    if(k>=0)rankTxt=`<div class="big">우리 반 ${k+1}등!</div>`;
+  }
+  if(cur!==4)return;
+  shell(`<div class="panel quiz pop"><div><span class="band">대결 끝</span></div><h2 style="font-size:2rem">무역 박사 완료!</h2>
+   <div class="score" style="font-size:2rem">${G.score||0}점</div>${rankTxt}
+   <div class="rules" style="text-align:left;width:100%"><b>꼭! 기억해요</b><ul><li>나라마다 <b>자연환경, 자원, 자본, 기술</b>이 달라 잘 만드는 것이 달라요.</li><li>잘 만드는 상품은 <b>수출</b>하고, 잘 만들기 어렵거나 부족한 상품은 <b>수입</b>해요.</li><li>그러면 더 좋은 상품을 더 싸게 쓰고, 모든 나라가 더 풍족해질 수 있어요.</li></ul></div></div>`);
+}
+function ranking(all){
+  return Object.keys(all||{}).map(Number).map(n=>({n,...all[n]})).filter(x=>x.quiz)
+    .sort((a,b)=>(b.quiz.score||0)-(a.quiz.score||0)||(b.quiz.i||0)-(a.quiz.i||0)||(a.quiz.at||9e15)-(b.quiz.at||9e15));
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store('tl-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:'tradelab',stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store('tl-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});}};
+  $('#newroom').onclick=()=>{store('tl-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  $('#go').textContent=t.endAt?'멈춤':'시작';$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+const activeNations=S=>NATIONS.filter(x=>S.some(s=>s.c===x.id));
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students(), C=RD.c||{};
+  $('#tsteps').innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>st===1?!!(x.s1&&x.s1.done):st===2?!!(C[x.c]&&C[x.c].r1&&C[x.c].r1.done):st===3?!!(C[x.c]&&C[x.c].r2&&C[x.c].r2.made):!!(x.quiz&&x.quiz.done);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${(NN[x.c]||{}).e||''} ${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  if(st===1)return tv1(main,S);
+  if(st===2)return tvRound(main,S,1);
+  if(st===3)return tvRound(main,S,2);
+  return tv4(main,S);
+}
+function tv1(main,S){
+  const done=S.filter(x=>x.s1&&x.s1.done);
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">만약에 카드 (교과서 97쪽)</h2><span class="muted">${done.length}/${S.length}명 끝</span></div>
+    <div class="nations" style="grid-template-columns:repeat(4,1fr)">${IFS.map(f=>`<div class="panel" style="text-align:center;padding:12px"><div class="emoji" style="font-size:2.6rem">${f.e}</div><div style="font-family:var(--display);font-size:1.15rem">${esc(f.q)}</div><div class="muted" style="font-size:.95rem">${esc(f.a)}</div></div>`).join('')}</div></div>
+   <div class="panel grid"><h2>우리 반이 생각한 무역이 필요한 까닭</h2><div class="list">${done.map(x=>`<div><b>${x.n} ${esc(x.name)}</b>${esc(WHY_START+x.s1.why)}</div>`).join('')||'<p class="muted">아직 보낸 친구가 없어요</p>'}</div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>한 나라 안에서 구할 수 있는 물자나 서비스라도 다른 나라에서 생산한 것을 이용하는 경우가 있을까요? 그 까닭은?</li></ul></div>`;
+}
+function natTable(nats,C,R){
+  return `<table class="ntable"><thead><tr><th style="text-align:left">나라</th>${GOODS.map(g=>`<th>${g.e}<br>${g.n}</th>`).join('')}<th>꾸러미</th>${R===2?'<th>수출/수입</th>':''}</tr></thead><tbody>
+   ${nats.map(x=>{const d=C[x.id]&&C[x.id]['r'+R];const inv=d&&d.inv;const best=bestOf(x);
+     return `<tr><td>${x.e} ${x.n}</td>${GOODS.map(g=>inv?`<td class="${(inv[g.id]||0)===0?'z':''}">${inv[g.id]||0}</td>`:`<td class="${g.id===best?'best':x.r[g.id]===0?'z':''}"><small class="muted">일손 1명→</small> ${x.r[g.id]}</td>`).join('')}
+       <td class="sets">${inv?sets(inv):'…'}</td>${R===2?`<td>${d?`${d.ex||0} / ${d.im||0}`:''}</td>`:''}</tr>`;}).join('')}</tbody></table>`;
+}
+function compareChart(nats,C){
+  const W=820,H=340,L=60,B=290,T=56;
+  const vals=nats.map(x=>{const c=C[x.id]||{};return {x,a:c.r1?sets(c.r1.inv):0,b:c.r2?sets(c.r2.inv):0};});
+  const mx=Math.max(4,...vals.map(v=>Math.max(v.a,v.b)));
+  const y=v=>B-(v/mx)*(B-T);
+  const bw=Math.min(54,(W-L-20)/nats.length/2.6);
+  let g=`<line x1="${L}" y1="${B}" x2="${W-10}" y2="${B}" stroke="#453422" stroke-width="2"/>`;
+  for(let k=0;k<=mx;k+=Math.max(1,Math.ceil(mx/5))){g+=`<line x1="${L}" y1="${y(k)}" x2="${W-10}" y2="${y(k)}" stroke="#EADFC4"/><text x="${L-8}" y="${y(k)+5}" text-anchor="end" font-size="14" fill="#8A7458">${k}</text>`;}
+  vals.forEach((v,i)=>{const cx=L+(i+.5)*(W-L-10)/nats.length;
+    g+=`<rect x="${cx-bw-3}" y="${y(v.a)}" width="${bw}" height="${B-y(v.a)}" fill="#8DB3C7" rx="4"/><text x="${cx-bw/2-3}" y="${y(v.a)-6}" text-anchor="middle" font-size="18" fill="#3D6E8C" font-family="Jua">${v.a}</text>`;
+    g+=`<rect x="${cx+3}" y="${y(v.b)}" width="${bw}" height="${B-y(v.b)}" fill="#F98F6E" rx="4"/><text x="${cx+bw/2+3}" y="${y(v.b)-6}" text-anchor="middle" font-size="18" fill="#E0704F" font-family="Jua">${v.b}</text>`;
+    g+=`<text x="${cx}" y="${B+28}" text-anchor="middle" font-size="18" fill="#453422" font-family="Jua">${v.x.e} ${v.x.n}</text>`;});
+  g+=`<rect x="${L+10}" y="6" width="16" height="16" fill="#8DB3C7"/><text x="${L+32}" y="20" font-size="15" fill="#453422">1라운드 혼자 만들기</text><rect x="${L+200}" y="6" width="16" height="16" fill="#F98F6E"/><text x="${L+222}" y="20" font-size="15" fill="#453422">2라운드 잘하는 것+무역</text>`;
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="나라별 꾸러미 비교 그래프">${g}</svg></div>`;
+}
+function tvRound(main,S,R){
+  const C=RD.c||{}, nats=activeNations(S);
+  const tot=k=>nats.reduce((s,x)=>s+(C[x.id]&&C[x.id]['r'+k]?sets(C[x.id]['r'+k].inv):0),0);
+  if(R===1){
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">1라운드: 우리 나라 혼자 만들기</h2><div class="closed" style="padding:6px 14px">🚫 국경 닫힘</div></div>
+      <p class="muted" style="margin:0">일손 ${HANDS}명으로 ${GOODS.map(g=>g.e).join('')}를 모두 만들어야 꾸러미가 돼요. 숫자를 누르기 전에는 "일손 1명이 만드는 양"이 보여요.</p>
+      ${natTable(nats,C,1)}
+      <div class="bigsum"><div>우리 반 꾸러미<b style="color:#3D6E8C">${tot(1)}</b></div></div></div>
+     <div class="rules"><b>핵심 질문</b><ul><li>나라마다 잘 만드는 상품이 다른 까닭은 무엇일까요? (자연환경, 자원, 자본, 기술)</li><li>사막나라는 왜 꾸러미를 만들지 못했을까요?</li></ul></div>`;
+    return;
+  }
+  const L=Object.values(RD.log||{}).sort((a,b)=>b.at-a.at).slice(0,8);
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">2라운드: 잘하는 것 만들고 무역하기</h2><span class="muted">무역 ${Object.values(RD.log||{}).length}번</span></div>
+     ${natTable(nats,C,2)}
+     <div class="bigsum"><div>1라운드 꾸러미<b style="color:#3D6E8C">${tot(1)}</b></div><div style="border:0;background:none;font-size:2.4rem">→</div><div>2라운드 꾸러미<b style="color:#E0704F">${tot(2)}</b></div></div></div>
+   <div class="two"><div class="panel grid"><h2>나라별 비교</h2>${compareChart(nats,C)}</div>
+    <div class="panel grid"><h2>무역 소식</h2><div class="list">${L.map(l=>`<div>${esc(l.t)}</div>`).join('')||'<p class="muted">아직 무역이 없어요</p>'}</div></div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>1라운드와 2라운드 중 언제 더 풍족했나요? 그 까닭은?</li><li>교과서 98쪽: ㉮ 나라는 옷, ㉯ 나라는 쌀처럼 잘 만드는 상품을 무역하면 어떤 좋은 점이 있을까요?</li></ul></div>`;
+}
+function tv4(main,S){
+  const L=ranking(RD.students);
+  const wrong={};S.forEach(x=>Object.entries((x.quiz&&x.quiz.wrong)||{}).forEach(([k,v])=>wrong[k]=(wrong[k]||0)+v));
+  const hard=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>({q:QQ[k],v})).filter(x=>x.q);
+  const top=Math.max(1,...L.map(x=>x.quiz.score||0));
+  if(RD.award){
+    const p=[L[1],L[0],L[2]];
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">정리 퀴즈 시상식</h2><button class="ghost" id="awoff">순위표로</button></div>
+     <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.quiz.score||0}점</div>`:'<span></span>').join('')}</div></div>
+     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br>정답: <b>${esc(h.q.a)}</b> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}`;
+    $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
+    return;
+  }
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">정리 퀴즈 대결</h2><button id="awon">시상식 ▶</button></div>
+   <p class="muted" style="margin:0">한 번에 맞히면 100점 + 빠르기 보너스 최대 50점. 틀리면 다시 골라야 넘어가요. ${QUIZ.length}문제.</p>
+   <div class="rank">${L.map((x,k)=>`<div class="r"><b>${k+1}</b><span class="nm">${(NN[x.c]||{}).e||''} ${esc(x.n)} ${esc(x.name)}${x.quiz.done?' 🏁':''}</span><div class="bar trk"><div class="track"><div style="width:${(x.quiz.score||0)/top*100}%"></div></div></div><span class="pt">${x.quiz.score||0}</span></div>`).join('')||'<p class="muted">아직 시작한 친구가 없어요</p>'}</div></div>
+   <div class="rules"><b>약속</b><ul><li>친구 화면은 보지 않아요.</li><li>다 푼 친구는 조용히 기다려요.</li></ul></div>`;
+  $('#awon').onclick=()=>roomRef(ROOM).child('award').set(true);
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
