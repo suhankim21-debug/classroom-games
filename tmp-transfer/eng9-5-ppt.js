@@ -153,7 +153,7 @@ Teaching Tip: 이 글의 짜임은 장소 제안 → 할 수 있는 일 → 교�
   const s = content();
   band(s, '활동 2 · Step 1 쓸 내용 정하기');
   T(s, '짝과 소개하고 싶은 우리 지역 명소를 정하고, 길 찾기 앱으로 가는 방법과 위치를 찾아요', { x: 1.99, y: 1.75, w: 9.44, h: 0.5, fontSize: 17, color: COL.title, align: 'center' });
-  const rows = [['명소 이름', 'Animation Museum · Soyang River Skywalk · Gongjicheon Park ...'], ['할 수 있는 일', 'see many toys · play soccer · eat lunch · read a book · ride bikes · take pictures'], ['가는 방법', 'by bus · by subway · by taxi · by train · by bike · on foot'], ['위치', "next to the ___ · in front of the ___ · between the ___ and the ___"]];
+  const rows = [['명소 이름', 'Sokcho Beach · Seoraksan Mountain · Sokcho Eye · Abai Village · Central Market'], ['할 수 있는 일', 'swim · ride the Sokcho Eye · eat lunch · hike · take pictures · see the sea'], ['가는 방법', 'by bus · by subway · by taxi · by train · by bike · on foot'], ['위치', "next to the ___ · in front of the ___ · between the ___ and the ___"]];
   rows.forEach(([k, v], i) => {
     const y = 2.4 + i * 0.86;
     box(s, 1.99, y, 2.2, 0.72, COL.band, { rectRadius: 0.08 });
@@ -166,7 +166,7 @@ Teaching Tip: 이 글의 짜임은 장소 제안 → 할 수 있는 일 → 교�
   s.addNotes(`[활동 2 · 쓰기 13분 중 3분] 교과서 139쪽 B Write Step 1 (짝 협력 쓰기).
 "With your partner, write about a local attraction you want to introduce. Then, research the place and complete the table."
 - 태블릿 지도·길 찾기 앱(네이버 지도, 카카오맵)으로 학교에서 가는 방법과 주변 건물을 찾습니다. 공식 홈페이지에서 할 수 있는 일을 찾습니다.
-- 명소 예시는 춘천 기준으로 넣었습니다(애니메이션박물관, 소양강 스카이워크, 공지천 등). 우리 지역이 다르면 다른 곳으로 바꿔 말해 주세요.
+- 명소 예시는 속초입니다: 속초해수욕장(Sokcho Beach), 설악산(Seoraksan Mountain), 속초아이 대관람차(Sokcho Eye), 아바이마을(Abai Village), 속초관광수산시장(Central Market). 학교에서 가는 방법(by bus, on foot 등)과 위치는 아이들이 지도 앱으로 직접 찾습니다.
 - 역할 나누기: 한 명은 검색, 한 명은 표 채우기.
 특수교육대상 학생: 학생 B는 짝과 함께 보기(말 상자)에서 골라 쓰기, 학생 A는 짝이 고른 교통수단 그림을 손가락으로 짚고 "bus" 따라 쓰기.`);
 }
