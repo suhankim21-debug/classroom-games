@@ -31,14 +31,19 @@ const ANS = { '점메추': '점심 메뉴 추천', '핫플': '인기 있는 곳'
     await Promise.all(Array.from({ length: N }, (_, i) => i + 1).map(async n => {
       const p = await mk(n + '번', n === 1 ? 820 : 1000, 1000); S[n] = p;
       await p.goto(URL + '?room=' + code);
-      await p.fill('#nm', `${n} 학생${n}`);
+      await p.fill('#cw-name', `${n} 학생${n}`);
       await p.click('#enter');
       await p.waitForSelector('.seg', { timeout: 15000 });
     }));
     console.log(`${N}명 입장 완료`);
+    // 👀 학생 화면: 선생님 화면에서 모든 학생이 번호 이름과 1단계로 보여요
+    await T.click('.cw-open');
+    await T.waitForFunction(n => [...document.querySelectorAll('.cw-tile:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /1\/4/.test(x.textContent) && x.querySelector('.cw-scr main')).length === n, N, { timeout: 15000 })
+      .catch(async () => fail('학생 화면 보기에 학생들이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile')].map(x => x.textContent.slice(0, 30)).join(' | ')))));
+    await T.click('.cw-close');
     const dup = await mk('중복');
     await dup.goto(URL + '?room=' + code);
-    await dup.fill('#nm', '3 다른학생'); await dup.click('#enter');
+    await dup.fill('#cw-name', '3 다른학생'); await dup.click('#enter');
     await dup.waitForFunction(() => /이미/.test(document.querySelector('#jm')?.textContent || ''), null, { timeout: 10000 })
       .then(() => console.log('같은 번호 다른 이름 막기 OK')).catch(() => fail('같은 번호에 다른 이름으로 들어가도 막히지 않음'));
     await dup.context().close();
@@ -141,7 +146,7 @@ const ANS = { '점메추': '점심 메뉴 추천', '핫플': '인기 있는 곳'
     await S[5].waitForSelector('text=우리말 번역가 배지', { timeout: 5000 }).then(() => console.log('지난 단계 다시 보기 OK')).catch(() => fail('1단계로 돌아가면 배지 화면이 안 보임'));
   } catch (e) { fail('진행 중 멈춤: ' + e.message); }
   finally {
-    await T.evaluate(c => firebase.database().ref('rooms/' + c).remove(), code).catch(() => {});
+    await T.evaluate(c => Promise.all([firebase.database().ref('rooms/' + c).remove(), firebase.database().ref('rooms/' + c + '_watch').remove()]), code).catch(() => {});
     await browser.close();
   }
   console.log(problems.length ? `\n문제 ${problems.length}개` : '\n모든 테스트 통과');

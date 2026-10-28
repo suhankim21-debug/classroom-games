@@ -153,7 +153,7 @@ function stop(){
   S.ref&&S.ref.update({on:false}).catch(()=>{});S.ref&&S.ref.onDisconnect().cancel();
   const b=document.querySelector('.cw-help');if(b)b.hidden=true;
 }
-function who(num,name){S.info.num=num==null?null:+num;S.info.name=name==null?null:String(name);S.ref&&S.ref.update({num:S.info.num,name:S.info.name}).catch(()=>{});}
+function who(num,name){if(S.info.num===(num==null?null:+num)&&S.info.name===(name==null?null:String(name)))return;S.info.num=num==null?null:+num;S.info.name=name==null?null:String(name);S.ref&&S.ref.update({num:S.info.num,name:S.info.name}).catch(()=>{});}
 function step(label,o={}){
   const s={step:String(label||''),n:o.n||0,total:o.total||0,wait:!!o.wait,stAt:TS()};
   if(S.info.step===s.step)return;
@@ -235,7 +235,7 @@ function cleanHtml(html){
 // 순서: 도움 요청(먼저 부른 순) → 이름을 아직 안 쓴 기기 → 번호 순 → 연결 끊긴 기기
 function list(){
   const t=now();
-  const rank=v=>v.off?3:v.help?0:v.num==null?1:2;
+  const rank=v=>v.off?3:v.help?0:!v.name?1:2;
   return Object.entries(T.data||{}).filter(([k,v])=>v&&typeof v==='object').map(([k,v])=>{const off=v.on===false||t-(v.at||0)>120000;
     return {k,...v,off,stuck:!off&&!v.wait&&!!v.ch&&t-v.ch>60000};})
     .sort((a,b)=>rank(a)-rank(b)||(a.help&&b.help?a.help-b.help:0)||(a.num??999)-(b.num??999)||a.k.localeCompare(b.k));
@@ -257,7 +257,7 @@ function status(v){
 function ack(k){wref(T.db,T.room).child(k).update({help:0,ack:TS()});}
 function render(){
   if(!T.ov||!T.open)return;
-  const L=list(),help=L.filter(v=>v.help&&!v.off),stuck=L.filter(v=>v.stuck&&!v.help),noname=L.filter(v=>v.num==null&&!v.off),on=L.filter(v=>!v.off);
+  const L=list(),help=L.filter(v=>v.help&&!v.off),stuck=L.filter(v=>v.stuck&&!v.help),noname=L.filter(v=>!v.name&&!v.off),on=L.filter(v=>!v.off);
   if(T.zoom){
     const v=L.find(x=>x.k===T.zoom);if(!v){T.zoom='';return render();}
     T.ov.innerHTML=`<div class="cw-zoom"><div class="cw-bar"><h2>${label(v)}</h2><div class="row" style="display:flex;gap:8px;flex-wrap:wrap">${v.help?'<button class="cw-ack">👍 확인했어요 (도움 끝)</button>':''}<button class="ghost cw-back">← 모든 학생</button></div></div><div class="cw-st" style="font-size:1rem">${status(v)}</div><div class="cw-slot"></div></div>`;
@@ -323,7 +323,7 @@ function teacher(o){
     // 새 도움 요청이 오면 소리와 알림
     const fresh=Object.entries(T.data).filter(([k,v])=>v&&v.help&&!T.seen.has(k+':'+v.help));
     Object.entries(T.data).forEach(([k,v])=>{if(v&&v.help)T.seen.add(k+':'+v.help);});
-    if(!first&&fresh.length){ding();if(!T.open)toast(`🙋 ${fresh.map(([k,v])=>v.num!=null?`${v.num}번 ${v.name||''}`:'이름 안 쓴 학생').join(', ')}이(가) 도움을 요청했어요`,5000);}
+    if(!first&&fresh.length){ding();if(!T.open)toast(`🙋 ${fresh.map(([k,v])=>v.num!=null?`${v.num}번 ${v.name||''}`:v.name||'이름 안 쓴 학생').join(', ')}이(가) 도움을 요청했어요`,5000);}
     first=false;
     badge();
     if(T.open)soon();

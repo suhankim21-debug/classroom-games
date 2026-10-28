@@ -152,6 +152,7 @@ main{padding-block:18px 48px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
@@ -219,7 +220,7 @@ function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value'
 
 /* ---------- start ---------- */
 function startView(){
-  clearOffs();clearInterval(tick);
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
   $('#sub').textContent='6학년 국어 · 4. 소중한 우리말';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>내 말을 점검하고,<br>우리말을 지켜요</h1>
    <p>내 언어생활을 점검하고, 실천 다짐문을 써요. 친구의 다짐문을 읽고 의견을 주고받아 고쳐 쓴 뒤, 일주일 동안 지킬 약속을 골라요.</p></div>
@@ -236,6 +237,8 @@ function joinView(){
   const saved=store('um-student');
   if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
   $('#sub').textContent='학생 화면';
+  // 선생님의 👀 학생 화면에 들어가기 화면부터 보여요
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
   app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
    <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
    <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
@@ -244,6 +247,7 @@ function joinView(){
   const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
   $('#rm').oninput=chk;$('#nm').oninput=chk;
   $('#home').onclick=startView;
+  ClassWatch.joinForm();
   $('#enter').onclick=async()=>{
     const code=$('#rm').value, p=parseName($('#nm').value);
     $('#enter').disabled=true;
@@ -260,7 +264,7 @@ function joinView(){
   };
 }
 function enterRoom(){
-  clearOffs();
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
   $('#sub').textContent=`${me.num}번 ${me.name}`;
   app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
   let ready=false;ROOMV={};onMe=null;
@@ -294,6 +298,7 @@ function shell(inner){
 }
 let gotOff=null;
 function renderStage(){
+  ClassWatch.step(STAGES[cur].k,{n:cur,total:4,wait:stepDone(cur)});
   onMe=()=>drawSteps();
   if(cur===1)return stage1();
   if(cur===2)return stage2();
@@ -561,6 +566,7 @@ async function teacherView(){
     }
   }catch(e){return showError(e);}
   ROOM=code;
+  ClassWatch.teacher({db,room:code});
   const url=location.origin+location.pathname+'?room='+code;
   $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
   app.innerHTML=`<div class="tv">
@@ -652,7 +658,8 @@ function tv4(main,S){
 }
 
 /* ---------- route ---------- */
-if(location.hash==='#teacher')teacherView();
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
 else if(ROOM)joinView();
 else startView();
 </script>
