@@ -64,6 +64,8 @@ main{padding-block:18px 48px}
 .levels button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .card{display:grid;gap:14px;justify-items:center;text-align:center}
 .pic{font-size:clamp(3.2rem,11vw,5rem);line-height:1}
+.pic img{display:block;width:min(320px,70vw);aspect-ratio:4/3;object-fit:cover;border-radius:16px;border:3px solid var(--line);background:#fff}
+.thumb{width:2.2em;height:1.65em;object-fit:cover;border-radius:4px;vertical-align:middle}
 .ko{font-family:var(--display);font-size:clamp(1.3rem,4vw,1.8rem);line-height:1.35}
 .en{font-family:var(--en);font-weight:800;font-size:clamp(1.3rem,4vw,1.9rem);line-height:1.6;color:var(--ink);letter-spacing:.01em}
 .en input.blank{display:inline-block;width:auto;min-width:4.5ch;font-family:var(--en);font-weight:800;font-size:inherit;padding:0 .25em;border:0;border-bottom:3px solid var(--coral);border-radius:0;background:#FFF4DF;text-align:center;margin:0 .1em}
@@ -150,18 +152,18 @@ const SETS={
 🐶 | 그것은 내 개야. | It's [my] [dog].
 📚 | 나는 책을 읽고 있어. | I'm [reading] a [book].
 🍕 | 피자 좀 먹을래? | Do you [want] some [pizza]?`},
-  'ybm-6-9':{name:'YBM(최희경) 6학년 9단원 How Can I Get to the Library?',text:`🚌 | 그곳에 버스로 갈 수 있어. | You can get there [by] [bus].
-🚇 | 그곳에 지하철로 갈 수 있어. | You can get there by [subway].
-🚕 | 그곳에 택시로 갈 수 있어. | You can get there by [taxi].
-🚆 | 그곳에 기차로 갈 수 있어. | You can get there by [train].
-🚲 | 그곳에 자전거로 갈 수 있어. | You can get there by [bike].
-🚶 | 그곳에 걸어서 갈 수 있어. | You can get there [on] [foot].
-📚 | 도서관에 어떻게 갈 수 있니? | How can I get to the [library]?
-🏥 | 병원에 어떻게 갈 수 있니? | [How] can I get to the [hospital]?
-🏦 | 그곳은 은행 앞에 있어. | It's [in front of] the [bank].
-📖 | 그곳은 도서관 옆에 있어. | It's [next to] the [library].
-🏪 | 그곳은 은행과 병원 사이에 있어. | It's [between] the bank and the [hospital].
-🗺️ | 너는 어디에 가고 싶니? | [Where] do you want to [go]?
+  'ybm-6-9':{name:'YBM(최희경) 6학년 9단원 How Can I Get to the Library?',text:`img/ybm-6-9/s01_bus.webp | 그곳에 버스로 갈 수 있어. | You can get there [by] [bus].
+img/ybm-6-9/s02_subway.webp | 그곳에 지하철로 갈 수 있어. | You can get there by [subway].
+img/ybm-6-9/s03_taxi.webp | 그곳에 택시로 갈 수 있어. | You can get there by [taxi].
+img/ybm-6-9/s04_train.webp | 그곳에 기차로 갈 수 있어. | You can get there by [train].
+img/ybm-6-9/s05_bike.webp | 그곳에 자전거로 갈 수 있어. | You can get there by [bike].
+img/ybm-6-9/s06_on_foot.webp | 그곳에 걸어서 갈 수 있어. | You can get there [on] [foot].
+img/ybm-6-9/s07_library.webp | 도서관에 어떻게 갈 수 있니? | How can I get to the [library]?
+img/ybm-6-9/s08_hospital.webp | 병원에 어떻게 갈 수 있니? | [How] can I get to the [hospital]?
+img/ybm-6-9/s09_in_front_of_bank.webp | 그곳은 은행 앞에 있어. | It's [in front of] the [bank].
+img/ybm-6-9/s10_next_to_library.webp | 그곳은 도서관 옆에 있어. | It's [next to] the [library].
+img/ybm-6-9/s11_between.webp | 그곳은 은행과 병원 사이에 있어. | It's [between] the bank and the [hospital].
+img/ybm-6-9/s12_where_go.webp | 너는 어디에 가고 싶니? | [Where] do you want to [go]?
 🌳 | Sunny 어린이 공원은 어때? | [What] [about] Sunny Children's Park?
 🦁 | 그곳에서 동물원을 방문할 수 있어. | You can [visit] the [zoo].
 🚂 | 그곳에서 Sunny 기차를 탈 수 있어. | You can [ride] the Sunny Train.
@@ -196,6 +198,9 @@ function parseSet(text){
     return {pic:pic||'✏️',ko,en};
   }).filter(Boolean);
 }
+// 그림 칸에는 이모지나 그림 파일 주소(img/… 또는 https://…)를 쓸 수 있어요
+const isImg=p=>/^(https?:\/\/|img\/)|\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(String(p||'').trim());
+const picHtml=(p,alt,cls='')=>isImg(p)?`<img class="${cls}" src="${esc(String(p).trim())}" alt="${esc(alt||'')}" loading="lazy" onerror="this.replaceWith(document.createTextNode('✏️'))">`:esc(p);
 const plain=en=>en.replace(/[\[\]]/g,'');
 const fixQuotes=s=>String(s).replace(/[‘’`´]/g,"'").replace(/[“”]/g,'"');
 // 대소문자, 문장부호, 띄어쓰기 수는 따지지 않아요. I'm = I am 처럼 줄임말도 같은 답으로 봐요.
@@ -392,7 +397,7 @@ function drawQ(){
     body=`<div class="slots" aria-label="낱말 ${n}개">${Array(n).fill('＿＿').join(' ')} <span style="font-family:var(--text);letter-spacing:0">(${n}낱말)</span></div>
       <input class="write" id="w" lang="en" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="영어 문장을 써요">`;
   }
-  box.innerHTML=`<div><span class="band">${shown?'따라 쓰기':LV[lv].k+' '+LV[lv].t}</span></div><div class="pic pop" aria-hidden="true">${esc(it.pic)}</div><div class="ko">${esc(it.ko)}</div>
+  box.innerHTML=`<div><span class="band">${shown?'따라 쓰기':LV[lv].k+' '+LV[lv].t}</span></div><div class="pic pop">${picHtml(it.pic,it.ko)}</div><div class="ko">${esc(it.ko)}</div>
     ${body}<div id="fb" class="diff" aria-live="polite"></div><div class="msg" id="qm" role="status"></div>
     <div class="row" style="justify-content:center"><button id="ok">확인 ✔</button>${!shown&&lv===1?'<button class="ghost" id="clr">다시 놓기</button>':''}</div>`;
   if(!shown&&lv===1){
@@ -488,7 +493,7 @@ function setupView(){
   let S={...last};$('#ct').value=S.custom||'';
   const items=()=>parseSet(S.set==='custom'?S.custom:(SETS[S.set]||SETS.sample).text);
   const pv=()=>{$('#cust').hidden=S.set!=='custom';const L=items();$('#cntv').textContent=`(${L.length}문장)`;
-    $('#pv').innerHTML=L.map(x=>`<div>${esc(x.pic)} ${esc(x.ko)} · <span class="s">${esc(x.en).replace(/\[([^\]]+)\]/g,'<u>$1</u>')}</span></div>`).join('')||'<div class="muted">문장이 없어요</div>';};
+    $('#pv').innerHTML=L.map(x=>`<div>${picHtml(x.pic,'','thumb')} ${esc(x.ko)} · <span class="s">${esc(x.en).replace(/\[([^\]]+)\]/g,'<u>$1</u>')}</span></div>`).join('')||'<div class="muted">문장이 없어요</div>';};
   $$('#sets button').forEach(b=>b.onclick=()=>{S.set=b.dataset.k;$$('#sets button').forEach(x=>x.setAttribute('aria-pressed',x===b));pv();});
   $$('#mins button').forEach(b=>b.onclick=()=>{S.min=+b.dataset.m;$$('#mins button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   $$('#tms button').forEach(b=>b.onclick=()=>{S.teams=+b.dataset.t;$$('#tms button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
