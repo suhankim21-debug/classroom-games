@@ -63,6 +63,9 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     // 테스트는 짧게: 끝나는 시간을 당겨요
     await T.evaluate(([c, ms]) => firebase.database().ref('rooms/' + c + '/cfg/endAt').set(now() + ms), [code, ROUND_MS]);
     await Promise.all(Object.values(S).map(p => p.waitForSelector('#q .ko', { timeout: 15000 })));
+    // 3·2·1 카운트다운이 끝나야 답을 받아요
+    await Promise.all(Object.values(S).map(p => p.waitForFunction(() => !document.querySelector('.count') && (!RV.startAt || now() >= RV.startAt), null, { timeout: 10000 })));
+    if (!(await T.evaluate(() => cfg().startAt))) fail('시작 카운트다운 시간이 저장되지 않음');
     console.log('게임 시작 OK');
 
     const item = p => p.evaluate(() => { const it = curItem(); return { en: it.en, plain: plain(it.en), blanks: blanksOf(it.en), lv: ME.level || 2, shown }; });

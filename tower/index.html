@@ -64,6 +64,16 @@ main{padding-block:18px 48px}
 .levels button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .card{display:grid;gap:14px;justify-items:center;text-align:center}
 .pic{font-size:clamp(3.2rem,11vw,5rem);line-height:1}
+.ti{width:1.3em;height:1.3em;vertical-align:-.3em;object-fit:contain}
+.ti.big{width:2.4em;height:2.4em;display:block;margin:0 auto}
+.ti.huge{width:min(160px,40vw);height:auto;aspect-ratio:1;display:block}
+.snd{background:transparent;border:2px solid rgba(255,255,255,.5);color:#fff;padding:.2em .6em;font-size:1.1rem}
+.count{position:fixed;inset:0;background:rgba(69,52,34,.82);display:grid;place-items:center;z-index:50;color:#fff;font-family:var(--display);font-size:clamp(6rem,30vw,16rem)}
+.fever{background:linear-gradient(90deg,#E0704F,#E9B04F);color:#fff;font-family:var(--display);text-align:center;border-radius:12px;padding:.3em .8em;font-size:1.25rem}
+@media (prefers-reduced-motion:no-preference){.fever{animation:fv 1s ease-in-out infinite alternate}@keyframes fv{to{filter:brightness(1.15);transform:scale(1.02)}}
+ .confetti{position:fixed;top:-20px;z-index:60;pointer-events:none;animation:fall linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.8}}}
+.listen{background:var(--blue);font-size:.95rem;padding:.45em .9em}
+.heroimg{padding:8px}.heroimg img{display:block;width:100%;height:auto;border-radius:12px}
 .pic img{display:block;width:min(320px,70vw);aspect-ratio:4/3;object-fit:cover;border-radius:16px;border:3px solid var(--line);background:#fff}
 .thumb{width:2.2em;height:1.65em;object-fit:cover;border-radius:4px;vertical-align:middle}
 .ko{font-family:var(--display);font-size:clamp(1.3rem,4vw,1.8rem);line-height:1.35}
@@ -126,7 +136,7 @@ main{padding-block:18px 48px}
   .levels button{font-size:.9rem}
 }
 </style></head><body>
-<header class="top"><div class="wrap"><div class="brand"><i>✏️</i> 문장 탑 쌓기</div><small id="sub"></small></div></header>
+<header class="top"><div class="wrap"><div class="brand"><i>✏️</i> 문장 탑 쌓기</div><div class="row"><small id="sub"></small><button class="snd" id="snd" aria-label="소리 켜기/끄기">🔊</button></div></div></header>
 <main class="wrap" id="app"></main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -164,14 +174,17 @@ img/ybm-6-9/s09_in_front_of_bank.webp | 그곳은 은행 앞에 있어. | It's [
 img/ybm-6-9/s10_next_to_library.webp | 그곳은 도서관 옆에 있어. | It's [next to] the [library].
 img/ybm-6-9/s11_between.webp | 그곳은 은행과 병원 사이에 있어. | It's [between] the bank and the [hospital].
 img/ybm-6-9/s12_where_go.webp | 너는 어디에 가고 싶니? | [Where] do you want to [go]?
-🌳 | Sunny 어린이 공원은 어때? | [What] [about] Sunny Children's Park?
-🦁 | 그곳에서 동물원을 방문할 수 있어. | You can [visit] the [zoo].
-🚂 | 그곳에서 Sunny 기차를 탈 수 있어. | You can [ride] the Sunny Train.
-🛒 | 시장은 역 옆에 있어. | The [market] is next to the [station].
-⚽ | 그곳에서 축구를 할 수 있어. | You can [play] [soccer].
-🧸 | 그곳에서 장난감을 많이 볼 수 있어. | You can see many [toys].`}
+img/ybm-6-9/s13_childrens_park.webp | Sunny 어린이 공원은 어때? | [What] [about] Sunny Children's Park?
+img/ybm-6-9/s14_zoo.webp | 그곳에서 동물원을 방문할 수 있어. | You can [visit] the [zoo].
+img/ybm-6-9/s15_ride_train.webp | 그곳에서 Sunny 기차를 탈 수 있어. | You can [ride] the Sunny Train.
+img/ybm-6-9/s16_market_station.webp | 시장은 역 옆에 있어. | The [market] is next to the [station].
+img/ybm-6-9/s17_soccer.webp | 그곳에서 축구를 할 수 있어. | You can [play] [soccer].
+img/ybm-6-9/s18_toys.webp | 그곳에서 장난감을 많이 볼 수 있어. | You can see many [toys].`}
 };
 const TEAM_ICONS=['🐯','🐰','🐻','🦊','🐼','🐸'];
+const TEAM_IMG=['tiger','rabbit','bear','fox','panda','frog'];
+// 조 마스코트 그림 (Codex로 그림). 그림을 못 불러오면 이모지로 보여요
+const TI=(i,cls='ti')=>TEAM_IMG[i]?`<img class="${cls}" src="img/team_${TEAM_IMG[i]}.png" alt="${TEAM_ICONS[i]}" onerror="this.replaceWith(document.createTextNode('${TEAM_ICONS[i]}'))">`:'✏️';
 const TEAM_COLORS=['#E0704F','#3D6E8C','#3F8A5A','#E9B04F','#8C5BA8','#C8452D'];
 const LV={1:{k:'⭐',t:'낱말 카드',pts:1},2:{k:'⭐⭐',t:'빈칸 쓰기',pts:2},3:{k:'⭐⭐⭐',t:'문장 쓰기',pts:3}};
 
@@ -201,6 +214,38 @@ function parseSet(text){
 // 그림 칸에는 이모지나 그림 파일 주소(img/… 또는 https://…)를 쓸 수 있어요
 const isImg=p=>/^(https?:\/\/|img\/)|\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(String(p||'').trim());
 const picHtml=(p,alt,cls='')=>isImg(p)?`<img class="${cls}" src="${esc(String(p).trim())}" alt="${esc(alt||'')}" loading="lazy" onerror="this.replaceWith(document.createTextNode('✏️'))">`:esc(p);
+/* ---------- 소리 (파일 없이 브라우저에서 만들어요) ---------- */
+let AC=null,MUTE=!!store('tw-mute');
+function ac(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,t0,d,type='sine',v=.18){const a=ac();if(!a||MUTE)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,a.currentTime+t0);
+  g.gain.setValueAtTime(0,a.currentTime+t0);g.gain.linearRampToValueAtTime(v,a.currentTime+t0+.01);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t0+d);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t0);o.stop(a.currentTime+t0+d+.05);}
+const SFX={
+  right:()=>{tone(784,0,.15,'triangle');tone(1047,.1,.25,'triangle');},
+  wrong:()=>{tone(196,0,.18,'square',.08);tone(165,.15,.25,'square',.08);},
+  gold:()=>{[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.08,.3,'triangle',.15));},
+  block:()=>{tone(330,0,.08,'square',.06);tone(494,.05,.1,'triangle',.1);},
+  tick:()=>tone(1200,0,.05,'square',.05),
+  beep:()=>tone(660,0,.25,'square',.1),
+  go:()=>{tone(988,0,.15,'square',.12);tone(1319,.12,.4,'square',.12);},
+  fever:()=>{[440,554,659,880,659,880,1109].forEach((f,i)=>tone(f,i*.07,.15,'sawtooth',.07));},
+  end:()=>{tone(880,0,.25,'square',.1);tone(660,.25,.25,'square',.1);tone(440,.5,.6,'square',.1);},
+  fanfare:()=>{[[523,0],[523,.15],[523,.3],[659,.45],[784,.7],[659,.95],[784,1.1],[1047,1.3]].forEach(([f,t])=>tone(f,t,.35,'triangle',.16));}
+};
+function sayEn(t){try{if(MUTE||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+function confetti(n=24){if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const C=['#F98F6E','#E9B04F','#3F8A5A','#3D6E8C','#8C5BA8'];
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='confetti';d.style.left=Math.random()*100+'vw';d.style.width=d.style.height=(6+Math.random()*8)+'px';
+    d.style.background=C[i%C.length];d.style.borderRadius=Math.random()<.5?'50%':'2px';d.style.animationDuration=(1.2+Math.random()*1.3)+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}}
+// 3·2·1 카운트다운 (startAt까지), 끝나면 cb
+function countdown(startAt,cb){
+  let el=$('.count');if(!el){el=document.createElement('div');el.className='count';el.setAttribute('role','status');document.body.appendChild(el);}
+  let last=null;
+  const f=()=>{const ms=startAt-now();if(ms<=0){el.textContent='GO!';if(last!=='go'){last='go';SFX.go();}setTimeout(()=>{el.remove();cb&&cb();},500);return;}
+    const k=Math.ceil(ms/1000);if(k!==last){last=k;el.textContent=k;SFX.beep();}setTimeout(f,100);};
+  f();
+}
+// 마지막 1분은 블록 2배 (3분 넘는 판에서만)
+const isFever=c=>c&&c.startAt&&(c.endAt-c.startAt)>180000&&c.endAt-now()<=60000&&c.endAt-now()>0;
 const plain=en=>en.replace(/[\[\]]/g,'');
 const fixQuotes=s=>String(s).replace(/[‘’`´]/g,"'").replace(/[“”]/g,'"');
 // 대소문자, 문장부호, 띄어쓰기 수는 따지지 않아요. I'm = I am 처럼 줄임말도 같은 답으로 봐요.
@@ -271,7 +316,7 @@ function startView(){
   $('#sub').textContent='6학년 영어 · 쓰기 게임';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>바르게 쓰면<br>탑이 올라가요!</h1>
    <p>그림과 우리말 뜻을 보고 영어 문장을 써요. 맞게 쓸 때마다 우리 조의 탑에 블록이 쌓여요. 어려운 단계일수록 블록이 더 많이!</p></div>
-   <div class="panel" style="display:flex;justify-content:center;gap:8px;align-items:end">${[5,9,7].map((b,i)=>`<div style="width:90px">${towerSvg(b,10,TEAM_COLORS[i])}</div>`).join('')}</div></section>
+   <div class="panel heroimg"><img src="img/hero.webp" alt="버스, 지하철, 택시, 자전거로 오가는 마을" onerror="this.parentNode.innerHTML='<div style=&quot;display:flex;justify-content:center;gap:8px;align-items:end&quot;>${[5,9,7].map((b,i)=>`<div style=&quot;width:90px&quot;>${towerSvg(b,10,TEAM_COLORS[i]).replace(/"/g,'&quot;')}</div>`).join('')}</div>'"></div></section>
    <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
   $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
 }
@@ -337,20 +382,20 @@ function teamView(){
   view='team';
   const n=RV.teams||5;
   app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto"><div class="panel grid"><h2>우리 조를 골라요</h2><p class="muted" style="margin:0">짝과 같은 조를 눌러요.</p>
-   <div class="teams">${Array.from({length:n},(_,i)=>`<button data-t="${i+1}" style="border-color:${TEAM_COLORS[i]}"><span>${TEAM_ICONS[i]}</span>${i+1}조</button>`).join('')}</div></div></div>`;
+   <div class="teams">${Array.from({length:n},(_,i)=>`<button data-t="${i+1}" style="border-color:${TEAM_COLORS[i]}"><span>${TI(i,'ti big')}</span>${i+1}조</button>`).join('')}</div></div></div>`;
   $$('.teams button').forEach(b=>b.onclick=async()=>{$$('.teams button').forEach(x=>x.disabled=true);await roomRef(me.room).child('students/'+me.num+'/team').set(+b.dataset.t);});
 }
-function teamLabel(t){return `${TEAM_ICONS[t-1]||''} ${t}조`;}
+function teamLabel(t){return `${TI(t-1)} ${t}조`;}
 function waitView(){
   view='wait';
   app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto"><div class="panel card pop">
-    <div class="pic">${TEAM_ICONS[ME.team-1]||'✏️'}</div><h2 style="font-size:2rem">${teamLabel(ME.team)} 준비 완료!</h2>
+    <div class="pic">${TI(ME.team-1,'ti huge')}</div><h2 style="font-size:2rem">${teamLabel(ME.team)} 준비 완료!</h2>
     <div class="rules" style="text-align:left;width:100%"><b>게임 방법</b><ol>
      <li>그림과 우리말 뜻을 보고 영어로 써요.</li>
      <li>단계를 골라요. <b>⭐ 낱말 카드</b>(블록 1개) · <b>⭐⭐ 빈칸 쓰기</b>(블록 2개) · <b>⭐⭐⭐ 문장 쓰기</b>(블록 3개)</li>
      <li>맞으면 우리 조 탑에 블록이 쌓여요. 틀리면 틀린 낱말이 빨갛게 보여요. 고쳐서 다시!</li>
      <li>두 번 틀리면 정답이 보여요. 보고 <b>따라 쓰면</b> 블록 1개.</li>
-     <li>한 번에 3문제 연속 맞히면 <b>황금 블록</b> +1!</li></ol>
+     <li>한 번에 3문제 연속 맞히면 <b>황금 블록</b> +1!</li><li>마지막 1분은 🔥<b>피버 타임</b>: 블록 2배!</li><li>🔊 듣기를 누르면 문장을 영어로 읽어 줘요.</li></ol>
      <p style="margin:.4em 0 0">⌨️ 키보드를 <b>영어</b>로 바꿔 두어요. 대문자·마침표는 틀려도 괜찮지만, 바르게 쓰면 더 멋져요.</p></div>
     <p class="muted">선생님이 시작하면 바로 문제가 나와요.</p>
     <button class="ghost" id="chg" style="font-size:.9rem">조 바꾸기</button></div></div>`;
@@ -370,10 +415,15 @@ function playView(){
   app.innerHTML=`<div class="grid" style="max-width:820px;margin:0 auto">
    <div class="row" style="justify-content:space-between"><div class="myscore" id="mysc"></div><div class="timer" id="stm" style="font-size:2rem"></div></div>
    <div class="levels" role="group" aria-label="단계">${[1,2,3].map(k=>`<button data-l="${k}" aria-pressed="${k===lv}"><b>${LV[k].k}</b>${LV[k].t} · 블록 ${LV[k].pts}</button>`).join('')}</div>
+   <div class="fever" id="fev" hidden>🔥 피버 타임! 블록 2배 🔥</div>
    <div class="panel card" id="q"></div></div>`;
   drawScore();
+  if(RV.startAt&&now()<RV.startAt)countdown(RV.startAt);
   $$('.levels button').forEach(b=>b.onclick=()=>{if(busy)return;const l=+b.dataset.l;ME.level=l;roomRef(me.room).child('students/'+me.num+'/level').set(l);$$('.levels button').forEach(x=>x.setAttribute('aria-pressed',x===b));tries=0;shown=false;drawQ();});
-  const tk=()=>{const el=$('#stm');if(!el)return clearInterval(stuTick);const ms=RV.endAt-now(),left=Math.max(0,Math.ceil(ms/1000));el.textContent=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;el.classList.toggle('end',left<=30);if(ms<=0){clearInterval(stuTick);if(!busy)route();else setTimeout(route,1200);}};
+  const tk=()=>{const el=$('#stm');if(!el)return clearInterval(stuTick);const ms=RV.endAt-now(),left=Math.max(0,Math.ceil(ms/1000));el.textContent=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;el.classList.toggle('end',left<=30);
+    const fv=isFever(RV),fe=$('#fev');if(fv&&!tk.fv)SFX.fever();tk.fv=fv;if(fe)fe.hidden=!fv;
+    if(left<=10&&left>0&&left!==tk.last){tk.last=left;SFX.tick();}
+    if(ms<=0){clearInterval(stuTick);SFX.end();if(!busy)route();else setTimeout(route,1200);}};
   clearInterval(stuTick);stuTick=setInterval(tk,250);tk();
   tries=0;shown=false;drawQ();
 }
@@ -399,7 +449,7 @@ function drawQ(){
   }
   box.innerHTML=`<div><span class="band">${shown?'따라 쓰기':LV[lv].k+' '+LV[lv].t}</span></div><div class="pic pop">${picHtml(it.pic,it.ko)}</div><div class="ko">${esc(it.ko)}</div>
     ${body}<div id="fb" class="diff" aria-live="polite"></div><div class="msg" id="qm" role="status"></div>
-    <div class="row" style="justify-content:center"><button id="ok">확인 ✔</button>${!shown&&lv===1?'<button class="ghost" id="clr">다시 놓기</button>':''}</div>`;
+    <div class="row" style="justify-content:center"><button class="listen" id="hear" title="영어 문장 들어 보기">🔊 듣기</button><button id="ok">확인 ✔</button>${!shown&&lv===1?'<button class="ghost" id="clr">다시 놓기</button>':''}</div>`;
   if(!shown&&lv===1){
     const pick=[];
     const draw=()=>{const ws=tilesOf(it.en);$('#built').innerHTML=pick.map((i,k)=>`<button data-k="${k}">${esc(ws[i])}</button>`).join('');
@@ -411,6 +461,7 @@ function drawQ(){
   const inp=$('#w',box)||$('.blank',box);if(inp)setTimeout(()=>inp.focus(),50);
   $$('input',box).forEach(x=>x.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();check();}});
   $('#ok').onclick=check;
+  $('#hear').onclick=()=>{const m=MUTE;MUTE=false;sayEn(plain(it.en));MUTE=m;};
 }
 async function check(){
   if(busy)return;
@@ -436,10 +487,12 @@ async function check(){
     const streak=first?(ME.streak||0)+1:0;
     const gold=first&&streak%3===0;
     if(gold)pts+=1;
-    $('#qm').className='msg ok';$('#qm').textContent=`맞았어요! 블록 +${pts}${gold?' (황금 블록!)':''}`;
+    const fv=isFever(RV);if(fv)pts*=2;
+    $('#qm').className='msg ok';$('#qm').textContent=`맞았어요! 블록 +${pts}${gold?' (황금 블록!)':''}${fv?' 🔥2배':''}`;
+    (gold?SFX.gold:SFX.right)();confetti(gold?60:24);setTimeout(()=>sayEn(plain(it.en)),gold?500:250);
     $('#fb').innerHTML=`<span class="w">${esc(plain(it.en))}</span>`;
     try{
-      const ok=RV.phase==='play'&&now()<RV.endAt;
+      const ok=RV.phase==='play'&&now()<RV.endAt&&!(RV.startAt&&now()<RV.startAt);
       if(ok){
         await roomRef(me.room).child('students/'+me.num).update({score:INC(pts),solved:INC(1),i:(ME.i||0)+1,streak});
         await roomRef(me.room).child('log').push({n:me.num,t:ME.team,p:pts,l:shown?0:lv,g:gold?1:0,at:firebase.database.ServerValue.TIMESTAMP,s:plain(it.en)});
@@ -448,7 +501,7 @@ async function check(){
     await sleep(900);
     busy=false;tries=0;shown=false;if(view==='play')drawQ();
   }else{
-    tries++;
+    tries++;SFX.wrong();
     box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
     if(ME.streak)roomRef(me.room).child('students/'+me.num+'/streak').set(0);
     $('#fb').innerHTML=fbHtml;
@@ -466,7 +519,7 @@ async function endView(){
   app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto"><div class="panel card pop"><div><span class="band">게임 끝</span></div>
    <h2 style="font-size:2rem">${teamLabel(ME.team)} 탑 완성!</h2>
    <div class="myscore"><span>내가 쌓은 블록 <b>${ME.score||0}</b></span><span>맞힌 문장 <b>${ME.solved||0}</b></span></div>
-   ${RV.award&&k>=0?`<div class="big">우리 조 ${k+1}등! (블록 ${T[k].s}개)</div>`:'<p class="muted">TV에서 시상식을 기다려요.</p>'}
+   ${RV.award&&k>=0?(SFX.fanfare(),confetti(k===0?80:30),'')+`<div class="big">우리 조 ${k+1}등! (블록 ${T[k].s}개)</div>`:'<p class="muted">TV에서 시상식을 기다려요.</p>'}
    <div class="rules" style="text-align:left;width:100%"><b>돌아보기</b><ul><li>오늘 가장 어려웠던 낱말은 무엇이었나요?</li><li>문장 첫 글자는 대문자, 끝에는 마침표(.)나 물음표(?)를 썼나요?</li></ul></div></div></div>`;
 }
 function teamTotals(all,n){
@@ -543,7 +596,10 @@ function renderTime(){
   const left=c.phase==='play'?Math.max(0,Math.round((c.endAt-now())/1000)):c.phase==='lobby'?(c.min||10)*60:0;
   el.textContent=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
   el.classList.toggle('end',c.phase!=='lobby'&&left<=30);
-  if(c.phase==='play'&&left<=0&&!renderTime.ended){renderTime.ended=true;roomRef(ROOM).child('cfg').update({phase:'end'});}
+  if(c.phase==='play'&&left<=0&&!renderTime.ended){renderTime.ended=true;SFX.end();roomRef(ROOM).child('cfg').update({phase:'end'});}
+  if(c.phase==='play'&&left<=10&&left>0&&left!==renderTime.last){renderTime.last=left;SFX.tick();}
+  const fv=c.phase==='play'&&isFever(c);if(fv&&!renderTime.fv)SFX.fever();renderTime.fv=fv;const fb=$('#tvfev');if(fb)fb.hidden=!fv;
+  if(c.phase==='play'&&c.startAt&&now()<c.startAt&&!$('.count'))countdown(c.startAt);
   if(c.phase!=='play')renderTime.ended=false;
 }
 let lastPhase='',lastLog=0;
@@ -560,10 +616,10 @@ function renderTV(prev){
   const on=(id,f)=>{const b=$('#'+id);if(b)b.onclick=f;};
   on('minus',()=>ref.update({min:Math.max(2,(c.min||10)-1)}));
   on('plus',()=>ref.update({min:Math.min(30,(c.min||10)+1)}));
-  on('go',()=>ref.update({phase:'play',endAt:now()+(c.min||10)*60000,award:false}));
+  on('go',()=>{ac();const st=now()+3500;ref.update({phase:'play',startAt:st,endAt:st+(c.min||10)*60000,award:false});});
   on('add1',()=>ref.update({endAt:(c.endAt||now())+60000}));
   on('stop',()=>ref.update({phase:'end'}));
-  on('award',()=>ref.update({award:true}));
+  on('award',()=>{ac();ref.update({award:true});});
   on('again',async()=>{
     if(!confirm('점수를 0으로 하고 같은 문장으로 한 판 더 할까요? (조는 그대로예요)'))return;
     const up={};Object.keys(st).forEach(k=>{up[`students/${k}/score`]=0;up[`students/${k}/solved`]=0;up[`students/${k}/streak`]=0;});
@@ -571,6 +627,7 @@ function renderTV(prev){
     await roomRef(ROOM).update(up);
   });
   const main=$('#main');
+  if(!c.award)awardPlayed=false;
   if(c.phase==='lobby')return tvLobby(main,c,st);
   if(c.phase==='end'&&c.award)return tvAward(main,c,st);
   tvTowers(main,c,st);
@@ -580,17 +637,21 @@ function tvLobby(main,c,st){
   Object.entries(st).sort((a,b)=>a[0]-b[0]).forEach(([k,v])=>{(v.team&&T[v.team-1]?T[v.team-1]:none).push({n:k,...v});});
   const chip=s=>`<span>${s.n} ${esc(s.name)}<button data-kick="${s.n}" aria-label="${s.n}번 내보내기" title="잘못 들어온 이름 지우기">×</button></span>`;
   main.innerHTML=`<div class="panel grid"><h2>QR로 들어와서 <b>"번호 이름"</b>을 쓰고, 우리 조를 골라요</h2>
-    <div class="lobby">${T.map((m,i)=>`<div class="tm" style="border-color:${TEAM_COLORS[i]}"><h3>${TEAM_ICONS[i]} ${i+1}조</h3>${m.map(chip).join('')||'<em class="muted">아직 없어요</em>'}</div>`).join('')}</div>
+    <div class="lobby">${T.map((m,i)=>`<div class="tm" style="border-color:${TEAM_COLORS[i]}"><h3>${TI(i)} ${i+1}조</h3>${m.map(chip).join('')||'<em class="muted">아직 없어요</em>'}</div>`).join('')}</div>
     ${none.length?`<div class="none"><b>조를 고르는 중</b> <div class="row" style="margin-top:6px">${none.map(chip).join('')}</div></div>`:''}</div>
    <div class="panel rules"><b>게임 방법</b><ol>
     <li>그림과 우리말 뜻을 보고 영어로 써요. 맞으면 우리 조 탑에 블록이 쌓여요.</li>
     <li><b>⭐ 낱말 카드</b> 블록 1 · <b>⭐⭐ 빈칸 쓰기</b> 블록 2 · <b>⭐⭐⭐ 문장 쓰기</b> 블록 3</li>
     <li>틀리면 틀린 낱말이 빨갛게! 두 번 틀리면 정답을 보고 따라 써요(블록 1).</li>
-    <li>한 번에 3문제 연속 → 황금 블록 +1</li></ol>
+    <li>한 번에 3문제 연속 → 황금 블록 +1 · 마지막 1분 🔥피버 타임 블록 2배</li></ol>
     <p style="margin:.4em 0 0"><b>약속</b> 소리 지르지 않기 · 친구 화면 보지 않기 · 우리 조 친구 도와주기</p></div>`;
   $$('[data-kick]',main).forEach(b=>b.onclick=()=>{if(confirm(b.dataset.kick+'번을 내보낼까요?'))roomRef(ROOM).child('students/'+b.dataset.kick).remove();});
 }
+let seenLog=null,awardPlayed=false;
 function tvTowers(main,c,st){
+  const keys=Object.keys(RD.log||{});
+  if(seenLog){const fresh=keys.filter(k=>!seenLog.has(k));if(fresh.length){const g=fresh.some(k=>RD.log[k].g);(g?SFX.gold:SFX.block)();}}
+  seenLog=new Set(keys);
   const n=c.teams||5;
   const T=teamTotals(st,n).sort((a,b)=>a.t-b.t);
   const max=Math.max(10,...T.map(x=>x.s));
@@ -603,10 +664,12 @@ function tvTowers(main,c,st){
   const total=T.reduce((a,x)=>a+x.c,0);
   const ended=c.phase==='end';
   main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2>${ended?'게임 끝! 시상식을 눌러요':'바르게 쓰면 탑이 올라가요'}</h2><span class="band">우리 반이 쓴 문장 ${total}개</span></div>
-    <div class="towers" style="grid-template-columns:repeat(${n},1fr)">${T.map(x=>`<div class="tw"><div class="crown">${x.s>0&&x.s===top?'👑':''}</div><div class="cnt">${x.s}</div>${towerSvg(x.s,max,TEAM_COLORS[x.t-1],golds[x.t-1])}<div class="nm">${TEAM_ICONS[x.t-1]} ${x.t}조</div></div>`).join('')}</div></div>
-   <div class="panel grid"><h2>방금 쓴 문장</h2><div class="feed">${log.slice(0,5).map(e=>`<div style="border-left-color:${TEAM_COLORS[e.t-1]}">${TEAM_ICONS[e.t-1]} ${e.t}조 +${e.p}${e.g?' 🌟':''} <em>${e.l?LV[e.l].k:'따라 쓰기'}</em> <span style="font-family:var(--en);font-weight:800">${esc(e.s||'')}</span></div>`).join('')||'<p class="muted">첫 문장을 기다려요…</p>'}</div></div>`;
+    <div class="fever" id="tvfev" hidden>🔥 피버 타임! 마지막 1분은 블록 2배 🔥</div>
+    <div class="towers" style="grid-template-columns:repeat(${n},1fr)">${T.map(x=>`<div class="tw"><div class="crown">${x.s>0&&x.s===top?'👑':''}</div><div class="cnt">${x.s}</div>${towerSvg(x.s,max,TEAM_COLORS[x.t-1],golds[x.t-1])}<div class="nm">${TI(x.t-1)} ${x.t}조</div></div>`).join('')}</div></div>
+   <div class="panel grid"><h2>방금 쓴 문장</h2><div class="feed">${log.slice(0,5).map(e=>`<div style="border-left-color:${TEAM_COLORS[e.t-1]}">${TI(e.t-1)} ${e.t}조 +${e.p}${e.g?' 🌟':''} <em>${e.l?LV[e.l].k:'따라 쓰기'}</em> <span style="font-family:var(--en);font-weight:800">${esc(e.s||'')}</span></div>`).join('')||'<p class="muted">첫 문장을 기다려요…</p>'}</div></div>`;
 }
 function tvAward(main,c,st){
+  if(!awardPlayed){awardPlayed=true;SFX.fanfare();confetti(90);}
   const T=teamTotals(st,c.teams||5);
   const pod=[T[1],T[0],T[2]];
   const L=Object.entries(st).map(([k,v])=>({n:+k,...v}));
@@ -614,12 +677,14 @@ function tvAward(main,c,st){
   const hard=best(v=>(v.level===3?1:0)*1000+(v.solved||0));
   const tot=T.reduce((a,x)=>a+x.c,0);
   main.innerHTML=`<div class="panel grid"><h2 style="text-align:center;font-size:2.2rem">🏆 문장 탑 시상식</h2>
-    <div class="podium">${pod.map((x,i)=>x?`<div class="p${[2,1,3][i]}"><b>${[2,1,3][i]}등</b><span>${TEAM_ICONS[x.t-1]} ${x.t}조</span>블록 ${x.s}개<br><small>${x.m.map(m=>esc(m.name)).join(' · ')}</small></div>`:'<div style="background:transparent"></div>').join('')}</div>
+    <div class="podium">${pod.map((x,i)=>x?`<div class="p${[2,1,3][i]}"><b>${[2,1,3][i]}등</b><span>${TI(x.t-1,'ti big')} ${x.t}조</span>블록 ${x.s}개<br><small>${x.m.map(m=>esc(m.name)).join(' · ')}</small></div>`:'<div style="background:transparent"></div>').join('')}</div>
     <p class="big" style="text-align:center">우리 반이 함께 쓴 문장 ${tot}개!</p></div>
    <div class="panel rules"><b>돌아보기</b><ul><li>오늘 가장 어려웠던 낱말은? 짝에게 철자를 불러 줘요.</li><li>문장 첫 글자는 <b>대문자</b>, 끝에는 <b>마침표(.)</b>나 <b>물음표(?)</b>!</li></ul></div>`;
 }
 
 /* ---------- route ---------- */
+{const b=$('#snd');const d=()=>{b.textContent=MUTE?'🔇':'🔊';};d();b.onclick=()=>{MUTE=!MUTE;store('tw-mute',MUTE);d();if(!MUTE){ac();SFX.right();}};}
+document.addEventListener('pointerdown',()=>ac(),{once:true});
 if(location.hash==='#teacher')teacherView();
 else if(ROOM)joinView();
 else startView();
