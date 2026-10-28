@@ -49,6 +49,7 @@ a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
 <header><h1>⭕ 원의 둘레와 넓이 실험실</h1><button id="fs">전체 화면</button></header>
 <nav>
   <button data-t="s1" class="on">① 원 굴리기<small>원주와 지름의 관계 (2차시)</small></button>
+  <button data-t="s5">🔎 왜 3.14일까?<small>지름 끈 감기 · 변 늘리기 (2~3차시)</small></button>
   <button data-t="s2">② 원주율 찾기<small>원주율 · 원주와 지름 구하기 (3~4차시)</small></button>
   <button data-t="s3">③ 넓이 어림하기<small>모눈과 정사각형 (5차시)</small></button>
   <button data-t="s4">④ 잘라 붙이기<small>원의 넓이 구하는 방법 (6차시)</small></button>
@@ -67,6 +68,26 @@ a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
     <label><input id="r1trace" type="checkbox"> 빨간 점이 지나간 길</label>
   </div>
   <div class="say" id="say1">원 위의 빨간 점이 바닥에 닿은 곳에서 출발해요. 한 바퀴 굴러서 빨간 점이 다시 바닥에 닿을 때까지 간 거리가 바로 <b>원의 둘레(원주)</b>예요.</div>
+</section>
+
+<!-- 🔎 왜 3.14일까? -->
+<section id="s5">
+  <p class="q"><span>질문</span>원주는 왜 지름의 3.14배일까요?</p>
+  <canvas id="c5"></canvas>
+  <div class="ctl">
+    <button id="r5wrap" class="pick on">🧵 지름 끈으로 감기</button>
+    <button id="r5poly" class="pick">⬡ 원 안·밖 도형 변 늘리기</button>
+  </div>
+  <div class="ctl" id="r5wctl">
+    <button id="r5play">▶ 끈 감기</button>
+    <button id="r5reset" class="sub">↺ 처음으로</button>
+    <label>지름 <input id="r5d" type="range" min="2" max="20" step="1" value="10"><b class="val" id="r5dv">10 cm</b></label>
+  </div>
+  <div class="ctl" id="r5pctl" style="display:none">
+    <button id="r5more">변 늘리기 ▶</button>
+    <button id="r5back" class="sub">↺ 정육각형·정사각형으로</button>
+  </div>
+  <div class="say" id="say5"></div>
 </section>
 
 <!-- ② 원주율 찾기 -->
@@ -288,6 +309,120 @@ sims.s1 = (() => {
   $('#r1mode').onclick = () => { if (anim) anim.stop = true; mode = mode === 'roll' ? 'compare' : 'roll'; $('#r1mode').textContent = mode === 'roll' ? '정육각형·정사각형과 비교' : '원 굴리기로 돌아가기'; draw(); say(); };
   $('#r1d').oninput = () => { $('#r1dv').textContent = d() + ' cm'; if (anim) anim.stop = true; phi = 0; draw(); say(); };
   $('#r1ruler').onchange = $('#r1trace').onchange = draw;
+  return { draw };
+})();
+
+/* ---------- 🔎 왜 3.14일까? ---------- */
+sims.s5 = (() => {
+  const cv = $('#c5'); let mode = 'wrap', k = 0, anim = null, step = 0;
+  const d = () => +$('#r5d').value;
+  const STEPS = [[6, 4], [12, 12], [24, 24], [48, 48], [96, 96]];
+  const NAME = n => n === 4 ? '정사각형' : n === 6 ? '정육각형' : `정${n}각형`;
+  const inV = n => n * Math.sin(PI / n), outV = n => n * Math.tan(PI / n);
+  const BLUES = [COL.blue, '#7FB3D5', COL.blue];
+  function draw() {
+    const { c, w, h } = prep(cv);
+    if (mode === 'wrap') drawWrap(c, w, h); else drawPoly(c, w, h);
+  }
+  // 지름 길이의 끈을 원 둘레에 감기: 끈 하나 = 호의 중심각 2(라디안)
+  function drawWrap(c, w, h) {
+    const wide = w > 640, R = wide ? Math.min(h / 2 - 40, w * 0.22) : Math.min(w / 2 - 30, h * 0.27);
+    const cx = wide ? 40 + R : w / 2, cy = wide ? h / 2 + 8 : 30 + R + 14, a0 = PI / 2;
+    c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = '#FDEBD0'; c.fill(); c.strokeStyle = COL.navy; c.lineWidth = 3; c.stroke();
+    c.beginPath(); c.arc(cx, cy, 4, 0, TAU); c.fillStyle = COL.navy; c.fill();
+    if (k < 1) { // 아직 감기 전: 원 안에 지름 끈
+      const t = k; line(c, cx - R, cy, cx + R, cy, COL.blue, 6);
+      text(c, `지름 ${d()} cm 끈`, cx, cy - 16, { color: COL.blue, bold: true, size: 17 });
+      if (t > 0) { c.beginPath(); c.arc(cx, cy, R, a0, a0 + 2 * t); c.strokeStyle = COL.blue; c.lineWidth = 9; c.stroke(); }
+    }
+    for (let j = 0; j < 3; j++) {
+      const f = Math.max(0, Math.min(1, k - j)); if (!f) continue;
+      const s0 = a0 + 2 * j, s1 = s0 + 2 * f;
+      c.beginPath(); c.arc(cx, cy, R, s0, s1); c.strokeStyle = BLUES[j]; c.lineWidth = 9; c.stroke();
+      line(c, cx + (R - 9) * Math.cos(s0), cy + (R - 9) * Math.sin(s0), cx + (R + 9) * Math.cos(s0), cy + (R + 9) * Math.sin(s0), COL.navy, 2);
+      if (f === 1) { const m = s0 + 1; c.beginPath(); c.arc(cx + (R + 24) * Math.cos(m), cy + (R + 24) * Math.sin(m), 15, 0, TAU); c.fillStyle = BLUES[j]; c.fill(); text(c, `${j + 1}`, cx + (R + 24) * Math.cos(m), cy + (R + 24) * Math.sin(m) + 1, { color: '#fff', bold: true, size: 17 }); }
+    }
+    line(c, cx + (R - 12) * Math.cos(a0), cy + (R - 12) * Math.sin(a0), cx + (R + 12) * Math.cos(a0), cy + (R + 12) * Math.sin(a0), COL.red, 3);
+    if (k >= 3) { // 남은 조각
+      c.beginPath(); c.arc(cx, cy, R, a0 + 6, a0 + TAU); c.strokeStyle = COL.yellow; c.lineWidth = 11; c.stroke();
+      const m = a0 + 6 + (TAU - 6) / 2;
+      text(c, '조금 남아요!', cx + (R - 34) * Math.cos(m), cy + (R - 34) * Math.sin(m), { color: '#B7950B', bold: true, size: 17 });
+    }
+    text(c, `지름 ${d()} cm`, 16, 20, { align: 'left', size: 18, color: COL.blue, bold: true });
+    // 오른쪽(또는 아래): 지름 끈을 10칸으로 나눠 남은 조각과 비교
+    if (k < 3) return;
+    const bx = wide ? cx + R + 70 : 24, bw = wide ? w - bx - 30 : w - 48, by = wide ? cy - 60 : cy + R + 60;
+    text(c, '남은 조각을 지름 끈과 비교하면?', bx, by - 34, { align: 'left', bold: true, size: 18, color: COL.navy });
+    c.fillStyle = '#7FB3D5'; c.fillRect(bx, by, bw, 26);
+    for (let i = 0; i <= 10; i++) line(c, bx + bw * i / 10, by - (i % 5 ? 0 : 6), bx + bw * i / 10, by + 26, '#fff', i % 5 ? 1.5 : 3);
+    text(c, `지름 ${d()} cm 끈 (10칸)`, bx + bw / 2, by + 44, { size: 15, color: COL.blue, bold: true });
+    const left = PI - 3;
+    c.fillStyle = COL.yellow; c.fillRect(bx, by + 64, bw * left, 26);
+    text(c, `남은 조각 ≈ 지름의 0.14 (${fmt(d() * left, 1)} cm)`, bx + bw * left + 10, by + 77, { align: 'left', size: 16, bold: true, color: '#B7950B' });
+    text(c, '1칸(0.1)보다 조금 길어요', bx, by + 108, { align: 'left', size: 15, color: COL.mute });
+    text(c, '원주 = 지름 × 3 + 지름 × 0.14', bx, by + 146, { align: 'left', size: 20, bold: true, color: COL.navy });
+    text(c, `= 지름 × 3.14  (${fmt(d() * 3.14, 2)} cm)`, bx + 66, by + 176, { align: 'left', size: 20, bold: true, color: COL.red });
+  }
+  // 원 안 정n각형 · 원 밖 정m각형 둘레 ÷ 지름이 3.14로 좁혀지기
+  function drawPoly(c, w, h) {
+    const [ni, no] = STEPS[step];
+    const wide = w > 640, R = wide ? Math.min(h / 2 - 34, w * 0.2) : Math.min(w / 2 - 40, h * 0.24);
+    const cx = wide ? 40 + R + 10 : w / 2, cy = wide ? h / 2 : 24 + R + 10;
+    const poly = (n, r, col, rot) => { c.beginPath(); for (let i = 0; i <= n; i++) { const a = rot + i * TAU / n; i ? c.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : c.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); } c.strokeStyle = col; c.lineWidth = 3; c.stroke(); };
+    poly(no, R / Math.cos(PI / no), COL.red, no === 4 ? PI / 4 : PI / no);
+    c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = '#FDEBD055'; c.fill(); c.strokeStyle = COL.navy; c.lineWidth = 2; c.setLineDash([5, 4]); c.stroke(); c.setLineDash([]);
+    poly(ni, R, COL.green, 0);
+    text(c, `안: ${NAME(ni)}  ·  밖: ${NAME(no)}`, cx, wide ? 20 : cy + R + 34, { bold: true, size: 17, color: COL.navy });
+    // 수직선 3 ~ 4
+    const lx = wide ? cx + R + 80 : 30, lw = wide ? w - lx - 40 : w - 60, ly = wide ? h / 2 - 20 : cy + R + 110;
+    const X = v => lx + lw * (v - 2.9) / 1.2;
+    line(c, lx, ly, lx + lw, ly, '#9b927f', 3);
+    for (let v = 3; v <= 4.001; v += 0.1) { const big = Math.abs(v - Math.round(v)) < 1e-6 || Math.abs(v - 3.5) < 1e-6; line(c, X(v), ly - (big ? 10 : 5), X(v), ly + (big ? 10 : 5), '#9b927f', 2); if (big) text(c, fmt(v, 1), X(v), ly + 26, { size: 15, color: COL.mute }); }
+    c.fillStyle = '#F4C54255'; c.fillRect(X(inV(ni)), ly - 14, X(outV(no)) - X(inV(ni)), 28);
+    line(c, X(PI), ly - 40, X(PI), ly + 40, COL.navy, 2, [4, 4]);
+    text(c, '원주 ÷ 지름 = 3.14…', X(PI), ly + 56, { size: 15, bold: true, color: COL.navy });
+    const mark = (v, col, up, cap) => { c.beginPath(); c.arc(X(v), ly, 9, 0, TAU); c.fillStyle = col; c.fill(); text(c, cap, X(v) + (up ? -4 : 4), ly + (up ? -30 : 30) + (up ? 0 : 54), { size: 15, bold: true, color: col, align: up ? 'right' : 'left' }); };
+    mark(inV(ni), COL.green, true, `안 ${fmt(inV(ni), 2)}`);
+    mark(outV(no), COL.red, true, '');
+    text(c, `밖 ${fmt(outV(no), 2)}`, X(outV(no)) + 6, ly - 30, { size: 15, bold: true, color: COL.red, align: 'left' });
+    // 표
+    const tx = lx, ty = ly + 110; if (ty + 20 > h) return;
+    text(c, '도형의 둘레 ÷ 지름 (소수 셋째 자리까지)', tx, ty, { align: 'left', size: 14, color: COL.mute, bold: true });
+    STEPS.slice(0, step + 1).forEach(([a, b], i) => {
+      const y = ty + 22 + i * 22; if (y > h - 8) return;
+      text(c, `안 ${NAME(a)} ${inV(a).toFixed(3)}  <  원  <  밖 ${NAME(b)} ${outV(b).toFixed(3)}`, tx, y, { align: 'left', size: 15, color: i === step ? COL.ink : COL.mute, bold: i === step });
+    });
+  }
+  function say() {
+    const [ni, no] = STEPS[step];
+    $('#say5').innerHTML = mode === 'wrap'
+      ? (k >= 3
+        ? `지름 끈을 원에 감으면 <b>3번</b> 감고 <b>조금 남아요.</b> 남은 조각은 지름의 <b>약 0.14</b>예요.<br>👉 그래서 원주는 <b class="hl">지름 × 3.14</b>쯤! 지름을 바꿔서 또 감아 보세요. 큰 원이든 작은 원이든 늘 <b>3번 하고 0.14</b>가 남아요.`
+        : '영상에서 본 것처럼, <b>지름과 길이가 같은 끈</b>으로 원의 둘레를 감아 볼까요? 몇 번 감길까요? 손가락으로 예상해 보세요.')
+      : step === 0
+        ? '원 <b>안</b> 정육각형의 둘레는 지름의 <b>3배</b>, 원 <b>밖</b> 정사각형의 둘레는 지름의 <b>4배</b>예요. 원주는 그 사이에 있어요.<br>도형의 변을 늘리면 어떻게 될까요? <b>변 늘리기 ▶</b>를 눌러 보세요.'
+        : step < STEPS.length - 1
+          ? `변이 많아질수록 안·밖 도형이 원에 딱 붙고, 두 값(<b style="color:var(--green)">${inV(ni).toFixed(2)}</b>와 <b style="color:var(--red)">${outV(no).toFixed(2)}</b>) 사이가 <b>좁아져요.</b>`
+          : `정96각형이면 안 <b>${inV(ni).toFixed(3)}</b>, 밖 <b>${outV(no).toFixed(3)}</b>! 두 값이 모두 <b class="hl">3.14…</b>로 모여요. 원주는 그 사이에 끼어 있으니 지름의 <b class="hl">약 3.14배</b>예요.<br>약 2200년 전 그리스의 <b>아르키메데스</b>도 정96각형으로 이렇게 원주율을 어림했어요.`;
+  }
+  function setMode(m) {
+    if (anim) anim.stop = true; mode = m;
+    $('#r5wrap').classList.toggle('on', m === 'wrap'); $('#r5poly').classList.toggle('on', m === 'poly');
+    $('#r5wctl').style.display = m === 'wrap' ? '' : 'none'; $('#r5pctl').style.display = m === 'poly' ? '' : 'none';
+    draw(); say();
+  }
+  $('#r5wrap').onclick = () => setMode('wrap');
+  $('#r5poly').onclick = () => setMode('poly');
+  $('#r5play').onclick = () => {
+    if (anim) anim.stop = true; k = 0; say();
+    const go = j => { anim = animate(1500, t => { k = j + ease(t); draw(); }, () => { k = j + 1; draw(); if (j < 2) go(j + 1); else say(); }); };
+    go(0);
+  };
+  $('#r5reset').onclick = () => { if (anim) anim.stop = true; k = 0; draw(); say(); };
+  $('#r5d').oninput = () => { $('#r5dv').textContent = d() + ' cm'; draw(); };
+  $('#r5more').onclick = () => { step = Math.min(STEPS.length - 1, step + 1); draw(); say(); };
+  $('#r5back').onclick = () => { step = 0; draw(); say(); };
+  say();
   return { draw };
 })();
 

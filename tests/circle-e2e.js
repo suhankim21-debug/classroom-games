@@ -1,4 +1,4 @@
-// 원의 둘레와 넓이 실험실 자동 테스트: 네 화면을 차례로 눌러 보고 오류가 없는지 확인해요.
+// 원의 둘레와 넓이 실험실 자동 테스트: 다섯 화면을 차례로 눌러 보고 오류가 없는지 확인해요.
 // 실행: node tests/circle-e2e.js   (다른 주소: URL=http://localhost:8000/circle/ node tests/circle-e2e.js)
 const { chromium } = require('playwright');
 const URL = process.env.URL || 'https://suhankim21-debug.github.io/classroom-games/circle/';
@@ -13,6 +13,12 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     await p.click('#r1play'); await p.waitForTimeout(4600);
     if (!(await p.textContent('#say1')).includes('3배보다 조금')) fail(`[${w}] 원 굴리기 결과 문장이 안 나옴`);
     await p.click('#r1mode');
+    await p.click('nav button[data-t=s5]');
+    await p.click('#r5play'); await p.waitForTimeout(5200);
+    if (!(await p.textContent('#say5')).includes('3번')) fail(`[${w}] 지름 끈 감기 결과 문장이 안 나옴`);
+    await p.click('#r5poly');
+    for (let k = 0; k < 4; k++) await p.click('#r5more');
+    if (!(await p.textContent('#say5')).includes('3.141')) fail(`[${w}] 정96각형 값 이상: ${await p.textContent('#say5')}`);
     await p.click('nav button[data-t=s2]');
     for (const i of [1, 2, 6]) { await p.click(`#objs button:nth-child(${i})`); await p.waitForTimeout(7200); }
     const pis = await p.$$eval('#tb td.pi', t => t.map(x => +x.textContent));
