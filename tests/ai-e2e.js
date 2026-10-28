@@ -66,11 +66,16 @@ const SHAPES = () => {
     await Promise.all(Array.from({ length: N }, (_, i) => i + 1).map(async n => {
       const p = await mk(n + '번', n === 1 ? 400 : 1000, 1000); S[n] = p;
       await p.goto(URL + '?room=' + code);
-      await p.fill('#nm', `${n} 학생${n}`);
+      await p.fill('#cw-name', `${n} 학생${n}`);
       await p.click('#enter');
       await p.waitForSelector('#cards button', { timeout: 15000 });
     }));
     console.log(`${N}명 입장 완료`);
+    // 👀 학생 화면: 선생님 화면에서 모든 학생이 번호 이름과 1단계로 보여요
+    await T.click('.cw-open');
+    await T.waitForFunction(n => [...document.querySelectorAll('.cw-tile:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /1\/4/.test(x.textContent) && x.querySelector('.cw-scr main')).length === n, N, { timeout: 15000 })
+      .catch(async () => fail('학생 화면 보기에 학생들이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile')].map(x => x.textContent.slice(0, 30)).join(' | ')))));
+    await T.click('.cw-close');
 
     // 1단계: 순서 맞히기(2번은 일부러 한 번 틀려요) → 장면 문제
     await Promise.all(Object.entries(S).map(async ([n, p]) => {
@@ -136,7 +141,7 @@ const SHAPES = () => {
     await shot(S[1], 's4'); await shot(T, 't4');
     console.log('4단계 OK');
   } catch (e) { fail('진행 중 멈춤: ' + e.message); }
-  await T.evaluate(c => firebase.database().ref('rooms/' + c).remove(), code).catch(() => {});
+  await T.evaluate(c => Promise.all([firebase.database().ref('rooms/' + c).remove(), firebase.database().ref('rooms/' + c + '_watch').remove()]), code).catch(() => {});
   await browser.close();
   console.log(problems.length ? `문제 ${problems.length}개` : '모두 통과');
   process.exit(problems.length ? 1 : 0);

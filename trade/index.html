@@ -149,6 +149,7 @@ button.nation[aria-pressed="true"] .tag{background:#fff;color:var(--c)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
@@ -194,7 +195,7 @@ function canMake(nat,p){return Object.entries(PROD[p].need).every(([r,c])=>(nat.
 
 /* ---------- start ---------- */
 function startView(){
-  if(unsub){unsub();unsub=null;} if(tUnsub){tUnsub();tUnsub=null;}
+  if(unsub){unsub();unsub=null;} if(tUnsub){tUnsub();tUnsub=null;}ClassWatch.teacherStop();
   $('#sub').textContent='6학년 사회 · 시장경제와 국가 간 거래';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>자원을 바꾸고,<br>상품을 만들어요</h1>
   <p>짝과 함께 한 나라가 되어요. 우리 나라 자원만으로는 미션을 할 수 없어요. 다른 나라와 자원을 주고받아 상품 2개를 만들면 <b>무역 성공!</b></p></div>
@@ -209,6 +210,8 @@ function joinView(){
   const saved=store('rt-student');
   if(saved&&saved.room===ROOM&&ROOM){me=saved;return playView();}
   $('#sub').textContent='학생 화면';
+  // 선생님의 👀 학생 화면에 들어가기 화면부터 보여요
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
   let pick=0;
   app.innerHTML=`<div class="grid">
    <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
@@ -222,6 +225,7 @@ function joinView(){
   const chk=()=>{$('#enter').disabled=!(pick&&$('#p1').value.trim()&&/^\d{4}$/.test($('#rm').value));};
   $('#p1').oninput=chk;$('#rm').oninput=chk;
   $('#home').onclick=startView;
+  ClassWatch.joinForm({nm:'#none',checks:[{label:'우리 모둠 나라 고르기',ok:()=>!!pick},{label:'"나" 칸에 번호 이름 쓰기',ok:()=>!!$('#p1').value.trim()}]});
   $('#enter').onclick=async()=>{
     const code=$('#rm').value, names=[$('#p1').value.trim(),$('#p2').value.trim()].filter(Boolean);
     let room;try{room=await withTimeout(roomRef(code).child('open').get());}catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return;}
@@ -253,6 +257,8 @@ let view='main';
 function renderPlay(){
   const N=NATIONS[me.n],nat=NAT;
   $('#sub').textContent=`${me.n}모둠 · ${N.n} · ${(nat.names||[]).join(', ')}`;
+  ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(null,`${me.n}모둠 ${N.n} (${(nat.names||[]).join(', ')})`);
+  ClassWatch.step(nat.doneAt?'무역 성공':'무역하기',{wait:!!nat.doneAt});
   if(nat.doneAt&&view==='main'&&!window._help) return winView();
   if(view!=='main')return;
   const mission=N.m.map(p=>{const done=nat.made&&nat.made[p];
@@ -348,6 +354,7 @@ async function teacherView(){
     }
   }catch(e){ return showError(e); }
   ROOM=code;
+  ClassWatch.teacher({db,room:code});
   const url=location.origin+location.pathname+'?room='+code;
   $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
   app.innerHTML=`<div class="tv">
@@ -414,6 +421,7 @@ function awardView(){
   $('#back').onclick=teacherView;
 }
 
-if(ROOM)joinView();else if(location.hash==='#teacher')teacherView();else startView();
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(ROOM)joinView();else if(location.hash==='#teacher')teacherView();else startView();
 
 </script></body></html>

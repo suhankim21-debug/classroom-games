@@ -41,6 +41,11 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       await p.waitForSelector('#send', { timeout: 15000 });
     }));
     console.log('5나라 참여 완료');
+    // 👀 학생 화면: 모둠 나라 이름과 '무역하기' 단계로 보여요
+    await T.click('.cw-open');
+    await T.waitForFunction(() => [...document.querySelectorAll('.cw-tile:not(.off)')].filter(x => /\d모둠/.test(x.textContent) && /무역하기/.test(x.textContent) && x.querySelector('.cw-scr main')).length === 5, null, { timeout: 15000 })
+      .catch(async () => fail('학생 화면 보기에 5나라가 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile')].map(x => x.textContent.slice(0, 40)).join(' | ')))));
+    await T.click('.cw-close');
     // 중복 참여 확인
     const dup = await mk('중복');
     await dup.goto(URL + '?room=' + code);
@@ -119,7 +124,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     ok = true;
   } catch (e) { fail('테스트 중단: ' + e.message); }
   finally {
-    const del = await T.evaluate(c => firebase.database().ref('rooms/' + c).remove().then(()=> 'deleted', e => 'delete failed: ' + e.message), code);
+    const del = await T.evaluate(c => Promise.all([firebase.database().ref('rooms/' + c).remove(), firebase.database().ref('rooms/' + c + '_watch').remove()]).then(()=> 'deleted', e => 'delete failed: ' + e.message), code);
     console.log('방 데이터 정리:', del);
     await browser.close();
     console.log(problems.length ? `\n문제 ${problems.length}개` : '\n모두 통과');
