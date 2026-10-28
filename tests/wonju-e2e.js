@@ -53,8 +53,8 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     console.log(`${N}명 입장 완료`);
     // 👀 학생 화면: 선생님 화면에서 모든 학생이 번호 이름과 1단계로 보여요
     await T.click('.cw-open');
-    await T.waitForFunction(n => [...document.querySelectorAll('.cw-tile:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /1\/4/.test(x.textContent) && x.querySelector('.cw-scr main')).length === n, N, { timeout: 15000 })
-      .catch(async () => fail('학생 화면 보기에 학생들이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile')].map(x => x.textContent.slice(0, 30)).join(' | ')))));
+    await T.waitForFunction(n => [...document.querySelectorAll('.cw-card:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /1\/4/.test(x.textContent)).length === n, N, { timeout: 15000 })
+      .catch(async () => fail('학생 화면 보기에 학생들이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.textContent.slice(0, 30)).join(' | ')))));
     await T.click('.cw-close');
 
     // 1단계

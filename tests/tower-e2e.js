@@ -51,9 +51,14 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         // 이름을 안 쓴 채 도움 요청 → 선생님 학생 화면에 '이름 아직 안 씀'으로 보여야 해요
         await p.click('.cw-help');
         await T.click('.cw-open');
-        await T.waitForFunction(() => document.querySelector('.cw-tile.help') && /이름 아직/.test(document.querySelector('.cw-tile.help').textContent), null, { timeout: 10000 }).catch(() => fail('선생님 학생 화면에 이름 안 쓴 학생의 도움 요청이 안 보임'));
+        await T.waitForFunction(() => { const c = document.querySelector('.cw-card.help'); return c && /이름 아직/.test(c.textContent) && /들어가기/.test(c.textContent) && /아직 안 한 것: .*이름 쓰기/.test(c.textContent); }, null, { timeout: 10000 })
+          .catch(async () => fail('선생님 카드에 이름 안 쓴 학생의 도움 요청·할 일이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.textContent).join(' | ')))));
         await shot(T, 't0-watch-help');
-        await T.click('.cw-tile.help'); await T.click('.cw-ack');
+        await T.click('.cw-card.help');
+        // 크게 보기: 기기 크기와 상관없이 태블릿 세로 폭(820px)으로 고정, 잘리지 않게 전체 높이
+        await T.waitForFunction(() => { const b = document.querySelector('.cw-zoom .cw-scr'), i = b && b.firstChild; return b && i && i.style.width === '820px' && b.clientHeight >= i.scrollHeight * (b.clientWidth / 820) - 2; }, null, { timeout: 5000 }).catch(() => fail('크게 보기가 820px 고정·전체 높이가 아님'));
+        await shot(T, 't0-zoom');
+        await T.click('.cw-ack');
         await p.waitForFunction(() => /선생님이 확인/.test(document.body.textContent), null, { timeout: 10000 }).catch(() => fail('선생님이 확인한 것이 학생에게 안 보임'));
         await T.click('.cw-back'); await T.click('.cw-close');
         await p.fill('#cw-name', '1 학생1');
@@ -75,10 +80,16 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     await shot(T, 't1-lobby'); await shot(S[1], 's1-wait');
     // 👀 학생 화면: 모두 번호 이름과 '기다리기' 단계로 보이고, 작은 화면 안에 학생 화면 글자가 보여요
     await T.click('.cw-open');
-    await T.waitForFunction(n => { const t = [...document.querySelectorAll('.cw-tile')].filter(x => !x.classList.contains('off')); return t.length >= n && t.filter(x => /기다리기/.test(x.textContent) && /준비 완료/.test(x.textContent)).length === n; }, N, { timeout: 15000 })
-      .catch(async () => fail('학생 화면 보기에 10명의 기다리기 화면이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile .cw-hd')].map(x => x.textContent).join(',')))));
-    if (await T.evaluate(() => [...document.querySelectorAll('.cw-ov [onclick], .cw-ov script')].length)) fail('학생 화면 복사본에 스크립트가 들어감');
+    await T.waitForFunction(n => [...document.querySelectorAll('.cw-card:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /3\/4 기다리기/.test(x.textContent) && /준비 완료/.test(x.textContent)).length === n, N, { timeout: 15000 })
+      .catch(async () => fail('학생 카드에 10명의 기다리기가 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.textContent).join(' | ')))));
+    if (new Set(await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.offsetHeight))).size !== 1) fail('학생 카드 크기가 서로 다름');
     await shot(T, 't1-watch');
+    // 단계별 화면: 입력 글자 없이 학생 화면 모양만
+    await T.click('.cw-tabs button[data-tab="steps"]');
+    await T.waitForSelector('.cw-zoom .cw-scr', { timeout: 5000 }).catch(() => fail('단계별 화면이 안 보임'));
+    if (await T.evaluate(() => [...document.querySelectorAll('.cw-ov [onclick], .cw-ov script, .cw-ov input[value]')].length)) fail('단계별 화면에 스크립트나 입력 글자가 남음');
+    await shot(T, 't1-steps');
+    await T.click('.cw-tabs button[data-tab="cards"]');
     await T.click('.cw-close');
     console.log(`${N}명 입장, 조 고르기 OK`);
 
@@ -150,7 +161,8 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         // 게임 중 학생 화면: 쓰고 있는 글자까지 선생님 화면에 보여요
         await p.fill('#w', 'typing now');
         await T.click('.cw-open');
-        await T.waitForFunction(() => [...document.querySelectorAll('.cw-tile')].some(x => /7번/.test(x.textContent) && /4\/4 게임/.test(x.textContent) && x.querySelector('input[value^="typing"]')), null, { timeout: 10000 }).catch(() => fail('게임 중 학생이 쓰는 글자가 학생 화면 보기에 안 보임'));
+        await T.waitForFunction(() => [...document.querySelectorAll('.cw-card')].some(x => /7번/.test(x.textContent) && /4\/4 게임/.test(x.textContent) && /문장 쓰기 · /.test(x.textContent) && /✏️ typing now/.test(x.textContent)), null, { timeout: 10000 })
+          .catch(async () => fail('게임 중 학생 카드에 문제·쓰는 글자가 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.textContent).join(' | ')))));
         await shot(T, 't2-watch');
         await T.click('.cw-close');
         await p.fill('#w', '');
