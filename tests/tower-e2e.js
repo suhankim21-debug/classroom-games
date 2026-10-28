@@ -84,11 +84,18 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       .catch(async () => fail('학생 카드에 10명의 기다리기가 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.textContent).join(' | ')))));
     if (new Set(await T.evaluate(() => [...document.querySelectorAll('.cw-card')].map(x => x.offsetHeight))).size !== 1) fail('학생 카드 크기가 서로 다름');
     await shot(T, 't1-watch');
-    // 단계별 화면: 입력 글자 없이 학생 화면 모양만
+    // 단계별 화면: 지나온 단계까지 순서대로 모두(들어가기·조 고르기·기다리기), 지금 인원, 입력 글자 없는 예시 화면
     await T.click('.cw-tabs button[data-tab="steps"]');
-    await T.waitForSelector('.cw-zoom .cw-scr', { timeout: 5000 }).catch(() => fail('단계별 화면이 안 보임'));
+    await T.waitForFunction(() => { const c = [...document.querySelectorAll('.cw-flow .cw-col')].map(x => x.querySelector('.cw-ch').textContent); return c.length >= 3 && /들어가기/.test(c[0]) && /조 고르기/.test(c[1]) && /기다리기\s*10명/.test(c[2]) && document.querySelectorAll('.cw-col .cw-mini .cw-scr').length === c.length; }, null, { timeout: 5000 })
+      .catch(async () => fail('단계별 흐름판이 다름: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-col .cw-ch')].map(x => x.textContent).join(' → ')))));
     if (await T.evaluate(() => [...document.querySelectorAll('.cw-ov [onclick], .cw-ov script, .cw-ov input[value]')].length)) fail('단계별 화면에 스크립트나 입력 글자가 남음');
     await shot(T, 't1-steps');
+    await T.click('.cw-col:nth-of-type(1)');
+    await T.waitForSelector('.cw-guide .cw-frame .cw-scr', { timeout: 5000 }).catch(() => fail('단계 안내용 큰 화면이 안 나옴'));
+    await T.click('.cw-next');
+    await T.waitForFunction(() => /조 고르기/.test(document.querySelector('.cw-gtitle').textContent), null, { timeout: 3000 }).catch(() => fail('다음 단계 버튼이 안 됨'));
+    await shot(T, 't1-guide');
+    await T.click('.cw-gback');
     await T.click('.cw-tabs button[data-tab="cards"]');
     await T.click('.cw-close');
     console.log(`${N}명 입장, 조 고르기 OK`);
