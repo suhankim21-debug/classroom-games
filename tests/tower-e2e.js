@@ -43,7 +43,23 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     await Promise.all(Array.from({ length: N }, (_, i) => i + 1).map(async n => {
       const p = await mk(n + '번', n === 1 ? 400 : 1000, 1000); S[n] = p;
       await p.goto(URL + '?room=' + code);
-      await p.fill('#nm', `${n} 학생${n}`);
+      await p.waitForSelector('#cw-num');
+      if (n === 1) {
+        // 시작 안내: 무엇이 빠졌는지 보여 주고, 이름 칸에 "1 학생1"을 한꺼번에 써도 나눠 줘요
+        if (!(await p.$('.cw-roomok'))) fail('QR로 들어왔는데 방 번호 확인 표시가 없음');
+        if (!/번호 쓰기/.test(await p.textContent('.cw-todo'))) fail('들어가기 전 할 일 목록이 없음');
+        // 이름을 안 쓴 채 도움 요청 → 선생님 학생 화면에 '이름 아직 안 씀'으로 보여야 해요
+        await p.click('.cw-help');
+        await T.click('.cw-open');
+        await T.waitForFunction(() => document.querySelector('.cw-tile.help') && /이름 아직/.test(document.querySelector('.cw-tile.help').textContent), null, { timeout: 10000 }).catch(() => fail('선생님 학생 화면에 이름 안 쓴 학생의 도움 요청이 안 보임'));
+        await shot(T, 't0-watch-help');
+        await T.click('.cw-tile.help'); await T.click('.cw-ack');
+        await p.waitForFunction(() => /선생님이 확인/.test(document.body.textContent), null, { timeout: 10000 }).catch(() => fail('선생님이 확인한 것이 학생에게 안 보임'));
+        await T.click('.cw-back'); await T.click('.cw-close');
+        await p.fill('#cw-name', '1 학생1');
+      } else { await p.fill('#cw-num', String(n)); await p.fill('#cw-name', '학생' + n); }
+      await p.waitForFunction(n => document.querySelector('#nm').value === n + ' 학생' + n, n, { timeout: 3000 }).catch(() => fail(n + '번 번호·이름 칸이 합쳐지지 않음'));
+      if (!/다 됐어요/.test(await p.textContent('.cw-todo'))) fail(n + '번 다 채웠는데 안내가 안 바뀜');
       await p.click('#enter');
       await p.waitForSelector('.teams button', { timeout: 15000 });
       await p.click(`.teams button[data-t="${Math.ceil(n / 2)}"]`);
@@ -51,12 +67,19 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     }));
     // 같은 번호 다른 이름은 막혀야 해요
     const X = await mk('중복', 800, 800);
-    await X.goto(URL + '?room=' + code); await X.fill('#nm', '3 다른이름'); await X.click('#enter');
+    await X.goto(URL + '?room=' + code); await X.fill('#cw-num', '3'); await X.fill('#cw-name', '다른이름'); await X.click('#enter');
     await X.waitForFunction(() => /이미/.test(document.querySelector('#jm').textContent), null, { timeout: 10000 }).catch(() => fail('같은 번호 다른 이름을 막지 않음'));
     await X.context().close();
     await T.waitForFunction(n => new RegExp(`${n}명 · 조 고름 ${n}명`).test(document.querySelector('#cnt').textContent), N, { timeout: 15000 }).catch(() => fail('TV에 10명이 조별로 안 보임'));
     if ((await T.$$('.lobby .tm span')).length !== N) fail('대기실 조별 명단 수가 다름');
     await shot(T, 't1-lobby'); await shot(S[1], 's1-wait');
+    // 👀 학생 화면: 모두 번호 이름과 '기다리기' 단계로 보이고, 작은 화면 안에 학생 화면 글자가 보여요
+    await T.click('.cw-open');
+    await T.waitForFunction(n => { const t = [...document.querySelectorAll('.cw-tile')].filter(x => !x.classList.contains('off')); return t.length >= n && t.filter(x => /기다리기/.test(x.textContent) && /준비 완료/.test(x.textContent)).length === n; }, N, { timeout: 15000 })
+      .catch(async () => fail('학생 화면 보기에 10명의 기다리기 화면이 안 보임: ' + (await T.evaluate(() => [...document.querySelectorAll('.cw-tile .cw-hd')].map(x => x.textContent).join(',')))));
+    if (await T.evaluate(() => [...document.querySelectorAll('.cw-ov [onclick], .cw-ov script')].length)) fail('학생 화면 복사본에 스크립트가 들어감');
+    await shot(T, 't1-watch');
+    await T.click('.cw-close');
     console.log(`${N}명 입장, 조 고르기 OK`);
 
     await T.click('#go');
@@ -123,6 +146,15 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         await p.click('#clr');
         await answer(p, false);
       }
+      if (n === 7) {
+        // 게임 중 학생 화면: 쓰고 있는 글자까지 선생님 화면에 보여요
+        await p.fill('#w', 'typing now');
+        await T.click('.cw-open');
+        await T.waitForFunction(() => [...document.querySelectorAll('.cw-tile')].some(x => /7번/.test(x.textContent) && /4\/4 게임/.test(x.textContent) && x.querySelector('input[value^="typing"]')), null, { timeout: 10000 }).catch(() => fail('게임 중 학생이 쓰는 글자가 학생 화면 보기에 안 보임'));
+        await shot(T, 't2-watch');
+        await T.click('.cw-close');
+        await p.fill('#w', '');
+      }
       if (n === 4) {
         // 연속 3문제 → 황금 블록
         const sc = await p.evaluate(() => ME.score || 0);
@@ -144,6 +176,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     };
     await Promise.all(Object.entries(S).map(([n, p]) => plan(+n, p)));
     await shot(T, 't2-play'); await shot(S[2], 's2-play');
+
     const tv = await T.evaluate(() => [...document.querySelectorAll('.tw .cnt')].map(e => +e.textContent));
     const db = await T.evaluate(() => teamTotals(RD.students, 5).sort((a, b) => a.t - b.t).map(x => x.s));
     if (tv.join() !== db.join()) fail(`TV 탑 숫자(${tv})와 저장된 점수(${db})가 다름`);
@@ -173,7 +206,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     console.log('한 판 더 OK');
   } catch (e) { fail('진행 중 멈춤: ' + e.message.split('\n')[0] + ' ' + (e.stack.split('\n').find(l => /tower-e2e.js:\d+/.test(l)) || '')); for (const [n, p] of Object.entries(S)) await shot(p, 'err-' + n); await shot(T, 'err-t'); }
   finally {
-    if (code) await T.evaluate(c => firebase.database().ref('rooms/' + c).remove(), code).catch(() => {});
+    if (code) await T.evaluate(c => Promise.all([firebase.database().ref('rooms/' + c).remove(), firebase.database().ref('rooms/' + c + '_watch').remove()]), code).catch(() => {});
     await browser.close();
     console.log(problems.length ? `문제 ${problems.length}개` : '모두 통과');
     process.exit(problems.length ? 1 : 0);

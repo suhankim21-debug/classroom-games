@@ -141,6 +141,7 @@ main{padding-block:18px 48px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
@@ -312,24 +313,29 @@ function towerSvg(blocks,max,color,golds){
 
 /* ---------- start ---------- */
 function startView(){
-  clearOffs();clearInterval(tick);
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
   $('#sub').textContent='6학년 영어 · 쓰기 게임';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>바르게 쓰면<br>탑이 올라가요!</h1>
    <p>그림과 우리말 뜻을 보고 영어 문장을 써요. 맞게 쓸 때마다 우리 조의 탑에 블록이 쌓여요. 어려운 단계일수록 블록이 더 많이!</p></div>
    <div class="panel heroimg"><img src="img/hero.webp" alt="버스, 지하철, 택시, 자전거로 오가는 마을" onerror="this.parentNode.innerHTML='<div style=&quot;display:flex;justify-content:center;gap:8px;align-items:end&quot;>${[5,9,7].map((b,i)=>`<div style=&quot;width:90px&quot;>${towerSvg(b,10,TEAM_COLORS[i]).replace(/"/g,'&quot;')}</div>`).join('')}</div>'"></div></section>
-   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+   <div class="choose"><button id="goStu">🙋 학생은 여기를 눌러요</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
   $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
 }
 
 /* ---------- student ---------- */
 let me=null, RV={}, ME={}, ITEMS=[], view='';
+// 학생 화면 위의 순서 표시. 선생님의 "👀 학생 화면"에도 같은 단계 이름이 보여요
+const STEPS=['들어가기','조 고르기','기다리기','게임'];
+const stepBar=k=>ClassWatch.steps(STEPS,k);
+function watchMe(){if(!me)return;ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);}
 function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
 function joinView(){
   clearOffs();
   const saved=store('tw-student');
   if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
   $('#sub').textContent='학생 화면';
-  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step(STEPS[0],{n:1,total:4});
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">${stepBar(1)}
    <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
    <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
    <div class="msg bad" id="jm" role="status"></div>
@@ -337,6 +343,7 @@ function joinView(){
   const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
   $('#rm').oninput=chk;$('#nm').oninput=chk;
   $('#home').onclick=startView;
+  ClassWatch.joinForm();
   $('#enter').onclick=async()=>{
     const code=$('#rm').value, p=parseName($('#nm').value);
     $('#enter').disabled=true;
@@ -353,7 +360,7 @@ function joinView(){
   };
 }
 function enterRoom(){
-  clearOffs();
+  clearOffs();watchMe();
   $('#sub').textContent=`${me.num}번 ${me.name}`;
   app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
   let got={me:false,room:false};
@@ -379,16 +386,16 @@ function route(){
   return waitView();
 }
 function teamView(){
-  view='team';
+  view='team';ClassWatch.step(STEPS[1],{n:2,total:4});
   const n=RV.teams||5;
-  app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto"><div class="panel grid"><h2>우리 조를 골라요</h2><p class="muted" style="margin:0">짝과 같은 조를 눌러요.</p>
+  app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto">${stepBar(2)}<div class="panel grid"><h2>우리 조를 골라요</h2><p class="muted" style="margin:0">짝과 같은 조를 눌러요. 몇 조인지 모르면 TV를 보거나 🙋 도와주세요를 눌러요.</p>
    <div class="teams">${Array.from({length:n},(_,i)=>`<button data-t="${i+1}" style="border-color:${TEAM_COLORS[i]}"><span>${TI(i,'ti big')}</span>${i+1}조</button>`).join('')}</div></div></div>`;
   $$('.teams button').forEach(b=>b.onclick=async()=>{$$('.teams button').forEach(x=>x.disabled=true);await roomRef(me.room).child('students/'+me.num+'/team').set(+b.dataset.t);});
 }
 function teamLabel(t){return `${TI(t-1)} ${t}조`;}
 function waitView(){
-  view='wait';
-  app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto"><div class="panel card pop">
+  view='wait';ClassWatch.step(STEPS[2],{n:3,total:4,wait:true});
+  app.innerHTML=`<div class="grid" style="max-width:720px;margin:0 auto">${stepBar(3)}<div class="panel card pop">
     <div class="pic">${TI(ME.team-1,'ti huge')}</div><h2 style="font-size:2rem">${teamLabel(ME.team)} 준비 완료!</h2>
     <div class="rules" style="text-align:left;width:100%"><b>게임 방법</b><ol>
      <li>그림과 우리말 뜻을 보고 영어로 써요.</li>
@@ -397,7 +404,7 @@ function waitView(){
      <li>두 번 틀리면 정답이 보여요. 보고 <b>따라 쓰면</b> 블록 1개.</li>
      <li>한 번에 3문제 연속 맞히면 <b>황금 블록</b> +1!</li><li>마지막 1분은 🔥<b>피버 타임</b>: 블록 2배!</li><li>🔊 듣기를 누르면 문장을 영어로 읽어 줘요.</li></ol>
      <p style="margin:.4em 0 0">⌨️ 키보드를 <b>영어</b>로 바꿔 두어요. 대문자·마침표는 틀려도 괜찮지만, 바르게 쓰면 더 멋져요.</p></div>
-    <p class="muted">선생님이 시작하면 바로 문제가 나와요.</p>
+    <p class="big" style="font-size:1.4rem">다 했어요! 이제 기다려요.<br><span class="muted" style="font-size:1.05rem">선생님이 시작하면 바로 문제가 나와요.</span></p>
     <button class="ghost" id="chg" style="font-size:.9rem">조 바꾸기</button></div></div>`;
   $('#chg').onclick=()=>roomRef(me.room).child('students/'+me.num+'/team').remove();
 }
@@ -410,7 +417,7 @@ function drawScore(){
   el.innerHTML=`<span>${teamLabel(ME.team)}</span><span>내가 쌓은 블록 <b>${ME.score||0}</b></span><span>맞힌 문장 <b>${ME.solved||0}</b></span>${(ME.streak||0)>0?`<span class="streak">연속 ${ME.streak}${'🔥'.repeat(Math.min(3,ME.streak))}</span>`:''}`;
 }
 function playView(){
-  view='play';
+  view='play';ClassWatch.step(STEPS[3],{n:4,total:4});
   const lv=ME.level||2;
   app.innerHTML=`<div class="grid" style="max-width:820px;margin:0 auto">
    <div class="row" style="justify-content:space-between"><div class="myscore" id="mysc"></div><div class="timer" id="stm" style="font-size:2rem"></div></div>
@@ -511,7 +518,7 @@ async function check(){
   }
 }
 async function endView(){
-  view='end';
+  view='end';ClassWatch.step('게임 끝',{wait:true});
   const all=(await roomRef(me.room).child('students').get()).val()||{};
   const T=teamTotals(all,RV.teams||5);
   const k=T.findIndex(x=>x.t===ME.team);
@@ -531,7 +538,7 @@ function teamTotals(all,n){
 /* ---------- teacher ---------- */
 let tick=null,RD={};
 function setupView(){
-  clearOffs();clearInterval(tick);
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
   $('#sub').textContent='선생님 화면 · 게임 준비';
   const last=store('tw-setup')||{set:Object.keys(SETS).slice(-1)[0],min:10,teams:5,custom:''};
   app.innerHTML=`<div class="grid" style="max-width:900px;margin:0 auto"><div class="panel grid"><h2>게임 준비</h2>
@@ -572,6 +579,7 @@ async function teacherView(){
     if(!code||(await withTimeout(roomRef(code).child('app').get())).val()!=='tower')return setupView();
   }catch(e){return showError(e);}
   ROOM=code;
+  ClassWatch.teacher({db,room:code});
   const url=location.origin+location.pathname+'?room='+code;
   $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
   app.innerHTML=`<div class="tv">
@@ -636,7 +644,8 @@ function tvLobby(main,c,st){
   const n=c.teams||5,T=Array.from({length:n},()=>[]),none=[];
   Object.entries(st).sort((a,b)=>a[0]-b[0]).forEach(([k,v])=>{(v.team&&T[v.team-1]?T[v.team-1]:none).push({n:k,...v});});
   const chip=s=>`<span>${s.n} ${esc(s.name)}<button data-kick="${s.n}" aria-label="${s.n}번 내보내기" title="잘못 들어온 이름 지우기">×</button></span>`;
-  main.innerHTML=`<div class="panel grid"><h2>QR로 들어와서 <b>"번호 이름"</b>을 쓰고, 우리 조를 골라요</h2>
+  main.innerHTML=`<div class="panel grid">${ClassWatch.steps(['QR 찍기','번호·이름 쓰고 들어가기','우리 조 고르기','기다리기'],0)}
+    <p class="big" style="text-align:center;margin:0;font-size:clamp(1.3rem,2.6vw,1.8rem)">태블릿으로 QR을 찍고, 화면에 나오는 ①②③을 차례로 해요</p>
     <div class="lobby">${T.map((m,i)=>`<div class="tm" style="border-color:${TEAM_COLORS[i]}"><h3>${TI(i)} ${i+1}조</h3>${m.map(chip).join('')||'<em class="muted">아직 없어요</em>'}</div>`).join('')}</div>
     ${none.length?`<div class="none"><b>조를 고르는 중</b> <div class="row" style="margin-top:6px">${none.map(chip).join('')}</div></div>`:''}</div>
    <div class="panel rules"><b>게임 방법</b><ol>
@@ -685,7 +694,8 @@ function tvAward(main,c,st){
 /* ---------- route ---------- */
 {const b=$('#snd');const d=()=>{b.textContent=MUTE?'🔇':'🔊';};d();b.onclick=()=>{MUTE=!MUTE;store('tw-mute',MUTE);d();if(!MUTE){ac();SFX.right();}};}
 document.addEventListener('pointerdown',()=>ac(),{once:true});
-if(location.hash==='#teacher')teacherView();
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
 else if(ROOM)joinView();
 else startView();
 </script>
