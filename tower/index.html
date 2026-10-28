@@ -2,7 +2,8 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>문장 탑 쌓기</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nunito:wght@600;800&display=swap">
-<style>body{margin:0}
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
 /* Same classroom notice-board look as the other class games. Single light look by choice (classroom TV). */
 :root{
   --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
@@ -379,7 +380,7 @@ function enterRoom(){
   });
 }
 function route(){
-  clearInterval(stuTick);
+  clearInterval(stuTick);ClassWatch.detail(null);
   if(!ME.team)return teamView();
   if(RV.phase==='play'&&now()<RV.endAt)return playView();
   if(RV.phase==='play'||RV.phase==='end')return endView();
@@ -439,6 +440,8 @@ function drawQ(){
   const it=curItem();
   if(!it){box.innerHTML='<p>문장이 아직 없어요. 선생님을 기다려요.</p>';return;}
   const lv=ME.level||2;
+  // 선생님 카드에 '문제'와 쓰는 중인 글자(낱말 카드는 놓은 순서)를 보여 줘요
+  ClassWatch.detail(()=>({q:`${shown?'따라 쓰기':LV[lv].k+' '+LV[lv].t} · ${it.ko}`,...(!shown&&lv===1&&box._answer?{w:box._answer()}:{})}));
   let body='';
   if(shown){
     body=`<p style="margin:0">정답을 보고 <b>문장 전체</b>를 따라 써요. (블록 1개)</p><div class="ghostans">${esc(plain(it.en))}</div>
