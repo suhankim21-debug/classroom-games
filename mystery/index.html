@@ -84,6 +84,8 @@ body.dark .big{color:var(--moon)}
 .pick button b{display:block;font-size:2rem;font-weight:400;color:var(--coral2)}
 .pick button[aria-pressed="true"]{border-color:var(--coral2);background:#FFE7DC}
 .pick button.mate{border-style:dashed}
+.chosen{font-family:var(--display);font-size:1.4rem;background:#E3F1E7;border:2px solid var(--ok);border-radius:14px;padding:8px 14px;color:var(--ink)}
+.chosen small{font-family:var(--text);font-size:.95rem;color:var(--muted)}
 .pick button small{display:block;font-family:var(--text);font-size:.85rem;color:var(--bad)}
 .easy .pick{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 .easy .pick button{font-size:1.5rem;padding:1em .4em}
@@ -555,6 +557,7 @@ function stuMafia(){
       $('#tk1').innerHTML=`<div class="task ${pick?'done':''}"><i>1</i> ${label}</div>
       ${role==='mafia'?`<p class="muted" style="margin:0">마피아끼리 같은 친구를 고르면 좋아요. 다르면 많이 고른 친구, 같으면 둘 중 한 명이 정해져요.${matePicks.length?'<br><b style="color:var(--bad)">'+matePicks.join(' · ')+'</b>':''}</p>`:''}
       ${chk&&chk.t===pick?`<div class="big" style="font-size:1.6rem">${tag(chk.t)} → ${chk.mafia?'🦹 마피아예요!':'🙂 마피아가 아니에요'}</div>`:''}
+      ${pick?`<div class="chosen">✔ 내가 고른 친구: <b>${tag(pick)}</b> <small>(아침 전까지 바꿀 수 있어요)</small></div>`:''}
       <div class="pick">${cands.map(n=>`<button data-n="${n}" aria-pressed="${pick===n}"><b>${n}</b>${esc(nameOf(n))}${role==='mafia'&&(SEC.mates||[]).some(m=>m!==me.num&&NT[m]&&NT[m].pick===n)?'<small>마피아 친구가 고름</small>':''}</button>`).join('')}</div>`;
       $$('#tk1 .pick button').forEach(b=>b.onclick=()=>{if(role==='police'&&chk)return;pick=+b.dataset.n;roomRef(me.room).child(`nt/${G.day}/${me.num}/pick`).set(pick);drawPick();});};
     redrawPick=()=>{pick=(NT[me.num]||{}).pick||pick;drawPick();};
@@ -602,7 +605,7 @@ function stuMafia(){
     ClassWatch.step('게임 끝',{wait:true});
     const myTeam=(ROLES[SEC.role]||{}).team;const iWin=myTeam===G.win;
     frame(`${head}<div class="win ${G.win==='mafia'?'villain':'citizen'} pop"><div class="emoji">${G.win==='mafia'?'🦹':'🎉'}</div><div class="huge">${G.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!'}</div>
-      <div style="font-size:1.3rem">${iWin?'우리 팀이 이겼어요!':'아쉬워요, 다음 게임!'} · 내 역할: ${(ROLES[SEC.role]||{}).e||''} ${(ROLES[SEC.role]||{}).n||''}</div><div>내 점수 ${P.pt||0}점</div></div>`);
+      <div style="font-size:1.3rem">${iWin?'우리 팀이 이겼어요!':'아쉬워요, 다음 게임!'} · 내 역할: ${(ROLES[SEC.role]||{}).e||''} ${(ROLES[SEC.role]||{}).n||''}</div><div>내 점수 ${P.pt||0}점</div></div>${nightLog(G.hist,tag)}`);
   }
 }
 
@@ -785,6 +788,7 @@ function tvLiar(main,S,g){
     say('누가 라이어일까요? 태블릿에서 투표해요.');
     $('#back').onclick=()=>gref().update({phase:'talk',endAt:now()+g.talkSec*1000});
     $('#res').onclick=async()=>{
+      if(n<order.length&&!confirm(`아직 ${order.length-n}명이 투표하지 않았어요.\n그래도 결과를 볼까요?`))return;
       const t=tally(V,order);const h=RD.h||{};
       await gref().update({phase:'reveal',result:{tally:t.c,acc:t.top,tie:t.tie,liars:h.liars,word:h.word,e:h.e,d:h.d}});
     };
@@ -889,6 +893,8 @@ async function resolveNight(){
       if((!alive[n]||roles[n]==='citizen')&&x.pick&&roles[x.pick]==='mafia')p++;pts[n]=p;});
     if(t&&!saved)alive[t]=0;
     const win=winner(alive,roles);
+    const picks={};A.forEach(n=>{if(N[n]&&N[n].pick)picks[n]=N[n].pick;});
+    await roomRef(ROOM).child('h/hist/'+g.day).set({mafia:Object.fromEntries(A.filter(n=>roles[n]==='mafia').map(n=>[n,(N[n]&&N[n].pick)||0])),doc:doc||0,docPick:(doc&&N[doc]&&N[doc].pick)||0,t,saved,done:Object.keys(alive).filter(n=>N[n]&&N[n].done).length,all:Object.keys(alive).length});
     await gref().update({phase:'morning',alive,morning:{t,saved},win:win||null,endAt:0});
     await addPts(pts);
   }finally{resolving=false;}
@@ -904,8 +910,13 @@ async function resolveVote(){
 async function mafiaEnd(){
   const g=G_(),roles=(RD.h||{}).roles||{};
   const pts={};Object.keys(roles).forEach(n=>{if(ROLES[roles[n]].team===g.win)pts[n]=2;});
-  await gref().update({phase:'end',reveal:roles});
+  await gref().update({phase:'end',reveal:roles,hist:(RD.h||{}).hist||null});
   await addPts(pts);
+}
+// 게임이 끝나면 밤마다 누가 누구를 골랐는지 보여 줘요
+function nightLog(hist,tg){
+  const H=Object.entries(hist||{}).filter(([,x])=>x);if(!H.length)return '';
+  return `<div class="panel grid"><h2>🌙 밤 기록</h2><div class="rank">${H.map(([d,x])=>`<div class="r" style="grid-template-columns:5em 1fr"><b>${d}일째</b><span>🦹 ${Object.entries(x.mafia||{}).map(([m,p])=>`${tg(m)} → ${p?tg(p):'고르지 않음'}`).join(' · ')}${x.doc?`<br>🧑‍⚕️ ${tg(x.doc)} → ${x.docPick?tg(x.docPick)+' 지킴':'고르지 않음'}`:''}<br>${x.t?(x.saved?`결과: ${tg(x.t)} 지켜 냄`:`결과: ${tg(x.t)} 잠듦`):'결과: 아무 일도 없음'}${x.done<x.all?` <small class="muted">(아침 버튼을 눌렀을 때 ${x.all-x.done}명이 아직 안 끝남)</small>`:''}</span></div>`).join('')}</div></div>`;
 }
 function tvMafia(main,S,g){
   const N=(RD.nt||{})[g.day]||{};const V=(RD.v||{})[voteKey(g)]||{};
@@ -930,7 +941,7 @@ function tvMafia(main,S,g){
      <div class="row" style="justify-content:center"><button id="morning" class="${done.length>=all.length?'':'ghost'}" style="font-size:1.4rem" ${done.length?'':'disabled'}>☀️ 아침이 밝았어요</button></div>
      ${done.length<all.length?'<p class="muted" style="text-align:center;margin:0">모두 끝나면 버튼이 밝아져요. 기다리지 않고 눌러도 돼요.</p>':''}`;
     say(`밤이 되었어요. 모두 태블릿 화면을 가리고 화면에 나온 일을 해요.`);
-    $('#morning').onclick=resolveNight;return;
+    $('#morning').onclick=()=>{if(done.length<all.length&&!confirm(`아직 ${all.length-done.length}명이 밤 일을 끝내지 않았어요. 의사나 마피아가 아직 고르지 않았을 수 있어요.\n그래도 아침으로 넘어갈까요?`))return;resolveNight();};return;
   }
   if(g.phase==='morning'){
     const M=g.morning||{};
@@ -955,7 +966,7 @@ function tvMafia(main,S,g){
      <div class="row" style="justify-content:center"><button class="ghost" id="back">◀ 토론 더 하기</button><button id="res" style="font-size:1.4rem" ${n?'':'disabled'}>결과 보기 ▶</button></div>`;
     say('누구를 내보낼까요? 태블릿에서 투표해요.');
     $('#back').onclick=()=>gref().update({phase:'day',endAt:now()+60000});
-    $('#res').onclick=resolveVote;return;
+    $('#res').onclick=()=>{if(n<A.length&&!confirm(`아직 ${A.length-n}명이 투표하지 않았어요.\n그래도 결과를 볼까요?`))return;resolveVote();};return;
   }
   if(g.phase==='verdict'){
     const Vd=g.verdict||{};const mx=Math.max(1,...Object.values(Vd.tally||{}));
@@ -969,6 +980,7 @@ function tvMafia(main,S,g){
     const roles=g.reveal||{};
     main.innerHTML=`${head}<div class="win ${g.win==='mafia'?'villain':'citizen'} pop"><div class="emoji">${g.win==='mafia'?'🦹':'🎉'}</div><div class="huge">${g.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!'}</div><div>이긴 팀은 모두 +2점. 밤 퀴즈와 맞힌 예측 점수도 더했어요.</div></div>
      <div class="panel grid"><h2>모두의 역할</h2>${seats(n=>({cls:roles[n]==='mafia'?'hot':'',sub:`${ROLES[roles[n]].e} ${ROLES[roles[n]].n}`}))}</div>
+     ${nightLog(g.hist,tagT)}
      <div class="panel grid"><h2>점수</h2>${scoreboard(S)}</div>
      <div class="row" style="justify-content:center"><button id="again" style="font-size:1.4rem">한 게임 더 ▶</button><button class="ghost" id="aw">🏆 시상식</button></div>`;
     say(g.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!');
