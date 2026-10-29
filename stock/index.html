@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>우리 반 쿠키 증권</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* 다른 게임과 같은 교실 게시판 느낌. 주가는 우리나라 증권 화면처럼 오르면 빨강, 내리면 파랑 */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --gold:#E9B04F; --up:#D2402F; --down:#2F6FD2;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+button.okb{background:var(--ok)} button.upb{background:var(--up)} button.downb{background:var(--down)} button.inkb{background:var(--ink)}
+button.small{font-size:.9rem;padding:.35em .8em;border-radius:10px}
+input,select,textarea{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+textarea{min-height:5.5em;resize:vertical}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.9em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 24px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.center{text-align:center;justify-items:center}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.big{font-family:var(--display);font-size:clamp(1.5rem,4.2vw,2.2rem);line-height:1.25}
+.huge{font-family:var(--display);font-size:clamp(2rem,6vw,3.4rem);line-height:1.15}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px;color:var(--ink)}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.warn{background:#FBE3DC;border:2px solid var(--bad);border-radius:14px;padding:10px 14px;color:var(--ink)}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.9);opacity:.3}to{transform:none;opacity:1}}
+}
+/* 첫 화면 */
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.minis div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;font-family:var(--display)}
+.minis span{display:block;font-size:2.2rem;line-height:1.2}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.check{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;font-family:var(--display);font-size:1.15rem}
+.check input{width:1.6em;height:1.6em;flex:none;accent-color:var(--coral2)}
+/* 학생 화면 */
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.status div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px}
+.status small{display:block;color:var(--muted);font-size:.9rem}
+.status b{font-family:var(--display);font-weight:400;font-size:1.45rem}
+.mkt{font-family:var(--display);font-size:1.15rem;border-radius:12px;padding:8px 14px;background:#E3F1E7;color:var(--ok)}
+.mkt.closed{background:#EEE6D3;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tabs button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.1rem;padding:.6em .3em}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.co{background:#fff;border:3px solid var(--line);border-radius:16px;padding:12px 14px;display:grid;gap:4px;text-align:left;color:var(--ink);font-family:var(--text);font-size:1rem;line-height:1.35}
+button.co{cursor:pointer}
+.co[aria-pressed="true"]{border-color:var(--coral2);background:#FFF4DF}
+.co .hd{display:flex;gap:10px;align-items:center}
+.co .hd span{font-size:2.2rem;line-height:1}
+.co .hd b{font-family:var(--display);font-weight:400;font-size:1.35rem}
+.co .pr{font-family:var(--display);font-size:1.6rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.co .pr small{font-size:1.05rem}
+.co svg{width:100%;height:44px;display:block}
+.co .mine{font-size:.95rem;color:var(--coral2);font-family:var(--display)}
+.detail{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.detail svg{width:100%;height:120px;display:block}
+.stepper{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.stepper button{font-size:1.6rem;width:2.4em;padding:.25em 0}
+.stepper output{font-family:var(--display);font-size:2rem;text-align:center}
+.bs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bs button{font-size:1.25rem;padding:.8em .4em}
+.tbl{width:100%;border-collapse:collapse;font-size:1rem}
+.tbl th,.tbl td{border-bottom:2px solid var(--line);padding:6px 8px;text-align:right}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{font-family:var(--display);font-weight:400;color:var(--muted)}
+.hist{display:grid;gap:6px;max-height:340px;overflow:auto}
+.hist div{background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;gap:8px;justify-content:space-between}
+.newsc{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:16px;display:grid;gap:8px}
+.newsc .nh{display:flex;gap:12px;align-items:center}
+.newsc .nh span{font-size:3rem;line-height:1}
+.newsc h2{font-size:clamp(1.5rem,4vw,2.1rem)}
+.newsc p{margin:0;font-size:1.15rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:.2em .8em;font-family:var(--display);font-size:1.1rem}
+.picks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.picks button{background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.1rem;padding:.6em .3em;line-height:1.25}
+.picks button span{display:block;font-size:2rem}
+.picks.upk button[aria-pressed="true"]{border-color:var(--up);background:#FBE3DC}
+.picks.dnk button[aria-pressed="true"]{border-color:var(--down);background:#E1EAF8}
+.ops{display:grid;gap:6px}
+.ops div{background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.fp{font-size:2.6rem;letter-spacing:.1em}
+.easy .co .hd span{font-size:3rem}.easy .co .pr{font-size:2rem}
+.easy .bs button{font-size:1.6rem;padding:1em .4em}
+.easy .picks button span{font-size:3rem}
+/* 선생님 TV */
+.tv{display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(1.6rem,4vw,2.4rem);line-height:1;font-variant-numeric:tabular-nums}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display);color:var(--ink)}
+.req{display:grid;gap:6px}
+.req div{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;background:#FFF1D0;border:2px solid var(--gold);border-radius:12px;padding:6px 10px}
+.req b{font-family:var(--display);font-weight:400;font-size:1.15rem}
+.side button{width:100%}
+.badge{display:inline-block;background:var(--bad);color:#fff;border-radius:999px;padding:0 .55em;margin-left:.3em}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.board .co .pr{font-size:2rem}
+.rank{display:grid;gap:6px}
+.rank .r{display:grid;grid-template-columns:2.2em 1fr auto 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px;font-family:var(--display);font-size:1.15rem;color:var(--ink)}
+.rank .r b{font-weight:400;color:var(--coral2)}
+.rank .r .rt{text-align:right}
+.feed{display:grid;gap:4px;font-size:1rem}
+.two2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+.people button{background:var(--cream);color:var(--ink);border-radius:999px;padding:.2em .8em;font-size:1rem}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.2rem;font-weight:400}
+.podium div span{display:block;font-size:1.5rem}
+.podium .p1{background:var(--gold);min-height:230px}.podium .p2{min-height:180px;background:#8DB3C7}.podium .p3{min-height:140px}
+#modal{position:fixed;inset:0;z-index:95;background:rgba(40,30,20,.55);display:none;overflow:auto;padding:24px max(12px,env(safe-area-inset-right,0px)) 40px max(12px,env(safe-area-inset-left,0px))}
+#modal.on{display:block}
+#modal .panel{max-width:900px;margin:0 auto}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1rem;padding:.4em .7em}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld .lb{font-family:var(--display);font-size:1.1rem}
+.f2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.effrow{display:grid;grid-template-columns:9em 1fr;gap:8px;align-items:center}
+.nlist{display:grid;gap:6px;max-height:280px;overflow:auto}
+.nlist button{background:#fff;color:var(--ink);border:2px solid var(--line);text-align:left;font-size:1.05rem;padding:.5em .8em}
+.nlist button[aria-pressed="true"]{border-color:var(--coral2);background:#FFF4DF}
+.nlist button.used{opacity:.55}
+.secret{background:#2B2140;color:#fff;border-radius:14px;padding:10px 14px;display:none}
+.secret.on{display:block}
+.opg{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;gap:6px}
+.opg .row b{font-family:var(--display);font-weight:400;font-size:1.25rem}
+@media (max-width:900px){
+  .hero,.tv,.detail{grid-template-columns:1fr}
+  .board{grid-template-columns:1fr 1fr}
+  .choose,.two2{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .status{grid-template-columns:1fr}
+  .tabs{grid-template-columns:1fr 1fr}
+  .board{grid-template-columns:1fr}
+  .picks{grid-template-columns:1fr 1fr}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>📈</i> 우리 반 쿠키 증권</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<div class="wrap" id="foot" style="text-align:right;padding-bottom:90px"></div>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const DH_API='https://api.dahandin.com/openapi/v1';
+
+/* ---------- 가상 회사 6개 (사회 2단원 무역·시장경제와 이어져요) ---------- */
+const CO=[
+  {id:'sea',e:'🚢',n:'바다해운',d:'큰 배로 여러 나라에 물건을 실어 날라요',p:1000},
+  {id:'volt',e:'🔋',n:'번개배터리',d:'전기차 배터리를 만들어요. 원료인 흑연을 수입해요',p:1500},
+  {id:'chip',e:'💾',n:'반짝반도체',d:'반도체를 만들어 세계 여러 나라에 수출해요',p:2000},
+  {id:'tteok',e:'🌶️',n:'냠냠떡볶이',d:'우리 동네에서 가장 인기 있는 분식집이에요',p:500},
+  {id:'farm',e:'🌾',n:'푸른농장',d:'쌀과 과일을 길러요. 날씨가 아주 중요해요',p:800},
+  {id:'game',e:'🎮',n:'두근게임즈',d:'재미있는 게임을 만들어 팔아요',p:1200}
+];
+const COI=Object.fromEntries(CO.map(c=>[c.id,c]));
+/* ---------- 뉴스 카드: x는 다음 날 아침 주가에 주는 영향(-2 ~ +2). 실제 오르내림은 여기에 작은 운이 더해져요 ---------- */
+const NEWS=[
+  {e:'🚗',t:'전기차가 날개 돋친 듯 팔려요',b:'올해 전기차를 사는 사람이 작년보다 두 배나 늘었대요. 전기차에는 배터리와 반도체가 꼭 필요해요.',x:{volt:2,chip:1}},
+  {e:'🌀',t:'큰 태풍이 다가온대요',b:'다음 주에 아주 큰 태풍이 우리나라 쪽으로 온다는 예보가 나왔어요. 바다에 배가 뜨기 어렵고 논밭도 걱정이에요. 사람들은 집에 머물 것 같아요.',x:{sea:-2,farm:-2,game:1}},
+  {e:'🌶️',t:'냠냠떡볶이 신메뉴 "치즈 폭탄" 대박',b:'냠냠떡볶이가 새로 낸 치즈 폭탄 떡볶이를 먹으려고 가게 앞에 줄이 길게 섰어요.',x:{tteok:2}},
+  {e:'✏️',t:'흑연을 파는 나라가 수출을 줄인대요',b:'배터리 원료인 흑연을 많이 파는 나라가 앞으로 흑연을 조금만 팔겠다고 했어요. 흑연을 수입하는 회사는 걱정이 커졌어요.',x:{volt:-2}},
+  {e:'📱',t:'새 스마트폰이 나와 반도체 주문이 늘었어요',b:'세계적인 회사들이 새 스마트폰을 내놓으면서 반도체를 더 많이 사 가기로 했어요. 물건을 실어 나를 배도 더 필요해요.',x:{chip:2,sea:1}},
+  {e:'🎮',t:'두근게임즈 새 게임 출시가 미뤄졌어요',b:'기다리던 새 게임에서 고칠 점이 많이 나와서 출시가 석 달 뒤로 미뤄졌대요.',x:{game:-2}},
+  {e:'🚢',t:'세계 무역이 늘어 배가 모자라요',b:'나라와 나라 사이에 사고파는 물건이 크게 늘어서, 물건을 실을 배를 구하기 어려울 정도래요.',x:{sea:2}},
+  {e:'☀️',t:'올해는 날씨가 좋아 풍년이래요',b:'비와 햇볕이 알맞아서 쌀과 과일이 아주 잘 자랐어요. 농장마다 수확이 많을 것 같아요.',x:{farm:2}},
+  {e:'🌍',t:'다른 나라와 무역 분쟁, 관세를 올린대요',b:'어떤 큰 나라가 우리나라 물건에 세금(관세)을 더 매기겠다고 했어요. 수출하는 회사들이 걱정하고 있어요.',x:{chip:-2,sea:-1,volt:-1}},
+  {e:'🧪',t:'번개배터리, 더 오래 가는 배터리 개발 성공',b:'번개배터리가 한 번 충전으로 훨씬 멀리 갈 수 있는 새 배터리를 만들었어요. 여러 자동차 회사가 관심을 보여요.',x:{volt:2}},
+  {e:'🥬',t:'채소값이 올라 떡볶이 재료비가 비싸졌어요',b:'가뭄으로 채소값이 크게 올랐어요. 분식집은 재료비가 걱정이고, 농장은 채소를 비싸게 팔 수 있어요.',x:{tteok:-1,farm:1}},
+  {e:'🏆',t:'두근게임즈 게임이 세계 대회 종목이 됐어요',b:'두근게임즈의 게임이 세계 게임 대회 종목으로 뽑혔어요. 게임을 하는 사람이 더 늘 것 같아요.',x:{game:2}},
+  {e:'⛽',t:'기름값이 크게 올랐어요',b:'배와 농기계에 넣는 기름값이 크게 올랐어요. 기름 대신 전기로 달리는 차에 관심이 커지고 있어요.',x:{sea:-2,farm:-1,volt:1}},
+  {e:'🎪',t:'우리 지역 축제가 열려요',b:'이번 주말 우리 지역에서 큰 축제가 열려요. 사람들이 많이 모여서 먹을거리를 사 먹을 것 같아요.',x:{tteok:2,farm:1}},
+  {e:'💾',t:'반도체가 너무 많이 만들어졌대요',b:'세계 여러 회사가 반도체를 한꺼번에 많이 만들어서 창고에 쌓였어요. 반도체 값이 떨어질 수 있어요.',x:{chip:-2}},
+  {e:'🐛',t:'병충해로 과일 농사가 어려워요',b:'벌레가 퍼져서 과일나무가 많이 아파요. 올해 과일 수확이 크게 줄 것 같아요.',x:{farm:-2}},
+  {e:'🤝',t:'이웃 나라와 무역 협정을 맺었어요',b:'우리나라와 이웃 나라가 서로 관세를 낮추기로 약속했어요. 물건을 더 쉽게 사고팔 수 있어요.',x:{sea:1,chip:1,volt:1}},
+  {e:'🦠',t:'감기가 유행해서 밖에 잘 안 나가요',b:'독한 감기가 유행해서 사람들이 밖에 덜 나가고 집에서 시간을 보내요.',x:{tteok:-1,game:1}},
+  {e:'🗣️',t:'"○○ 회사가 망한대!" 소문이 돌아요',b:'인터넷에 근거 없는 소문이 돌았어요. 회사는 "사실이 아니에요"라고 했어요. 소문만 믿고 사고팔아도 될까요?',x:{}},
+  {e:'🏫',t:'방학이 다가와요',b:'곧 방학이에요. 학교 앞 분식집에 오는 학생 손님은 줄고, 집에서 게임하는 시간은 늘 것 같아요.',x:{tteok:-1,game:1}}
+];
+const LV=[[-2,'⬇⬇'],[-1,'⬇'],[0,'－'],[1,'⬆'],[2,'⬆⬆']];
+// 기기마다 다른 그림 두 개: 선생님 화면과 학생 화면에 같이 보여서 "내 기기"인지 확인해요
+const FP=['🐯','🐰','🐼','🦊','🐸','🐙','🦄','🐝','🐢','🐬','🦁','🐧','🍎','🍌','🍇','🍓','🍉','🍩','🍪','🌽','⚽','🎈','🚀','🌈','⭐','🌙','🔥','💎','🎵','🧩','🪁','🌻'];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app'), modal=$('#modal');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+const won=n=>Math.round(+n||0).toLocaleString('ko-KR')+'원';
+const pctTxt=x=>x>0?`▲ ${x.toFixed(1)}%`:x<0?`▼ ${Math.abs(x).toFixed(1)}%`:'－ 0.0%';
+const ud=x=>x>0?'up':x<0?'down':'flat';
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>{if(ev.reason&&ev.reason.dh)return;showError(ev.reason);});
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+let skew=0;db.ref('.info/serverTimeOffset').on('value',s=>{skew=s.val()||0;});
+const now=()=>Date.now()+skew;
+const hms=ms=>{const s=Math.max(0,Math.ceil(ms/1000));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return (h?h+'시간 ':'')+m+'분 '+String(s%60).padStart(2,'0')+'초';};
+const isOpen=p=>!!p&&p.phase==='open'&&now()<p.closeAt;
+function spark(h,w=240,ht=44){
+  h=(h||[]).slice(-16);if(h.length<2)h=[h[0]||0,h[0]||0];
+  const mn=Math.min(...h),mx=Math.max(...h),r=mx-mn||1;
+  const pts=h.map((v,i)=>`${(i/(h.length-1)*(w-8)+4).toFixed(1)},${(ht-4-(v-mn)/r*(ht-8)).toFixed(1)}`).join(' ');
+  const c=h[h.length-1]>h[0]?'var(--up)':h[h.length-1]<h[0]?'var(--down)':'var(--muted)';
+  return `<svg viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+// 오늘 장 마감 시각 (지났으면 다음 날 같은 시각)
+function nextClose(hhmm){const [h,m]=String(hhmm||'13:10').split(':').map(Number);const d=new Date(now());d.setHours(h,m,0,0);if(d.getTime()<=now())d.setDate(d.getDate()+1);return d.getTime();}
+const closeTxt=t=>{const d=new Date(t);return `${d.getMonth()+1}월 ${d.getDate()}일 ${d.getHours()>=12?'오후':'오전'} ${(d.getHours()%12)||12}시 ${String(d.getMinutes()).padStart(2,'0')}분`;};
+
+/* ---------- 주문 서명: 학생 기기마다 열쇠를 만들어, 다른 친구 이름으로 주문을 넣을 수 없게 해요 ---------- */
+const b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const EC={name:'ECDSA',namedCurve:'P-256'},SG={name:'ECDSA',hash:'SHA-256'};
+async function myKeys(room,num){
+  const k0='stock-key-'+room+'-'+num;let k=store(k0);
+  if(!k||!k.priv){
+    const kp=await crypto.subtle.generateKey(EC,true,['sign','verify']);
+    const priv=await crypto.subtle.exportKey('jwk',kp.privateKey),pub=await crypto.subtle.exportKey('jwk',kp.publicKey);
+    k={priv,pub:{kty:pub.kty,crv:pub.crv,x:pub.x,y:pub.y}};store(k0,k);
+  }
+  return k;
+}
+async function signStr(priv,str){const key=await crypto.subtle.importKey('jwk',priv,EC,false,['sign']);return b64(await crypto.subtle.sign(SG,key,new TextEncoder().encode(str)));}
+async function verifyStr(pub,str,sig){try{const key=await crypto.subtle.importKey('jwk',{kty:pub.kty,crv:pub.crv,x:pub.x,y:pub.y,ext:true},EC,false,['verify']);return await crypto.subtle.verify(SG,key,unb64(sig),new TextEncoder().encode(str));}catch(e){return false;}}
+async function fpOf(pub){const h=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pub.x+pub.y)));return FP[h[0]%FP.length]+FP[h[1]%FP.length];}
+
+/* ---------- 첫 화면 ---------- */
+function startView(){
+  clearOffs();$('#foot').innerHTML='';clearInterval(tick);ClassWatch.teacherStop();closeModal();
+  $('#sub').textContent='3주 모의 주식 투자 · 다했니 쿠키로 투자해요';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>뉴스를 읽고<br>투자해 봐요</h1>
+   <p>매일 아침 새 뉴스가 나와요. 뉴스가 어떤 회사에 좋을지 나쁠지 생각해서 주식을 사고팔아요. 다음 날 아침 주가가 바뀌어요. 3주 뒤 내 쿠키는 늘어날까요?</p></div>
+   <div class="minis">${CO.map(c=>`<div><span>${c.e}</span>${esc(c.n)}</div>`).join('')}</div></section>
+   <div class="choose"><button id="goStu">학생으로 들어가기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- 학생: 들어가기 ---------- */
+let me=null,KEYS=null,MYFP='',PUB=null,P=null,MYO={},MYP=null,predDay=null,predOff=null;
+let TAB='market',SEL='',QTY=1,NIN=1,NOUT=1,DRAFT=null,vkey='',wasOpen=null,sending=false;
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();$('#foot').innerHTML='';
+  const saved=store('stock-me');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <label class="check"><input type="checkbox" id="ez"> 🌟 쉬운 화면 (그림과 글자를 크게, 한 주씩 사고팔기)</label>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div>
+   <p class="muted" style="margin:0">이 태블릿이 내 증권 계좌가 돼요. 3주 동안 같은 태블릿으로 들어와요.</p></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm({checks:[]});
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value,p=parseName($('#nm').value),easy=$('#ez').checked;
+    $('#enter').disabled=true;
+    try{
+      const a=await withTimeout(roomRef(code).child('app').get());
+      if(a.val()!=='stock'){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const k=await myKeys(code,p.num),f=await fpOf(k.pub);
+      const r=await withTimeout(roomRef(code).child('players/'+p.num).transaction(c=>{
+        if(c&&c.name!==p.name)return;
+        return {...(c||{}),name:p.name,key:k.pub,fp:f,easy:easy||!!(c&&c.easy),at:Date.now()};
+      },undefined,false));
+      if(!r.committed){const c=r.snapshot.val();$('#jm').textContent=`${p.num}번은 이미 "${c&&c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('stock-me',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+async function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  KEYS=await myKeys(me.room,me.num);MYFP=await fpOf(KEYS.pub);
+  PUB=null;P=null;MYO={};MYP=null;predDay=null;vkey='';
+  const R=roomRef(me.room);
+  listen(R.child('players/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('stock-me',null);me=null;clearOffs();return joinView();}
+    P=v;$('#sub').textContent=`${me.num}번 ${me.name}`;document.body.classList.toggle('easy',!!P.easy);render();
+  });
+  listen(R.child('pub'),s=>{PUB=s.val();render();});
+  listen(R.child('orders/'+me.num),s=>{MYO=s.val()||{};render();});
+  offs.push(()=>{if(predOff)predOff();predOff=null;});
+  clearInterval(tick);tick=setInterval(()=>{
+    const el=$('#cd');if(el&&PUB)el.textContent=hms(PUB.closeAt-now());
+    const o=isOpen(PUB);if(o!==wasOpen){wasOpen=o;render(true);}
+  },500);
+}
+const myAcct=()=>PUB&&PUB.acct&&PUB.acct[me.num];
+const myOps=()=>Object.entries((PUB&&PUB.ops)||{}).filter(([,o])=>o.num===me.num).sort((a,b)=>b[1].at-a[1].at);
+const pendingOrders=()=>Object.entries(MYO).filter(([,o])=>!o.r).map(([id,o])=>{try{return JSON.parse(o.d);}catch(e){return null;}}).filter(Boolean);
+function render(force){
+  if(!me)return;
+  if(PUB&&PUB.day!==predDay){
+    if(predOff)predOff();predDay=PUB.day;MYP=null;DRAFT=null;
+    const ref=roomRef(me.room).child(`pred/${predDay}/${me.num}`);const h=ref.on('value',x=>{MYP=x.val();render();});predOff=()=>ref.off('value',h);
+  }
+  const a=myAcct();
+  const st=!PUB||!P?'load':P.fp!==MYFP?'other':!a||a.fp!==MYFP?'wait':'main';
+  const open=isOpen(PUB);
+  const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.reveal,MYP]:[PUB.prices,PUB.hist,a,MYO,myOps(),PUB.cfg];
+  const key=JSON.stringify([st,TAB,SEL,QTY,NIN,NOUT,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
+  if(key===vkey&&!force)return;vkey=key;
+  if(st==='load'){app.innerHTML='<div class="panel"><h2>불러오는 중…</h2></div>';return;}
+  if(st==='other')return stuOther();
+  if(st==='wait')return stuWait(a);
+  stuMain(a,open);
+}
+function frame(inner){
+  app.innerHTML=`<div class="grid" style="max-width:980px;margin:0 auto">${inner}</div>`;
+  $('#foot').innerHTML='<button class="ghost small" id="relog">다른 이름으로 들어가기</button>';
+  $('#relog').onclick=()=>{if(!confirm('다른 이름으로 들어갈까요? 이 태블릿의 내 계좌 열쇠는 그대로 남아 있어요.'))return;store('stock-me',null);me=null;clearOffs();joinView();};
+}
+function stuOther(){
+  ClassWatch.step('다른 기기 알림',{wait:true});
+  frame(`<div class="panel grid center"><div class="emoji">📱</div><h2 style="font-size:1.7rem">다른 기기에서 ${me.num}번으로 들어왔어요</h2>
+   <p style="margin:0">내 계좌는 한 기기에서만 쓸 수 있어요. 이 태블릿으로 계속하려면 아래 버튼을 누르고 선생님께 승인을 받아요.</p>
+   <button id="rereg">이 태블릿으로 다시 등록</button></div>`);
+  $('#rereg').onclick=()=>roomRef(me.room).child('players/'+me.num).update({key:KEYS.pub,fp:MYFP,at:Date.now()});
+}
+function stuWait(a){
+  ClassWatch.step('승인 기다리기',{wait:true});
+  frame(`<div class="panel grid center"><div class="emoji">⏳</div><h2 style="font-size:1.7rem">${a?'새 기기라서 선생님 승인이 필요해요':'선생님이 계좌를 열어 주고 있어요'}</h2>
+   <p style="margin:0">선생님 화면에 내 이름과 이 그림이 보이면 승인을 기다려요.</p><div class="fp">${MYFP}</div></div>
+   ${rulesBox()}`);
+}
+function rulesBox(){
+  const c=(PUB&&PUB.cfg)||{rate:1000,cap:20,ratio:.5};
+  return `<div class="rules"><b>쿠키 증권의 약속</b><ul>
+    <li>쿠키 1개는 <b>${won(c.rate)}</b>이에요. 다했니 쿠키를 맡기면 투자할 돈이 생겨요.</li>
+    <li>주가는 오를 수도, 내릴 수도 있어요. <b>쿠키를 잃을 수도 있어요.</b> 잃어도 괜찮은 만큼만 맡겨요.</li>
+    <li>맡길 수 있는 쿠키는 남은 쿠키의 ${Math.round(c.ratio*100)}%, 모두 합쳐 최대 ${c.cap}개예요.</li>
+    <li>장은 매일 아침 뉴스와 함께 열리고 <b>오후 ${esc(c.close||'1:10')}</b>에 닫혀요. 수업 시간에는 거래하지 않아요.</li>
+    <li>친구 태블릿으로 주문하지 않아요. 내 계좌는 내 태블릿에서만 움직여요.</li></ul></div>`;
+}
+function stuMain(a,open){
+  const easy=!!(P&&P.easy);
+  const ph=PUB.phase;
+  const status=ph==='end'?'<span class="mkt closed">🏁 프로젝트가 끝났어요</span>'
+    :ph==='setup'?'<span class="mkt closed">⏳ 곧 첫 거래일이 시작돼요. 먼저 쿠키를 맡겨요</span>'
+    :open?`<span class="mkt">🟢 장이 열려 있어요 · 마감까지 <b id="cd">${hms(PUB.closeAt-now())}</b></span>`
+    :'<span class="mkt closed">🔴 장이 닫혔어요 · 내일 아침 새 뉴스와 함께 열려요</span>';
+  const tabs=[['market','📈 시장'],['news','📰 뉴스'],['wallet','💰 내 지갑'],['cookie','🍪 쿠키']];
+  ClassWatch.step({market:'시장',news:'뉴스와 예측',wallet:'내 지갑',cookie:'쿠키 맡기기·찾기'}[TAB],{n:tabs.findIndex(t=>t[0]===TAB)+1,total:4});
+  frame(`<div class="row between"><span class="band">${PUB.day?`${PUB.day}일째 / ${PUB.cfg.days}일`:'준비'}</span>${status}</div>
+   <div class="status"><div><small>💵 투자할 수 있는 돈</small><b class="num">${won(a.cash)}</b></div><div><small>📊 내 자산 (돈 + 주식)</small><b class="num">${won(a.v)}</b></div>
+    <div><small>📈 수익률</small><b class="num ${ud(a.ret)}">${a.dep?pctTxt(a.ret):'－'}</b></div></div>
+   <nav class="tabs">${tabs.map(([k,l])=>`<button data-tab="${k}" aria-pressed="${TAB===k}">${l}</button>`).join('')}</nav>
+   <div id="tabbox" class="grid"></div>`);
+  $$('[data-tab]').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;render();});
+  const box=$('#tabbox');
+  if(TAB==='market')stuMarket(box,a,open,easy);
+  else if(TAB==='news')stuNews(box,open,easy);
+  else if(TAB==='wallet')stuWallet(box,a);
+  else stuCookie(box,a,easy);
+}
+function coCard(c,a,btn){
+  const pr=PUB.prices[c.id],ch=(PUB.chg||{})[c.id]||0,mine=(a.hold||{})[c.id]||0;
+  return `<${btn?'button':'div'} class="co" ${btn?`data-co="${c.id}" aria-pressed="${SEL===c.id}"`:''}><div class="hd"><span>${c.e}</span><b>${esc(c.n)}</b></div>
+    <div class="pr num">${won(pr)} <small class="${ud(ch)}">${pctTxt(ch)}</small></div>${spark((PUB.hist||{})[c.id])}
+    ${mine?`<div class="mine">내 주식 ${mine}주</div>`:'<div class="muted" style="font-size:.95rem">아직 없어요</div>'}</${btn?'button':'div'}>`;
+}
+function stuMarket(box,a,open,easy){
+  const pend=pendingOrders().filter(o=>o.t==='buy'||o.t==='sell');
+  let det='';
+  if(SEL){
+    const c=COI[SEL],pr=PUB.prices[SEL],mine=(a.hold||{})[SEL]||0,avg=mine?Math.round(((a.cost||{})[SEL]||0)/mine):0;
+    if(easy)QTY=1;
+    const maxBuy=Math.floor(a.cash/pr);
+    const cost=pr*QTY;
+    det=`<div class="panel grid pop"><div class="row between"><div class="row"><span style="font-size:3rem;line-height:1">${c.e}</span><div><h2 style="font-size:1.8rem">${esc(c.n)}</h2><div class="muted">${esc(c.d)}</div></div></div><button class="ghost small" id="x">닫기 ✕</button></div>
+      <div class="detail"><div class="grid" style="gap:6px"><div class="big num">${won(pr)} <span class="${ud((PUB.chg||{})[SEL]||0)}" style="font-size:.7em">${pctTxt((PUB.chg||{})[SEL]||0)}</span></div>${((PUB.hist||{})[SEL]||[]).length>1?spark((PUB.hist||{})[SEL],400,120):'<p class="muted" style="margin:0">내일 아침부터 주가 그래프가 그려져요.</p>'}
+        <div class="muted">처음 값 ${won(((PUB.hist||{})[SEL]||[pr])[0])} · 내 주식 <b>${mine}주</b>${mine?` · 산 값 평균 ${won(avg)}`:''}</div></div>
+       <div class="grid" style="gap:10px">${easy?`<div class="big center">한 주씩 사고팔아요</div>`:`<div class="stepper"><button class="ghost" id="qm" aria-label="한 주 빼기">−</button><output class="num" id="qv">${QTY}주</output><button class="ghost" id="qp" aria-label="한 주 더하기">＋</button></div>
+         <div class="row" style="justify-content:center"><button class="ghost small" id="qmax" ${maxBuy?'':'disabled'}>살 수 있는 만큼 (${maxBuy}주)</button><button class="ghost small" id="qall" ${mine?'':'disabled'}>가진 만큼 (${mine}주)</button></div>
+         <div class="center muted">${QTY}주 × ${won(pr)} = <b style="color:var(--ink)">${won(cost)}</b></div>`}
+        <div class="bs"><button class="upb" id="buy" ${open&&cost<=a.cash?'':'disabled'}>${easy?'1주 사기':'사기'}</button><button class="downb" id="sell" ${open&&mine>=QTY?'':'disabled'}>${easy?'1주 팔기':'팔기'}</button></div>
+        <div class="msg ${open?'':'bad'}" role="status">${!open?'장이 닫혀 있어서 지금은 사고팔 수 없어요.':cost>a.cash?'돈이 모자라요.':''}</div></div></div></div>`;
+  }
+  box.innerHTML=`${det}${pend.length?`<div class="warn">⏳ 주문 ${pend.length}개를 선생님 화면이 처리하는 중이에요. 잠시만 기다려요.</div>`:''}
+   <div class="cos">${CO.map(c=>coCard(c,a,true)).join('')}</div>
+   <p class="muted" style="margin:0">회사를 누르면 사고팔 수 있어요. 빨간색은 어제보다 오른 값, 파란색은 내린 값이에요.</p>`;
+  $$('[data-co]',box).forEach(b=>b.onclick=()=>{SEL=SEL===b.dataset.co?'':b.dataset.co;QTY=1;render();});
+  if(!SEL)return;
+  $('#x').onclick=()=>{SEL='';render();};
+  const pr=PUB.prices[SEL],mine=(a.hold||{})[SEL]||0;
+  if($('#qm')){$('#qm').onclick=()=>{QTY=Math.max(1,QTY-1);render();};$('#qp').onclick=()=>{QTY=Math.min(999,QTY+1);render();};
+    $('#qmax').onclick=()=>{QTY=Math.max(1,Math.floor(a.cash/pr));render();};$('#qall').onclick=()=>{QTY=Math.max(1,mine);render();};}
+  $('#buy').onclick=()=>sendOrder({t:'buy',c:SEL,q:QTY});
+  $('#sell').onclick=()=>sendOrder({t:'sell',c:SEL,q:QTY});
+}
+async function sendOrder(o){
+  if(sending)return;sending=true;
+  try{
+    const ref=roomRef(me.room).child('orders/'+me.num).push();
+    const d=JSON.stringify({id:ref.key,num:me.num,day:PUB.day,ts:now(),...o});
+    const s=await signStr(KEYS.priv,d);
+    await withTimeout(ref.set({d,s}));
+  }catch(e){alert('주문을 보내지 못했어요: '+(e.code||e.message));}
+  finally{sending=false;}
+}
+function newsCard(n){return n?`<div class="newsc pop"><div class="nh"><span>${n.e}</span><div><div class="muted">${n.day}일째 아침 뉴스</div><h2>${esc(n.t)}</h2></div></div><p>${esc(n.b)}</p></div>`:'';}
+function revealBox(r){
+  if(!r)return '';
+  return `<div class="panel grid"><h2>어제 뉴스는 이렇게 됐어요</h2><div class="muted">${r.e} ${esc(r.t)}</div>
+   <div class="chips">${CO.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(r.chg[c.id])}">${pctTxt(r.chg[c.id]||0)}</b></span>`).join('')}</div></div>`;
+}
+function stuNews(box,open,easy){
+  const n=PUB.news;
+  if(!n){box.innerHTML=`<div class="panel grid center"><div class="emoji">📰</div><h2>${PUB.phase==='end'?'프로젝트가 끝났어요':'첫 거래일 아침에 첫 뉴스가 나와요'}</h2></div>${revealBox(PUB.reveal)}`;return;}
+  if(DRAFT===null)DRAFT={up:(MYP||{}).up||'',down:(MYP||{}).down||'',why:(MYP||{}).why||''};
+  const saved=MYP&&MYP.up===DRAFT.up&&MYP.down===DRAFT.down&&(MYP.why||'')===DRAFT.why;
+  const pk=(cls,k)=>`<div class="picks ${cls}">${CO.map(c=>`<button data-k="${k}" data-c="${c.id}" aria-pressed="${DRAFT[k]===c.id}"><span>${c.e}</span>${esc(c.n)}</button>`).join('')}</div>`;
+  box.innerHTML=`${newsCard(n)}${revealBox(PUB.reveal)}
+   <div class="panel grid"><h2>내일 아침 주가를 예측해요</h2><p class="muted" style="margin:0">맞히면 "뉴스 해석왕" 점수 1점씩! (쿠키와는 상관없어요)</p>
+    <div class="fld"><span class="lb up">⬆ 오를 것 같은 회사</span>${pk('upk','up')}</div>
+    <div class="fld"><span class="lb down">⬇ 내릴 것 같은 회사</span>${pk('dnk','down')}</div>
+    ${easy?'':`<div class="fld"><span class="lb">왜 그렇게 생각해요?</span><textarea id="why" maxlength="200" placeholder="예) 태풍이 오면 배가 못 떠서 바다해운이 돈을 못 벌어요">${esc(DRAFT.why)}</textarea></div>`}
+    <div class="row"><button id="psave" ${open&&DRAFT.up&&DRAFT.down&&!saved?'':'disabled'}>예측 저장</button><span class="msg ${saved?'ok':''}">${saved?'✔ 저장했어요':!open?'장이 닫혀서 예측을 바꿀 수 없어요':''}</span></div></div>`;
+  $$('[data-k]',box).forEach(b=>b.onclick=()=>{if(!open)return;const k=b.dataset.k,o=k==='up'?'down':'up';DRAFT[k]=b.dataset.c;if(DRAFT[o]===DRAFT[k])DRAFT[o]='';render(true);});
+  if($('#why'))$('#why').oninput=e=>{DRAFT.why=e.target.value;const s=$('#psave');if(s)s.disabled=!(open&&DRAFT.up&&DRAFT.down);};
+  $('#psave').onclick=async()=>{await roomRef(me.room).child(`pred/${PUB.day}/${me.num}`).set({up:DRAFT.up,down:DRAFT.down,why:DRAFT.why.slice(0,200),at:now()});};
+}
+function orderText(d){
+  const c=COI[d.c];
+  if(d.t==='buy')return `${c?c.e+' '+c.n:''} ${d.q}주 사기`;
+  if(d.t==='sell')return `${c?c.e+' '+c.n:''} ${d.q}주 팔기`;
+  if(d.t==='in')return `🍪 쿠키 ${d.n}개 맡기기 신청`;
+  if(d.t==='out')return `🍪 쿠키 ${d.n}개로 바꾸기 신청`;
+  return '';
+}
+function stuWallet(box,a){
+  const rows=CO.filter(c=>(a.hold||{})[c.id]).map(c=>{const q=a.hold[c.id],cost=(a.cost||{})[c.id]||0,v=q*PUB.prices[c.id],pl=v-cost;
+    return `<tr><td>${c.e} ${esc(c.n)}</td><td class="num">${q}주</td><td class="num">${won(cost/q)}</td><td class="num">${won(PUB.prices[c.id])}</td><td class="num ${ud(pl)}">${pl>0?'+':''}${won(pl)}<br><small>${cost?pctTxt(pl/cost*100):''}</small></td></tr>`;}).join('');
+  const hist=Object.entries(MYO).map(([id,o])=>{let d={};try{d=JSON.parse(o.d);}catch(e){}return {id,d,r:o.r};}).sort((x,y)=>y.id<x.id?-1:1).slice(0,40);
+  const rate=PUB.cfg.rate;
+  box.innerHTML=`<div class="panel grid"><h2>내가 가진 주식</h2>${rows?`<div style="overflow-x:auto"><table class="tbl"><tr><th>회사</th><th>주식 수</th><th>산 값(평균)</th><th>지금 값</th><th>이익·손해</th></tr>${rows}</table></div>`:'<p class="muted" style="margin:0">아직 가진 주식이 없어요.</p>'}</div>
+   <div class="panel grid"><h2>내 계좌 정리</h2><table class="tbl">
+    <tr><td>맡긴 쿠키</td><td class="num">${a.dep}개 (${won(a.dep*rate)})</td></tr>
+    <tr><td>돌려받은 쿠키</td><td class="num">${a.wd}개 (${won(a.wd*rate)})</td></tr>
+    ${a.res?`<tr><td>돌려받기 기다리는 쿠키</td><td class="num">${Math.round(a.res/rate)}개</td></tr>`:''}
+    <tr><td>지금 내 자산</td><td class="num">${won(a.v)}</td></tr>
+    <tr><td>수익률 = (지금 자산 + 돌려받은 것 − 맡긴 것) ÷ 맡긴 것</td><td class="num ${ud(a.ret)}">${a.dep?pctTxt(a.ret):'－'}</td></tr></table></div>
+   <div class="panel grid"><h2>거래 기록</h2><div class="hist">${hist.map(h=>`<div><span>${esc(orderText(h.d))}</span><span class="${h.r?(h.r.ok?'up':'down'):'muted'}">${h.r?esc(h.r.m):'⏳ 처리 중'}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
+}
+function stuCookie(box,a,easy){
+  const c=PUB.cfg,ops=myOps();
+  const pin=ops.filter(([,o])=>o.type==='in'&&o.st==='wait').reduce((s,[,o])=>s+o.n,0)+pendingOrders().filter(o=>o.t==='in').reduce((s,o)=>s+o.n,0);
+  const maxIn=Math.max(0,c.cap-a.dep-pin),maxOut=Math.floor(a.cash/c.rate);
+  NIN=Math.max(1,Math.min(NIN,maxIn||1));NOUT=Math.max(1,Math.min(NOUT,maxOut||1));
+  const end=PUB.phase==='end';
+  const stTxt={wait:'⏳ 선생님 확인 기다리는 중',done:'✔ 끝났어요',cancel:'✕ 취소됐어요'};
+  box.innerHTML=`${rulesBox()}
+   ${end?`<div class="panel grid center"><div class="emoji">🏁</div><h2 style="font-size:1.7rem">모든 주식을 팔고 쿠키로 바꿨어요</h2><p style="margin:0">선생님이 다했니에서 쿠키를 돌려줄 거예요. 아래에서 확인해요.</p></div>`:`
+   <div class="panel grid"><h2>🍪 쿠키 맡기기 (다했니 쿠키 → 투자할 돈)</h2>
+    <p class="muted" style="margin:0">신청하면 선생님이 다했니에서 쿠키를 빼고, 내 계좌에 돈을 넣어 줘요. 앞으로 ${maxIn}개 더 맡길 수 있어요.</p>
+    <div class="stepper" style="max-width:420px"><button class="ghost" id="im">−</button><output class="num">${NIN}개</output><button class="ghost" id="ip">＋</button></div>
+    <div class="row"><button id="inb" ${maxIn?'':'disabled'}>쿠키 ${NIN}개 맡기기 신청 (${won(NIN*c.rate)})</button></div></div>
+   <div class="panel grid"><h2>💵 쿠키로 바꾸기 (투자할 돈 → 다했니 쿠키)</h2>
+    <p class="muted" style="margin:0">주식을 판 돈을 쿠키로 바꿔요. 지금 ${maxOut}개까지 바꿀 수 있어요. 마지막 날에는 모두 자동으로 바꿔 줘요.</p>
+    <div class="stepper" style="max-width:420px"><button class="ghost" id="om">−</button><output class="num">${NOUT}개</output><button class="ghost" id="op">＋</button></div>
+    <div class="row"><button class="ghost" id="outb" ${maxOut?'':'disabled'}>${won(NOUT*c.rate)} → 쿠키 ${NOUT}개 신청</button></div></div>`}
+   <div class="panel grid"><h2>내 쿠키 신청</h2><div class="ops">${ops.map(([,o])=>`<div><span>${o.type==='in'?`맡기기 ${o.n}개`:`돌려받기 ${o.n}개`}</span><span>${stTxt[o.st]||''}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
+  if(end)return;
+  $('#im').onclick=()=>{NIN--;render();};$('#ip').onclick=()=>{NIN++;render();};
+  $('#om').onclick=()=>{NOUT--;render();};$('#op').onclick=()=>{NOUT++;render();};
+  $('#inb').onclick=()=>{if(confirm(`다했니 쿠키 ${NIN}개를 맡길까요?\n주가가 내리면 쿠키를 잃을 수도 있어요.`))sendOrder({t:'in',n:NIN});};
+  $('#outb').onclick=()=>sendOrder({t:'out',n:NOUT});
+}
+
+/* ---------- 선생님 화면 ----------
+   장부(M)는 선생님 컴퓨터에만 있어요. Firebase의 pub은 장부를 보여 주기만 하는 복사본이라,
+   누가 pub을 고쳐도 선생님 화면이 바로 되돌려요. 학생은 서명한 주문만 넣을 수 있어요.
+   다했니 API 키와 학생 코드는 이 컴퓨터(localStorage)에만 두고 어디에도 올리지 않아요. */
+let tick=null,M=null,LEADER=false,ORD={},PL={},PRED={},DH={key:'',codes:{}},EXP='',PUBNOW=null,tvKey='',predOff2=null,MODAL='',guardT=null;
+// 창마다 다른 이름 (새로고침해도 같은 창은 같은 이름)
+const TAB_ID=(()=>{try{let t=sessionStorage.getItem('stock-tab');if(!t){t=Math.random().toString(36).slice(2);sessionStorage.setItem('stock-tab',t);}return t;}catch(e){return Math.random().toString(36).slice(2);}})();
+window.addEventListener('pagehide',()=>{const l=store('stock-leader');if(LEADER&&l&&l.id===TAB_ID)store('stock-leader',null);});
+function newMaster(room){
+  return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:15,showRank:true},
+    day:0,phase:'setup',closeAt:0,prices:Object.fromEntries(CO.map(c=>[c.id,c.p])),hist:Object.fromEntries(CO.map(c=>[c.id,[c.p]])),chg:{},
+    today:null,eff:null,reveal:null,used:[],log:[],acct:{},ops:{},done:{},feed:[],award:false,tamper:0};
+}
+const saveM=()=>store('stock-master',M);
+function claimLeader(){const l=store('stock-leader');if(l&&l.id!==TAB_ID&&Date.now()-l.t<6000)return false;store('stock-leader',{id:TAB_ID,t:Date.now()});return true;}
+async function teacherView(){
+  clearOffs();$('#foot').innerHTML='';closeModal();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  if(!claimLeader()){
+    app.innerHTML=`<div class="panel grid"><h2>이 컴퓨터의 다른 창에서 선생님 화면이 열려 있어요</h2><p>장부가 둘로 나뉘지 않게 한 창에서만 열 수 있어요. 다른 창을 쓰거나 닫고 다시 시도해요.</p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+    $('#retry').onclick=teacherView;$('#home').onclick=()=>{location.hash='';startView();};return;
+  }
+  LEADER=true;
+  app.innerHTML='<div class="panel grid center"><h2>장부를 여는 중이에요…</h2></div>';
+  M=store('stock-master');DH=store('stock-dh')||{key:'',codes:{}};
+  try{
+    if(!M){
+      let code;
+      for(let i=0;i<20;i++){code=String(Math.floor(1000+Math.random()*9000));if(!(await withTimeout(roomRef(code).child('open').get())).exists())break;}
+      M=newMaster(code);saveM();
+    }
+    await withTimeout(roomRef(M.room).update({open:M.created,app:'stock'}));
+  }catch(e){LEADER=false;return showError(e);}
+  ROOM=M.room;
+  ClassWatch.teacher({db,room:ROOM});
+  const url=location.origin+location.pathname+'?room='+ROOM;
+  $('#sub').textContent='선생님 화면 · 이 컴퓨터가 장부를 가지고 있어요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid side">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${ROOM}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="row between"><h2>계좌</h2><span class="muted" id="cnt"></span></div><div id="reqs" class="req"></div><div class="people" id="ppl"></div></div>
+    <button id="cookieBtn">🍪 쿠키 처리</button>
+    <button class="ghost" id="setBtn">⚙️ 설정 · 다했니 연결</button>
+    <button class="ghost" id="bakBtn">💾 장부 백업</button>
+    <button class="ghost" id="home">처음으로</button>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#bakBtn').onclick=()=>openModal('backup');
+  $('#home').onclick=()=>{location.hash='';LEADER=false;store('stock-leader',null);startView();};
+  const R=roomRef(ROOM);
+  listen(R.child('players'),s=>{PL=s.val()||{};renderTV();});
+  listen(R.child('orders'),s=>{ORD=s.val()||{};pump();});
+  listen(R.child('pub'),s=>{PUBNOW=s.val();guard();});
+  listenPred();
+  publish();
+  clearInterval(tick);tick=setInterval(teacherTick,500);
+}
+function teacherTick(){
+  if(!LEADER||!M)return;
+  const l=store('stock-leader');
+  if(l&&l.id!==TAB_ID&&Date.now()-l.t<6000){LEADER=false;clearInterval(tick);app.innerHTML='<div class="panel grid"><h2>다른 창이 장부를 열었어요</h2><p>이 창은 멈췄어요. 장부를 연 창을 써 주세요.</p></div>';return;}
+  store('stock-leader',{id:TAB_ID,t:Date.now()});
+  if(M.phase==='open'&&now()>=M.closeAt){M.phase='closed';saveM();publish();}
+  const el=$('#tm');if(el)el.textContent=M.phase==='open'?hms(M.closeAt-now()):'';
+}
+function listenPred(){
+  if(predOff2)predOff2();PRED={};
+  const ref=roomRef(ROOM).child('pred/'+M.day);const h=ref.on('value',s=>{PRED=s.val()||{};renderTV();});predOff2=()=>ref.off('value',h);
+}
+// Firebase는 빈 칸과 배열 모양을 바꿔서 돌려줘요. 같은 모양으로 맞춰서 비교해요
+function norm(x){
+  if(x===null||x===undefined)return undefined;
+  if(typeof x==='object'){const o={};Object.keys(x).sort().forEach(k=>{const v=norm(x[k]);if(v!==undefined)o[k]=v;});return Object.keys(o).length?o:undefined;}
+  if(typeof x==='number'&&!isFinite(x))return undefined;
+  return x;
+}
+const resOf=n=>Object.values(M.ops).filter(o=>o.num===+n&&o.type==='out'&&o.st==='wait').reduce((s,o)=>s+o.n,0)*M.cfg.rate;
+function acctView(n,a){
+  const res=resOf(n),stocks=CO.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*M.prices[c.id],0);
+  const v=a.cash+stocks+res,base=a.dep*M.cfg.rate,net=v+a.wd*M.cfg.rate;
+  return {name:a.name,fp:a.fp,cash:a.cash,hold:a.hold,cost:a.cost,dep:a.dep,wd:a.wd,res,v,ret:base?Math.round((net-base)/base*1000)/10:0,pt:a.pt||0};
+}
+function buildPub(){
+  const acct={};Object.entries(M.acct).forEach(([n,a])=>acct[n]=acctView(n,a));
+  const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at});
+  return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today,reveal:M.reveal,
+    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,days:M.cfg.days},acct,ops,award:!!M.award};
+}
+function publish(){
+  if(!LEADER)return;
+  const p=buildPub();EXP=JSON.stringify(norm(p));
+  roomRef(ROOM).child('pub').set(p);
+  renderTV();if(MODAL==='cookie')drawCookie();
+}
+// 누가 pub(보여 주는 장부)을 고치면 선생님 장부대로 되돌려요
+function guard(){
+  if(!LEADER||!EXP)return;
+  if(JSON.stringify(norm(PUBNOW))===EXP)return;
+  clearTimeout(guardT);guardT=setTimeout(()=>{if(JSON.stringify(norm(PUBNOW))!==EXP){M.tamper=(M.tamper||0)+1;saveM();publish();}},500);
+}
+/* 주문 처리: 서명을 확인하고 장부에 적어요 (한 번에 하나씩) */
+let pumping=null,pumpAgain=false;
+function pump(){if(pumping){pumpAgain=true;return pumping;}pumping=doPump().finally(()=>{pumping=null;if(pumpAgain){pumpAgain=false;pump();}});return pumping;}
+async function drain(){do{await pump();}while(pumping);}
+async function doPump(){
+  if(!LEADER||!M)return;
+  const list=[];
+  Object.entries(ORD).forEach(([n,os])=>Object.entries(os||{}).forEach(([id,o])=>{if(!M.done[id]&&o&&!o.r)list.push([+n,id,o]);}));
+  list.sort((a,b)=>a[1]<b[1]?-1:1);
+  for(const [n,id,o] of list){
+    if(!LEADER)return;
+    let r;try{r=await processOrder(n,id,o);}catch(e){r={ok:false,m:'처리하지 못했어요'};}
+    M.done[id]=1;saveM();
+    await roomRef(ROOM).child(`orders/${n}/${id}/r`).set(r);
+  }
+  if(list.length)publish();
+}
+const feed=t=>{M.feed.unshift({t:Date.now(),x:t});M.feed=M.feed.slice(0,12);};
+async function processOrder(n,id,o){
+  const a=M.acct[n];
+  if(!a)return {ok:false,m:'아직 계좌가 열리지 않았어요'};
+  let d;try{d=JSON.parse(o.d);}catch(e){return {ok:false,m:'주문을 읽을 수 없어요'};}
+  if(d.id!==id||d.num!==n)return {ok:false,m:'주문 번호가 맞지 않아요'};
+  if(!(await verifyStr(a.key,o.d,o.s)))return {ok:false,m:'내 태블릿에서 보낸 주문이 아니에요'};
+  if(M.phase==='end')return {ok:false,m:'프로젝트가 끝났어요'};
+  const rate=M.cfg.rate;
+  if(d.t==='buy'||d.t==='sell'){
+    const c=COI[d.c],q=d.q;
+    if(!c||!Number.isInteger(q)||q<1||q>999)return {ok:false,m:'주문이 이상해요'};
+    if(!M.day||d.day!==M.day||d.ts>M.closeAt)return {ok:false,m:'장이 닫힌 뒤에 보낸 주문이에요'};
+    const pr=M.prices[c.id];a.hold=a.hold||{};a.cost=a.cost||{};
+    if(d.t==='buy'){
+      if(pr*q>a.cash)return {ok:false,m:`돈이 모자라요 (${won(pr*q)} 필요)`};
+      a.cash-=pr*q;a.hold[c.id]=(a.hold[c.id]||0)+q;a.cost[c.id]=(a.cost[c.id]||0)+pr*q;
+      feed(`📈 누군가 ${c.e} ${c.n} ${q}주를 샀어요`);
+      return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 샀어요`};
+    }
+    const h=a.hold[c.id]||0;
+    if(h<q)return {ok:false,m:`가진 주식이 ${h}주뿐이에요`};
+    a.cost[c.id]=Math.round((a.cost[c.id]||0)*(h-q)/h);a.hold[c.id]=h-q;if(!a.hold[c.id]){delete a.hold[c.id];delete a.cost[c.id];}
+    a.cash+=pr*q;
+    feed(`📉 누군가 ${c.e} ${c.n} ${q}주를 팔았어요`);
+    return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 팔았어요`};
+  }
+  if(d.t==='in'){
+    const k=d.n;if(!Number.isInteger(k)||k<1)return {ok:false,m:'쿠키 수가 이상해요'};
+    const pin=Object.values(M.ops).filter(x=>x.num===n&&x.type==='in'&&x.st==='wait').reduce((s,x)=>s+x.n,0);
+    const left=M.cfg.cap-a.dep-pin;
+    if(k>left)return {ok:false,m:`최대 ${Math.max(0,left)}개까지 맡길 수 있어요`};
+    const op={num:n,type:'in',n:k,st:'wait',at:Date.now()};M.ops['op'+id]=op;
+    snapOp('op'+id);
+    return {ok:true,m:'✔ 신청했어요. 선생님 확인을 기다려요'};
+  }
+  if(d.t==='out'){
+    const k=d.n;if(!Number.isInteger(k)||k<1)return {ok:false,m:'쿠키 수가 이상해요'};
+    if(k*rate>a.cash)return {ok:false,m:`돈이 모자라요 (${won(k*rate)} 필요)`};
+    a.cash-=k*rate;M.ops['op'+id]={num:n,type:'out',n:k,st:'wait',at:Date.now()};
+    snapOp('op'+id);
+    return {ok:true,m:'✔ 신청했어요. 선생님이 다했니에서 쿠키를 줄 거예요'};
+  }
+  return {ok:false,m:'모르는 주문이에요'};
+}
+/* ---------- 다했니 (읽기 전용 API): 쿠키를 빼거나 준 뒤 정말 바뀌었는지 확인해요 ---------- */
+let dhLast=0;
+async function dhGet(code){
+  const w=dhLast+350-Date.now();if(w>0)await sleep(w);dhLast=Date.now();
+  let r;
+  try{r=await fetch(`${DH_API}/get/student/total?code=${encodeURIComponent(code)}`,{headers:{'X-API-Key':DH.key}});}
+  catch(e){const er=new Error('다했니 서버에 연결하지 못했어요');er.dh=1;throw er;}
+  const j=await r.json().catch(()=>({}));
+  if(!j.result){const er=new Error(j.message||'다했니에서 읽지 못했어요');er.dh=1;throw er;}
+  return j.data;
+}
+const dhReady=n=>!!(DH.key&&DH.codes&&DH.codes[n]);
+async function snapOp(opid){
+  const op=M.ops[opid];if(!op||!dhReady(op.num))return;
+  try{
+    const d=await dhGet(DH.codes[op.num]);
+    op.snap={c:d.cookie,u:d.usedCookie,t:d.totalCookie,at:Date.now()};
+    if(op.type==='in'){const lim=Math.floor(d.totalCookie*M.cfg.ratio);if(op.n>lim)op.warn=`남은 쿠키의 ${Math.round(M.cfg.ratio*100)}%(${lim}개)보다 많아요`;}
+  }catch(e){op.snapErr=e.message;}
+  saveM();if(MODAL==='cookie')drawCookie();
+}
+const waitOps=(n,type)=>Object.entries(M.ops).filter(([,o])=>o.num===n&&o.type===type&&o.st==='wait');
+function finishOps(n,type,how){
+  const a=M.acct[n];
+  waitOps(n,type).forEach(([,o])=>{
+    if(how==='cancel'){o.st='cancel';if(type==='out')a.cash+=o.n*M.cfg.rate;return;}
+    o.st='done';o.doneAt=Date.now();o.how=how;
+    if(type==='in'){a.cash+=o.n*M.cfg.rate;a.dep+=o.n;}else a.wd+=o.n;
+  });
+  saveM();publish();
+}
+async function verifyOps(n,type){
+  const list=waitOps(n,type);if(!list.length)return '';
+  if(list.some(([,o])=>!o.snap))return '신청할 때 다했니 쿠키를 읽어 두지 못해서 자동으로 확인할 수 없어요. 다했니를 보고 "직접 확인"을 눌러 주세요.';
+  let d;try{d=await dhGet(DH.codes[n]);}catch(e){return e.message;}
+  const need=list.reduce((s,[,o])=>s+o.n,0);
+  if(type==='in'){const base=Math.min(...list.map(([,o])=>o.snap.u));const got=d.usedCookie-base;
+    if(got<need)return `다했니에서 아직 ${need-got}개가 덜 빠졌어요 (사용한 쿠키가 ${Math.max(0,got)}개 늘었어요).`;}
+  else{const base=Math.min(...list.map(([,o])=>o.snap.c));const got=d.cookie-base;
+    if(got<need)return `다했니에서 아직 ${need-got}개를 덜 줬어요 (받은 쿠키가 ${Math.max(0,got)}개 늘었어요).`;}
+  finishOps(n,type,'api');return '';
+}
+
+/* ---------- 선생님 TV 그리기 ---------- */
+function rankList(){
+  return Object.entries(M.acct).map(([n,a])=>({n:+n,...acctView(n,a)})).filter(x=>x.dep).sort((a,b)=>b.ret-a.ret||b.v-a.v||a.n-b.n);
+}
+function renderTV(){
+  const main=$('#main');if(!main||!M)return;
+  const reqs=Object.entries(PL).filter(([n,p])=>p&&(!M.acct[n]||M.acct[n].fp!==p.fp));
+  const opsWait=Object.values(M.ops).filter(o=>o.st==='wait').length;
+  const k=JSON.stringify([M.day,M.phase,M.closeAt,M.prices,M.reveal,M.today,M.feed,M.cfg,M.award,M.tamper,Object.keys(M.acct).length,rankList(),reqs.map(([n,p])=>[n,p.name,p.fp]),Object.entries(PL).map(([n,p])=>[n,p&&p.easy]),Object.keys(PRED).length,opsWait]);
+  $('#cookieBtn').innerHTML=`🍪 쿠키 처리${opsWait?`<span class="badge">${opsWait}</span>`:''}`;
+  if(k===tvKey&&$('#tvb'))return;tvKey=k;
+  $('#cnt').textContent=`${Object.keys(M.acct).length}명`;
+  $('#reqs').innerHTML=(reqs.length>1?'<button class="okb small" id="okAll">모두 승인</button>':'')+reqs.map(([n,p])=>`<div><b>${n} ${esc(p.name)} <span title="학생 화면의 그림과 같은지 확인해요">${p.fp||''}</span>${M.acct[n]?'<br><small class="muted">새 기기</small>':''}</b><button class="okb small" data-ok="${n}">승인</button><button class="ghost small" data-no="${n}">거절</button></div>`).join('');
+  $('#ppl').innerHTML=Object.entries(M.acct).sort((a,b)=>a[0]-b[0]).map(([n,a])=>`<button data-easy="${n}" title="누르면 🌟 쉬운 화면을 켜고 꺼요">${(PL[n]||{}).easy?'🌟':''}${n} ${esc(a.name)}</button>`).join('')||'<span class="muted" style="background:none">QR로 들어오면 여기서 승인해요</span>';
+  $$('[data-ok]').forEach(b=>b.onclick=()=>approve(+b.dataset.ok));
+  $$('[data-easy]').forEach(b=>b.onclick=()=>{const n=b.dataset.easy;if(PL[n])roomRef(ROOM).child(`players/${n}/easy`).set(!PL[n].easy);});
+  $$('[data-no]').forEach(b=>b.onclick=()=>{if(confirm(b.dataset.no+'번 신청을 거절할까요?'))roomRef(ROOM).child('players/'+b.dataset.no).remove();});
+  if($('#okAll'))$('#okAll').onclick=()=>reqs.forEach(([n])=>approve(+n,true));
+  if(M.award)return tvAward(main);
+  const ph=M.phase,last=M.day>=M.cfg.days;
+  const bar=`<div class="panel row between" id="tvb"><div class="row"><span class="band">${M.day?`${M.day}일째 / ${M.cfg.days}일`:'준비'}</span>
+     <span class="big">${ph==='setup'?'첫 거래일 준비':ph==='open'?'🟢 장이 열려 있어요':ph==='closed'?'🔴 장이 닫혔어요':'🏁 프로젝트 끝'}</span>
+     ${ph==='open'?`<span class="muted">마감 ${closeTxt(M.closeAt)} · 남은 시간 <b class="timer" id="tm" style="font-size:1.3rem"></b></span>`:''}</div>
+    <div class="row">${ph==='open'?'<button class="ghost small" id="closeNow">지금 마감</button>':''}${ph==='closed'?'<button class="ghost small" id="reopen">30분 더 열기</button>':''}
+     ${ph==='end'?'<button id="aw">🏆 시상식</button>':`<button id="nextDay">${ph==='setup'?'🔔 첫 거래일 시작':'🌅 새 날 시작'}</button>${M.day?`<button class="${last?'':'ghost'}" id="endBtn">🏁 프로젝트 끝내기</button>`:''}`}</div></div>
+   ${M.tamper?`<div class="warn">⚠ 누군가 보여 주는 장부를 고치려 해서 ${M.tamper}번 되돌렸어요. 선생님 컴퓨터의 장부는 안전해요.</div>`:''}`;
+  let body='';
+  if(ph==='setup'){
+    body=`<div class="panel grid"><h2 style="font-size:1.8rem">첫 거래일 전에 할 일</h2>
+      <ol style="margin:0;font-size:1.15rem;display:grid;gap:6px">
+       <li>학생들이 QR로 들어오면 왼쪽에서 <b>승인</b>해요. 학생 화면의 그림과 같은지 확인해요.</li>
+       <li>(선택) <b>⚙️ 설정</b>에서 다했니 API 키와 학생 코드를 넣으면, 쿠키를 빼고 줬는지 자동으로 확인해요. TV에 띄우지 말고 하세요.</li>
+       <li>학생이 쿠키 맡기기를 신청하면 <b>🍪 쿠키 처리</b>에 목록이 떠요. 다했니에서 그만큼 사용 처리하고 확인을 눌러요.</li>
+       <li>준비되면 <b>🔔 첫 거래일 시작</b>! 첫 뉴스가 나오고 장이 열려요.</li></ol></div>`;
+  }
+  const rv=M.reveal&&M.reveal.day===M.day-1?M.reveal:null;
+  if(ph==='open'||ph==='closed'){
+    body=`${rv?`<div class="panel grid pop"><h2>☀️ 어제 뉴스 결과: ${rv.e} ${esc(rv.t)}</h2><div class="chips">${CO.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(rv.chg[c.id])}">${pctTxt(rv.chg[c.id]||0)}</b></span>`).join('')}</div>
+       <div class="muted">예측한 친구 ${rv.n}명 중 ${rv.right}명이 하나 이상 맞혔어요.</div></div>`:''}
+     ${newsCard(M.today)}
+     <div class="muted" style="text-align:right">오늘 예측한 친구 ${Object.keys(PRED).length}명</div>`;
+  }
+  if(ph==='end'){
+    const fin=Object.values(M.ops).filter(o=>o.fin);
+    body=`<div class="panel grid center pop"><div class="emoji">🏁</div><div class="huge">3주 투자가 끝났어요</div><p style="font-size:1.2rem;margin:0">모든 주식을 마지막 날 값으로 팔고 쿠키로 바꿨어요. 🍪 쿠키 처리에서 다했니로 돌려줘요.</p>
+      <div class="muted">돌려줄 쿠키 ${fin.filter(o=>o.st==='wait').length}명 남음 · ${fin.filter(o=>o.st==='done').length}명 끝</div></div>`;
+  }
+  const rk=rankList();
+  main.innerHTML=`${bar}${body}
+   <div class="board">${CO.map(c=>`<div class="co"><div class="hd"><span>${c.e}</span><b>${esc(c.n)}</b></div><div class="pr num">${won(M.prices[c.id])} <small class="${ud((M.chg||{})[c.id]||0)}">${pctTxt((M.chg||{})[c.id]||0)}</small></div>${spark(M.hist[c.id])}<div class="muted" style="font-size:.9rem">${esc(c.d)}</div></div>`).join('')}</div>
+   <div class="two2">
+    <div class="panel grid"><div class="row between"><h2>📊 수익률 순위</h2><button class="ghost small" id="rk">${M.cfg.showRank?'순위 가리기':'순위 보이기'}</button></div>
+     ${M.cfg.showRank?`<div class="rank">${rk.map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${won(x.v+x.wd*M.cfg.rate)}</span><span class="rt num ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<p class="muted" style="margin:0">쿠키를 맡긴 친구가 생기면 보여요</p>'}</div>`:'<p class="muted" style="margin:0">순위를 가렸어요</p>'}</div>
+    <div class="panel grid"><h2>📢 오늘의 거래 소식</h2><div class="feed">${M.feed.map(f=>`<div>${esc(f.x)}</div>`).join('')||'<span class="muted">아직 거래가 없어요</span>'}</div></div></div>`;
+  if($('#nextDay'))$('#nextDay').onclick=()=>openModal('day');
+  if($('#endBtn'))$('#endBtn').onclick=()=>{if(confirm(`프로젝트를 끝낼까요?\n${M.day}일째 뉴스의 결과로 마지막 주가를 정하고, 모든 주식을 팔아 쿠키로 바꿔요. 되돌릴 수 없어요.`))endProject();};
+  if($('#closeNow'))$('#closeNow').onclick=()=>{M.closeAt=now();M.phase='closed';saveM();publish();};
+  if($('#reopen'))$('#reopen').onclick=()=>{M.closeAt=now()+30*60000;M.phase='open';saveM();publish();};
+  if($('#aw'))$('#aw').onclick=()=>{M.award=true;saveM();publish();};
+  $('#rk').onclick=()=>{M.cfg.showRank=!M.cfg.showRank;saveM();renderTV();};
+  teacherTick();
+}
+function tvAward(main){
+  const rk=rankList();const p=[rk[1],rk[0],rk[2]];
+  const pt=Object.entries(M.acct).map(([n,a])=>({n:+n,name:a.name,pt:a.pt||0})).sort((a,b)=>b.pt-a.pt||a.n-b.n);
+  main.innerHTML=`<div class="panel grid" id="tvb"><div class="row between"><h2 style="font-size:2rem">🏆 쿠키 증권 시상식</h2><button class="ghost" id="awoff">돌아가기</button></div>
+   <h3 style="font-size:1.4rem">📈 수익률왕</h3>
+   <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${x.n} ${esc(x.name)}</span>${pctTxt(x.ret)}</div>`:'<span></span>').join('')}</div></div>
+   <div class="panel grid"><h3 style="font-size:1.4rem">📰 뉴스 해석왕 (예측을 가장 많이 맞힌 친구)</h3><div class="rank">${pt.slice(0,5).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.pt}점</span></div>`).join('')}</div></div>
+   <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요?</p></div>`;
+  $('#awoff').onclick=()=>{M.award=false;saveM();publish();};
+}
+function approve(n,quiet){
+  const p=PL[n];if(!p)return;
+  const a=M.acct[n];
+  if(a&&!quiet&&!confirm(`${n}번 ${p.name}의 새 기기를 승인할까요? 예전 기기로는 더 이상 주문할 수 없어요.`))return;
+  M.acct[n]=a?{...a,key:p.key,fp:p.fp}:{name:p.name,key:p.key,fp:p.fp,cash:0,hold:{},cost:{},dep:0,wd:0,pt:0};
+  saveM();publish();
+}
+
+/* ---------- 새 날, 끝내기 ---------- */
+async function applyNews(){
+  if(!M.day||!M.today)return;
+  const P=(await withTimeout(roomRef(ROOM).child('pred/'+M.day).get())).val()||{};
+  const chg={};
+  CO.forEach(c=>{
+    const lv=(M.eff||{})[c.id]||0;
+    let p=lv*(5+Math.random()*5)+(Math.random()*6-3);p=Math.max(-30,Math.min(30,p));
+    const old=M.prices[c.id],np=Math.max(100,Math.round(old*(1+p/100)/10)*10);
+    chg[c.id]=Math.round((np-old)/old*1000)/10;M.prices[c.id]=np;M.hist[c.id].push(np);
+  });
+  M.chg=chg;
+  let right=0;
+  Object.entries(P).forEach(([n,p])=>{const a=M.acct[n];if(!a||!p)return;let pt=0;if(p.up&&chg[p.up]>0)pt++;if(p.down&&chg[p.down]<0)pt++;a.pt=(a.pt||0)+pt;if(pt)right++;});
+  M.reveal={day:M.day,e:M.today.e,t:M.today.t,chg,right,n:Object.keys(P).length};
+  M.log.push({day:M.day,e:M.today.e,t:M.today.t,eff:M.eff,chg});
+}
+async function startDay(nw){
+  await drain();
+  await applyNews();
+  M.day++;M.today={e:nw.e,t:nw.t,b:nw.b,day:M.day};M.eff=nw.x||{};
+  if(nw.i!=null&&!M.used.includes(nw.i))M.used.push(nw.i);
+  M.closeAt=nextClose(M.cfg.close);M.phase='open';M.feed=[];M.award=false;
+  saveM();listenPred();publish();
+}
+async function endProject(){
+  await drain();
+  await applyNews();
+  const rate=M.cfg.rate;
+  Object.entries(M.acct).forEach(([n,a])=>{
+    CO.forEach(c=>{const q=(a.hold||{})[c.id]||0;if(q)a.cash+=q*M.prices[c.id];});
+    a.hold={};a.cost={};
+    const k=Math.round(a.cash/rate);
+    if(k>0)M.ops['fin'+n]={num:+n,type:'out',n:k,st:'wait',at:Date.now(),fin:true};
+    a.fin={cash:a.cash,n:k};a.cash=0;
+    if(k>0)snapOp('fin'+n);
+  });
+  M.phase='end';M.today=null;M.closeAt=0;
+  saveM();publish();
+}
+
+/* ---------- 창 (새 날 · 쿠키 처리 · 설정 · 백업) ---------- */
+function openModal(k){MODAL=k;modal.classList.add('on');({day:drawDay,cookie:drawCookie,set:drawSet,backup:drawBackup})[k]();}
+function closeModal(){MODAL='';modal.classList.remove('on');modal.innerHTML='';}
+const mhead=t=>`<div class="row between"><h2 style="font-size:1.7rem">${t}</h2><button class="ghost small" id="mx">닫기 ✕</button></div>`;
+const bindClose=()=>{$('#mx').onclick=closeModal;};
+let DAYPICK=null;
+function drawDay(){
+  if(!DAYPICK||DAYPICK.day!==M.day){const i=NEWS.findIndex((_,k)=>!M.used.includes(k));DAYPICK={day:M.day,i:i<0?0:i,own:false,e:'📰',t:'',b:'',x:{}};}
+  const P=DAYPICK,sel=P.own?P:NEWS[P.i];
+  modal.innerHTML=`<div class="panel grid">${mhead(M.day?`🌅 ${M.day+1}일째 시작`:'🔔 첫 거래일 시작')}
+   <div class="rules">${M.day?`<b>누르면 이렇게 돼요</b><ul><li>남은 주문을 모두 처리해요.</li><li>어제 뉴스(${esc(M.today?M.today.t:'')})의 영향으로 주가가 바뀌고, 예측 점수를 매겨요.</li><li>아래 고른 뉴스가 오늘의 뉴스로 나오고 장이 열려요 (마감 오후 ${esc(M.cfg.close)}).</li></ul>`:'첫 뉴스가 나오고 장이 열려요. 주가는 내일 아침 이 뉴스에 따라 바뀌어요.'}</div>
+   <div class="seg"><button data-own="0" aria-pressed="${!P.own}">준비된 뉴스에서 고르기</button><button data-own="1" aria-pressed="${P.own}">✏️ 직접 쓰기 (우리 반 일로)</button></div>
+   ${P.own?`<div class="f2"><label class="fld"><span class="lb">그림 (이모지)</span><input id="ne" value="${esc(P.e)}" maxlength="4"></label><label class="fld" style="grid-column:span 2"><span class="lb">제목</span><input id="nt" value="${esc(P.t)}" maxlength="40" placeholder="예) 우리 학교 체육대회가 열려요"></label></div>
+     <label class="fld"><span class="lb">내용 (두세 문장)</span><textarea id="nb" maxlength="200">${esc(P.b)}</textarea></label>
+     <div class="fld"><span class="lb">내일 주가에 주는 영향 (학생에게는 안 보여요)</span>${CO.map(c=>`<div class="effrow"><span>${c.e} ${esc(c.n)}</span><div class="seg" data-c="${c.id}">${LV.map(([v,l])=>`<button data-v="${v}" aria-pressed="${(P.x[c.id]||0)===v}">${l}</button>`).join('')}</div></div>`).join('')}</div>`
+    :`<div class="nlist">${NEWS.map((n,k)=>`<button data-i="${k}" aria-pressed="${P.i===k}" class="${M.used.includes(k)?'used':''}">${n.e} ${esc(n.t)}${M.used.includes(k)?' (썼어요)':''}</button>`).join('')}</div>
+     ${newsCard({...sel,day:M.day+1})}
+     <button class="ghost" id="peek">🔒 내일 주가 영향 보기 (꾹 누르기 · 학생에게 보이지 않게)</button>
+     <div class="secret" id="sec">${CO.map(c=>`${c.e} ${esc(c.n)} ${(LV.find(l=>l[0]===(sel.x[c.id]||0))||LV[2])[1]}`).join(' · ')}</div>`}
+   <div class="row" style="justify-content:center"><button id="go" style="font-size:1.3rem">${M.day?'🌅 새 날 시작':'🔔 장 열기'}</button></div>
+   <div class="msg bad" id="dm"></div></div>`;
+  bindClose();
+  $$('[data-own]').forEach(b=>b.onclick=()=>{P.own=b.dataset.own==='1';drawDay();});
+  $$('[data-i]').forEach(b=>b.onclick=()=>{P.i=+b.dataset.i;drawDay();});
+  $$('.seg[data-c]').forEach(s=>$$('button',s).forEach(b=>b.onclick=()=>{P.x[s.dataset.c]=+b.dataset.v;drawDay();}));
+  ['ne','nt','nb'].forEach(id=>{const el=$('#'+id);if(el)el.oninput=()=>{P[id[1]]=el.value;};});
+  if($('#peek')){const s=$('#sec');$('#peek').onpointerdown=e=>{e.preventDefault();s.classList.add('on');};['pointerup','pointerleave','pointercancel'].forEach(t=>$('#peek').addEventListener(t,()=>s.classList.remove('on')));}
+  $('#go').onclick=async()=>{
+    const nw=P.own?{e:P.e||'📰',t:P.t.trim(),b:P.b.trim(),x:{...P.x}}:{...NEWS[P.i],i:P.i};
+    if(!nw.t){$('#dm').textContent='뉴스 제목을 써 주세요.';return;}
+    $('#go').disabled=true;
+    try{await startDay(nw);DAYPICK=null;closeModal();}catch(e){$('#dm').textContent='시작하지 못했어요: '+(e.message||e);$('#go').disabled=false;}
+  };
+}
+function drawCookie(){
+  if(MODAL!=='cookie')return;
+  const groups={};
+  Object.entries(M.ops).forEach(([id,o])=>{if(o.st!=='wait')return;const k=o.num+'|'+o.type;(groups[k]=groups[k]||{num:o.num,type:o.type,ops:[]}).ops.push(o);});
+  const G=Object.values(groups).sort((a,b)=>a.type<b.type?1:a.type>b.type?-1:a.num-b.num);
+  const done=Object.values(M.ops).filter(o=>o.st!=='wait').sort((a,b)=>(b.doneAt||b.at)-(a.doneAt||a.at)).slice(0,15);
+  const ready=!!DH.key;
+  const sumIn=G.filter(g=>g.type==='in').reduce((s,g)=>s+g.ops.reduce((t,o)=>t+o.n,0),0),sumOut=G.filter(g=>g.type==='out').reduce((s,g)=>s+g.ops.reduce((t,o)=>t+o.n,0),0);
+  modal.innerHTML=`<div class="panel grid">${mhead('🍪 쿠키 처리')}
+   <p style="margin:0">다했니에서 아래만큼 <b>빼거나(사용 처리)</b> <b>주고</b>, 확인을 눌러요. ${ready?'확인을 누르면 다했니 쿠키가 정말 바뀌었는지 API로 읽어서 맞을 때만 처리해요.':'다했니 API를 연결하지 않아서 "직접 확인"으로 처리해요. (⚙️ 설정에서 연결할 수 있어요)'}</p>
+   <div class="chips"><span>빼야 할 쿠키 ${sumIn}개</span><span>줘야 할 쿠키 ${sumOut}개</span></div>
+   ${G.map(g=>{const n=g.ops.reduce((s,o)=>s+o.n,0),a=M.acct[g.num]||{};const warn=g.ops.map(o=>o.warn||o.snapErr).filter(Boolean);
+     return `<div class="opg"><div class="row between"><b>${g.num} ${esc(a.name||'')} · ${g.type==='in'?`다했니에서 쿠키 <span class="down">${n}개 빼기</span> → ${won(n*M.cfg.rate)} 넣기`:`다했니에서 쿠키 <span class="up">${n}개 주기</span>${g.ops.some(o=>o.fin)?' (마지막 정산)':''}`}</b>
+       <div class="row">${ready&&dhReady(g.num)?`<button class="okb small" data-v="${g.num}|${g.type}">다했니에서 확인</button>`:''}<button class="${ready&&dhReady(g.num)?'ghost':'okb'} small" data-m="${g.num}|${g.type}">직접 확인</button>${g.ops.some(o=>o.fin)?'':`<button class="ghost small" data-c="${g.num}|${g.type}">취소</button>`}</div></div>
+       ${warn.length?`<div class="warn" style="padding:4px 10px">${warn.map(esc).join(' · ')}</div>`:''}<div class="msg bad" style="min-height:0" id="vm${g.num}${g.type}"></div></div>`;}).join('')||'<p class="muted">지금 처리할 쿠키가 없어요.</p>'}
+   <details><summary>최근 처리한 것</summary><div class="ops" style="margin-top:8px">${done.map(o=>`<div><span>${o.num} ${esc((M.acct[o.num]||{}).name||'')} · ${o.type==='in'?'맡기기':'돌려주기'} ${o.n}개</span><span>${o.st==='done'?(o.how==='api'?'✔ 다했니로 확인':'✔ 직접 확인'):'✕ 취소'}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></details></div>`;
+  bindClose();
+  $$('[data-v]').forEach(b=>b.onclick=async()=>{const [n,t]=b.dataset.v.split('|');b.disabled=true;const m=await verifyOps(+n,t);const el=$(`#vm${n}${t}`);if(el)el.textContent=m;b.disabled=false;});
+  $$('[data-m]').forEach(b=>b.onclick=()=>{const [n,t]=b.dataset.m.split('|');if(confirm(`다했니에서 ${n}번 쿠키를 ${t==='in'?'뺐나요':'줬나요'}?`))finishOps(+n,t,'manual');});
+  $$('[data-c]').forEach(b=>b.onclick=()=>{const [n,t]=b.dataset.c.split('|');if(confirm(`${n}번 신청을 취소할까요?`))finishOps(+n,t,'cancel');});
+}
+function drawSet(){
+  const c=M.cfg;
+  const codes=Object.entries(DH.codes||{}).sort((a,b)=>a[0]-b[0]).map(([n,v])=>`${n} ${v}`).join('\n');
+  modal.innerHTML=`<div class="panel grid">${mhead('⚙️ 설정')}
+   <div class="f2"><label class="fld"><span class="lb">장 마감 시간</span><input type="time" id="sc" value="${esc(c.close)}"></label>
+    <label class="fld"><span class="lb">프로젝트 기간 (거래일)</span><input type="number" id="sd" min="1" max="60" value="${c.days}"></label>
+    <label class="fld"><span class="lb">쿠키 1개 = ?원</span><input type="number" id="sr" min="100" step="100" value="${c.rate}" ${M.day||Object.values(M.acct).some(a=>a.dep)?'disabled title="쿠키를 맡긴 뒤에는 바꿀 수 없어요"':''}></label>
+    <label class="fld"><span class="lb">한 명이 맡길 수 있는 쿠키 (모두 합쳐)</span><input type="number" id="sp" min="1" max="200" value="${c.cap}"></label>
+    <label class="fld"><span class="lb">남은 쿠키의 몇 %까지</span><input type="number" id="so" min="10" max="100" step="10" value="${Math.round(c.ratio*100)}"></label></div>
+   <h3 style="font-size:1.4rem">다했니 연결 (읽기 전용)</h3>
+   <div class="warn">API 키와 학생 코드는 <b>이 컴퓨터에만</b> 저장되고 학생 화면이나 서버에 올라가지 않아요. 학생 코드와 쿠키 수가 보이니 <b>TV에 띄우지 말고</b> 넣어 주세요. 새 키를 만들면 예전 키를 쓰던 다른 다했니 앱이 멈춰요.</div>
+   <label class="fld"><span class="lb">다했니 API 키 (다했니 → API 센터)</span><input type="password" id="dk" value="${esc(DH.key)}" autocomplete="off" placeholder="복사해 둔 키를 붙여 넣어요"></label>
+   <label class="fld"><span class="lb">학생 코드: 한 줄에 "번호 학생코드"</span><textarea id="dc" placeholder="1 ABCD1234&#10;2 EFGH5678" style="min-height:8em">${esc(codes)}</textarea></label>
+   <div class="row"><button id="save">저장</button><button class="ghost" id="test">다했니 연결 확인</button></div>
+   <div id="tres"></div></div>`;
+  bindClose();
+  const readCodes=()=>{const o={};$('#dc').value.split('\n').forEach(l=>{const p=l.trim().split(/\s+/);if(p.length>=2&&/^\d{1,2}$/.test(p[0]))o[+p[0]]=p[p.length-1];});return o;};
+  $('#save').onclick=()=>{
+    c.close=$('#sc').value||'13:10';c.days=Math.max(1,+$('#sd').value||15);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
+    c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
+    DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
+    saveM();publish();closeModal();
+  };
+  $('#test').onclick=async()=>{
+    DH={key:$('#dk').value.trim(),codes:readCodes()};
+    const box=$('#tres');const rows=[];
+    if(!DH.key){box.innerHTML='<p class="msg bad">API 키를 넣어 주세요.</p>';return;}
+    box.innerHTML='<p class="muted">읽는 중…</p>';
+    for(const [n,code] of Object.entries(DH.codes)){
+      const ours=(M.acct[n]||PL[n]||{}).name||'';
+      try{const d=await dhGet(code);rows.push(`<tr><td>${n} ${esc(ours)}</td><td>${d.number} ${esc(d.name)}</td><td class="num">${d.totalCookie}개</td><td>${ours&&ours!==d.name?'<b class="down">이름이 달라요</b>':'✔'}</td></tr>`);}
+      catch(e){rows.push(`<tr><td>${n} ${esc(ours)}</td><td colspan="3" class="down">${esc(e.message)}</td></tr>`);}
+      box.innerHTML=`<table class="tbl"><tr><th>우리 반</th><th>다했니</th><th>남은 쿠키</th><th>확인</th></tr>${rows.join('')}</table>`;
+    }
+    if(!rows.length)box.innerHTML='<p class="msg bad">학생 코드를 한 줄에 하나씩 넣어 주세요.</p>';
+  };
+}
+function drawBackup(){
+  modal.innerHTML=`<div class="panel grid">${mhead('💾 장부 백업')}
+   <p style="margin:0">장부는 이 컴퓨터의 브라우저에 저장돼요. 브라우저 기록을 지우거나 다른 컴퓨터로 옮길 때를 위해 가끔 백업 파일을 내려받아 두세요. (다했니 키와 학생 코드는 백업 파일에 들어가지 않아요)</p>
+   <div class="row"><button id="dl">백업 파일 내려받기</button><label class="ghost" style="display:inline-block;border:2px solid var(--coral);color:var(--coral2);border-radius:14px;padding:.6em 1.1em;font-family:var(--display);cursor:pointer">백업 파일 불러오기<input type="file" id="ul" accept=".json,application/json" hidden></label></div>
+   <div class="msg" id="bm"></div>
+   <details><summary>처음부터 다시 시작</summary><p>새 방을 만들고 장부를 비워요. 지금 장부는 먼저 백업해 두세요.</p><button class="ghost" id="reset">새 방 만들기</button></details></div>`;
+  bindClose();
+  $('#dl').onclick=()=>{const d=new Date();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(M)],{type:'application/json'}));a.download=`쿠키증권_장부_${d.getMonth()+1}월${d.getDate()}일_${M.day}일째.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);};
+  $('#ul').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{const o=JSON.parse(await f.text());if(!o||!o.room||!o.acct||!o.prices)throw 0;
+      if(!confirm(`${o.room}번 방, ${o.day}일째 장부로 바꿀까요? 지금 장부는 사라져요.`))return;
+      M=o;saveM();closeModal();teacherView();}
+    catch(err){$('#bm').className='msg bad';$('#bm').textContent='쿠키 증권 백업 파일이 아니에요.';}
+  };
+  $('#reset').onclick=()=>{if(confirm('정말 새 방을 만들까요? 지금 장부는 사라지고 학생들은 다시 들어와야 해요.')){store('stock-master',null);closeModal();teacherView();}};
+}
+
+/* ---------- 길 찾기 ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
