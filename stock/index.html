@@ -54,7 +54,7 @@ main{padding-block:18px 24px}
 .hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
 .hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
 .hero p{font-size:1.15rem}
-.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.minis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .minis div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;font-family:var(--display)}
 .minis span{display:block;font-size:2.2rem;line-height:1.2}
 .choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
@@ -68,7 +68,7 @@ main{padding-block:18px 24px}
 .status b{font-family:var(--display);font-weight:400;font-size:1.45rem}
 .mkt{font-family:var(--display);font-size:1.15rem;border-radius:12px;padding:8px 14px;background:#E3F1E7;color:var(--ok)}
 .mkt.closed{background:#EEE6D3;color:var(--muted)}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .tabs button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.1rem;padding:.6em .3em}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .cos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
@@ -101,6 +101,11 @@ button.co{cursor:pointer}
 .newsc h2{font-size:clamp(1.5rem,4vw,2.1rem)}
 .newsc p{margin:0;font-size:1.15rem}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
+.fxbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.fxbar .big{white-space:nowrap}
+.prog{display:flex;gap:6px}
+.prog i{flex:1;height:14px;border-radius:7px;background:var(--line)}
+.prog i.on{background:var(--coral)}
 .chips span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:.2em .8em;font-family:var(--display);font-size:1.1rem}
 .picks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .picks button{background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.1rem;padding:.6em .3em;line-height:1.25}
@@ -127,7 +132,10 @@ button.co{cursor:pointer}
 .req b{font-family:var(--display);font-weight:400;font-size:1.15rem}
 .side button{width:100%}
 .badge{display:inline-block;background:var(--bad);color:#fff;border-radius:999px;padding:0 .55em;margin-left:.3em}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.board .co .hd span{font-size:1.6rem}.board .co .pr{font-size:1.3rem}
+.sect{font-family:var(--display);font-size:1.3rem;margin:6px 0 -4px}
+.tip{background:#fff7e0;border:2px dashed var(--coral);border-radius:14px;padding:10px 14px}
 .board .co .pr{font-size:2rem}
 .rank{display:grid;gap:6px}
 .rank .r{display:grid;grid-template-columns:2.2em 1fr auto 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px;font-family:var(--display);font-size:1.15rem;color:var(--ink)}
@@ -192,38 +200,72 @@ const FIREBASE_CONFIG = {
 const DH_API='https://api.dahandin.com/openapi/v1';
 
 /* ---------- 가상 회사 6개 (사회 2단원 무역·시장경제와 이어져요) ---------- */
+// g: 회사가 꾸준히 크는 힘(하루 %), v: 매일 흔들리는 정도(±%). 학생에게는 보이지 않아요
 const CO=[
-  {id:'sea',e:'🚢',n:'바다해운',d:'큰 배로 여러 나라에 물건을 실어 날라요',p:1000},
-  {id:'volt',e:'🔋',n:'번개배터리',d:'전기차 배터리를 만들어요. 원료인 흑연을 수입해요',p:1500},
-  {id:'chip',e:'💾',n:'반짝반도체',d:'반도체를 만들어 세계 여러 나라에 수출해요',p:2000},
-  {id:'tteok',e:'🌶️',n:'냠냠떡볶이',d:'우리 동네에서 가장 인기 있는 분식집이에요',p:500},
-  {id:'farm',e:'🌾',n:'푸른농장',d:'쌀과 과일을 길러요. 날씨가 아주 중요해요',p:800},
-  {id:'game',e:'🎮',n:'두근게임즈',d:'재미있는 게임을 만들어 팔아요',p:1200}
+  {id:'sea',e:'🚢',n:'바다해운',d:'큰 배로 여러 나라에 물건을 실어 날라요',p:1000,g:.3,v:3},
+  {id:'volt',e:'🔋',n:'번개배터리',d:'전기차 배터리를 만들어요. 원료인 흑연을 수입해요',p:1500,g:.5,v:4},
+  {id:'chip',e:'💾',n:'반짝반도체',d:'반도체를 만들어 세계 여러 나라에 수출해요',p:2000,g:.5,v:4},
+  {id:'car',e:'🚗',n:'씽씽자동차',d:'자동차를 만들어 여러 나라에 수출해요',p:3000,g:.4,v:3},
+  {id:'sun',e:'☀️',n:'햇살에너지',d:'햇빛으로 전기를 만들어요',p:900,g:.5,v:4.5},
+  {id:'tteok',e:'🌶️',n:'냠냠떡볶이',d:'우리 동네에서 가장 인기 있는 분식집이에요',p:500,g:.2,v:3},
+  {id:'mart',e:'🛒',n:'바로마트',d:'먹을거리와 생활용품을 팔아요. 경기가 나빠도 꾸준히 팔려요',p:700,g:.3,v:1.5},
+  {id:'farm',e:'🌾',n:'푸른농장',d:'쌀과 과일을 길러요. 날씨가 아주 중요해요',p:800,g:.2,v:2.5},
+  {id:'game',e:'🎮',n:'두근게임즈',d:'재미있는 게임을 만들어 팔아요',p:1200,g:.4,v:4.5},
+  {id:'star',e:'🎤',n:'반짝엔터',d:'케이팝 가수를 키워 세계 무대에 세워요',p:1300,g:.4,v:5},
+  {id:'drug',e:'💊',n:'튼튼제약',d:'감기약과 백신을 만들어요',p:2500,g:.4,v:3.5},
+  {id:'bank',e:'🏛️',n:'든든은행',d:'사람들의 돈을 맡아 주고 빌려줘요. 이자가 오르면 돈을 더 벌어요',p:1800,g:.3,v:2},
+  {id:'air',e:'✈️',n:'구름항공',d:'비행기로 사람과 물건을 실어 날라요. 기름값과 여행객 수가 중요해요',p:1100,g:.2,v:4}
 ];
-const COI=Object.fromEntries(CO.map(c=>[c.id,c]));
+// ETF: 여러 회사를 바구니에 함께 담은 상품. 값은 담긴 회사들의 평균 움직임을 따라가요
+const ETF=[
+  {id:'etfall',e:'🧺',n:'우리반 전체 ETF',d:'13개 회사를 모두 조금씩 담은 바구니예요. 한 회사가 어려워도 덜 흔들려요',p:1000,k:'etf',of:CO.map(c=>c.id)},
+  {id:'etffut',e:'🚀',n:'미래기술 ETF',d:'배터리·반도체·자동차·태양광 회사를 함께 담았어요',p:1000,k:'etf',of:['volt','chip','car','sun']}
+];
+const GOLD={id:'gold',e:'🥇',n:'금',d:'세상이 불안할 때 사람들이 찾는 안전 자산이에요. 천천히 움직여요',p:3000,k:'gold',g:.25,v:1};
+const AS=[...CO,...ETF,GOLD];
+const COI=Object.fromEntries(AS.map(c=>[c.id,c]));
+const feeRate=(c,cfg)=>c.k==='etf'?cfg.fee*.3:c.k==='gold'?cfg.fee*.5:cfg.fee;
+const feeOf=(amt,c,cfg,short)=>Math.max(10,Math.round(amt*(feeRate(c,cfg)+(short?cfg.sfee:0))/100));
 /* ---------- 뉴스 카드: x는 다음 날 아침 주가에 주는 영향(-2 ~ +2). 실제 오르내림은 여기에 작은 운이 더해져요 ---------- */
 const NEWS=[
-  {e:'🚗',t:'전기차가 날개 돋친 듯 팔려요',b:'올해 전기차를 사는 사람이 작년보다 두 배나 늘었대요. 전기차에는 배터리와 반도체가 꼭 필요해요.',x:{volt:2,chip:1}},
-  {e:'🌀',t:'큰 태풍이 다가온대요',b:'다음 주에 아주 큰 태풍이 우리나라 쪽으로 온다는 예보가 나왔어요. 바다에 배가 뜨기 어렵고 논밭도 걱정이에요. 사람들은 집에 머물 것 같아요.',x:{sea:-2,farm:-2,game:1}},
+  {e:'🚗',t:'전기차가 날개 돋친 듯 팔려요',b:'올해 전기차를 사는 사람이 작년보다 두 배나 늘었대요. 전기차에는 배터리와 반도체가 꼭 필요해요.',x:{volt:2,chip:1,car:1,sun:1}},
+  {e:'🌀',t:'큰 태풍이 다가온대요',b:'다음 주에 아주 큰 태풍이 우리나라 쪽으로 온다는 예보가 나왔어요. 바다에 배가 뜨기 어렵고 논밭도 걱정이에요. 사람들은 집에 머물 것 같아요.',x:{sea:-2,farm:-2,game:1,air:-1}},
   {e:'🌶️',t:'냠냠떡볶이 신메뉴 "치즈 폭탄" 대박',b:'냠냠떡볶이가 새로 낸 치즈 폭탄 떡볶이를 먹으려고 가게 앞에 줄이 길게 섰어요.',x:{tteok:2}},
   {e:'✏️',t:'흑연을 파는 나라가 수출을 줄인대요',b:'배터리 원료인 흑연을 많이 파는 나라가 앞으로 흑연을 조금만 팔겠다고 했어요. 흑연을 수입하는 회사는 걱정이 커졌어요.',x:{volt:-2}},
   {e:'📱',t:'새 스마트폰이 나와 반도체 주문이 늘었어요',b:'세계적인 회사들이 새 스마트폰을 내놓으면서 반도체를 더 많이 사 가기로 했어요. 물건을 실어 나를 배도 더 필요해요.',x:{chip:2,sea:1}},
   {e:'🎮',t:'두근게임즈 새 게임 출시가 미뤄졌어요',b:'기다리던 새 게임에서 고칠 점이 많이 나와서 출시가 석 달 뒤로 미뤄졌대요.',x:{game:-2}},
   {e:'🚢',t:'세계 무역이 늘어 배가 모자라요',b:'나라와 나라 사이에 사고파는 물건이 크게 늘어서, 물건을 실을 배를 구하기 어려울 정도래요.',x:{sea:2}},
   {e:'☀️',t:'올해는 날씨가 좋아 풍년이래요',b:'비와 햇볕이 알맞아서 쌀과 과일이 아주 잘 자랐어요. 농장마다 수확이 많을 것 같아요.',x:{farm:2}},
-  {e:'🌍',t:'다른 나라와 무역 분쟁, 관세를 올린대요',b:'어떤 큰 나라가 우리나라 물건에 세금(관세)을 더 매기겠다고 했어요. 수출하는 회사들이 걱정하고 있어요.',x:{chip:-2,sea:-1,volt:-1}},
+  {e:'🌍',t:'다른 나라와 무역 분쟁, 관세를 올린대요',b:'어떤 큰 나라가 우리나라 물건에 세금(관세)을 더 매기겠다고 했어요. 수출하는 회사들이 걱정하고 있어요.',x:{chip:-2,sea:-1,volt:-1,car:-1,fx:1,gold:1}},
   {e:'🧪',t:'번개배터리, 더 오래 가는 배터리 개발 성공',b:'번개배터리가 한 번 충전으로 훨씬 멀리 갈 수 있는 새 배터리를 만들었어요. 여러 자동차 회사가 관심을 보여요.',x:{volt:2}},
   {e:'🥬',t:'채소값이 올라 떡볶이 재료비가 비싸졌어요',b:'가뭄으로 채소값이 크게 올랐어요. 분식집은 재료비가 걱정이고, 농장은 채소를 비싸게 팔 수 있어요.',x:{tteok:-1,farm:1}},
   {e:'🏆',t:'두근게임즈 게임이 세계 대회 종목이 됐어요',b:'두근게임즈의 게임이 세계 게임 대회 종목으로 뽑혔어요. 게임을 하는 사람이 더 늘 것 같아요.',x:{game:2}},
-  {e:'⛽',t:'기름값이 크게 올랐어요',b:'배와 농기계에 넣는 기름값이 크게 올랐어요. 기름 대신 전기로 달리는 차에 관심이 커지고 있어요.',x:{sea:-2,farm:-1,volt:1}},
-  {e:'🎪',t:'우리 지역 축제가 열려요',b:'이번 주말 우리 지역에서 큰 축제가 열려요. 사람들이 많이 모여서 먹을거리를 사 먹을 것 같아요.',x:{tteok:2,farm:1}},
+  {e:'⛽',t:'기름값이 크게 올랐어요',b:'배와 농기계에 넣는 기름값이 크게 올랐어요. 기름 대신 전기로 달리는 차에 관심이 커지고 있어요.',x:{sea:-2,farm:-1,volt:1,air:-2,sun:1}},
+  {e:'🎪',t:'우리 지역 축제가 열려요',b:'이번 주말 우리 지역에서 큰 축제가 열려요. 사람들이 많이 모여서 먹을거리를 사 먹을 것 같아요.',x:{tteok:2,farm:1,star:1}},
   {e:'💾',t:'반도체가 너무 많이 만들어졌대요',b:'세계 여러 회사가 반도체를 한꺼번에 많이 만들어서 창고에 쌓였어요. 반도체 값이 떨어질 수 있어요.',x:{chip:-2}},
   {e:'🐛',t:'병충해로 과일 농사가 어려워요',b:'벌레가 퍼져서 과일나무가 많이 아파요. 올해 과일 수확이 크게 줄 것 같아요.',x:{farm:-2}},
-  {e:'🤝',t:'이웃 나라와 무역 협정을 맺었어요',b:'우리나라와 이웃 나라가 서로 관세를 낮추기로 약속했어요. 물건을 더 쉽게 사고팔 수 있어요.',x:{sea:1,chip:1,volt:1}},
-  {e:'🦠',t:'감기가 유행해서 밖에 잘 안 나가요',b:'독한 감기가 유행해서 사람들이 밖에 덜 나가고 집에서 시간을 보내요.',x:{tteok:-1,game:1}},
+  {e:'🤝',t:'이웃 나라와 무역 협정을 맺었어요',b:'우리나라와 이웃 나라가 서로 관세를 낮추기로 약속했어요. 물건을 더 쉽게 사고팔 수 있어요.',x:{sea:1,chip:1,volt:1,car:1,fx:-1}},
+  {e:'🦠',t:'감기가 유행해서 밖에 잘 안 나가요',b:'독한 감기가 유행해서 사람들이 밖에 덜 나가고 집에서 시간을 보내요.',x:{tteok:-1,game:1,drug:2,mart:1}},
   {e:'🗣️',t:'"○○ 회사가 망한대!" 소문이 돌아요',b:'인터넷에 근거 없는 소문이 돌았어요. 회사는 "사실이 아니에요"라고 했어요. 소문만 믿고 사고팔아도 될까요?',x:{}},
-  {e:'🏫',t:'방학이 다가와요',b:'곧 방학이에요. 학교 앞 분식집에 오는 학생 손님은 줄고, 집에서 게임하는 시간은 늘 것 같아요.',x:{tteok:-1,game:1}}
+  {e:'🏫',t:'방학이 다가와요',b:'곧 방학이에요. 학교 앞 분식집에 오는 학생 손님은 줄고, 집에서 게임하는 시간은 늘 것 같아요.',x:{tteok:-1,game:1}},
+  {e:'💵',t:'세계 경제가 불안해서 달러를 찾는 사람이 많아요',b:'세계 여러 나라 경제가 흔들리자 사람들이 안전하다고 여기는 달러를 많이 사려고 해요. 달러 값이 오르면 수출하는 회사는 같은 물건을 팔아도 원화로 더 많이 벌고, 원료를 수입하는 회사는 더 비싸게 사야 해요.',x:{fx:2,chip:1,car:1,volt:-1,gold:2}},
+  {e:'✈️',t:'외국인 관광객이 우리나라로 몰려와요',b:'우리나라 여행이 인기라서 외국인 관광객이 크게 늘었어요. 관광객들이 달러를 원화로 바꾸면서 원화를 찾는 사람이 많아졌어요. 분식집에도 외국인 손님이 늘었대요.',x:{fx:-2,tteok:1,air:1,mart:1}},
+  {e:'🏦',t:'우리나라 중앙은행이 이자를 올린대요',b:'우리나라 중앙은행이 이자(금리)를 올리기로 했어요. 이자를 더 받으려고 외국 돈이 우리나라로 들어오면 원화 값이 올라요. 돈을 빌려 공장을 짓는 회사는 이자 부담이 커져요.',x:{fx:-1,volt:-1,game:-1,bank:2,gold:-1}},
+  {e:'📦',t:'우리나라 수출이 역대 최고래요',b:'올해 우리나라가 외국에 판 물건이 가장 많았대요. 수출로 번 달러를 원화로 바꾸면 원화 값이 오를 수 있어요.',x:{fx:-1,chip:1,sea:1,car:1}},
+  {e:'🎤',t:'반짝엔터 가수가 세계 음악 순위 1위',b:'반짝엔터의 아이돌 그룹이 세계 음악 순위 1위에 올랐어요. 세계 공연 표가 금방 다 팔렸대요.',x:{star:2,air:1}},
+  {e:'💊',t:'튼튼제약 새 감기약이 허가를 받았어요',b:'튼튼제약이 오래 연구한 새 감기약을 팔아도 된다는 허가를 받았어요. 약국마다 주문이 들어오고 있어요.',x:{drug:2}},
+  {e:'🔧',t:'씽씽자동차가 차를 다시 고쳐 주기로 했어요',b:'씽씽자동차가 판 차 일부에서 문제가 발견돼서 모두 무료로 고쳐 주기로 했어요(리콜). 돈이 많이 들 것 같아요.',x:{car:-2}},
+  {e:'🌞',t:'정부가 태양광 발전을 돕기로 했어요',b:'정부가 집과 학교 지붕에 태양광 판을 다는 비용을 보태 주기로 했어요.',x:{sun:2}},
+  {e:'🧾',t:'물가가 올라 장보기가 부담스러워요',b:'과자, 우유, 채소 값이 한꺼번에 올랐어요. 사람들이 외식을 줄이고 꼭 필요한 것만 사요.',x:{tteok:-1,mart:1,star:-1}},
+  {e:'📵',t:'든든은행 앱이 하루 종일 멈췄어요',b:'든든은행 휴대폰 앱이 고장 나서 하루 동안 쓸 수 없었어요. 화가 난 손님들이 다른 은행으로 옮기겠대요.',x:{bank:-2}},
+  {e:'🧳',t:'방학 해외여행 예약이 쏟아져요',b:'방학을 앞두고 해외여행 예약이 작년보다 크게 늘었어요. 비행기 표가 거의 다 팔렸대요.',x:{air:2}},
+  {e:'⛏️',t:'금이 많이 묻힌 광산이 새로 발견됐어요',b:'아주 큰 금광이 새로 발견됐어요. 앞으로 금이 많이 나오면 금이 흔해질 수도 있어요.',x:{gold:-2}},
+  {e:'😟',t:'"경제가 나빠질지도 몰라요" 걱정이 커졌어요',b:'여러 전문가가 내년에 경제가 어려워질 수 있다고 말했어요. 사람들이 주식을 팔고 안전한 곳에 돈을 두려고 해요.',x:{sea:-1,volt:-1,chip:-1,car:-1,sun:-1,tteok:-1,farm:-1,game:-1,star:-1,drug:-1,bank:-1,air:-1,gold:2}},
+  {e:'😊',t:'"경제가 좋아지고 있어요" 반가운 소식',b:'일자리가 늘고 가게마다 손님이 많아졌대요. 많은 회사가 돈을 더 잘 벌 것 같아요.',x:{sea:1,volt:1,chip:1,car:1,sun:1,tteok:1,mart:1,farm:1,game:1,star:1,drug:1,bank:1,air:1,gold:-1}}
 ];
+/* 달러 환율: 1달러를 사려면 원화가 얼마나 필요한지. 뉴스의 fx 값이 다음 날 환율을 움직여요 */
+const FX0=1300;
+const EFF=[...CO,GOLD,{id:'fx',e:'💵',n:'환율 (달러 값)'}];
 const LV=[[-2,'⬇⬇'],[-1,'⬇'],[0,'－'],[1,'⬆'],[2,'⬆⬆']];
 // 기기마다 다른 그림 두 개: 선생님 화면과 학생 화면에 같이 보여서 "내 기기"인지 확인해요
 const FP=['🐯','🐰','🐼','🦊','🐸','🐙','🦄','🐝','🐢','🐬','🦁','🐧','🍎','🍌','🍇','🍓','🍉','🍩','🍪','🌽','⚽','🎈','🚀','🌈','⭐','🌙','🔥','💎','🎵','🧩','🪁','🌻'];
@@ -292,14 +334,14 @@ function startView(){
   $('#sub').textContent='3주 모의 주식 투자 · 다했니 쿠키로 투자해요';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>뉴스를 읽고<br>투자해 봐요</h1>
    <p>매일 아침 새 뉴스가 나와요. 뉴스가 어떤 회사에 좋을지 나쁠지 생각해서 주식을 사고팔아요. 다음 날 아침 주가가 바뀌어요. 3주 뒤 내 쿠키는 늘어날까요?</p></div>
-   <div class="minis">${CO.map(c=>`<div><span>${c.e}</span>${esc(c.n)}</div>`).join('')}</div></section>
+   <div class="minis">${AS.map(c=>`<div><span>${c.e}</span>${esc(c.n)}</div>`).join('')}</div></section>
    <div class="choose"><button id="goStu">학생으로 들어가기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
   $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
 }
 
 /* ---------- 학생: 들어가기 ---------- */
 let me=null,KEYS=null,MYFP='',PUB=null,P=null,MYO={},MYP=null,predDay=null,predOff=null;
-let TAB='market',SEL='',QTY=1,NIN=1,NOUT=1,DRAFT=null,vkey='',wasOpen=null,sending=false;
+let TAB='market',SEL='',QTY=1,NIN=1,NOUT=1,FXQ=1,DW=1000,SW=1000,DRAFT=null,vkey='',wasOpen=null,sending=false;
 function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
 function joinView(){
   clearOffs();$('#foot').innerHTML='';
@@ -367,8 +409,8 @@ function render(force){
   const a=myAcct();
   const st=!PUB||!P?'load':P.fp!==MYFP?'other':!a||a.fp!==MYFP?'wait':'main';
   const open=isOpen(PUB);
-  const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.reveal,MYP]:[PUB.prices,PUB.hist,a,MYO,myOps(),PUB.cfg];
-  const key=JSON.stringify([st,TAB,SEL,QTY,NIN,NOUT,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
+  const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.reveal,MYP]:[PUB.prices,PUB.hist,PUB.fx,PUB.fxHist,a,MYO,myOps(),PUB.cfg];
+  const key=JSON.stringify([st,TAB,SEL,QTY,NIN,NOUT,FXQ,DW,SW,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
   if(key===vkey&&!force)return;vkey=key;
   if(st==='load'){app.innerHTML='<div class="panel"><h2>불러오는 중…</h2></div>';return;}
   if(st==='other')return stuOther();
@@ -400,6 +442,8 @@ function rulesBox(){
     <li>주가는 오를 수도, 내릴 수도 있어요. <b>쿠키를 잃을 수도 있어요.</b> 잃어도 괜찮은 만큼만 맡겨요.</li>
     <li>맡길 수 있는 쿠키는 남은 쿠키의 ${Math.round(c.ratio*100)}%, 모두 합쳐 최대 ${c.cap}개예요.</li>
     <li>장은 매일 아침 뉴스와 함께 열리고 <b>오후 ${esc(c.close||'1:10')}</b>에 닫혀요. 수업 시간에는 거래하지 않아요.</li>
+    <li>사고팔 때마다 수수료가 붙어요. 산 지 ${c.sdays!=null?c.sdays:3}일이 안 돼서 팔면 수수료가 더 붙어요. <b>자주 사고팔면 손해</b>예요.</li>
+    <li>한 회사에 몰지 말고 여러 회사, ETF, 금에 나누어 담아요. 🏦 은행에서 달러 환전, 예금, 적금도 할 수 있어요.</li>
     <li>친구 태블릿으로 주문하지 않아요. 내 계좌는 내 태블릿에서만 움직여요.</li></ul></div>`;
 }
 function stuMain(a,open){
@@ -409,16 +453,17 @@ function stuMain(a,open){
     :ph==='setup'?'<span class="mkt closed">⏳ 곧 첫 거래일이 시작돼요. 먼저 쿠키를 맡겨요</span>'
     :open?`<span class="mkt">🟢 장이 열려 있어요 · 마감까지 <b id="cd">${hms(PUB.closeAt-now())}</b></span>`
     :'<span class="mkt closed">🔴 장이 닫혔어요 · 내일 아침 새 뉴스와 함께 열려요</span>';
-  const tabs=[['market','📈 시장'],['news','📰 뉴스'],['wallet','💰 내 지갑'],['cookie','🍪 쿠키']];
-  ClassWatch.step({market:'시장',news:'뉴스와 예측',wallet:'내 지갑',cookie:'쿠키 맡기기·찾기'}[TAB],{n:tabs.findIndex(t=>t[0]===TAB)+1,total:4});
+  const tabs=[['market','📈 시장'],['bank','🏦 은행'],['news','📰 뉴스'],['wallet','💰 내 지갑'],['cookie','🍪 쿠키']];
+  ClassWatch.step({market:'시장',bank:'은행·환전',news:'뉴스와 예측',wallet:'내 지갑',cookie:'쿠키 맡기기·찾기'}[TAB],{n:tabs.findIndex(t=>t[0]===TAB)+1,total:tabs.length});
   frame(`<div class="row between"><span class="band">${PUB.day?`${PUB.day}일째 / ${PUB.cfg.days}일`:'준비'}</span>${status}</div>
-   <div class="status"><div><small>💵 투자할 수 있는 돈</small><b class="num">${won(a.cash)}</b></div><div><small>📊 내 자산 (돈 + 주식)</small><b class="num">${won(a.v)}</b></div>
+   <div class="status"><div><small>💵 투자할 수 있는 돈</small><b class="num">${won(a.cash)}</b></div><div><small>📊 내 자산 (돈 + 주식 + 은행)</small><b class="num">${won(a.v)}</b></div>
     <div><small>📈 수익률</small><b class="num ${ud(a.ret)}">${a.dep?pctTxt(a.ret):'－'}</b></div></div>
    <nav class="tabs">${tabs.map(([k,l])=>`<button data-tab="${k}" aria-pressed="${TAB===k}">${l}</button>`).join('')}</nav>
    <div id="tabbox" class="grid"></div>`);
   $$('[data-tab]').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;render();});
   const box=$('#tabbox');
   if(TAB==='market')stuMarket(box,a,open,easy);
+  else if(TAB==='bank')stuBank(box,a,open);
   else if(TAB==='news')stuNews(box,open,easy);
   else if(TAB==='wallet')stuWallet(box,a);
   else stuCookie(box,a,easy);
@@ -435,28 +480,78 @@ function stuMarket(box,a,open,easy){
   if(SEL){
     const c=COI[SEL],pr=PUB.prices[SEL],mine=(a.hold||{})[SEL]||0,avg=mine?Math.round(((a.cost||{})[SEL]||0)/mine):0;
     if(easy)QTY=1;
-    const maxBuy=Math.floor(a.cash/pr);
-    const cost=pr*QTY;
+    const fr=feeRate(c,PUB.cfg)/100,maxBuy=Math.max(0,Math.floor(a.cash/(pr*(1+fr))));
+    const lb=(a.lb||{})[SEL],short=lb!=null&&PUB.day-lb<PUB.cfg.sdays;
+    const bf=feeOf(pr*QTY,c,PUB.cfg,false),sf=feeOf(pr*QTY,c,PUB.cfg,short);
+    const cost=pr*QTY+bf;
     det=`<div class="panel grid pop"><div class="row between"><div class="row"><span style="font-size:3rem;line-height:1">${c.e}</span><div><h2 style="font-size:1.8rem">${esc(c.n)}</h2><div class="muted">${esc(c.d)}</div></div></div><button class="ghost small" id="x">닫기 ✕</button></div>
       <div class="detail"><div class="grid" style="gap:6px"><div class="big num">${won(pr)} <span class="${ud((PUB.chg||{})[SEL]||0)}" style="font-size:.7em">${pctTxt((PUB.chg||{})[SEL]||0)}</span></div>${((PUB.hist||{})[SEL]||[]).length>1?spark((PUB.hist||{})[SEL],400,120):'<p class="muted" style="margin:0">내일 아침부터 주가 그래프가 그려져요.</p>'}
         <div class="muted">처음 값 ${won(((PUB.hist||{})[SEL]||[pr])[0])} · 내 주식 <b>${mine}주</b>${mine?` · 산 값 평균 ${won(avg)}`:''}</div></div>
        <div class="grid" style="gap:10px">${easy?`<div class="big center">한 주씩 사고팔아요</div>`:`<div class="stepper"><button class="ghost" id="qm" aria-label="한 주 빼기">−</button><output class="num" id="qv">${QTY}주</output><button class="ghost" id="qp" aria-label="한 주 더하기">＋</button></div>
          <div class="row" style="justify-content:center"><button class="ghost small" id="qmax" ${maxBuy?'':'disabled'}>살 수 있는 만큼 (${maxBuy}주)</button><button class="ghost small" id="qall" ${mine?'':'disabled'}>가진 만큼 (${mine}주)</button></div>
-         <div class="center muted">${QTY}주 × ${won(pr)} = <b style="color:var(--ink)">${won(cost)}</b></div>`}
+         <div class="center muted">살 때: ${QTY}주 × ${won(pr)} + 수수료 ${won(bf)} = <b style="color:var(--ink)">${won(cost)}</b><br>팔 때: ${won(pr*QTY)} − 수수료 ${won(sf)} = <b style="color:var(--ink)">${won(pr*QTY-sf)}</b></div>`}
+        ${short&&mine?`<div class="warn" style="padding:6px 10px">⏱ 산 지 ${PUB.day-lb}일밖에 안 됐어요. 지금 팔면 단기 매매 수수료 ${PUB.cfg.sfee}%가 더 붙어요.</div>`:''}
         <div class="bs"><button class="upb" id="buy" ${open&&cost<=a.cash?'':'disabled'}>${easy?'1주 사기':'사기'}</button><button class="downb" id="sell" ${open&&mine>=QTY?'':'disabled'}>${easy?'1주 팔기':'팔기'}</button></div>
         <div class="msg ${open?'':'bad'}" role="status">${!open?'장이 닫혀 있어서 지금은 사고팔 수 없어요.':cost>a.cash?'돈이 모자라요.':''}</div></div></div></div>`;
   }
   box.innerHTML=`${det}${pend.length?`<div class="warn">⏳ 주문 ${pend.length}개를 선생님 화면이 처리하는 중이에요. 잠시만 기다려요.</div>`:''}
-   <div class="cos">${CO.map(c=>coCard(c,a,true)).join('')}</div>
-   <p class="muted" style="margin:0">회사를 누르면 사고팔 수 있어요. 빨간색은 어제보다 오른 값, 파란색은 내린 값이에요.</p>`;
+   <div class="tip">💡 사고팔 때마다 <b>수수료</b>가 붙어요 (주식 ${PUB.cfg.fee}%, ETF ${+(PUB.cfg.fee*.3).toFixed(2)}%, 금 ${+(PUB.cfg.fee*.5).toFixed(2)}%). 산 지 ${PUB.cfg.sdays}일이 안 돼서 팔면 <b>${PUB.cfg.sfee}%</b>가 더 붙어요. 자주 사고팔수록 손해예요!</div>
+   <div class="sect">📈 주식 (회사 하나)</div><div class="cos">${CO.map(c=>coCard(c,a,true)).join('')}</div>
+   <div class="sect">🧺 ETF (여러 회사를 담은 바구니)</div><div class="cos">${ETF.map(c=>coCard(c,a,true)).join('')}</div>
+   <div class="sect">🥇 금 (안전 자산)</div><div class="cos">${coCard(GOLD,a,true)}</div>
+   <p class="muted" style="margin:0">누르면 사고팔 수 있어요. 빨간색은 어제보다 오른 값, 파란색은 내린 값이에요.</p>`;
   $$('[data-co]',box).forEach(b=>b.onclick=()=>{SEL=SEL===b.dataset.co?'':b.dataset.co;QTY=1;render();});
   if(!SEL)return;
   $('#x').onclick=()=>{SEL='';render();};
   const pr=PUB.prices[SEL],mine=(a.hold||{})[SEL]||0;
   if($('#qm')){$('#qm').onclick=()=>{QTY=Math.max(1,QTY-1);render();};$('#qp').onclick=()=>{QTY=Math.min(999,QTY+1);render();};
-    $('#qmax').onclick=()=>{QTY=Math.max(1,Math.floor(a.cash/pr));render();};$('#qall').onclick=()=>{QTY=Math.max(1,mine);render();};}
+    $('#qmax').onclick=()=>{QTY=Math.max(1,Math.floor(a.cash/(pr*(1+feeRate(COI[SEL],PUB.cfg)/100))));render();};$('#qall').onclick=()=>{QTY=Math.max(1,mine);render();};}
   $('#buy').onclick=()=>sendOrder({t:'buy',c:SEL,q:QTY});
-  $('#sell').onclick=()=>sendOrder({t:'sell',c:SEL,q:QTY});
+  $('#sell').onclick=()=>{const lb=(a.lb||{})[SEL];if(lb!=null&&PUB.day-lb<PUB.cfg.sdays&&!confirm(`산 지 ${PUB.day-lb}일밖에 안 됐어요.\n지금 팔면 수수료가 ${PUB.cfg.sfee}% 더 붙어요. 그래도 팔까요?`))return;sendOrder({t:'sell',c:SEL,q:QTY});};
+}
+function stuBank(box,a,open){
+  const c=PUB.cfg,fx=PUB.fx,usd=a.usd||0,dp=a.dpst||0,sv=a.sav,end=PUB.phase==='end';
+  const maxFx=Math.floor(a.cash/fx);
+  FXQ=Math.max(1,Math.min(FXQ,999));DW=Math.max(100,DW);
+  const pend=pendingOrders().filter(o=>['fxb','fxs','dep','wdr','sj','sc'].includes(o.t));
+  const can=!end;
+  box.innerHTML=`${pend.length?`<div class="warn">⏳ 은행 일 ${pend.length}개를 선생님 화면이 처리하는 중이에요.</div>`:''}
+   <div class="panel grid"><h2>💵 환전소 (원 ↔ 달러)</h2>
+    <div class="detail"><div class="grid" style="gap:6px">
+      <div class="big num">1달러 = ${won(fx)} <span class="${ud(PUB.fxChg||0)}" style="font-size:.7em">${pctTxt(PUB.fxChg||0)}</span></div>
+      ${(PUB.fxHist||[]).length>1?spark(PUB.fxHist,400,100):'<p class="muted" style="margin:0">내일 아침부터 환율 그래프가 그려져요.</p>'}
+      <div>내 달러 <b>${usd}달러</b>${usd?` (지금 바꾸면 ${won(usd*fx)})`:''}${usd?` · 바꾼 값 평균 ${won((a.usdCost||0)/usd)}`:''}</div>
+      <p class="muted" style="margin:0">환율이 오른다 = 달러 값이 오른다 = 1달러를 사려면 원화가 더 많이 필요해요. 쌀 때 달러를 사서 비쌀 때 팔면 이익이에요.</p></div>
+     <div class="grid" style="gap:10px"><div class="stepper"><button class="ghost" id="fm" aria-label="1달러 빼기">−</button><output class="num">${FXQ}달러</output><button class="ghost" id="fp" aria-label="1달러 더하기">＋</button></div>
+      <div class="row" style="justify-content:center"><button class="ghost small" id="fmax" ${maxFx?'':'disabled'}>살 수 있는 만큼 (${maxFx}달러)</button><button class="ghost small" id="fall" ${usd?'':'disabled'}>가진 만큼 (${usd}달러)</button></div>
+      <div class="center muted">${FXQ}달러 × ${won(fx)} = <b style="color:var(--ink)">${won(FXQ*fx)}</b></div>
+      <div class="bs"><button class="upb" id="fxb" ${open&&FXQ*fx<=a.cash?'':'disabled'}>달러 사기</button><button class="downb" id="fxs" ${open&&usd>=FXQ?'':'disabled'}>달러 팔기</button></div>
+      <div class="msg ${open?'':'bad'}">${!open?'환전소는 장이 열려 있을 때만 열려요.':''}</div></div></div></div>
+   <div class="panel grid"><h2>🏦 예금 (언제든 넣고 빼요)</h2>
+    <p class="muted" style="margin:0">매일 아침 예금한 돈의 <b>${c.dRate}%</b>가 이자로 붙어요. 붙은 이자에도 다음 날 또 이자가 붙어요. 주가처럼 내리지는 않지만 크게 오르지도 않아요.</p>
+    <div class="chips"><span>예금한 돈 <b class="num">${won(dp)}</b></span><span>내일 아침 이자 <b class="num up">${won(Math.floor(dp*c.dRate/100))}</b></span><span>지금까지 받은 이자 <b class="num">${won(a.dInt||0)}</b></span></div>
+    <div class="stepper" style="max-width:460px"><button class="ghost" id="dm">−</button><output class="num">${won(DW)}</output><button class="ghost" id="dpl">＋</button></div>
+    <div class="row"><button id="depb" ${can&&DW<=a.cash?'':'disabled'}>${won(DW)} 넣기</button><button class="ghost" id="wdrb" ${can&&DW<=dp?'':'disabled'}>${won(DW)} 빼기</button>
+     <button class="ghost small" id="dall" ${can&&a.cash>0?'':'disabled'}>가진 돈 모두 넣기</button><button class="ghost small" id="wall" ${can&&dp>0?'':'disabled'}>모두 빼기</button></div></div>
+   <div class="panel grid"><h2>🐷 적금 (매일 조금씩 모아요)</h2>
+    ${sv?`<div class="row between"><b style="font-size:1.2rem">하루 ${won(sv.w)}씩 · ${sv.paid}/${c.term}번 넣었어요</b><span class="muted">모은 돈 ${won(sv.paid*sv.w)}</span></div>
+      <div class="prog">${Array.from({length:c.term},(_,i)=>`<i class="${i<sv.paid?'on':''}"></i>`).join('')}</div>
+      <p style="margin:0">${sv.paid>=c.term?`다 모았어요! 내일 아침 <b>${won(sv.paid*sv.w)} + 이자 ${won(Math.floor(sv.paid*sv.w*c.sRate/100))}</b>을 받아요.`:`매일 아침 투자할 돈에서 ${won(sv.w)}씩 자동으로 빠져요. ${c.term}번 다 넣으면 다음 날 아침 모은 돈과 이자 <b>${c.sRate}%</b>를 함께 받아요.`}${sv.miss?` (돈이 모자라서 ${sv.miss}번 건너뛰었어요)`:''}</p>
+      <div class="row"><button class="ghost small" id="scb" ${can?'':'disabled'}>적금 깨기 (이자 없이 모은 돈만 돌려받아요)</button></div>`
+     :`<p class="muted" style="margin:0">하루에 넣을 돈을 정해요. 가입하면 오늘 첫 돈이 빠지고, 매일 아침 같은 돈이 자동으로 빠져요. ${c.term}번 다 넣으면 다음 날 아침 모은 돈에 <b>이자 ${c.sRate}%</b>를 더해 돌려줘요. 중간에 깨면 이자는 없어요.</p>
+      <div class="seg">${[500,1000,2000,3000].map(w=>`<button data-sw="${w}" aria-pressed="${SW===w}">하루 ${won(w)}</button>`).join('')}</div>
+      <div class="center muted">${won(SW)} × ${c.term}번 = ${won(SW*c.term)} → 만기에 <b style="color:var(--ink)">${won(SW*c.term+Math.floor(SW*c.term*c.sRate/100))}</b></div>
+      <div class="row"><button id="sjb" ${can&&SW<=a.cash&&(PUB.day||0)+c.term<=c.days?'':'disabled'}>하루 ${won(SW)} 적금 가입</button><span class="msg bad">${(PUB.day||0)+c.term>c.days?'프로젝트가 끝나기 전에 다 모을 수 없어서 가입할 수 없어요.':''}</span></div>`}</div>
+   <div class="panel grid"><h2>은행 기록</h2><div class="hist">${(a.bk||[]).map(b=>`<div><span>${b.d}일째</span><span>${esc(b.m)}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
+  $('#fm').onclick=()=>{FXQ=Math.max(1,FXQ-1);render();};$('#fp').onclick=()=>{FXQ++;render();};
+  $('#fmax').onclick=()=>{FXQ=Math.max(1,maxFx);render();};$('#fall').onclick=()=>{FXQ=Math.max(1,usd);render();};
+  $('#fxb').onclick=()=>sendOrder({t:'fxb',q:FXQ});$('#fxs').onclick=()=>sendOrder({t:'fxs',q:FXQ});
+  $('#dm').onclick=()=>{DW=Math.max(1000,DW-1000);render();};$('#dpl').onclick=()=>{DW=Math.round(DW/1000)*1000+1000;render();};
+  $('#depb').onclick=()=>sendOrder({t:'dep',w:DW});$('#wdrb').onclick=()=>sendOrder({t:'wdr',w:DW});
+  $('#dall').onclick=()=>sendOrder({t:'dep',w:a.cash});$('#wall').onclick=()=>sendOrder({t:'wdr',w:dp});
+  $$('[data-sw]',box).forEach(b=>b.onclick=()=>{SW=+b.dataset.sw;render();});
+  if($('#sjb'))$('#sjb').onclick=()=>{if(confirm(`하루 ${won(SW)}씩 ${c.term}번 넣는 적금에 가입할까요?\n오늘 첫 ${won(SW)}이 바로 빠져요.`))sendOrder({t:'sj',w:SW});};
+  if($('#scb'))$('#scb').onclick=()=>{if(confirm('적금을 깰까요? 이자 없이 모은 돈만 돌려받아요.'))sendOrder({t:'sc'});};
 }
 async function sendOrder(o){
   if(sending)return;sending=true;
@@ -472,7 +567,7 @@ function newsCard(n){return n?`<div class="newsc pop"><div class="nh"><span>${n.
 function revealBox(r){
   if(!r)return '';
   return `<div class="panel grid"><h2>어제 뉴스는 이렇게 됐어요</h2><div class="muted">${r.e} ${esc(r.t)}</div>
-   <div class="chips">${CO.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(r.chg[c.id])}">${pctTxt(r.chg[c.id]||0)}</b></span>`).join('')}</div></div>`;
+   <div class="chips">${AS.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(r.chg[c.id])}">${pctTxt(r.chg[c.id]||0)}</b></span>`).join('')}${r.fx!=null?`<span>💵 환율 <b class="${ud(r.fx)}">${pctTxt(r.fx)}</b></span>`:''}</div></div>`;
 }
 function stuNews(box,open,easy){
   const n=PUB.news;
@@ -490,23 +585,48 @@ function stuNews(box,open,easy){
   if($('#why'))$('#why').oninput=e=>{DRAFT.why=e.target.value;const s=$('#psave');if(s)s.disabled=!(open&&DRAFT.up&&DRAFT.down);};
   $('#psave').onclick=async()=>{await roomRef(me.room).child(`pred/${PUB.day}/${me.num}`).set({up:DRAFT.up,down:DRAFT.down,why:DRAFT.why.slice(0,200),at:now()});};
 }
+// 바구니 수: 투자한 돈이 몇 군데에 고르게 나뉘었는지 (ETF는 담긴 회사들로 나눠서 셈)
+function basket(hold,prices,usdWon){
+  const w={};let tot=0;
+  AS.forEach(c=>{const v=(hold[c.id]||0)*prices[c.id];if(!v)return;tot+=v;
+    if(c.k==='etf')c.of.forEach(id=>w[id]=(w[id]||0)+v/c.of.length);else w[c.id]=(w[c.id]||0)+v;});
+  if(usdWon>0){w.usd=usdWon;tot+=usdWon;}
+  if(!tot)return 0;
+  return 1/Object.values(w).reduce((s,v)=>s+(v/tot)**2,0);
+}
 function orderText(d){
   const c=COI[d.c];
   if(d.t==='buy')return `${c?c.e+' '+c.n:''} ${d.q}주 사기`;
   if(d.t==='sell')return `${c?c.e+' '+c.n:''} ${d.q}주 팔기`;
   if(d.t==='in')return `🍪 쿠키 ${d.n}개 맡기기 신청`;
   if(d.t==='out')return `🍪 쿠키 ${d.n}개로 바꾸기 신청`;
+  if(d.t==='fxb')return `💵 ${d.q}달러 사기`;
+  if(d.t==='fxs')return `💵 ${d.q}달러 팔기`;
+  if(d.t==='dep')return `🏦 예금 ${won(d.w)} 넣기`;
+  if(d.t==='wdr')return `🏦 예금 ${won(d.w)} 빼기`;
+  if(d.t==='sj')return `🐷 하루 ${won(d.w)} 적금 가입`;
+  if(d.t==='sc')return `🐷 적금 깨기`;
   return '';
 }
 function stuWallet(box,a){
-  const rows=CO.filter(c=>(a.hold||{})[c.id]).map(c=>{const q=a.hold[c.id],cost=(a.cost||{})[c.id]||0,v=q*PUB.prices[c.id],pl=v-cost;
+  const rows=AS.filter(c=>(a.hold||{})[c.id]).map(c=>{const q=a.hold[c.id],cost=(a.cost||{})[c.id]||0,v=q*PUB.prices[c.id],pl=v-cost;
     return `<tr><td>${c.e} ${esc(c.n)}</td><td class="num">${q}주</td><td class="num">${won(cost/q)}</td><td class="num">${won(PUB.prices[c.id])}</td><td class="num ${ud(pl)}">${pl>0?'+':''}${won(pl)}<br><small>${cost?pctTxt(pl/cost*100):''}</small></td></tr>`;}).join('');
   const hist=Object.entries(MYO).map(([id,o])=>{let d={};try{d=JSON.parse(o.d);}catch(e){}return {id,d,r:o.r};}).sort((x,y)=>y.id<x.id?-1:1).slice(0,40);
   const rate=PUB.cfg.rate;
-  box.innerHTML=`<div class="panel grid"><h2>내가 가진 주식</h2>${rows?`<div style="overflow-x:auto"><table class="tbl"><tr><th>회사</th><th>주식 수</th><th>산 값(평균)</th><th>지금 값</th><th>이익·손해</th></tr>${rows}</table></div>`:'<p class="muted" style="margin:0">아직 가진 주식이 없어요.</p>'}</div>
+  const bas=basket(a.hold||{},PUB.prices,a.usd*PUB.fx);
+  box.innerHTML=`<div class="panel grid"><h2>🧺 내 투자 습관</h2>
+    <div class="chips"><span>거래 ${a.trades||0}번</span><span>낸 수수료 <b class="num down">${won(a.fee||0)}</b></span><span>바구니 ${bas?bas.toFixed(1):'0'}개</span></div>
+    <p style="margin:0">${!bas?'아직 투자한 것이 없어요.':bas<2?'🥚 달걀을 한 바구니에 거의 다 담았어요. 그 회사가 어려워지면 크게 잃을 수 있어요. 여러 회사나 ETF에 나누어 담아 봐요.':bas<4?'🧺 여러 바구니에 나누어 담고 있어요. 좋아요!':'🌳 아주 골고루 나누어 담았어요. 한 회사가 흔들려도 내 돈은 덜 흔들려요.'}
+     ${(a.trades||0)>=(PUB.day||1)*3?' ⚠ 하루에 너무 자주 사고팔고 있어요. 수수료가 쌓이고 있어요.':''}</p></div>
+   <div class="panel grid"><h2>내가 가진 주식 · ETF · 금</h2>${rows?`<div style="overflow-x:auto"><table class="tbl"><tr><th>종목</th><th>수</th><th>산 값(평균)</th><th>지금 값</th><th>이익·손해</th></tr>${rows}</table></div>`:'<p class="muted" style="margin:0">아직 가진 주식이 없어요.</p>'}</div>
    <div class="panel grid"><h2>내 계좌 정리</h2><table class="tbl">
     <tr><td>맡긴 쿠키</td><td class="num">${a.dep}개 (${won(a.dep*rate)})</td></tr>
     <tr><td>돌려받은 쿠키</td><td class="num">${a.wd}개 (${won(a.wd*rate)})</td></tr>
+    <tr><td>투자할 수 있는 돈</td><td class="num">${won(a.cash)}</td></tr>
+    <tr><td>주식 · ETF · 금</td><td class="num">${won(AS.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*PUB.prices[c.id],0))}</td></tr>
+    ${a.usd?`<tr><td>달러 ${a.usd}달러 (오늘 환율로)</td><td class="num">${won(a.usd*PUB.fx)}</td></tr>`:''}
+    ${a.dpst?`<tr><td>예금</td><td class="num">${won(a.dpst)}</td></tr>`:''}
+    ${a.sav?`<tr><td>적금 (모은 돈)</td><td class="num">${won(a.sav.paid*a.sav.w)}</td></tr>`:''}
     ${a.res?`<tr><td>돌려받기 기다리는 쿠키</td><td class="num">${Math.round(a.res/rate)}개</td></tr>`:''}
     <tr><td>지금 내 자산</td><td class="num">${won(a.v)}</td></tr>
     <tr><td>수익률 = (지금 자산 + 돌려받은 것 − 맡긴 것) ÷ 맡긴 것</td><td class="num ${ud(a.ret)}">${a.dep?pctTxt(a.ret):'－'}</td></tr></table></div>
@@ -547,8 +667,17 @@ const TAB_ID=(()=>{try{let t=sessionStorage.getItem('stock-tab');if(!t){t=Math.r
 window.addEventListener('pagehide',()=>{const l=store('stock-leader');if(LEADER&&l&&l.id===TAB_ID)store('stock-leader',null);});
 function newMaster(room){
   return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:15,showRank:true},
-    day:0,phase:'setup',closeAt:0,prices:Object.fromEntries(CO.map(c=>[c.id,c.p])),hist:Object.fromEntries(CO.map(c=>[c.id,[c.p]])),chg:{},
-    today:null,eff:null,reveal:null,used:[],log:[],acct:{},ops:{},done:{},feed:[],award:false,tamper:0};
+    day:0,phase:'setup',closeAt:0,prices:Object.fromEntries(AS.map(c=>[c.id,c.p])),hist:Object.fromEntries(AS.map(c=>[c.id,[c.p]])),chg:{},
+    today:null,eff:null,reveal:null,used:[],log:[],acct:{},ops:{},done:{},feed:[],award:false,tamper:0,fx:FX0,fxHist:[FX0],fxChg:0};
+}
+// 예전 장부(은행 기능 전)도 그대로 쓸 수 있게 빈 칸을 채워요
+function fixM(m){
+  if(m.fx==null){m.fx=FX0;m.fxHist=[FX0];m.fxChg=0;}
+  if(m.cfg.dRate==null)m.cfg.dRate=.3;if(m.cfg.sRate==null)m.cfg.sRate=3;if(m.cfg.term==null)m.cfg.term=5;
+  if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=3;if(m.cfg.sdays==null)m.cfg.sdays=3;
+  AS.forEach(c=>{if(m.prices[c.id]==null){m.prices[c.id]=c.p;m.hist[c.id]=[c.p];}});
+  if(!m.mom)m.mom={};
+  return m;
 }
 const saveM=()=>store('stock-master',M);
 function claimLeader(){const l=store('stock-leader');if(l&&l.id!==TAB_ID&&Date.now()-l.t<6000)return false;store('stock-leader',{id:TAB_ID,t:Date.now()});return true;}
@@ -561,12 +690,12 @@ async function teacherView(){
   }
   LEADER=true;
   app.innerHTML='<div class="panel grid center"><h2>장부를 여는 중이에요…</h2></div>';
-  M=store('stock-master');DH=store('stock-dh')||{key:'',codes:{}};
+  M=store('stock-master');if(M)fixM(M);DH=store('stock-dh')||{key:'',codes:{}};
   try{
     if(!M){
       let code;
       for(let i=0;i<20;i++){code=String(Math.floor(1000+Math.random()*9000));if(!(await withTimeout(roomRef(code).child('open').get())).exists())break;}
-      M=newMaster(code);saveM();
+      M=fixM(newMaster(code));saveM();
     }
     await withTimeout(roomRef(M.room).update({open:M.created,app:'stock'}));
   }catch(e){LEADER=false;return showError(e);}
@@ -616,15 +745,17 @@ function norm(x){
 }
 const resOf=n=>Object.values(M.ops).filter(o=>o.num===+n&&o.type==='out'&&o.st==='wait').reduce((s,o)=>s+o.n,0)*M.cfg.rate;
 function acctView(n,a){
-  const res=resOf(n),stocks=CO.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*M.prices[c.id],0);
-  const v=a.cash+stocks+res,base=a.dep*M.cfg.rate,net=v+a.wd*M.cfg.rate;
-  return {name:a.name,fp:a.fp,cash:a.cash,hold:a.hold,cost:a.cost,dep:a.dep,wd:a.wd,res,v,ret:base?Math.round((net-base)/base*1000)/10:0,pt:a.pt||0};
+  const res=resOf(n),stocks=AS.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*M.prices[c.id],0);
+  const bank=(a.usd||0)*M.fx+(a.dpst||0)+(a.sav?a.sav.paid*a.sav.w:0);
+  const v=a.cash+stocks+bank+res,base=a.dep*M.cfg.rate,net=v+a.wd*M.cfg.rate;
+  return {name:a.name,fp:a.fp,cash:a.cash,hold:a.hold,cost:a.cost,dep:a.dep,wd:a.wd,res,v,ret:base?Math.round((net-base)/base*1000)/10:0,pt:a.pt||0,
+    usd:a.usd||0,usdCost:a.usdCost||0,dpst:a.dpst||0,dInt:a.dInt||0,sav:a.sav||null,bk:a.bk||[],lb:a.lb||{},fee:a.fee||0,trades:a.trades||0};
 }
 function buildPub(){
   const acct={};Object.entries(M.acct).forEach(([n,a])=>acct[n]=acctView(n,a));
   const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at});
-  return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today,reveal:M.reveal,
-    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,days:M.cfg.days},acct,ops,award:!!M.award};
+  return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today,reveal:M.reveal,fx:M.fx,fxHist:M.fxHist,fxChg:M.fxChg,
+    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays},acct,ops,award:!!M.award};
 }
 function publish(){
   if(!LEADER)return;
@@ -656,6 +787,8 @@ async function doPump(){
   if(list.length)publish();
 }
 const feed=t=>{M.feed.unshift({t:Date.now(),x:t});M.feed=M.feed.slice(0,12);};
+// 학생 은행 기록 (최근 15개)
+const bk=(a,m)=>{a.bk=[{d:M.day,m},...(a.bk||[])].slice(0,15);};
 async function processOrder(n,id,o){
   const a=M.acct[n];
   if(!a)return {ok:false,m:'아직 계좌가 열리지 않았어요'};
@@ -668,19 +801,65 @@ async function processOrder(n,id,o){
     const c=COI[d.c],q=d.q;
     if(!c||!Number.isInteger(q)||q<1||q>999)return {ok:false,m:'주문이 이상해요'};
     if(!M.day||d.day!==M.day||d.ts>M.closeAt)return {ok:false,m:'장이 닫힌 뒤에 보낸 주문이에요'};
-    const pr=M.prices[c.id];a.hold=a.hold||{};a.cost=a.cost||{};
+    const pr=M.prices[c.id];a.hold=a.hold||{};a.cost=a.cost||{};a.lb=a.lb||{};
     if(d.t==='buy'){
-      if(pr*q>a.cash)return {ok:false,m:`돈이 모자라요 (${won(pr*q)} 필요)`};
-      a.cash-=pr*q;a.hold[c.id]=(a.hold[c.id]||0)+q;a.cost[c.id]=(a.cost[c.id]||0)+pr*q;
+      const f=feeOf(pr*q,c,M.cfg,false);
+      if(pr*q+f>a.cash)return {ok:false,m:`돈이 모자라요 (수수료까지 ${won(pr*q+f)} 필요)`};
+      a.cash-=pr*q+f;a.hold[c.id]=(a.hold[c.id]||0)+q;a.cost[c.id]=(a.cost[c.id]||0)+pr*q+f;a.lb[c.id]=M.day;
+      a.fee=(a.fee||0)+f;a.trades=(a.trades||0)+1;
       feed(`📈 누군가 ${c.e} ${c.n} ${q}주를 샀어요`);
-      return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 샀어요`};
+      return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 샀어요 (수수료 ${won(f)})`};
     }
     const h=a.hold[c.id]||0;
-    if(h<q)return {ok:false,m:`가진 주식이 ${h}주뿐이에요`};
-    a.cost[c.id]=Math.round((a.cost[c.id]||0)*(h-q)/h);a.hold[c.id]=h-q;if(!a.hold[c.id]){delete a.hold[c.id];delete a.cost[c.id];}
-    a.cash+=pr*q;
+    if(h<q)return {ok:false,m:`가진 것이 ${h}주뿐이에요`};
+    const short=a.lb[c.id]!=null&&M.day-a.lb[c.id]<M.cfg.sdays,f=feeOf(pr*q,c,M.cfg,short);
+    a.cost[c.id]=Math.round((a.cost[c.id]||0)*(h-q)/h);a.hold[c.id]=h-q;if(!a.hold[c.id]){delete a.hold[c.id];delete a.cost[c.id];delete a.lb[c.id];}
+    a.cash+=pr*q-f;a.fee=(a.fee||0)+f;a.trades=(a.trades||0)+1;
     feed(`📉 누군가 ${c.e} ${c.n} ${q}주를 팔았어요`);
-    return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 팔았어요`};
+    return {ok:true,m:`✔ ${q}주를 ${won(pr*q)}에 팔았어요 (수수료 ${won(f)}${short?', 단기 매매':''})`};
+  }
+  if(d.t==='fxb'||d.t==='fxs'){
+    const q=d.q;
+    if(!Number.isInteger(q)||q<1||q>9999)return {ok:false,m:'주문이 이상해요'};
+    if(!M.day||d.day!==M.day||d.ts>M.closeAt)return {ok:false,m:'환전소가 닫힌 뒤에 보낸 주문이에요'};
+    const w=q*M.fx;a.usd=a.usd||0;a.usdCost=a.usdCost||0;
+    if(d.t==='fxb'){
+      if(w>a.cash)return {ok:false,m:`돈이 모자라요 (${won(w)} 필요)`};
+      a.cash-=w;a.usd+=q;a.usdCost+=w;bk(a,`💵 ${q}달러를 ${won(w)}에 샀어요`);
+      feed(`💵 누군가 달러를 샀어요`);
+      return {ok:true,m:`✔ ${q}달러를 ${won(w)}에 샀어요`};
+    }
+    if(a.usd<q)return {ok:false,m:`가진 달러가 ${a.usd}달러뿐이에요`};
+    a.usdCost=Math.round(a.usdCost*(a.usd-q)/a.usd);a.usd-=q;a.cash+=w;bk(a,`💵 ${q}달러를 ${won(w)}에 팔았어요`);
+    feed(`💵 누군가 달러를 팔았어요`);
+    return {ok:true,m:`✔ ${q}달러를 ${won(w)}에 팔았어요`};
+  }
+  if(d.t==='dep'||d.t==='wdr'){
+    const w=d.w;
+    if(!Number.isInteger(w)||w<1)return {ok:false,m:'금액이 이상해요'};
+    a.dpst=a.dpst||0;
+    if(d.t==='dep'){
+      if(w>a.cash)return {ok:false,m:`돈이 모자라요 (${won(a.cash)} 있어요)`};
+      a.cash-=w;a.dpst+=w;bk(a,`🏦 예금에 ${won(w)} 넣었어요`);
+      return {ok:true,m:`✔ 예금에 ${won(w)} 넣었어요`};
+    }
+    if(w>a.dpst)return {ok:false,m:`예금이 ${won(a.dpst)}뿐이에요`};
+    a.dpst-=w;a.cash+=w;bk(a,`🏦 예금에서 ${won(w)} 뺐어요`);
+    return {ok:true,m:`✔ 예금에서 ${won(w)} 뺐어요`};
+  }
+  if(d.t==='sj'){
+    const w=d.w,t=M.cfg.term;
+    if(!Number.isInteger(w)||w<100||w>100000)return {ok:false,m:'금액이 이상해요'};
+    if(a.sav)return {ok:false,m:'적금은 하나만 들 수 있어요'};
+    if(M.day+t>M.cfg.days)return {ok:false,m:'프로젝트가 끝나기 전에 다 모을 수 없어요'};
+    if(w>a.cash)return {ok:false,m:`돈이 모자라요 (${won(w)} 필요)`};
+    a.cash-=w;a.sav={w,paid:1,miss:0,from:M.day};bk(a,`🐷 하루 ${won(w)} 적금에 가입하고 첫 돈을 넣었어요`);
+    return {ok:true,m:`✔ 적금에 가입했어요 (1/${t}번)`};
+  }
+  if(d.t==='sc'){
+    if(!a.sav)return {ok:false,m:'든 적금이 없어요'};
+    const w=a.sav.paid*a.sav.w;a.cash+=w;a.sav=null;bk(a,`🐷 적금을 깨고 ${won(w)}을 돌려받았어요 (이자 없음)`);
+    return {ok:true,m:`✔ 적금을 깨고 ${won(w)}을 돌려받았어요`};
   }
   if(d.t==='in'){
     const k=d.n;if(!Number.isInteger(k)||k<1)return {ok:false,m:'쿠키 수가 이상해요'};
@@ -751,7 +930,7 @@ function renderTV(){
   const main=$('#main');if(!main||!M)return;
   const reqs=Object.entries(PL).filter(([n,p])=>p&&(!M.acct[n]||M.acct[n].fp!==p.fp));
   const opsWait=Object.values(M.ops).filter(o=>o.st==='wait').length;
-  const k=JSON.stringify([M.day,M.phase,M.closeAt,M.prices,M.reveal,M.today,M.feed,M.cfg,M.award,M.tamper,Object.keys(M.acct).length,rankList(),reqs.map(([n,p])=>[n,p.name,p.fp]),Object.entries(PL).map(([n,p])=>[n,p&&p.easy]),Object.keys(PRED).length,opsWait]);
+  const k=JSON.stringify([M.day,M.phase,M.closeAt,M.prices,M.fx,M.reveal,M.today,M.feed,M.cfg,M.award,M.tamper,Object.keys(M.acct).length,rankList(),reqs.map(([n,p])=>[n,p.name,p.fp]),Object.entries(PL).map(([n,p])=>[n,p&&p.easy]),Object.keys(PRED).length,opsWait]);
   $('#cookieBtn').innerHTML=`🍪 쿠키 처리${opsWait?`<span class="badge">${opsWait}</span>`:''}`;
   if(k===tvKey&&$('#tvb'))return;tvKey=k;
   $('#cnt').textContent=`${Object.keys(M.acct).length}명`;
@@ -780,7 +959,7 @@ function renderTV(){
   }
   const rv=M.reveal&&M.reveal.day===M.day-1?M.reveal:null;
   if(ph==='open'||ph==='closed'){
-    body=`${rv?`<div class="panel grid pop"><h2>☀️ 어제 뉴스 결과: ${rv.e} ${esc(rv.t)}</h2><div class="chips">${CO.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(rv.chg[c.id])}">${pctTxt(rv.chg[c.id]||0)}</b></span>`).join('')}</div>
+    body=`${rv?`<div class="panel grid pop"><h2>☀️ 어제 뉴스 결과: ${rv.e} ${esc(rv.t)}</h2><div class="chips">${AS.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(rv.chg[c.id])}">${pctTxt(rv.chg[c.id]||0)}</b></span>`).join('')}${rv.fx!=null?`<span>💵 환율 <b class="${ud(rv.fx)}">${pctTxt(rv.fx)}</b></span>`:''}</div>
        <div class="muted">예측한 친구 ${rv.n}명 중 ${rv.right}명이 하나 이상 맞혔어요.</div></div>`:''}
      ${newsCard(M.today)}
      <div class="muted" style="text-align:right">오늘 예측한 친구 ${Object.keys(PRED).length}명</div>`;
@@ -792,7 +971,8 @@ function renderTV(){
   }
   const rk=rankList();
   main.innerHTML=`${bar}${body}
-   <div class="board">${CO.map(c=>`<div class="co"><div class="hd"><span>${c.e}</span><b>${esc(c.n)}</b></div><div class="pr num">${won(M.prices[c.id])} <small class="${ud((M.chg||{})[c.id]||0)}">${pctTxt((M.chg||{})[c.id]||0)}</small></div>${spark(M.hist[c.id])}<div class="muted" style="font-size:.9rem">${esc(c.d)}</div></div>`).join('')}</div>
+   <div class="board">${AS.map(c=>`<div class="co"><div class="hd"><span>${c.e}</span><b>${esc(c.n)}</b></div><div class="pr num">${won(M.prices[c.id])} <small class="${ud((M.chg||{})[c.id]||0)}">${pctTxt((M.chg||{})[c.id]||0)}</small></div>${spark(M.hist[c.id],200,36)}</div>`).join('')}</div>
+   <div class="panel fxbar"><span style="font-size:2rem">💵</span><div><div class="muted">오늘의 환율</div><div class="big num">1달러 = ${won(M.fx)} <small class="${ud(M.fxChg||0)}">${pctTxt(M.fxChg||0)}</small></div></div><div style="width:300px;max-width:100%">${spark(M.fxHist,300,50)}</div><div class="muted" style="flex:1;min-width:200px">환율이 오르면 수출하는 회사에 좋고, 원료를 수입하는 회사에는 부담이에요.</div></div>
    <div class="two2">
     <div class="panel grid"><div class="row between"><h2>📊 수익률 순위</h2><button class="ghost small" id="rk">${M.cfg.showRank?'순위 가리기':'순위 보이기'}</button></div>
      ${M.cfg.showRank?`<div class="rank">${rk.map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${won(x.v+x.wd*M.cfg.rate)}</span><span class="rt num ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<p class="muted" style="margin:0">쿠키를 맡긴 친구가 생기면 보여요</p>'}</div>`:'<p class="muted" style="margin:0">순위를 가렸어요</p>'}</div>
@@ -808,11 +988,16 @@ function renderTV(){
 function tvAward(main){
   const rk=rankList();const p=[rk[1],rk[0],rk[2]];
   const pt=Object.entries(M.acct).map(([n,a])=>({n:+n,name:a.name,pt:a.pt||0})).sort((a,b)=>b.pt-a.pt||a.n-b.n);
+  const dv=Object.entries(M.acct).filter(([,a])=>a.divDays).map(([n,a])=>({n:+n,name:a.name,d:a.divSum/a.divDays})).sort((a,b)=>b.d-a.d||a.n-b.n);
+  const st=rk.filter(x=>x.ret>0).map(x=>({...x,trades:M.acct[x.n].trades||0})).sort((a,b)=>a.trades-b.trades||b.ret-a.ret);
   main.innerHTML=`<div class="panel grid" id="tvb"><div class="row between"><h2 style="font-size:2rem">🏆 쿠키 증권 시상식</h2><button class="ghost" id="awoff">돌아가기</button></div>
    <h3 style="font-size:1.4rem">📈 수익률왕</h3>
    <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${x.n} ${esc(x.name)}</span>${pctTxt(x.ret)}</div>`:'<span></span>').join('')}</div></div>
    <div class="panel grid"><h3 style="font-size:1.4rem">📰 뉴스 해석왕 (예측을 가장 많이 맞힌 친구)</h3><div class="rank">${pt.slice(0,5).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.pt}점</span></div>`).join('')}</div></div>
-   <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요?</p></div>`;
+   <div class="two2"><div class="panel grid"><h3 style="font-size:1.4rem">🧺 분산 투자왕 (여러 바구니에 골고루)</h3><div class="rank">${dv.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.d.toFixed(1)}개</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div>
+    <div class="panel grid"><h3 style="font-size:1.4rem">🐢 꾸준한 투자왕 (적게 사고팔고 이익)</h3><div class="rank">${st.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${x.trades}번</span><span class="rt ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div></div>
+   <div class="panel grid"><h3>수수료로 나간 돈</h3><p style="margin:0;font-size:1.15rem">우리 반이 3주 동안 낸 수수료는 모두 <b>${won(Object.values(M.acct).reduce((s,a)=>s+(a.fee||0),0))}</b>이에요. 가장 많이 사고판 친구는 ${(()=>{const t=Object.values(M.acct).sort((x,y)=>(y.trades||0)-(x.trades||0))[0];return t?`${t.trades||0}번 거래하고 수수료 ${won(t.fee||0)}를 냈어요`:'없어요';})()}.</p></div>
+   <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요? 자주 사고판 친구와 오래 가진 친구는요?</p></div>`;
   $('#awoff').onclick=()=>{M.award=false;saveM();publish();};
 }
 function approve(n,quiet){
@@ -828,21 +1013,50 @@ async function applyNews(){
   if(!M.day||!M.today)return;
   const P=(await withTimeout(roomRef(ROOM).child('pred/'+M.day).get())).val()||{};
   const chg={};
-  CO.forEach(c=>{
-    const lv=(M.eff||{})[c.id]||0;
-    let p=lv*(5+Math.random()*5)+(Math.random()*6-3);p=Math.max(-30,Math.min(30,p));
-    const old=M.prices[c.id],np=Math.max(100,Math.round(old*(1+p/100)/10)*10);
+  /* 하루 주가 = 꾸준히 크는 힘 + 뉴스 영향 + 운 − 어제 뉴스로 너무 오른(내린) 만큼 조금 되돌림
+     그래서 뉴스를 보고 바로 따라 사고팔기보다, 좋은 회사를 골고루 오래 가진 친구가 유리해요 */
+  const mom={};
+  [...CO,GOLD].forEach(c=>{
+    const lv=(M.eff||{})[c.id]||0,gold=c.k==='gold';
+    const news=lv*(gold?1+Math.random()*1.5:2+Math.random()*3);
+    let p=c.g+news+(Math.random()*2-1)*c.v-.4*((M.mom||{})[c.id]||0);p=Math.max(-20,Math.min(20,p));
+    mom[c.id]=news;
+    const old=M.prices[c.id],np=gold?Math.max(100,Math.round(old*(1+p/100))):Math.max(100,Math.round(old*(1+p/100)/10)*10);
     chg[c.id]=Math.round((np-old)/old*1000)/10;M.prices[c.id]=np;M.hist[c.id].push(np);
   });
+  M.mom=mom;
+  ETF.forEach(e=>{
+    const r=e.of.reduce((s,id)=>s+M.prices[id]/M.hist[id][M.hist[id].length-2],0)/e.of.length;
+    const old=M.prices[e.id],np=Math.max(100,Math.round(old*r));
+    chg[e.id]=Math.round((np-old)/old*1000)/10;M.prices[e.id]=np;M.hist[e.id].push(np);
+  });
   M.chg=chg;
+  // 환율: 뉴스 영향 한 단계에 1~2%, 작은 운 ±1%, 하루 최대 ±6%
+  const fl=(M.eff||{}).fx||0;
+  let fp=fl*(1+Math.random())+(Math.random()*2-1);fp=Math.max(-6,Math.min(6,fp));
+  const ofx=M.fx,nfx=Math.max(500,Math.round(ofx*(1+fp/100)));
+  M.fx=nfx;M.fxHist.push(nfx);M.fxChg=Math.round((nfx-ofx)/ofx*1000)/10;
   let right=0;
   Object.entries(P).forEach(([n,p])=>{const a=M.acct[n];if(!a||!p)return;let pt=0;if(p.up&&chg[p.up]>0)pt++;if(p.down&&chg[p.down]<0)pt++;a.pt=(a.pt||0)+pt;if(pt)right++;});
-  M.reveal={day:M.day,e:M.today.e,t:M.today.t,chg,right,n:Object.keys(P).length};
-  M.log.push({day:M.day,e:M.today.e,t:M.today.t,eff:M.eff,chg});
+  M.reveal={day:M.day,e:M.today.e,t:M.today.t,chg,fx:M.fxChg,right,n:Object.keys(P).length};
+  M.log.push({day:M.day,e:M.today.e,t:M.today.t,eff:M.eff,chg,fx:M.fx});
+}
+/* 새 날 아침 은행 일: 예금 이자(복리), 적금 자동 납입과 만기 */
+function bankDay(){
+  const c=M.cfg,nd=M.day+1;
+  Object.values(M.acct).forEach(a=>{
+    if(M.day){const b=basket(a.hold||{},M.prices,(a.usd||0)*M.fx);a.divSum=(a.divSum||0)+b;a.divDays=(a.divDays||0)+1;}
+    if(M.day&&a.dpst>0){const it=Math.floor(a.dpst*c.dRate/100);if(it>0){a.dpst+=it;a.dInt=(a.dInt||0)+it;a.bk=[{d:nd,m:`🏦 예금 이자 ${won(it)}을 받았어요`},...(a.bk||[])].slice(0,15);}}
+    const s=a.sav;if(!s)return;
+    if(s.paid>=c.term){const p=s.paid*s.w,it=Math.floor(p*c.sRate/100);a.cash+=p+it;a.sav=null;a.bk=[{d:nd,m:`🐷 적금 만기! ${won(p)} + 이자 ${won(it)}을 받았어요`},...(a.bk||[])].slice(0,15);return;}
+    if(a.cash>=s.w){a.cash-=s.w;s.paid++;a.bk=[{d:nd,m:`🐷 적금에 ${won(s.w)}을 넣었어요 (${s.paid}/${c.term}번)`},...(a.bk||[])].slice(0,15);}
+    else{s.miss=(s.miss||0)+1;a.bk=[{d:nd,m:`🐷 돈이 모자라서 오늘은 적금을 건너뛰었어요`},...(a.bk||[])].slice(0,15);}
+  });
 }
 async function startDay(nw){
   await drain();
   await applyNews();
+  bankDay();
   M.day++;M.today={e:nw.e,t:nw.t,b:nw.b,day:M.day};M.eff=nw.x||{};
   if(nw.i!=null&&!M.used.includes(nw.i))M.used.push(nw.i);
   M.closeAt=nextClose(M.cfg.close);M.phase='open';M.feed=[];M.award=false;
@@ -853,8 +1067,12 @@ async function endProject(){
   await applyNews();
   const rate=M.cfg.rate;
   Object.entries(M.acct).forEach(([n,a])=>{
-    CO.forEach(c=>{const q=(a.hold||{})[c.id]||0;if(q)a.cash+=q*M.prices[c.id];});
+    AS.forEach(c=>{const q=(a.hold||{})[c.id]||0;if(q)a.cash+=q*M.prices[c.id];});
     a.hold={};a.cost={};
+    // 달러는 마지막 환율로 바꾸고, 예금은 찾고, 적금은 다 모았으면 이자까지 줘요
+    if(a.usd){a.cash+=a.usd*M.fx;a.usd=0;a.usdCost=0;}
+    if(a.dpst){a.cash+=a.dpst;a.dpst=0;}
+    if(a.sav){const p=a.sav.paid*a.sav.w;a.cash+=p+(a.sav.paid>=M.cfg.term?Math.floor(p*M.cfg.sRate/100):0);a.sav=null;}
     const k=Math.round(a.cash/rate);
     if(k>0)M.ops['fin'+n]={num:+n,type:'out',n:k,st:'wait',at:Date.now(),fin:true};
     a.fin={cash:a.cash,n:k};a.cash=0;
@@ -874,15 +1092,15 @@ function drawDay(){
   if(!DAYPICK||DAYPICK.day!==M.day){const i=NEWS.findIndex((_,k)=>!M.used.includes(k));DAYPICK={day:M.day,i:i<0?0:i,own:false,e:'📰',t:'',b:'',x:{}};}
   const P=DAYPICK,sel=P.own?P:NEWS[P.i];
   modal.innerHTML=`<div class="panel grid">${mhead(M.day?`🌅 ${M.day+1}일째 시작`:'🔔 첫 거래일 시작')}
-   <div class="rules">${M.day?`<b>누르면 이렇게 돼요</b><ul><li>남은 주문을 모두 처리해요.</li><li>어제 뉴스(${esc(M.today?M.today.t:'')})의 영향으로 주가가 바뀌고, 예측 점수를 매겨요.</li><li>아래 고른 뉴스가 오늘의 뉴스로 나오고 장이 열려요 (마감 오후 ${esc(M.cfg.close)}).</li></ul>`:'첫 뉴스가 나오고 장이 열려요. 주가는 내일 아침 이 뉴스에 따라 바뀌어요.'}</div>
+   <div class="rules">${M.day?`<b>누르면 이렇게 돼요</b><ul><li>남은 주문을 모두 처리해요.</li><li>어제 뉴스(${esc(M.today?M.today.t:'')})의 영향으로 주가와 환율이 바뀌고, 예측 점수를 매겨요.</li><li>예금 이자를 주고, 적금을 자동으로 넣어요.</li><li>아래 고른 뉴스가 오늘의 뉴스로 나오고 장이 열려요 (마감 오후 ${esc(M.cfg.close)}).</li></ul>`:'첫 뉴스가 나오고 장이 열려요. 주가는 내일 아침 이 뉴스에 따라 바뀌어요.'}</div>
    <div class="seg"><button data-own="0" aria-pressed="${!P.own}">준비된 뉴스에서 고르기</button><button data-own="1" aria-pressed="${P.own}">✏️ 직접 쓰기 (우리 반 일로)</button></div>
    ${P.own?`<div class="f2"><label class="fld"><span class="lb">그림 (이모지)</span><input id="ne" value="${esc(P.e)}" maxlength="4"></label><label class="fld" style="grid-column:span 2"><span class="lb">제목</span><input id="nt" value="${esc(P.t)}" maxlength="40" placeholder="예) 우리 학교 체육대회가 열려요"></label></div>
      <label class="fld"><span class="lb">내용 (두세 문장)</span><textarea id="nb" maxlength="200">${esc(P.b)}</textarea></label>
-     <div class="fld"><span class="lb">내일 주가에 주는 영향 (학생에게는 안 보여요)</span>${CO.map(c=>`<div class="effrow"><span>${c.e} ${esc(c.n)}</span><div class="seg" data-c="${c.id}">${LV.map(([v,l])=>`<button data-v="${v}" aria-pressed="${(P.x[c.id]||0)===v}">${l}</button>`).join('')}</div></div>`).join('')}</div>`
+     <div class="fld"><span class="lb">내일 주가와 환율에 주는 영향 (학생에게는 안 보여요)</span>${EFF.map(c=>`<div class="effrow"><span>${c.e} ${esc(c.n)}</span><div class="seg" data-c="${c.id}">${LV.map(([v,l])=>`<button data-v="${v}" aria-pressed="${(P.x[c.id]||0)===v}">${l}</button>`).join('')}</div></div>`).join('')}</div>`
     :`<div class="nlist">${NEWS.map((n,k)=>`<button data-i="${k}" aria-pressed="${P.i===k}" class="${M.used.includes(k)?'used':''}">${n.e} ${esc(n.t)}${M.used.includes(k)?' (썼어요)':''}</button>`).join('')}</div>
      ${newsCard({...sel,day:M.day+1})}
      <button class="ghost" id="peek">🔒 내일 주가 영향 보기 (꾹 누르기 · 학생에게 보이지 않게)</button>
-     <div class="secret" id="sec">${CO.map(c=>`${c.e} ${esc(c.n)} ${(LV.find(l=>l[0]===(sel.x[c.id]||0))||LV[2])[1]}`).join(' · ')}</div>`}
+     <div class="secret" id="sec">${EFF.map(c=>`${c.e} ${esc(c.n)} ${(LV.find(l=>l[0]===(sel.x[c.id]||0))||LV[2])[1]}`).join(' · ')}</div>`}
    <div class="row" style="justify-content:center"><button id="go" style="font-size:1.3rem">${M.day?'🌅 새 날 시작':'🔔 장 열기'}</button></div>
    <div class="msg bad" id="dm"></div></div>`;
   bindClose();
@@ -927,7 +1145,13 @@ function drawSet(){
     <label class="fld"><span class="lb">프로젝트 기간 (거래일)</span><input type="number" id="sd" min="1" max="60" value="${c.days}"></label>
     <label class="fld"><span class="lb">쿠키 1개 = ?원</span><input type="number" id="sr" min="100" step="100" value="${c.rate}" ${M.day||Object.values(M.acct).some(a=>a.dep)?'disabled title="쿠키를 맡긴 뒤에는 바꿀 수 없어요"':''}></label>
     <label class="fld"><span class="lb">한 명이 맡길 수 있는 쿠키 (모두 합쳐)</span><input type="number" id="sp" min="1" max="200" value="${c.cap}"></label>
-    <label class="fld"><span class="lb">남은 쿠키의 몇 %까지</span><input type="number" id="so" min="10" max="100" step="10" value="${Math.round(c.ratio*100)}"></label></div>
+    <label class="fld"><span class="lb">남은 쿠키의 몇 %까지</span><input type="number" id="so" min="10" max="100" step="10" value="${Math.round(c.ratio*100)}"></label>
+    <label class="fld"><span class="lb">주식 수수료 (%) · ETF는 0.3배, 금은 0.5배</span><input type="number" id="sfe" min="0" max="5" step="0.1" value="${c.fee}"></label>
+    <label class="fld"><span class="lb">단기 매매 수수료 (%)</span><input type="number" id="ssf" min="0" max="10" step="0.5" value="${c.sfee}"></label>
+    <label class="fld"><span class="lb">단기 매매 기준 (산 지 며칠 안에 팔면)</span><input type="number" id="ssd" min="0" max="10" value="${c.sdays}"></label>
+    <label class="fld"><span class="lb">예금 하루 이자 (%)</span><input type="number" id="sdr" min="0" max="10" step="0.1" value="${c.dRate}"></label>
+    <label class="fld"><span class="lb">적금 만기 이자 (%)</span><input type="number" id="ssr" min="0" max="50" value="${c.sRate}"></label>
+    <label class="fld"><span class="lb">적금 기간 (넣는 횟수)</span><input type="number" id="stm" min="2" max="15" value="${c.term}" ${Object.values(M.acct).some(a=>a.sav)?'disabled title="적금을 든 친구가 있어서 바꿀 수 없어요"':''}></label></div>
    <h3 style="font-size:1.4rem">다했니 연결 (읽기 전용)</h3>
    <div class="warn">API 키와 학생 코드는 <b>이 컴퓨터에만</b> 저장되고 학생 화면이나 서버에 올라가지 않아요. 학생 코드와 쿠키 수가 보이니 <b>TV에 띄우지 말고</b> 넣어 주세요. 새 키를 만들면 예전 키를 쓰던 다른 다했니 앱이 멈춰요.</div>
    <label class="fld"><span class="lb">다했니 API 키 (다했니 → API 센터)</span><input type="password" id="dk" value="${esc(DH.key)}" autocomplete="off" placeholder="복사해 둔 키를 붙여 넣어요"></label>
@@ -939,6 +1163,7 @@ function drawSet(){
   $('#save').onclick=()=>{
     c.close=$('#sc').value||'13:10';c.days=Math.max(1,+$('#sd').value||15);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
     c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
+    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
     DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
     saveM();publish();closeModal();
   };
@@ -968,7 +1193,7 @@ function drawBackup(){
     const f=e.target.files[0];if(!f)return;
     try{const o=JSON.parse(await f.text());if(!o||!o.room||!o.acct||!o.prices)throw 0;
       if(!confirm(`${o.room}번 방, ${o.day}일째 장부로 바꿀까요? 지금 장부는 사라져요.`))return;
-      M=o;saveM();closeModal();teacherView();}
+      M=fixM(o);saveM();closeModal();teacherView();}
     catch(err){$('#bm').className='msg bad';$('#bm').textContent='쿠키 증권 백업 파일이 아니에요.';}
   };
   $('#reset').onclick=()=>{if(confirm('정말 새 방을 만들까요? 지금 장부는 사라지고 학생들은 다시 들어와야 해요.')){store('stock-master',null);closeModal();teacherView();}};
