@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>우리 반 추리 게임</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* 다른 게임과 같은 교실 게시판 느낌. 밤에는 화면 전체가 어두워져요 */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F; --night:#1F2540; --night2:#2E3760; --moon:#F4E3A1;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55;transition:background .6s}
+body.dark{background:var(--night)}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+button.okb{background:var(--ok)} button.blueb{background:var(--blue)} button.darkb{background:var(--night2)}
+button.small{font-size:.9rem;padding:.35em .8em;border-radius:10px}
+input,select{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+body.dark .top{background:#141A30}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.9em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 24px}
+#sec{padding-bottom:14px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+body.dark .panel{background:var(--night2);border-color:#46508A;color:#F3EEDD}
+body.dark .muted{color:#B9B6D3}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.center{text-align:center;justify-items:center}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+body.dark .big{color:var(--moon)}
+.huge{font-family:var(--display);font-size:clamp(2.2rem,7vw,4rem);line-height:1.15}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px;color:var(--ink)}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pulse{animation:pu 1.2s ease-in-out infinite alternate} @keyframes pu{to{transform:scale(1.04)}}
+}
+/* 첫 화면 */
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.gcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gcards div{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.gcards b{display:block;font-family:var(--display);font-weight:400;font-size:1.5rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+/* 들어가기 */
+.check{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;font-family:var(--display);font-size:1.15rem}
+.check input{width:1.6em;height:1.6em;flex:none;accent-color:var(--coral2)}
+/* 비밀 카드 */
+.secret{display:grid;gap:12px;justify-items:center;text-align:center;background:#fff;border:3px dashed var(--coral);border-radius:22px;padding:22px 16px;min-height:280px;align-content:center;color:var(--ink)}
+.secret.open{border-style:solid;background:#FFF9EC}
+.secret.liar{background:#2B2140;border-color:#7E5BC8;color:#fff}
+.secret.mafia{background:#3A1F28;border-color:var(--bad);color:#fff}
+.secret.doctor{background:#E8F4EC;border-color:var(--ok)}
+.secret.police{background:#E4EEF6;border-color:var(--blue)}
+.secret .word{font-family:var(--display);font-size:clamp(2.4rem,9vw,3.6rem);line-height:1.1}
+.secret .desc{font-size:1.15rem;max-width:30em}
+.holdbtn{font-size:1.3rem;padding:1em 1.4em;width:100%;max-width:520px}
+.easy .holdbtn{font-size:1.6rem}
+.starters{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.starters span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display);color:var(--ink)}
+/* 사람 고르기 */
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pick button{background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.25rem;padding:.8em .4em;line-height:1.25}
+.pick button b{display:block;font-size:2rem;font-weight:400;color:var(--coral2)}
+.pick button[aria-pressed="true"]{border-color:var(--coral2);background:#FFE7DC}
+.pick button.mate{border-style:dashed}
+.pick button small{display:block;font-family:var(--text);font-size:.85rem;color:var(--bad)}
+.easy .pick{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.easy .pick button{font-size:1.5rem;padding:1em .4em}
+.easy .pick button b{font-size:2.6rem}
+/* 퀴즈 */
+.quiz{text-align:center;display:grid;gap:12px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.3rem,4vw,1.8rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.opts.two{grid-template-columns:1fr 1fr}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.8em .4em;line-height:1.3}
+.opts button span{display:block;font-size:2rem}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.easy .opts button{font-size:1.5rem}.easy .opts button span{font-size:3rem}
+.prog{display:flex;gap:6px;justify-content:center}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+.task{display:flex;gap:8px;align-items:center;font-family:var(--display);font-size:1.15rem}
+.task i{font-style:normal;display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--line);color:#fff}
+.task.done i{background:var(--ok)}
+/* 선생님 TV */
+.tv{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+body.dark .roomcode{color:var(--moon)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,5rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1rem;padding:.45em .8em}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld .lb{font-family:var(--display);font-size:1.1rem}
+.bigpick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bigpick button{background:#fff;color:var(--ink);border:3px solid var(--line);display:grid;gap:4px;justify-items:center;padding:16px;font-size:1.5rem}
+.bigpick button span{font-size:3rem;line-height:1}
+.bigpick button small{font-family:var(--text);font-size:1rem;color:var(--muted)}
+.bigpick button[aria-pressed="true"]{border-color:var(--coral2);background:#FFF4DF}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.sets button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.05rem;padding:.6em .5em;text-align:left;display:flex;gap:8px;align-items:center}
+.sets button span{font-size:1.6rem}
+.sets button[aria-pressed="true"]{border-color:var(--coral2);background:#FFF4DF}
+.plist{display:grid;gap:6px}
+.plist .p{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px 10px;color:var(--ink)}
+.plist .p .nm{font-family:var(--display);font-size:1.2rem}
+.plist .p button{background:#fff;color:var(--muted);border:2px solid var(--line)}
+.plist .p button[aria-pressed="true"]{background:var(--gold);color:#fff;border-color:var(--gold)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display);color:var(--ink)}
+.people span.ok{background:var(--ok);color:#fff}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.seat{background:#fff;border:3px solid var(--line);border-radius:16px;padding:10px;text-align:center;font-family:var(--display);color:var(--ink)}
+.seat b{display:block;font-size:2.2rem;font-weight:400;color:var(--coral2);line-height:1.1}
+.seat span{font-size:1.3rem}
+.seat.now{border-color:var(--coral2);background:#FFE7DC}
+.seat.done{opacity:.55}
+.seat.out{background:#D9D4E6;color:#6F6A85;border-color:#B8B2CC}
+.seat.out b{color:#6F6A85}
+.seat.ok{border-color:var(--ok)}
+.seat small{display:block;font-family:var(--text);font-size:.95rem}
+.seat small:first-child{color:var(--muted)}
+.seat.hot{border-color:var(--bad);background:#FBE3DC}
+.tally{display:grid;gap:8px}
+.tally .t{display:grid;grid-template-columns:9em 1fr 3em;gap:10px;align-items:center;font-family:var(--display);font-size:1.3rem}
+.tally .track{height:30px;border-radius:10px;background:var(--cream);overflow:hidden}
+.tally .track div{height:100%;background:var(--coral);border-radius:10px;transition:width .8s}
+.tally .t.top .track div{background:var(--bad)}
+.tally .t b{text-align:right;font-weight:400}
+.win{border-radius:22px;padding:22px;text-align:center;display:grid;gap:8px;justify-items:center}
+.win.citizen{background:#E3F1E7;border:3px solid var(--ok);color:var(--ink)}
+.win.villain{background:#3A1F28;border:3px solid var(--bad);color:#fff}
+.win.liar{background:#2B2140;border:3px solid #7E5BC8;color:#fff}
+.rank{display:grid;gap:6px}
+.rank .r{display:grid;grid-template-columns:2.4em 1fr 4em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px;font-family:var(--display);font-size:1.2rem;color:var(--ink)}
+.rank .r b{font-weight:400;color:var(--coral2)} .rank .r .pt{text-align:right}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.moon{font-size:5rem;line-height:1}
+.roleset{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.roleset div{background:#fff;border-radius:14px;padding:8px 16px;font-family:var(--display);font-size:1.3rem;color:var(--ink);border:2px solid var(--line)}
+.hold-note{font-size:.95rem}
+#tvsecret{position:fixed;inset:0;z-index:70;background:rgba(20,26,48,.92);color:#fff;display:none;place-items:center;padding:20px;text-align:center;font-family:var(--display);font-size:1.4rem}
+#tvsecret.on{display:grid}
+@media (max-width:820px){
+  .hero,.tv{grid-template-columns:1fr}
+  .choose,.bigpick{grid-template-columns:1fr}
+  .opts{grid-template-columns:1fr}
+  .tally .t{grid-template-columns:6.5em 1fr 2.4em;font-size:1.1rem}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🕵️</i> 우리 반 추리 게임</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<!-- 역할·제시어처럼 남이 보면 안 되는 내용은 여기(학생 화면 보기에 올라가지 않는 곳)에 그려요 -->
+<div class="wrap" id="sec"></div>
+<div class="wrap" id="foot" style="text-align:right;padding-bottom:90px"></div>
+<div id="tvsecret" role="dialog" aria-label="사회자만 보기"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+
+/* ---------- 제시어 세트: [그림, 낱말, 뜻] ---------- */
+const SETS={
+  trade:{g:'학습',e:'🚢',n:'사회 · 무역',w:[
+    ['🚢','수출','우리나라 물건을 다른 나라에 파는 것'],['🛬','수입','다른 나라 물건을 사 오는 것'],
+    ['🌏','무역','나라와 나라가 물건을 사고파는 것'],['🏭','가공 무역','원료를 사 와서 물건을 만들어 다시 파는 무역'],
+    ['💾','반도체','우리나라가 가장 많이 수출하는 전자 부품'],['🚗','자동차','우리나라의 대표 수출품, 바퀴가 넷'],
+    ['🛢️','원유','땅속에서 뽑는 검은 기름, 많이 수입해요'],['🔥','천연가스','난방과 요리에 쓰는 연료'],
+    ['⚓','항구','큰 배가 짐을 싣고 내리는 곳'],['📦','컨테이너선','큰 상자를 가득 싣고 바다를 건너는 배'],
+    ['✏️','흑연','연필심과 배터리의 원료'],['🎪','박람회','여러 나라가 물건을 보여 주는 큰 행사']]},
+  circle:{g:'학습',e:'⭕',n:'수학 · 원',w:[
+    ['⭕','원주','원의 둘레'],['↔️','지름','원의 중심을 지나 원 위의 두 점을 이은 선분'],
+    ['📍','반지름','원의 중심과 원 위의 한 점을 이은 선분'],['🎯','원의 중심','원 한가운데에 있는 점'],
+    ['🥧','원주율','원주를 지름으로 나눈 값'],['🔢','3.14','원주율을 어림한 수'],
+    ['🧭','컴퍼스','원을 그릴 때 쓰는 도구'],['⬡','정육각형','변이 6개이고 길이가 모두 같은 도형'],
+    ['🍕','부채꼴','원을 피자 조각처럼 자른 모양'],['🟩','넓이','평면이 차지하는 크기'],
+    ['🛞','바퀴','굴러가는 둥근 물건'],['📏','줄자','원주를 잴 때 감아 보는 자']]},
+  urimal:{g:'학습',e:'💬',n:'국어 · 우리말',w:[
+    ['✂️','줄임말','낱말을 짧게 줄여 쓴 말 (예: 생파)'],['🚌','외래어','다른 나라에서 와서 우리말처럼 쓰는 말 (예: 버스)'],
+    ['🔤','외국어','다른 나라의 말 (예: 땡큐)'],['🌸','고운 말','듣는 사람의 기분이 좋아지는 말'],
+    ['🆕','신조어','새로 생겨난 말'],['🙊','비속어','거칠고 듣기 싫은 말'],
+    ['🙇','높임말','웃어른께 쓰는 말'],['📘','표준어','나라에서 정한 바른 말'],
+    ['🗺️','사투리','지역마다 다르게 쓰는 말'],['🇰🇷','한글','세종 대왕이 만든 우리 글자'],
+    ['✅','맞춤법','글자를 바르게 쓰는 규칙'],['📱','문자 메시지','휴대폰으로 주고받는 짧은 글']]},
+  media:{g:'학습',e:'📺',n:'국어 · 언어와 소통',w:[
+    ['🗣️','말','소리로 생각을 전하는 것'],['📝','글','글자로 생각을 전하는 것'],
+    ['📺','매체','생각이나 정보를 전하는 수단'],['💬','자막','영상 아래에 나오는 글자'],
+    ['📰','뉴스','새로운 소식을 알려 주는 것'],['👋','손짓','손을 움직여 뜻을 전하는 것'],
+    ['😊','표정','얼굴에 드러난 마음'],['🔊','목소리 크기','말할 때 소리를 크거나 작게 하는 것'],
+    ['✉️','편지','종이에 써서 보내는 글'],['📹','영상 통화','얼굴을 보면서 하는 전화'],
+    ['📢','광고','물건이나 생각을 널리 알리는 것'],['😀','이모티콘','기분을 나타내는 작은 그림']]},
+  eng9:{g:'학습',e:'🚌',n:'영어 · 9단원 장소와 교통',w:[
+    ['📚','library 도서관','책을 빌려 읽는 곳'],['🏥','hospital 병원','아플 때 가는 곳'],
+    ['🏦','bank 은행','돈을 맡기는 곳'],['🌳','park 공원','나무가 있고 산책하는 곳'],
+    ['🦁','zoo 동물원','여러 동물을 보는 곳'],['🛒','market 시장','물건을 사고파는 곳'],
+    ['🚉','station 역','기차를 타는 곳'],['🚌','bus 버스','정류장에서 타는 큰 차'],
+    ['🚇','subway 지하철','땅속으로 다니는 기차'],['🚕','taxi 택시','돈을 내고 타는 노란 차'],
+    ['🚆','train 기차','철길 위를 달리는 긴 차'],['🚲','bike 자전거','바퀴 두 개, 페달을 밟아요']]},
+  ai:{g:'학습',e:'🤖',n:'실과 · 인공지능',w:[
+    ['📊','데이터','인공지능이 배우는 자료'],['🧠','학습','데이터를 보고 규칙을 익히는 것'],
+    ['📦','모델','학습을 마친 인공지능'],['💯','평가','인공지능이 잘 맞히는지 확인하는 것'],
+    ['🤖','인공지능','사람처럼 배우고 판단하는 컴퓨터'],['🧹','로봇 청소기','스스로 집을 청소하는 기계'],
+    ['🌐','번역기','다른 나라 말로 바꿔 주는 프로그램'],['🎙️','음성 비서','말로 부르면 대답해 주는 인공지능'],
+    ['🚘','자율 주행차','사람이 운전하지 않아도 달리는 차'],['🙂','얼굴 인식','얼굴을 보고 누구인지 알아내는 기술'],
+    ['👍','추천','좋아할 만한 영상이나 물건을 골라 주는 것'],['🐱','엔트리','블록으로 코딩하는 프로그램']]},
+  animal:{g:'재미',e:'🦒',n:'동물',w:[
+    ['🦒','기린','목이 아주 긴 동물'],['🐘','코끼리','코가 길고 몸이 아주 큰 동물'],['🐧','펭귄','날지 못하는 추운 곳의 새'],
+    ['🦁','사자','동물의 왕이라고 불리는 동물'],['🐰','토끼','귀가 길고 깡충깡충 뛰는 동물'],['🐢','거북','등에 단단한 껍데기가 있는 동물'],
+    ['🐒','원숭이','나무를 잘 타고 바나나를 좋아하는 동물'],['🐬','돌고래','바다에 사는 똑똑한 동물'],['🐼','판다','검은 눈이 있고 대나무를 먹는 곰'],
+    ['🐱','고양이','야옹 하고 우는 동물'],['🐶','강아지','멍멍 하고 짖는 동물'],['🐙','문어','다리가 여덟 개인 바다 동물']]},
+  food:{g:'재미',e:'🍕',n:'음식',w:[
+    ['🌶️','떡볶이','빨갛고 매콤한 떡 요리'],['🍕','피자','둥글게 잘라 먹는 치즈 음식'],['🍜','라면','꼬불꼬불한 면을 끓여 먹는 음식'],
+    ['🍙','김밥','김에 밥과 재료를 말아 만든 음식'],['🍗','치킨','튀긴 닭고기'],['🍦','아이스크림','차갑고 달콤한 간식'],
+    ['🍔','햄버거','빵 사이에 고기를 넣은 음식'],['🍝','짜장면','검은 소스를 비벼 먹는 면 요리'],['🍣','초밥','밥 위에 생선을 올린 음식'],
+    ['🍧','팥빙수','얼음과 팥으로 만든 여름 간식'],['🥓','삼겹살','불판에 구워 먹는 돼지고기'],['🎂','케이크','생일에 먹는 빵']]},
+  school:{g:'재미',e:'🏫',n:'학교',w:[
+    ['🍱','급식실','점심을 먹는 곳'],['⚽','운동장','밖에서 뛰어노는 넓은 곳'],['📖','도서실','학교에서 책을 읽는 곳'],
+    ['🩹','보건실','다치거나 아플 때 가는 곳'],['☕','교무실','선생님들이 일하는 곳'],['🧑‍🏫','칠판','선생님이 글씨를 쓰는 판'],
+    ['👟','실내화','학교 안에서 신는 신발'],['🏀','체육관','비 오는 날 체육을 하는 곳'],['🔬','과학실','실험을 하는 교실'],
+    ['🎹','음악실','악기를 연주하는 교실'],['🗄️','사물함','내 물건을 넣어 두는 칸'],['🎤','방송실','학교 방송을 하는 곳']]},
+  job:{g:'재미',e:'🧑‍🚒',n:'직업',w:[
+    ['🧑‍🚒','소방관','불을 끄는 사람'],['🧑‍⚕️','의사','아픈 사람을 치료하는 사람'],['🧑‍🍳','요리사','맛있는 음식을 만드는 사람'],
+    ['👮','경찰관','나쁜 사람을 잡는 사람'],['🧑‍🏫','선생님','학생을 가르치는 사람'],['🎥','유튜버','영상을 만들어 올리는 사람'],
+    ['🎮','프로게이머','게임 대회에 나가는 사람'],['🧑‍🚀','우주 비행사','우주로 가는 사람'],['🎤','가수','노래를 부르는 사람'],
+    ['⚽','축구 선수','공을 차서 골을 넣는 사람'],['🎨','화가','그림을 그리는 사람'],['📦','택배 기사','상자를 집까지 가져다주는 사람']]},
+  sport:{g:'재미',e:'⚽',n:'운동과 놀이',w:[
+    ['⚽','축구','발로 공을 차서 골을 넣는 운동'],['🔴','피구','공을 던져 상대를 맞히는 놀이'],['🪢','줄넘기','줄을 돌리며 뛰어넘는 운동'],
+    ['🏊','수영','물속에서 헤엄치는 운동'],['🥋','태권도','우리나라의 발차기 무술'],['🏀','농구','공을 높은 바구니에 넣는 운동'],
+    ['🏸','배드민턴','라켓으로 깃털 공을 치는 운동'],['🏃','술래잡기','술래가 친구를 쫓아가 잡는 놀이'],['🪨','공기놀이','작은 돌 다섯 개를 던지고 잡는 놀이'],
+    ['⛷️','스키','눈 위에서 미끄러져 내려오는 운동'],['⚾','야구','방망이로 공을 치고 달리는 운동'],['🏓','탁구','작은 공을 탁자 위에서 치는 운동']]},
+  thing:{g:'재미',e:'☂️',n:'물건',w:[
+    ['☂️','우산','비 올 때 쓰는 물건'],['📱','휴대폰','전화하고 사진 찍는 기계'],['🧊','냉장고','음식을 차갑게 두는 기계'],
+    ['🧽','지우개','연필 글씨를 지우는 물건'],['✂️','가위','종이를 자르는 물건'],['⏰','시계','시간을 알려 주는 물건'],
+    ['👓','안경','눈이 잘 보이게 쓰는 물건'],['🪥','칫솔','이를 닦는 물건'],['🛏️','베개','잘 때 머리를 대는 물건'],
+    ['🚲','자전거','페달을 밟아 타는 탈것'],['📺','리모컨','멀리서 텔레비전을 켜는 물건'],['🌀','선풍기','바람을 만드는 기계']]}
+};
+const W=k=>(SETS[k]||SETS.animal).w.map(([e,w,d])=>({e,w,d}));
+const ROLES={
+  mafia:{e:'🦹',n:'마피아',team:'mafia',job:'밤마다 마피아끼리 의논해서 친구 한 명을 잠재워요. 낮에는 들키지 않게 시민인 척해요.',pick:'오늘 밤 잠재울 친구를 골라요'},
+  doctor:{e:'🧑‍⚕️',n:'의사',team:'citizen',job:'밤마다 한 명을 지켜요. 마피아가 그 친구를 골라도 깨워 줄 수 있어요. 나를 지켜도 돼요.',pick:'오늘 밤 지켜 줄 친구를 골라요'},
+  police:{e:'👮',n:'경찰',team:'citizen',job:'밤마다 한 명을 조사해서 마피아인지 아닌지 알아내요. 낮에 들키지 않게 친구들을 이끌어요.',pick:'오늘 밤 조사할 친구를 골라요'},
+  citizen:{e:'🙂',n:'시민',team:'citizen',job:'낮에 친구들의 말을 잘 듣고, 투표로 마피아를 찾아요.',pick:'의심 가는 친구를 골라요 (맞히면 1점)'}
+};
+const STARTERS=['○○할 때 써요','○○에서 볼 수 있어요','색깔은 ○○이에요','모양은 ○○이에요','○○와 비슷해요'];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app'), sec=$('#sec');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const pickOne=a=>a[Math.floor(Math.random()*a.length)];
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';sec.innerHTML='';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+let skew=0;db.ref('.info/serverTimeOffset').on('value',s=>{skew=s.val()||0;});
+const now=()=>Date.now()+skew;
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const leftSec=g=>g&&g.endAt?Math.max(0,Math.ceil((g.endAt-now())/1000)):0;
+const voteKey=g=>g.game==='liar'?'L'+g.round:'D'+g.day;
+// 투표 세기: 가장 많이 받은 한 명만 뽑혀요 (같으면 아무도 안 뽑혀요)
+function tally(votes,cands){
+  const c={};cands.forEach(n=>c[n]=0);let skip=0;
+  Object.values(votes||{}).forEach(t=>{if(+t&&c[t]!==undefined)c[t]++;else skip++;});
+  const mx=Math.max(0,...Object.values(c));const top=Object.keys(c).filter(n=>c[n]===mx&&mx>0).map(Number);
+  return {c,skip,top:top.length===1?top[0]:0,tie:top.length>1};
+}
+
+/* ---------- 첫 화면 ---------- */
+function startView(){
+  clearOffs();$('#foot').innerHTML='';clearInterval(tick);ClassWatch.teacherStop();document.body.classList.remove('dark');sec.innerHTML='';
+  $('#sub').textContent='자투리 시간 · 함께하는 말하기 추리 놀이';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>누가<br>숨어 있을까?</h1>
+   <p>친구들의 말을 잘 듣고 숨어 있는 한 사람을 찾아요. 제시어는 이번 학기에 배운 단원이나 재미있는 주제에서 골라요.</p></div>
+   <div class="gcards"><div><span class="emoji">🤫</span><b>라이어 게임</b><span class="muted">혼자만 제시어를 모르는 라이어를 찾아요</span></div>
+    <div><span class="emoji">🦹</span><b>마피아 게임</b><span class="muted">밤에는 몰래, 낮에는 투표로 마피아를 찾아요</span></div></div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- 학생: 들어가기 ---------- */
+let me=null,P={},G={},SEC={},NT={},MYV=null,PL={},vkey='',vkey2='',redrawPick=null;
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();$('#foot').innerHTML='';sec.innerHTML='';document.body.classList.remove('dark');
+  const saved=store('my-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <label class="check"><input type="checkbox" id="ez"> 🌟 쉬운 화면 (그림과 글자를 크게, 보기 2개)</label>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm({checks:[]});
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value), easy=$('#ez').checked;
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('players/'+p.num).transaction(c=>c?undefined:{name:p.name,easy,pt:0,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}
+        if(easy)await roomRef(code).child('players/'+p.num+'/easy').set(true);}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('my-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  P={};G={};SEC={};NT={};MYV=null;PL={};vkey='';
+  const R=roomRef(me.room);
+  let ntOff=null,vOff=null,ntDay=null,vK=null;
+  listen(R.child('players/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('my-student',null);me=null;clearOffs();return joinView();}
+    P=v;$('#sub').textContent=`${me.num}번 ${me.name}`;document.body.classList.toggle('easy',!!P.easy);render();
+  });
+  listen(R.child('players'),s=>{PL=s.val()||{};render(true);});
+  listen(R.child('sec/'+me.num),s=>{SEC=s.val()||{};render();});
+  listen(R.child('g'),s=>{
+    G=s.val()||{};
+    // 지금 투표 칸과 밤 칸만 따로 들어요
+    const k=G.phase?voteKey(G):null;
+    if(k!==vK){if(vOff)vOff();vK=k;MYV=null;if(k){const ref=R.child(`v/${k}/${me.num}`);const h=ref.on('value',x=>{MYV=x.val();render();});vOff=()=>ref.off('value',h);}}
+    const d=G.game==='mafia'?G.day:null;
+    if(d!==ntDay){if(ntOff)ntOff();ntDay=d;NT={};if(d){const ref=R.child('nt/'+d);const h=ref.on('value',x=>{NT=x.val()||{};render();});ntOff=()=>ref.off('value',h);}}
+    render();
+  });
+  offs.push(()=>{if(ntOff)ntOff();if(vOff)vOff();});
+  clearInterval(tick);tick=setInterval(()=>{const el=$('#stm');if(el){const l=leftSec(G);el.textContent=fmt(l);el.classList.toggle('end',l===0);}},300);
+}
+const nameOf=n=>(PL[n]&&PL[n].name)||'';
+const tag=n=>`${n} ${esc(nameOf(n))}`;
+// 화면이 바뀔 때만 다시 그려요 (고르는 중에 화면이 깜빡이지 않게)
+function render(soft){
+  if(!me)return;
+  const myNt=NT[me.num]||{};
+  const key=JSON.stringify([G.game,G.phase,G.round,G.day,G.talk,G.result,G.morning,G.verdict,G.alive&&G.alive[me.num],G.win,G.choices,!!P.easy,SEC.r,SEC.role,MYV,G.order,myNt.done,G.award,soft?Object.keys(PL).length:0]);
+  // 밤에 마피아 친구가 고른 것, 내가 고른 것, 경찰 조사 결과는 고르기 칸만 다시 그려요 (퀴즈는 그대로)
+  const key2=JSON.stringify([myNt.pick,SEC.check,SEC.role==='mafia'?Object.fromEntries(Object.entries(NT).map(([k,v])=>[k,v.pick])):0]);
+  if(key===vkey){if(key2!==vkey2){vkey2=key2;if(typeof redrawPick==='function'&&$('#tk1'))redrawPick();}return;}
+  vkey=key;vkey2=key2;redrawPick=null;
+  document.body.classList.toggle('dark',G.game==='mafia'&&G.phase==='night');
+  sec.innerHTML='';
+  if(!G.phase||G.phase==='lobby')return stuLobby();
+  if(G.game==='liar')return stuLiar();
+  return stuMafia();
+}
+function frame(inner){
+  app.innerHTML=`<div class="grid" style="max-width:860px;margin:0 auto">${inner}</div>`;
+  $('#foot').innerHTML='<button class="ghost small" id="relog">다른 이름으로 들어가기</button>';
+  $('#relog').onclick=()=>{store('my-student',null);me=null;clearOffs();sec.innerHTML='';joinView();};
+}
+function stuLobby(){
+  ClassWatch.step('기다리기',{wait:true});
+  frame(`<div class="panel grid center"><div class="emoji">🕵️</div><h2 style="font-size:1.8rem">선생님이 게임을 고르고 있어요</h2>
+    <p class="muted" style="margin:0">TV를 보며 기다려요.</p>
+    <label class="check" style="width:100%"><input type="checkbox" id="ez" ${P.easy?'checked':''}> 🌟 쉬운 화면 (그림과 글자를 크게, 보기 2개)</label></div>
+   <div class="rules"><b>우리의 약속</b><ul><li>친구 화면은 보지 않아요.</li><li>내 카드는 나만 봐요. 다 보면 화면을 가려요.</li><li>져도 웃으며 "다음 판!" 해요.</li></ul></div>`);
+  $('#ez').onchange=e=>roomRef(me.room).child('players/'+me.num+'/easy').set(e.target.checked);
+}
+// 꾹 누르면(쉬운 화면은 한 번 누르면) 비밀 카드가 보여요
+function holdCard(box,face,cls,label='꾹 누르고 있으면 내 카드가 보여요'){
+  const easy=!!P.easy;
+  box.innerHTML=`<div class="secret" id="card"><div class="emoji">🂠</div><button class="holdbtn" id="hold">${easy?'👆 눌러서 카드 보기':'👆 '+label}</button><div class="muted hold-note">${easy?'다시 누르면 가려져요':'손을 떼면 다시 가려져요'}</div></div>`;
+  let open=false;
+  const show=on=>{open=on;const c=$('#card',box);if(!c)return;
+    c.className='secret'+(on?' open '+(cls||''):'');
+    c.innerHTML=on?face+`<button class="holdbtn ghost" id="hold" style="${easy?'':'display:none'}">가리기</button>`:`<div class="emoji">🂠</div><button class="holdbtn" id="hold">${easy?'👆 눌러서 카드 보기':'👆 '+label}</button><div class="muted hold-note">${easy?'다시 누르면 가려져요':'손을 떼면 다시 가려져요'}</div>`;
+    bind();};
+  const bind=()=>{const b=$('#hold',box);if(!b)return;
+    if(easy){b.onclick=()=>show(!open);}
+    else{b.onpointerdown=e=>{e.preventDefault();show(true);};b.oncontextmenu=e=>e.preventDefault();}};
+  if(!easy){const up=()=>{if(open)show(false);};box.onpointerup=up;box.onpointerleave=up;box.onpointercancel=up;}
+  bind();
+}
+
+/* ---------- 학생: 라이어 게임 ---------- */
+function liarFace(){
+  const S=SEC||{};
+  if(S.liar&&!S.fake)return `<div class="emoji">🤫</div><div class="word">나는 라이어!</div><div class="desc">주제: <b>${esc(SETS[G.set].n)}</b><br>나만 제시어를 몰라요. 친구들 설명을 잘 듣고, 들키지 않게 비슷하게 말해요.</div>`;
+  return `<div class="emoji">${S.e}</div><div class="word">${esc(S.word)}</div><div class="desc">${esc(S.d)}</div><div class="muted">주제: ${esc(SETS[G.set].n)}</div>`;
+}
+function stuLiar(){
+  const inGame=(G.order||[]).includes(me.num);
+  const ph=G.phase;
+  if(!inGame){ClassWatch.step('다음 판 기다리기',{wait:true});return frame(`<div class="panel grid center"><div class="emoji">⏳</div><h2>이번 판이 끝나면 함께해요</h2><p class="muted">TV를 보며 친구들의 설명을 들어 봐요.</p></div>`);}
+  const ready=SEC.r===G.round;
+  const head=`<div class="row" style="justify-content:space-between"><span class="band">🤫 라이어 게임 · ${G.round}판</span><span class="muted">주제: ${SETS[G.set].e} ${esc(SETS[G.set].n)}</span></div>`;
+  if(ph==='card'||ph==='talk'){
+    const T=G.talk||{};const cur=ph==='talk'?(G.order||[])[T.i]:null;const mine=cur===me.num;
+    ClassWatch.step(ph==='card'?'카드 보기':(mine?'내 차례 말하기':'친구 설명 듣기'),{n:ph==='card'?1:2,total:4});
+    frame(`${head}
+     ${ph==='card'?`<div class="panel grid center"><h2 style="font-size:1.7rem">내 카드를 몰래 확인해요</h2><p class="muted" style="margin:0">친구에게 보여 주지 않아요. 확인했으면 TV를 봐요.</p></div>`
+       :`<div class="panel grid center ${mine?'pulse':''}" style="${mine?'border-color:var(--coral2);background:#FFE7DC':''}">${mine?`<div class="huge" style="color:var(--coral2)">내 차례예요!</div><p style="margin:0;font-size:1.2rem">제시어를 <b>한 문장</b>으로 설명해요. 제시어를 그대로 말하면 안 돼요.</p><div class="starters">${STARTERS.map(s=>`<span>${s}</span>`).join('')}</div><div class="timer" id="stm"></div>`
+         :`<h2 style="font-size:1.6rem">지금 말하는 친구: <span style="color:var(--coral2)">${cur?tag(cur):''}</span></h2><p class="muted" style="margin:0">잘 듣고 누가 수상한지 생각해요.</p>`}</div>
+       <div class="panel grid"><h2>말하는 순서</h2><div class="people">${(G.order||[]).map((n,k)=>`<span class="${k<T.i||(T.lap>1)?'ok':''}" style="${n===cur?'background:var(--coral2);color:#fff':''}">${k+1}. ${tag(n)}</span>`).join('')}</div></div>`}`);
+    if(!ready)sec.innerHTML='<div class="panel">카드를 받는 중…</div>';
+    else holdCard(sec,liarFace(),SEC.liar&&!SEC.fake?'liar':'');
+    return;
+  }
+  if(ph==='vote'){
+    ClassWatch.step('투표하기',{n:3,total:4,wait:MYV!=null});
+    const C=(G.order||[]).filter(n=>n!==me.num);
+    frame(`${head}<div class="panel grid"><h2 style="font-size:1.7rem">누가 라이어일까요?</h2><p class="muted" style="margin:0">${MYV?`<b style="color:var(--ok)">${tag(MYV)}</b>에게 투표했어요. 결과가 나오기 전까지 바꿀 수 있어요.`:'한 명을 눌러 투표해요.'}</p>
+      <div class="pick" id="vp">${C.map(n=>`<button data-n="${n}" aria-pressed="${MYV===n}"><b>${n}</b>${esc(nameOf(n))}</button>`).join('')}</div></div>`);
+    $$('#vp button').forEach(b=>b.onclick=()=>roomRef(me.room).child(`v/${voteKey(G)}/${me.num}`).set(+b.dataset.n));
+    if(ready)holdCard(sec,liarFace(),SEC.liar&&!SEC.fake?'liar':'','내 카드 다시 보기');
+    return;
+  }
+  const R=G.result||{};
+  if(ph==='reveal'){
+    ClassWatch.step('결과 보기',{n:4,total:4,wait:true});
+    return frame(`${head}<div class="panel grid center pop"><div class="emoji">🗳️</div><h2 style="font-size:1.8rem">${R.acc?`가장 많이 뽑힌 친구는 <span style="color:var(--coral2)">${tag(R.acc)}</span>`:'표가 똑같이 나뉘었어요'}</h2><p class="muted">TV를 봐요. 과연 라이어일까요?</p></div>`);
+  }
+  if(ph==='guess'){
+    const meLiar=(R.liars||[]).includes(me.num)&&R.acc===me.num;
+    if(meLiar){
+      ClassWatch.step('제시어 맞히기',{n:4,total:4});
+      const opts=G.choices||[];
+      frame(`${head}<div class="panel grid center"><div class="emoji">🤫</div><h2 style="font-size:1.8rem">들켰어요! 하지만 아직 기회가 있어요</h2><p style="margin:0">제시어를 맞히면 라이어가 이겨요. 무엇이었을까요?</p></div>
+       <div class="panel"><div class="opts" id="lg">${opts.map(o=>`<button data-w="${esc(o.w)}"><span>${o.e}</span>${esc(o.w)}</button>`).join('')}</div></div>`);
+      $$('#lg button').forEach(b=>b.onclick=()=>{$$('#lg button').forEach(x=>x.disabled=true);b.classList.add('right');roomRef(me.room).child('lg/'+G.round).set(b.dataset.w);});
+      return;
+    }
+    ClassWatch.step('결과 보기',{n:4,total:4,wait:true});
+    return frame(`${head}<div class="panel grid center pop"><div class="emoji">🤫</div><h2 style="font-size:1.8rem">${tag(R.acc)} 친구는 라이어가 맞아요!</h2><p>라이어가 제시어를 맞히는 중이에요. 두근두근…</p></div>`);
+  }
+  if(ph==='end'){
+    ClassWatch.step('결과 보기',{n:4,total:4,wait:true});
+    const iLiar=(R.liars||[]).includes(me.num);const iWin=R.win==='liar'?iLiar:!iLiar;
+    return frame(`${head}<div class="win ${R.win==='liar'?'liar':'citizen'} pop"><div class="emoji">${iWin?'🎉':'🙂'}</div><div class="huge">${iWin?'우리가 이겼어요!':'아쉬워요, 다음 판!'}</div>
+      <div style="font-size:1.3rem">제시어는 <b>${R.e} ${esc(R.word)}</b>, 라이어는 <b>${(R.liars||[]).map(tag).join(', ')}</b></div>${R.fakeWord?`<div>라이어가 받은 가짜 제시어: ${esc(R.fakeWord)}</div>`:''}<div class="muted" style="color:inherit">내 점수 ${P.pt||0}점</div></div>
+      <div class="panel"><b>제시어 뜻</b> ${esc(R.d||'')}</div>`);
+  }
+}
+
+/* ---------- 학생: 마피아 게임 ---------- */
+function roleFace(){
+  const r=ROLES[SEC.role];if(!r)return '';
+  const mates=(SEC.mates||[]).filter(n=>n!==me.num);
+  const checks=Object.entries(SEC.check||{}).map(([d,c])=>`<div>${d}일째 밤: ${tag(c.t)} → <b>${c.mafia?'🦹 마피아예요!':'🙂 마피아가 아니에요'}</b></div>`).join('');
+  return `<div class="emoji">${r.e}</div><div class="word">나는 ${r.n}</div><div class="desc">${r.job}</div>
+   ${SEC.role==='mafia'&&mates.length?`<div class="desc">함께하는 마피아: <b>${mates.map(tag).join(', ')}</b></div>`:''}${checks?`<div class="desc">${checks}</div>`:''}`;
+}
+const aliveList=()=>Object.keys(G.alive||{}).map(Number).filter(n=>G.alive[n]).sort((a,b)=>a-b);
+function seatsHTML(){
+  return `<div class="seats">${Object.keys(G.alive||{}).map(Number).sort((a,b)=>a-b).map(n=>`<div class="seat ${G.alive[n]?'':'out'}"><b>${G.alive[n]?n:'😴'}</b><span>${G.alive[n]?'':n+' '}${esc(nameOf(n))}</span></div>`).join('')}</div>`;
+}
+function nightQuiz(box,done){
+  const words=W(G.set);const easy=!!P.easy;const N=3;let i=0,ok=0,missed=false;
+  const draw=()=>{
+    const a=pickOne(words);const opts=shuffle([a,...shuffle(words.filter(x=>x.w!==a.w)).slice(0,easy?1:2)]);missed=false;
+    box.innerHTML=`<div class="quiz"><div class="task"><i>2</i> 밤 퀴즈 (${i+1}/${N}) · 한 번에 맞히면 1점</div><div class="prog">${Array.from({length:N},(_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     <div class="q">"${esc(a.d)}"</div><div class="opts ${easy?'two':''}">${opts.map(o=>`<button data-w="${esc(o.w)}"><span>${o.e}</span>${esc(o.w)}</button>`).join('')}</div><div class="msg" id="qm" role="status"></div></div>`;
+    $$('.opts button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.w===a.w){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);if(!missed)ok++;$('#qm',box).className='msg ok';$('#qm',box).textContent='맞았어요!';
+        await new Promise(r=>setTimeout(r,550));i++;if(i<N)return draw();done(ok);}
+      else{missed=true;b.classList.add('wrong');b.disabled=true;$('#qm',box).className='msg bad';$('#qm',box).textContent='다시 골라 봐요';}
+    });
+  };
+  draw();
+}
+function stuMafia(){
+  const inGame=G.alive&&me.num in G.alive;
+  const ph=G.phase;const alive=inGame&&!!G.alive[me.num];
+  const head=`<div class="row" style="justify-content:space-between"><span class="band">🦹 마피아 게임${G.day?` · ${G.day}일째`:''}</span><span class="muted">${alive?'':'👻 유령'}</span></div>`;
+  if(!inGame){ClassWatch.step('다음 게임 기다리기',{wait:true});return frame(`<div class="panel grid center"><div class="emoji">⏳</div><h2>이번 게임이 끝나면 함께해요</h2></div>`);}
+  const myRole=()=>{if(SEC.role)holdCard(sec,roleFace(),SEC.role,'꾹 누르고 있으면 내 역할이 보여요');};
+  if(ph==='role'){
+    ClassWatch.step('역할 보기',{n:1,total:4});
+    frame(`${head}<div class="panel grid center"><h2 style="font-size:1.7rem">내 역할을 몰래 확인해요</h2><p class="muted" style="margin:0">친구에게 보여 주지 않아요. 확인했으면 TV를 봐요.</p></div>`);
+    return myRole();
+  }
+  if(ph==='night'){
+    const mine=NT[me.num]||{};
+    ClassWatch.step('밤',{n:2,total:4,wait:!!mine.done});
+    frame(`${head}<div class="panel grid center"><div class="moon">🌙</div><h2 style="font-size:1.7rem">밤이 되었어요</h2><p style="margin:0">태블릿을 몸 쪽으로 세워 화면을 가려요. 모두 똑같이 화면을 눌러요.</p></div>`);
+    if(mine.done){sec.innerHTML=`<div class="panel grid center"><div class="emoji">😴</div><h2>다 했어요! 고개를 숙이고 기다려요</h2></div>`;return;}
+    const role=alive?SEC.role:'ghost';
+    const R=ROLES[role];
+    const A=aliveList();
+    let cands=A;
+    if(role==='mafia')cands=A.filter(n=>!(SEC.mates||[]).includes(n));
+    else if(role==='police'||role==='citizen'||role==='ghost')cands=A.filter(n=>n!==me.num);
+    const label=role==='ghost'?'👻 유령의 예측: 누가 마피아일까요? (맞히면 1점)':R.pick;
+    sec.innerHTML=`<div class="panel grid" id="tk1"></div><div class="panel" id="tk2"></div>`;
+    let pick=mine.pick||0;
+    const drawPick=()=>{
+      const matePicks=role==='mafia'?(SEC.mates||[]).filter(n=>n!==me.num).map(n=>NT[n]&&NT[n].pick?`${tag(n)} → ${tag(NT[n].pick)}`:'').filter(Boolean):[];
+      const chk=role==='police'&&SEC.check&&SEC.check[G.day];
+      $('#tk1').innerHTML=`<div class="task ${pick?'done':''}"><i>1</i> ${label}</div>
+      ${role==='mafia'?`<p class="muted" style="margin:0">마피아끼리 같은 친구를 고르면 좋아요. 다르면 많이 고른 친구, 같으면 둘 중 한 명이 정해져요.${matePicks.length?'<br><b style="color:var(--bad)">'+matePicks.join(' · ')+'</b>':''}</p>`:''}
+      ${chk&&chk.t===pick?`<div class="big" style="font-size:1.6rem">${tag(chk.t)} → ${chk.mafia?'🦹 마피아예요!':'🙂 마피아가 아니에요'}</div>`:''}
+      <div class="pick">${cands.map(n=>`<button data-n="${n}" aria-pressed="${pick===n}"><b>${n}</b>${esc(nameOf(n))}${role==='mafia'&&(SEC.mates||[]).some(m=>m!==me.num&&NT[m]&&NT[m].pick===n)?'<small>마피아 친구가 고름</small>':''}</button>`).join('')}</div>`;
+      $$('#tk1 .pick button').forEach(b=>b.onclick=()=>{if(role==='police'&&chk)return;pick=+b.dataset.n;roomRef(me.room).child(`nt/${G.day}/${me.num}/pick`).set(pick);drawPick();});};
+    redrawPick=()=>{pick=(NT[me.num]||{}).pick||pick;drawPick();};
+    drawPick();
+    nightQuiz($('#tk2'),async ok=>{
+      if(!pick){$('#tk2').innerHTML='<div class="task done"><i>2</i> 퀴즈 끝! 위에서 친구를 골라야 끝나요</div>';
+        const wait=setInterval(async()=>{if(pick){clearInterval(wait);await roomRef(me.room).child(`nt/${G.day}/${me.num}`).update({ok,done:true});}},300);return;}
+      await roomRef(me.room).child(`nt/${G.day}/${me.num}`).update({ok,done:true});
+    });
+    return;
+  }
+  if(ph==='morning'){
+    ClassWatch.step('아침',{n:3,total:4,wait:true});
+    const M=G.morning||{};
+    const meOut=M.t===me.num&&!M.saved;
+    frame(`${head}<div class="panel grid center pop"><div class="emoji">${meOut?'😴':M.t&&M.saved?'🧑‍⚕️':'☀️'}</div>
+      <h2 style="font-size:1.8rem">${meOut?'마피아가 나를 잠재웠어요':M.t?(M.saved?'의사가 친구를 지켜 냈어요!':`${tag(M.t)} 친구가 잠들었어요`):'아무 일도 없었어요'}</h2>
+      ${meOut?'<p style="margin:0">이제 <b>유령</b>이에요. 말은 하지 않고, 밤마다 예측과 퀴즈로 점수를 모아요. 내 역할은 비밀이에요.</p>':''}</div>${seatsHTML()}`);
+    return myRole();
+  }
+  if(ph==='day'){
+    ClassWatch.step('토론',{n:3,total:4,wait:true});
+    frame(`${head}<div class="panel grid center"><h2 style="font-size:1.8rem">${alive?'누가 마피아일까요? 이야기해요':'👻 유령은 조용히 들어요'}</h2><div class="timer" id="stm"></div>
+      ${alive?'<p class="muted" style="margin:0">"왜 그렇게 생각해?" 하고 까닭을 물어봐요.</p>':''}</div>${seatsHTML()}`);
+    return myRole();
+  }
+  if(ph==='vote'){
+    ClassWatch.step('투표',{n:4,total:4,wait:!alive||MYV!=null});
+    if(!alive){frame(`${head}<div class="panel grid center"><div class="emoji">👻</div><h2>친구들이 투표하고 있어요</h2></div>${seatsHTML()}`);return myRole();}
+    const C=aliveList().filter(n=>n!==me.num);
+    frame(`${head}<div class="panel grid"><h2 style="font-size:1.7rem">누구를 내보낼까요?</h2><p class="muted" style="margin:0">${MYV!=null?(MYV?`<b style="color:var(--ok)">${tag(MYV)}</b>에게 투표했어요.`:'<b>기권</b>했어요.')+' 결과가 나오기 전까지 바꿀 수 있어요.':'한 명을 눌러 투표해요. 잘 모르겠으면 기권해요.'}</p>
+      <div class="pick" id="vp">${C.map(n=>`<button data-n="${n}" aria-pressed="${MYV===n}"><b>${n}</b>${esc(nameOf(n))}</button>`).join('')}<button data-n="0" aria-pressed="${MYV===0}"><b>🤷</b>기권</button></div></div>`);
+    $$('#vp button').forEach(b=>b.onclick=()=>roomRef(me.room).child(`v/${voteKey(G)}/${me.num}`).set(+b.dataset.n));
+    return myRole();
+  }
+  if(ph==='verdict'){
+    ClassWatch.step('투표 결과',{n:4,total:4,wait:true});
+    const V=G.verdict||{};
+    frame(`${head}<div class="panel grid center pop"><div class="emoji">${V.out?(V.team==='mafia'?'🦹':'😢'):'🤝'}</div>
+      <h2 style="font-size:1.8rem">${V.out?(V.out===me.num?'내가 뽑혔어요. 이제 유령이에요':`${tag(V.out)} 친구가 뽑혔어요`):'표가 나뉘어 아무도 나가지 않아요'}</h2>
+      ${V.out&&V.team?`<div class="big">${V.team==='mafia'?'마피아였어요!':'시민 팀이었어요'}</div>`:''}</div>${seatsHTML()}`);
+    return myRole();
+  }
+  if(ph==='end'){
+    ClassWatch.step('게임 끝',{wait:true});
+    const myTeam=(ROLES[SEC.role]||{}).team;const iWin=myTeam===G.win;
+    frame(`${head}<div class="win ${G.win==='mafia'?'villain':'citizen'} pop"><div class="emoji">${G.win==='mafia'?'🦹':'🎉'}</div><div class="huge">${G.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!'}</div>
+      <div style="font-size:1.3rem">${iWin?'우리 팀이 이겼어요!':'아쉬워요, 다음 게임!'} · 내 역할: ${(ROLES[SEC.role]||{}).e||''} ${(ROLES[SEC.role]||{}).n||''}</div><div>내 점수 ${P.pt||0}점</div></div>`);
+  }
+}
+
+/* ---------- 선생님 화면 ---------- */
+let tick=null,RD={},CFG={},speakOn=true,lastSaid='';
+const DEF={game:'liar',set:'animal',liars:1,laps:1,talkSec:20,mode:'basic',mafia:0,doctor:true,police:true,dayMin:2,showTeam:true};
+async function teacherView(){
+  clearOffs();$('#foot').innerHTML='';sec.innerHTML='';
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid center"><h2>방을 만드는 중이에요…</h2></div>';
+  CFG={...DEF,...(store('my-cfg')||{})};speakOn=store('my-voice')!==false;
+  let code=store('my-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:'mystery',g:{phase:'lobby'}}));
+      store('my-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="panel grid"><button class="ghost" id="peek">🔒 사회자만 보기 (꾹 누르기)</button><button class="ghost" id="voice" aria-pressed="${speakOn}"></button></div>
+    <div class="row"><button class="ghost" id="lobby">게임 바꾸기</button><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};hostWatch();renderTV();});
+  const vtxt=()=>{$('#voice').textContent=speakOn?'🔊 사회자 목소리 켜짐':'🔇 사회자 목소리 꺼짐';};vtxt();
+  $('#voice').onclick=()=>{speakOn=!speakOn;store('my-voice',speakOn);vtxt();if(!speakOn&&window.speechSynthesis)speechSynthesis.cancel();};
+  const ts=$('#tvsecret');
+  $('#peek').onpointerdown=e=>{e.preventDefault();ts.innerHTML=secretText();ts.classList.add('on');};
+  const hide=()=>ts.classList.remove('on');['pointerup','pointerleave','pointercancel'].forEach(t=>$('#peek').addEventListener(t,hide));ts.onpointerup=hide;
+  $('#lobby').onclick=()=>{if(confirm('지금 게임을 끝내고 게임 고르기로 돌아갈까요?'))ref.child('g').set({phase:'lobby'});};
+  $('#newroom').onclick=()=>{if(confirm('새 방을 만들까요? 학생들은 다시 들어와야 해요.')){store('my-teacher-room',null);teacherView();}};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function say(t){
+  if(!speakOn||!window.speechSynthesis||t===lastSaid)return;lastSaid=t;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';u.rate=.95;speechSynthesis.speak(u);}catch(e){}
+}
+function secretText(){
+  const g=RD.g||{},h=RD.h||{};
+  if(g.game==='liar'&&h.word)return `<div>제시어: ${esc(h.word)}<br>라이어: ${(h.liars||[]).map(n=>tagT(n)).join(', ')}${h.fake?`<br>가짜 제시어: ${esc(h.fake)}`:''}</div>`;
+  if(g.game==='mafia'&&h.roles)return `<div>${Object.entries(h.roles).map(([n,r])=>`${ROLES[r].e} ${tagT(n)} ${ROLES[r].n}`).join('<br>')}</div>`;
+  return '<div>아직 게임이 시작되지 않았어요</div>';
+}
+const players=()=>{const s=RD.players||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+const tagT=n=>`${n} ${esc(((RD.players||{})[n]||{}).name||'')}`;
+const G_=()=>RD.g||{};
+const gref=()=>roomRef(ROOM).child('g');
+function renderTime(){
+  const el=$('#tm');if(!el)return;
+  const g=G_();const l=leftSec(g);
+  el.textContent=g.endAt?(l===0?'시간 끝!':fmt(l)):'';el.classList.toggle('end',!!g.endAt&&l===0);
+}
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const g=G_(),S=players();
+  document.body.classList.toggle('dark',g.game==='mafia'&&g.phase==='night');
+  $('#cnt').textContent=`${S.length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span>${x.easy?'🌟':''}${x.safe?'🛡':''} ${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  if(RD.award)return tvAward(main,S);
+  if(!g.phase||g.phase==='lobby')return tvLobby(main,S);
+  if(g.game==='liar')return tvLiar(main,S,g);
+  return tvMafia(main,S,g);
+}
+/* 게임 고르기 */
+let lobbyKey='';
+function tvLobby(main,S){
+  const k=JSON.stringify([CFG,S.map(x=>[x.n,x.name,x.easy,x.safe])]);
+  if(k===lobbyKey&&$('#lob'))return;lobbyKey=k;
+  const n=S.length,mf=CFG.mafia||autoMafia(n);
+  const setBtns=grp=>Object.entries(SETS).filter(([,v])=>v.g===grp).map(([key,v])=>`<button data-set="${key}" aria-pressed="${CFG.set===key}"><span>${v.e}</span>${esc(v.n)}</button>`).join('');
+  const seg=(id,opts,val)=>`<div class="seg" data-k="${id}">${opts.map(([v,l])=>`<button data-v="${v}" aria-pressed="${String(CFG[id])===String(v)}">${l}</button>`).join('')}</div>`;
+  main.innerHTML=`<div class="panel grid" id="lob"><h2 style="font-size:1.8rem">어떤 게임을 할까요?</h2>
+    <div class="bigpick"><button data-game="liar" aria-pressed="${CFG.game==='liar'}"><span>🤫</span>라이어 게임<small>3명부터 · 한 판 5~7분</small></button><button data-game="mafia" aria-pressed="${CFG.game==='mafia'}"><span>🦹</span>마피아 게임<small>5명부터 · 한 게임 15~20분</small></button></div></div>
+   <div class="panel grid"><h2>제시어 주제</h2><div class="fld"><span class="lb">📚 배운 단원</span><div class="sets">${setBtns('학습')}</div></div><div class="fld"><span class="lb">🎈 재미 주제</span><div class="sets">${setBtns('재미')}</div></div>
+    <p class="muted" style="margin:0">${CFG.game==='liar'?'라이어 게임: 이 주제의 낱말 하나가 제시어가 돼요.':'마피아 게임: 밤마다 이 주제의 "뜻 보고 낱말 맞히기" 퀴즈를 모두가 풀어요. (누가 마피아인지 화면 누르는 모습으로 알 수 없게)'}</p></div>
+   <div class="panel grid"><h2>규칙</h2>${CFG.game==='liar'?`
+     <div class="fld"><span class="lb">라이어 수</span>${seg('liars',[[1,'1명'],[2,'2명 (8명 이상)']])}</div>
+     <div class="fld"><span class="lb">라이어 카드</span>${seg('mode',[['basic','기본: "나는 라이어" 카드'],['fool','바보 라이어: 비슷한 가짜 제시어 (라이어도 몰라요)']])}</div>
+     <div class="fld"><span class="lb">한 사람 말하는 시간</span>${seg('talkSec',[[15,'15초'],[20,'20초'],[30,'30초']])}</div>
+     <div class="fld"><span class="lb">설명 바퀴 수</span>${seg('laps',[[1,'한 바퀴'],[2,'두 바퀴']])}</div>`:`
+     <div class="fld"><span class="lb">마피아 수 (지금 ${n}명이면 자동 ${autoMafia(n)}명)</span>${seg('mafia',[[0,'자동'],[1,'1명'],[2,'2명'],[3,'3명']])}</div>
+     <div class="fld"><span class="lb">특별 역할</span><div class="seg"><button data-tog="doctor" aria-pressed="${CFG.doctor}">🧑‍⚕️ 의사</button><button data-tog="police" aria-pressed="${CFG.police}">👮 경찰</button><button data-tog="showTeam" aria-pressed="${CFG.showTeam}">투표로 나간 친구 팀 공개</button></div></div>
+     <div class="fld"><span class="lb">낮 토론 시간</span>${seg('dayMin',[[1,'1분'],[2,'2분'],[3,'3분']])}</div>
+     <div class="roleset"><div>🦹 마피아 ${mf}</div>${CFG.doctor?'<div>🧑‍⚕️ 의사 1</div>':''}${CFG.police?'<div>👮 경찰 1</div>':''}<div>🙂 시민 ${Math.max(0,n-mf-(CFG.doctor?1:0)-(CFG.police?1:0))}</div></div>`}</div>
+   <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>들어온 친구 (${n}명)</h2><span class="muted">🌟 쉬운 화면 · 🛡 라이어·마피아·의사·경찰을 맡지 않아요</span></div>
+    <div class="plist">${S.map(x=>`<div class="p"><span class="nm">${x.n} ${esc(x.name)}</span><button class="small" data-easy="${x.n}" aria-pressed="${!!x.easy}">🌟 쉬운 화면</button><button class="small" data-safe="${x.n}" aria-pressed="${!!x.safe}">🛡 시민만</button><button class="small" data-kick="${x.n}">내보내기</button></div>`).join('')||'<p class="muted">QR로 들어와요</p>'}</div></div>
+   <div class="row" style="justify-content:center"><button id="start" style="font-size:1.5rem;padding:.8em 2em" ${n<(CFG.game==='liar'?3:5)?'disabled':''}>${CFG.game==='liar'?'🤫 라이어 게임 시작':'🦹 마피아 게임 시작'}</button></div>
+   ${n<(CFG.game==='liar'?3:5)?`<p class="muted" style="text-align:center;margin:0">${CFG.game==='liar'?3:5}명 이상 들어오면 시작할 수 있어요.</p>`:''}`;
+  const save=()=>{store('my-cfg',CFG);lobbyKey='';renderTV();};
+  $$('[data-game]',main).forEach(b=>b.onclick=()=>{CFG.game=b.dataset.game;save();});
+  $$('[data-set]',main).forEach(b=>b.onclick=()=>{CFG.set=b.dataset.set;save();});
+  $$('.seg[data-k]',main).forEach(s=>$$('button',s).forEach(b=>b.onclick=()=>{const v=b.dataset.v;CFG[s.dataset.k]=isNaN(+v)?v:+v;save();}));
+  $$('[data-tog]',main).forEach(b=>b.onclick=()=>{CFG[b.dataset.tog]=!CFG[b.dataset.tog];save();});
+  const pref=n=>roomRef(ROOM).child('players/'+n);
+  $$('[data-easy]',main).forEach(b=>b.onclick=()=>pref(b.dataset.easy).child('easy').set(b.getAttribute('aria-pressed')!=='true'));
+  $$('[data-safe]',main).forEach(b=>b.onclick=()=>pref(b.dataset.safe).child('safe').set(b.getAttribute('aria-pressed')!=='true'));
+  $$('[data-kick]',main).forEach(b=>b.onclick=()=>{if(confirm(b.dataset.kick+'번을 내보낼까요?'))pref(b.dataset.kick).remove();});
+  $('#start').onclick=()=>CFG.game==='liar'?liarStart(1):mafiaStart();
+}
+const autoMafia=n=>n<=6?1:n<=11?2:3;
+// 특별한 역할을 맡을 친구를 고르기: 🛡 친구는 빼고, 모자라면 함께 넣어요
+function chooseSpecial(nums,k){
+  const S=RD.players||{};const ok=shuffle(nums.filter(n=>!S[n].safe));
+  return ok.length>=k?ok.slice(0,k):ok.concat(shuffle(nums.filter(n=>S[n].safe))).slice(0,k);
+}
+async function addPts(map){await Promise.all(Object.entries(map).filter(([,v])=>v).map(([n,v])=>roomRef(ROOM).child(`players/${n}/pt`).transaction(p=>(p||0)+v)));}
+function scoreboard(S){
+  const L=S.slice().sort((a,b)=>(b.pt||0)-(a.pt||0)||a.n-b.n);
+  return `<div class="rank">${L.map((x,k)=>`<div class="r"><b>${k+1}</b><span>${x.n} ${esc(x.name)}</span><span class="pt">${x.pt||0}점</span></div>`).join('')}</div>`;
+}
+function tvAward(main,S){
+  const L=S.slice().sort((a,b)=>(b.pt||0)-(a.pt||0)||a.n-b.n);const p=[L[1],L[0],L[2]];
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">🏆 오늘의 추리왕</h2><button class="ghost" id="awoff">돌아가기</button></div>
+   <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${x.n} ${esc(x.name)}</span>${x.pt||0}점</div>`:'<span></span>').join('')}</div></div>
+   <div class="panel">${scoreboard(S)}</div>`;
+  say(L[0]?`오늘의 추리왕은 ${L[0].n}번 ${L[0].name}입니다!`:'');
+  $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
+}
+
+/* ---------- 선생님: 라이어 게임 ---------- */
+async function liarStart(round){
+  const S=players();const nums=S.map(x=>x.n);
+  const words=W(CFG.set);const used=(RD.h&&RD.h.used&&RD.h.set===CFG.set)?RD.h.used:[];
+  let pool=words.filter(w=>!used.includes(w.w));if(pool.length<2)pool=words;
+  const word=pickOne(pool);
+  const fake=CFG.mode==='fool'?pickOne(words.filter(w=>w.w!==word.w)):null;
+  const k=Math.min(CFG.liars,nums.length>=8?2:1);
+  const liars=chooseSpecial(nums,k);
+  const order=shuffle(nums);
+  const secU={};
+  nums.forEach(n=>{const L=liars.includes(n);
+    secU[n]=L?(fake?{r:round,liar:true,fake:true,word:fake.w,e:fake.e,d:fake.d}:{r:round,liar:true}):{r:round,liar:false,word:word.w,e:word.e,d:word.d};});
+  const R=roomRef(ROOM);
+  await R.update({sec:secU,h:{liars,word:word.w,e:word.e,d:word.d,fake:fake?fake.w:'',set:CFG.set,used:[...(used.length>=words.length-1?[]:used),word.w]},lg:null,
+    g:{game:'liar',set:CFG.set,mode:CFG.mode,phase:'card',round,order,laps:CFG.laps,talkSec:CFG.talkSec,talk:{i:0,lap:1},endAt:0}});
+  say('카드를 나눠 주었어요. 친구에게 보이지 않게 내 카드를 확인해요.');
+}
+let tvKey='';
+function tvLiar(main,S,g){
+  const V=(RD.v||{})[voteKey(g)]||{};const order=g.order||[];
+  const k=JSON.stringify([g,Object.keys(V).length,RD.lg,S.map(x=>[x.n,x.name,x.pt])]);
+  if(k===tvKey&&$('#lv'))return;tvKey=k;
+  const set=SETS[g.set];const T=g.talk||{};
+  const head=`<div class="row" style="justify-content:space-between" id="lv"><span class="band">🤫 라이어 게임 · ${g.round}판</span><span class="muted">주제: ${set.e} ${esc(set.n)}${g.mode==='fool'?' · 바보 라이어':''}</span></div>`;
+  if(g.phase==='card'){
+    main.innerHTML=`${head}<div class="panel grid center"><div class="emoji">${set.e}</div><div class="huge">주제는 "${esc(set.n)}"</div>
+      <p style="font-size:1.3rem;margin:0">태블릿의 카드를 <b>꾹 눌러</b> 몰래 확인해요. 한 명은 제시어 대신 <b>"나는 라이어"</b> 카드를 받았어요.</p></div>
+     <div class="rules"><b>말하기 규칙</b><ul><li>차례가 되면 제시어를 <b>한 문장</b>으로 설명해요.</li><li>제시어를 그대로 말하면 안 돼요. 너무 쉽게 말하면 라이어가 알아채요!</li><li>도움이 필요한 친구는 한 낱말로 말해도 좋아요.</li></ul></div>
+     <div class="row" style="justify-content:center"><button id="go" style="font-size:1.4rem">말하기 시작 ▶</button></div>`;
+    $('#go').onclick=()=>gref().update({phase:'talk',talk:{i:0,lap:1},endAt:now()+g.talkSec*1000});
+    return;
+  }
+  if(g.phase==='talk'){
+    const cur=order[T.i];const last=T.i>=order.length-1&&T.lap>=g.laps;
+    main.innerHTML=`${head}<div class="panel grid center"><div class="muted">${T.lap}바퀴째 · ${T.i+1}/${order.length}번째</div><div class="huge" style="color:var(--coral2)">${tagT(cur)}</div><div class="timer" id="tm"></div></div>
+     <div class="seats">${order.map((n,k)=>`<div class="seat ${n===cur?'now':(k<T.i||T.lap>1)?'done':''}"><small>${k+1}번째</small><b>${n}</b><span>${esc(nameOf2(n))}</span></div>`).join('')}</div>
+     <div class="row" style="justify-content:center"><button class="ghost" id="prev" ${T.i===0&&T.lap===1?'disabled':''}>◀ 앞 사람</button>${last?'':'<button id="next" style="font-size:1.3rem">다음 사람 ▶</button>'}<button class="${last?'':'ghost'}" id="vote" style="font-size:1.3rem">🗳️ 투표 시작</button></div>`;
+    say(`${cur}번 ${nameOf2(cur)} 차례예요.`);
+    const mv=d=>{let i=T.i+d,lap=T.lap;if(i>=order.length){i=0;lap++;}if(i<0){i=order.length-1;lap--;}gref().update({talk:{i,lap},endAt:now()+g.talkSec*1000});};
+    if($('#next'))$('#next').onclick=()=>mv(1);$('#prev').onclick=()=>mv(-1);
+    $('#vote').onclick=()=>gref().update({phase:'vote',endAt:0});
+    return;
+  }
+  if(g.phase==='vote'){
+    const n=Object.keys(V).filter(x=>order.includes(+x)).length;
+    main.innerHTML=`${head}<div class="panel grid center"><div class="emoji">🗳️</div><div class="huge">누가 라이어일까요?</div><p style="font-size:1.3rem;margin:0">태블릿에서 투표해요. 결과가 나오기 전까지 바꿀 수 있어요.</p><div class="big">${n} / ${order.length}명 투표</div></div>
+     <div class="seats">${order.map(x=>`<div class="seat ${V[x]?'ok':''}"><b>${V[x]?'✔':x}</b><span>${tagT(x)}</span></div>`).join('')}</div>
+     <div class="row" style="justify-content:center"><button class="ghost" id="back">◀ 설명 더 듣기</button><button id="res" style="font-size:1.4rem" ${n?'':'disabled'}>결과 보기 ▶</button></div>`;
+    say('누가 라이어일까요? 태블릿에서 투표해요.');
+    $('#back').onclick=()=>gref().update({phase:'talk',endAt:now()+g.talkSec*1000});
+    $('#res').onclick=async()=>{
+      const t=tally(V,order);const h=RD.h||{};
+      await gref().update({phase:'reveal',result:{tally:t.c,acc:t.top,tie:t.tie,liars:h.liars,word:h.word,e:h.e,d:h.d}});
+    };
+    return;
+  }
+  const R=g.result||{};
+  const bars=()=>{const mx=Math.max(1,...Object.values(R.tally||{}));return `<div class="tally">${Object.entries(R.tally||{}).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="t ${+n===R.acc?'top':''}"><span>${tagT(n)}</span><div class="track"><div style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('')}</div>`;};
+  if(g.phase==='reveal'){
+    const caught=(R.liars||[]).includes(R.acc);
+    main.innerHTML=`${head}<div class="panel grid"><h2 style="font-size:1.8rem">투표 결과</h2>${bars()}</div>
+     <div class="panel grid center pop"><div class="huge">${R.acc?`${tagT(R.acc)} 친구가 가장 많이 뽑혔어요`:'표가 똑같이 나뉘었어요!'}</div><p style="font-size:1.2rem;margin:0">${R.acc?'과연 라이어일까요?':'라이어를 찾지 못했어요.'}</p></div>
+     <div class="row" style="justify-content:center"><button id="open" style="font-size:1.5rem">🥁 라이어 공개!</button></div>`;
+    say(R.acc?`${R.acc}번 ${nameOf2(R.acc)} 친구가 가장 많이 뽑혔어요. 과연 라이어일까요?`:'표가 똑같이 나뉘었어요.');
+    $('#open').onclick=async()=>{
+      if(caught){const words=W(g.set);const ans=words.find(w=>w.w===R.word);
+        const choices=shuffle([ans,...shuffle(words.filter(w=>w.w!==R.word)).slice(0,5)]);
+        await gref().update({phase:'guess',choices});}
+      else await liarFinish('liar',null);
+    };
+    return;
+  }
+  if(g.phase==='guess'){
+    const lg=(RD.lg||{})[g.round];
+    main.innerHTML=`${head}<div class="win liar pop"><div class="emoji">🤫</div><div class="huge">${tagT(R.acc)} 친구는 라이어가 맞아요!</div>
+      <div style="font-size:1.3rem">마지막 기회! 라이어가 제시어를 맞히면 라이어가 이겨요.</div></div>
+     <div class="panel"><div class="opts">${(g.choices||[]).map(o=>`<button disabled style="opacity:1"><span>${o.e}</span>${esc(o.w)}</button>`).join('')}</div></div>
+     <div class="panel grid center"><div class="big">${lg?`라이어의 답: ${esc(lg)}`:'라이어가 고르는 중…'}</div>${lg?'':'<button class="ghost small" id="skip">라이어가 직접 말해도 돼요: 말로 맞혔어요 / 틀렸어요 →</button>'}</div>`;
+    say(`${R.acc}번 친구는 라이어가 맞아요! 라이어가 제시어를 맞히면 라이어가 이겨요.`);
+    if(lg)setTimeout(()=>{if(G_().phase==='guess')liarFinish(lg===R.word?'liar':'citizen',lg);},1800);
+    else $('#skip').onclick=()=>{const right=confirm('라이어가 말로 제시어를 맞혔나요?\n확인 = 맞혔어요 · 취소 = 틀렸어요');liarFinish(right?'liar':'citizen','(말로 답함)');};
+    return;
+  }
+  if(g.phase==='end'){
+    main.innerHTML=`${head}<div class="win ${R.win==='liar'?'liar':'citizen'} pop"><div class="emoji">${R.win==='liar'?'🤫':'🎉'}</div><div class="huge">${R.win==='liar'?'라이어 승리!':'시민 승리!'}</div>
+      <div style="font-size:1.4rem">제시어는 <b>${R.e} ${esc(R.word)}</b> · 라이어는 <b>${(R.liars||[]).map(tagT).join(', ')}</b></div>
+      <div>${R.why||''}</div>${(RD.h||{}).fake?`<div>라이어가 받은 가짜 제시어: <b>${esc(RD.h.fake)}</b></div>`:''}</div>
+     <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div class="panel grid"><h2>투표 결과</h2>${bars()}</div><div class="panel grid"><h2>점수</h2>${scoreboard(S)}<p class="muted" style="margin:0">시민이 이기면 시민 모두 +1, 라이어가 이기면 라이어 +3</p></div></div>
+     <div class="panel"><b>${R.e} ${esc(R.word)}</b>: ${esc(R.d||'')}</div>
+     <div class="row" style="justify-content:center"><button id="again" style="font-size:1.4rem">다음 판 ▶</button><button class="ghost" id="aw">🏆 시상식</button></div>`;
+    say(R.win==='liar'?`라이어 승리! 제시어는 ${R.word}였어요.`:`시민 승리! 제시어는 ${R.word}였어요.`);
+    $('#again').onclick=()=>{CFG.set=g.set;liarStart((g.round||1)+1);};
+    $('#aw').onclick=()=>roomRef(ROOM).child('award').set(true);
+  }
+}
+const nameOf2=n=>(((RD.players||{})[n]||{}).name)||'';
+let finishing=false;
+async function liarFinish(win,guess){
+  if(finishing)return;finishing=true;
+  try{
+    const g=G_();const R={...(g.result||{})};const order=g.order||[];
+    if(G_().phase==='end')return;
+    R.win=win;R.guess=guess||'';R.fakeWord=(RD.h||{}).fake||'';
+    R.why=!R.acc?'표가 나뉘어 라이어가 숨는 데 성공했어요.':!(R.liars||[]).includes(R.acc)?`${R.acc}번 친구는 라이어가 아니었어요.`:win==='liar'?`라이어가 제시어 "${R.word}"를 맞혀 역전했어요!`:`라이어가 "${guess||'?'}"라고 답해서 틀렸어요.`;
+    const pts={};order.forEach(n=>{const L=(R.liars||[]).includes(n);pts[n]=win==='liar'?(L?3:0):(L?0:1);});
+    await gref().update({phase:'end',result:R});
+    await addPts(pts);
+  }finally{finishing=false;}
+}
+
+/* ---------- 선생님: 마피아 게임 ---------- */
+async function mafiaStart(){
+  const S=players();const nums=S.map(x=>x.n);
+  const mf=Math.min(CFG.mafia||autoMafia(nums.length),Math.floor((nums.length-1)/2));
+  const want=mf+(CFG.doctor?1:0)+(CFG.police?1:0);
+  const sp=chooseSpecial(nums,Math.min(want,nums.length));
+  const roles={};nums.forEach(n=>roles[n]='citizen');
+  const maf=sp.slice(0,mf);maf.forEach(n=>roles[n]='mafia');
+  let i=mf;if(CFG.doctor&&sp[i])roles[sp[i++]]='doctor';if(CFG.police&&sp[i])roles[sp[i++]]='police';
+  const secU={};nums.forEach(n=>secU[n]=roles[n]==='mafia'?{role:'mafia',mates:maf}:{role:roles[n]});
+  const alive={};nums.forEach(n=>alive[n]=1);
+  await roomRef(ROOM).update({sec:secU,h:{roles},nt:null,v:null,
+    g:{game:'mafia',set:CFG.set,phase:'role',day:0,alive,dayMin:CFG.dayMin,showTeam:CFG.showTeam,count:{mafia:mf,doctor:Object.values(roles).includes('doctor')?1:0,police:Object.values(roles).includes('police')?1:0},endAt:0}});
+  say('역할 카드를 나눠 주었어요. 친구에게 보이지 않게 내 역할을 확인해요.');
+}
+// 경찰이 고르면 바로 결과를 경찰 태블릿에만 보내요
+function hostWatch(){
+  const g=RD.g||{},h=RD.h||{};
+  if(g.game!=='mafia'||g.phase!=='night'||!h.roles)return;
+  const N=(RD.nt||{})[g.day]||{};
+  Object.entries(h.roles).forEach(([n,r])=>{
+    if(r!=='police'||!g.alive[n])return;
+    const p=N[n]&&N[n].pick;const done=((RD.sec||{})[n]||{}).check||{};
+    if(p&&(!done[g.day]||done[g.day].t!==p))roomRef(ROOM).child(`sec/${n}/check/${g.day}`).set({t:p,mafia:h.roles[p]==='mafia'});
+  });
+}
+function winner(alive,roles){
+  const A=Object.keys(alive).filter(n=>alive[n]);const m=A.filter(n=>roles[n]==='mafia').length;
+  return m===0?'citizen':m>=A.length-m?'mafia':'';
+}
+let resolving=false;
+async function resolveNight(){
+  if(resolving)return;resolving=true;
+  try{
+    const g=G_(),h=RD.h||{},roles=h.roles||{};const N=(RD.nt||{})[g.day]||{};
+    const alive={...g.alive};const A=Object.keys(alive).filter(n=>alive[n]).map(Number);
+    const mafiaPicks={};A.filter(n=>roles[n]==='mafia').forEach(n=>{const p=N[n]&&N[n].pick;if(p&&alive[p])mafiaPicks[p]=(mafiaPicks[p]||0)+1;});
+    const mx=Math.max(0,...Object.values(mafiaPicks));const tops=Object.keys(mafiaPicks).filter(k=>mafiaPicks[k]===mx).map(Number);
+    const t=tops.length?pickOne(tops):0;
+    const doc=A.find(n=>roles[n]==='doctor');const saved=!!(t&&doc&&N[doc]&&N[doc].pick===t);
+    const pts={};
+    Object.keys(alive).map(Number).forEach(n=>{const x=N[n]||{};let p=x.ok||0;
+      if((!alive[n]||roles[n]==='citizen')&&x.pick&&roles[x.pick]==='mafia')p++;pts[n]=p;});
+    if(t&&!saved)alive[t]=0;
+    const win=winner(alive,roles);
+    await gref().update({phase:'morning',alive,morning:{t,saved},win:win||null,endAt:0});
+    await addPts(pts);
+  }finally{resolving=false;}
+}
+async function resolveVote(){
+  const g=G_(),roles=(RD.h||{}).roles||{};const V=(RD.v||{})[voteKey(g)]||{};
+  const A=Object.keys(g.alive).filter(n=>g.alive[n]).map(Number);
+  const vv={};A.forEach(n=>{if(V[n]!==undefined)vv[n]=V[n];});
+  const t=tally(vv,A);const alive={...g.alive};if(t.top)alive[t.top]=0;
+  const win=winner(alive,roles);
+  await gref().update({phase:'verdict',alive,verdict:{tally:t.c,skip:t.skip,out:t.top,team:t.top&&g.showTeam?(roles[t.top]==='mafia'?'mafia':'citizen'):null},win:win||null,endAt:0});
+}
+async function mafiaEnd(){
+  const g=G_(),roles=(RD.h||{}).roles||{};
+  const pts={};Object.keys(roles).forEach(n=>{if(ROLES[roles[n]].team===g.win)pts[n]=2;});
+  await gref().update({phase:'end',reveal:roles});
+  await addPts(pts);
+}
+function tvMafia(main,S,g){
+  const N=(RD.nt||{})[g.day]||{};const V=(RD.v||{})[voteKey(g)]||{};
+  const k=JSON.stringify([g,Object.keys(N).filter(n=>N[n].done).length,Object.keys(V).length,S.map(x=>[x.n,x.name,x.pt])]);
+  if(k===tvKey&&$('#mv'))return;tvKey=k;
+  const all=Object.keys(g.alive||{}).map(Number).sort((a,b)=>a-b);const A=all.filter(n=>g.alive[n]);
+  const C=g.count||{};
+  const head=`<div class="row" style="justify-content:space-between" id="mv"><span class="band">🦹 마피아 게임${g.day?` · ${g.day}일째`:''}</span><span class="muted">살아 있는 친구 ${A.length}명 · 밤 퀴즈: ${SETS[g.set].e} ${esc(SETS[g.set].n)}</span></div>`;
+  const seats=(f)=>`<div class="seats">${all.map(n=>{const x=f?f(n):{};return `<div class="seat ${g.alive[n]?'':'out'} ${x.cls||''}"><b>${g.alive[n]?n:'😴'}</b><span>${g.alive[n]?'':n+' '}${esc(nameOf2(n))}</span>${x.sub?`<small>${x.sub}</small>`:''}</div>`;}).join('')}</div>`;
+  const roleset=`<div class="roleset"><div>🦹 마피아 ${C.mafia||0}</div>${C.doctor?'<div>🧑‍⚕️ 의사 1</div>':''}${C.police?'<div>👮 경찰 1</div>':''}<div>🙂 시민 ${all.length-(C.mafia||0)-(C.doctor||0)-(C.police||0)}</div></div>`;
+  const toNight=()=>gref().update({phase:'night',day:(g.day||0)+1,endAt:0});
+  if(g.phase==='role'){
+    main.innerHTML=`${head}<div class="panel grid center"><div class="emoji">🎭</div><div class="huge">내 역할을 몰래 확인해요</div><p style="font-size:1.3rem;margin:0">태블릿의 카드를 꾹 눌러 봐요. 손을 떼면 가려져요.</p>${roleset}</div>
+     <div class="rules"><b>규칙</b><ul><li><b>밤</b>: 모두 태블릿을 세워 화면을 가리고, 화면에 나온 일(친구 고르기 + 퀴즈 3문제)을 해요. 모두 똑같이 누르니까 누가 마피아인지 몰라요.</li><li><b>낮</b>: 토론하고 투표로 한 명을 내보내요.</li><li>마피아를 모두 찾으면 시민 승리, 마피아가 시민 수만큼 남으면 마피아 승리!</li><li>잠든 친구는 👻 유령이 되어 말하지 않고, 밤마다 예측과 퀴즈로 점수를 모아요.</li></ul></div>
+     <div class="row" style="justify-content:center"><button class="darkb" id="go" style="font-size:1.5rem">🌙 밤이 되었어요</button></div>`;
+    $('#go').onclick=toNight;return;
+  }
+  if(g.phase==='night'){
+    const done=all.filter(n=>N[n]&&N[n].done);
+    main.innerHTML=`${head}<div class="panel grid center"><div class="moon">🌙</div><div class="huge">${g.day}일째 밤</div><p style="font-size:1.3rem;margin:0">모두 화면을 가리고 태블릿의 일을 해요. 말하지 않아요. 쉿!</p><div class="big">${done.length} / ${all.length}명 끝</div></div>
+     ${seats(n=>N[n]&&N[n].done?{cls:'ok',sub:'끝'}:{})}
+     <div class="row" style="justify-content:center"><button id="morning" class="${done.length>=all.length?'':'ghost'}" style="font-size:1.4rem" ${done.length?'':'disabled'}>☀️ 아침이 밝았어요</button></div>
+     ${done.length<all.length?'<p class="muted" style="text-align:center;margin:0">모두 끝나면 버튼이 밝아져요. 기다리지 않고 눌러도 돼요.</p>':''}`;
+    say(`밤이 되었어요. 모두 태블릿 화면을 가리고 화면에 나온 일을 해요.`);
+    $('#morning').onclick=resolveNight;return;
+  }
+  if(g.phase==='morning'){
+    const M=g.morning||{};
+    main.innerHTML=`${head}<div class="panel grid center pop"><div class="emoji">${M.t?(M.saved?'🧑‍⚕️':'😴'):'☀️'}</div><div class="huge">${M.t?(M.saved?'의사가 친구를 지켜 냈어요!':`${tagT(M.t)} 친구가 잠들었어요`):'지난밤에는 아무 일도 없었어요'}</div>
+      <p style="font-size:1.2rem;margin:0">${M.t&&!M.saved?'잠든 친구는 이제 👻 유령이에요. 말하지 않아요.':M.saved?'마피아가 고른 친구를 의사가 깨웠어요. 누구였는지는 비밀!':''}</p></div>${seats()}
+     <div class="row" style="justify-content:center">${g.win?'<button id="end" style="font-size:1.4rem">🏁 게임 결과 보기</button>':'<button id="talk" style="font-size:1.4rem">🗣️ 토론 시작</button>'}</div>`;
+    say(M.t?(M.saved?'아침이 밝았어요. 의사가 친구를 지켜 냈어요!':`아침이 밝았어요. 지난밤 마피아가 ${M.t}번 ${nameOf2(M.t)} 친구를 잠재웠어요.`):'아침이 밝았어요. 지난밤에는 아무 일도 없었어요.');
+    if($('#end'))$('#end').onclick=mafiaEnd;else $('#talk').onclick=()=>gref().update({phase:'day',endAt:now()+g.dayMin*60000});
+    return;
+  }
+  if(g.phase==='day'){
+    main.innerHTML=`${head}<div class="panel grid center"><div class="huge">누가 마피아일까요?</div><div class="timer" id="tm"></div><p style="font-size:1.2rem;margin:0">한 사람씩 손을 들고 말해요. "왜 그렇게 생각해?" 하고 까닭을 물어봐요.</p></div>${seats()}
+     <div class="row" style="justify-content:center"><button class="ghost" id="more">＋1분</button><button id="vote" style="font-size:1.4rem">🗳️ 투표 시작</button></div>`;
+    say('토론 시간이에요. 누가 마피아일까요?');
+    $('#more').onclick=()=>gref().update({endAt:Math.max(now(),g.endAt||0)+60000});
+    $('#vote').onclick=()=>gref().update({phase:'vote',endAt:0});return;
+  }
+  if(g.phase==='vote'){
+    const n=A.filter(x=>V[x]!==undefined).length;
+    main.innerHTML=`${head}<div class="panel grid center"><div class="emoji">🗳️</div><div class="huge">누구를 내보낼까요?</div><div class="big">${n} / ${A.length}명 투표</div><p class="muted" style="margin:0">가장 많이 받은 한 명이 나가요. 같은 표면 아무도 나가지 않아요.</p></div>
+     ${seats(x=>g.alive[x]&&V[x]!==undefined?{cls:'ok',sub:'투표함'}:{})}
+     <div class="row" style="justify-content:center"><button class="ghost" id="back">◀ 토론 더 하기</button><button id="res" style="font-size:1.4rem" ${n?'':'disabled'}>결과 보기 ▶</button></div>`;
+    say('누구를 내보낼까요? 태블릿에서 투표해요.');
+    $('#back').onclick=()=>gref().update({phase:'day',endAt:now()+60000});
+    $('#res').onclick=resolveVote;return;
+  }
+  if(g.phase==='verdict'){
+    const Vd=g.verdict||{};const mx=Math.max(1,...Object.values(Vd.tally||{}));
+    main.innerHTML=`${head}<div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div class="panel grid"><h2>투표 결과</h2><div class="tally">${Object.entries(Vd.tally||{}).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="t ${+n===Vd.out?'top':''}"><span>${tagT(n)}</span><div class="track"><div style="width:${c/mx*100}%"></div></div><b>${c}</b></div>`).join('')}${Vd.skip?`<div class="t"><span>🤷 기권</span><div class="track"><div style="width:${Vd.skip/mx*100}%;background:var(--line)"></div></div><b>${Vd.skip}</b></div>`:''}</div></div>
+      <div class="panel grid center pop"><div class="emoji">${Vd.out?(Vd.team==='mafia'?'🦹':Vd.team?'😢':'🚪'):'🤝'}</div><div class="huge" style="font-size:2.2rem">${Vd.out?`${tagT(Vd.out)} 친구가 나가요`:'표가 나뉘어 아무도 나가지 않아요'}</div>${Vd.out&&Vd.team?`<div class="big">${Vd.team==='mafia'?'마피아였어요!':'시민 팀이었어요…'}</div>`:''}</div></div>
+     ${seats()}<div class="row" style="justify-content:center">${g.win?'<button id="end" style="font-size:1.4rem">🏁 게임 결과 보기</button>':'<button class="darkb" id="night" style="font-size:1.4rem">🌙 다음 밤</button>'}</div>`;
+    say(Vd.out?`${Vd.out}번 ${nameOf2(Vd.out)} 친구가 나가요.${Vd.team?(Vd.team==='mafia'?' 마피아였어요!':' 시민 팀이었어요.'):''}`:'표가 나뉘어 아무도 나가지 않아요.');
+    if($('#end'))$('#end').onclick=mafiaEnd;else $('#night').onclick=toNight;return;
+  }
+  if(g.phase==='end'){
+    const roles=g.reveal||{};
+    main.innerHTML=`${head}<div class="win ${g.win==='mafia'?'villain':'citizen'} pop"><div class="emoji">${g.win==='mafia'?'🦹':'🎉'}</div><div class="huge">${g.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!'}</div><div>이긴 팀은 모두 +2점. 밤 퀴즈와 맞힌 예측 점수도 더했어요.</div></div>
+     <div class="panel grid"><h2>모두의 역할</h2>${seats(n=>({cls:roles[n]==='mafia'?'hot':'',sub:`${ROLES[roles[n]].e} ${ROLES[roles[n]].n}`}))}</div>
+     <div class="panel grid"><h2>점수</h2>${scoreboard(S)}</div>
+     <div class="row" style="justify-content:center"><button id="again" style="font-size:1.4rem">한 게임 더 ▶</button><button class="ghost" id="aw">🏆 시상식</button></div>`;
+    say(g.win==='mafia'?'마피아 팀 승리!':'시민 팀 승리!');
+    $('#again').onclick=()=>{CFG.set=g.set;roomRef(ROOM).child('g').set({phase:'lobby'});};
+    $('#aw').onclick=()=>roomRef(ROOM).child('award').set(true);
+  }
+}
+
+/* ---------- 길 찾기 ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
