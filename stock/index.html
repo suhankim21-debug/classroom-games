@@ -972,7 +972,7 @@ function renderTV(){
   const rk=rankList();
   main.innerHTML=`${bar}${body}
    <div class="board">${AS.map(c=>`<div class="co"><div class="hd"><span>${c.e}</span><b>${esc(c.n)}</b></div><div class="pr num">${won(M.prices[c.id])} <small class="${ud((M.chg||{})[c.id]||0)}">${pctTxt((M.chg||{})[c.id]||0)}</small></div>${spark(M.hist[c.id],200,36)}</div>`).join('')}</div>
-   <div class="panel fxbar"><span style="font-size:2rem">💵</span><div><div class="muted">오늘의 환율</div><div class="big num">1달러 = ${won(M.fx)} <small class="${ud(M.fxChg||0)}">${pctTxt(M.fxChg||0)}</small></div></div>${spark(M.fxHist,300,50)}<div class="muted" style="flex:1;min-width:200px">환율이 오르면 수출하는 회사에 좋고, 원료를 수입하는 회사에는 부담이에요.</div></div>
+   <div class="panel fxbar"><span style="font-size:2rem">💵</span><div><div class="muted">오늘의 환율</div><div class="big num">1달러 = ${won(M.fx)} <small class="${ud(M.fxChg||0)}">${pctTxt(M.fxChg||0)}</small></div></div><div style="width:300px;max-width:100%">${spark(M.fxHist,300,50)}</div><div class="muted" style="flex:1;min-width:200px">환율이 오르면 수출하는 회사에 좋고, 원료를 수입하는 회사에는 부담이에요.</div></div>
    <div class="two2">
     <div class="panel grid"><div class="row between"><h2>📊 수익률 순위</h2><button class="ghost small" id="rk">${M.cfg.showRank?'순위 가리기':'순위 보이기'}</button></div>
      ${M.cfg.showRank?`<div class="rank">${rk.map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${won(x.v+x.wd*M.cfg.rate)}</span><span class="rt num ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<p class="muted" style="margin:0">쿠키를 맡긴 친구가 생기면 보여요</p>'}</div>`:'<p class="muted" style="margin:0">순위를 가렸어요</p>'}</div>
