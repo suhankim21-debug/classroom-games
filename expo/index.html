@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>세계 무역 박람회</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 무역 실험실·원주 탐험대. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --nature:#5E9B5A; --tech:#3D6E8C; --geo:#C27A2C;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input,select{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.9em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q,.q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.opts.three{grid-template-columns:repeat(3,1fr)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+/* 나라 고르기 */
+.nations{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.nations button{background:#fff;color:var(--ink);border:2px solid var(--line);text-align:left;display:grid;gap:4px;font-family:var(--text);font-size:1rem;padding:12px 14px}
+.nations button b{font-family:var(--display);font-weight:400;font-size:1.35rem}
+.nations button[aria-pressed="true"]{border-color:var(--coral);background:#FFF4DF}
+.nations button small{color:var(--muted)}
+/* 1단계: 수입품·수출품 나누기 */
+.sortcard{display:grid;justify-items:center;gap:4px;background:#fff;border:3px solid var(--line);border-radius:18px;padding:14px 24px;min-width:min(100%,340px)}
+.sortcard .nm{font-family:var(--display);font-size:2rem;line-height:1.2}
+.sortbtn{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.sortbtn button{font-size:1.3rem;padding:1em .5em;line-height:1.25}
+.sortbtn .in{background:var(--blue)} .sortbtn .out{background:var(--coral2)}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;text-align:left}
+.board>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;min-height:5.5em}
+.board h3{font-size:1.15rem}
+.board .chipz{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.board .chipz span{background:var(--cream);border-radius:999px;padding:.15em .7em;font-family:var(--display)}
+.board .chipz span.hard{background:#F6E1DB;color:var(--bad)}
+.board .inb{border-color:var(--blue)} .board .outb{border-color:var(--coral2)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;text-align:center}
+.flow>div{background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 8px}
+.flow>div b{display:block;font-family:var(--display);font-weight:400;font-size:1.25rem}
+.flow>div .ic{font-size:2rem;line-height:1.2}
+.flow>span{font-size:2rem;color:var(--coral2);font-family:var(--display)}
+.flow .f1{border-color:var(--blue)} .flow .f2{border-color:var(--gold);background:#FFF9E8} .flow .f3{border-color:var(--coral2)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.45em .9em;font-family:var(--text);font-size:1.05rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* 2단계: 홍보관 */
+.ncard{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:#FFF4DF;border-radius:16px;padding:12px 16px;border:2px solid var(--coral)}
+.ncard .flag{font-size:3.2rem;line-height:1}
+.ncard h2{font-size:1.7rem}
+.facts{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.facts li{background:#fff;border-left:6px solid var(--blue2);border-radius:10px;padding:8px 12px}
+.prodpick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.prodpick button{background:#fff;color:var(--ink);border:2px solid var(--line);display:grid;gap:4px;justify-items:center;padding:12px 6px;font-size:1.1rem;line-height:1.25}
+.prodpick button span{font-size:2.6rem;line-height:1}
+.prodpick button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.prodpick button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kinds button{background:#fff;color:var(--ink);border:3px solid var(--line);display:grid;gap:4px;justify-items:center;padding:14px 8px;font-size:1.2rem;line-height:1.25}
+.kinds button span{font-size:2.4rem;line-height:1}
+.kinds button small{font-family:var(--text);font-size:.92rem;color:var(--muted)}
+.kinds button.wrong{background:#F6E1DB;border-color:var(--bad)}
+.kinds button.right{background:#E3F1E7;border-color:var(--ok)}
+.kb{display:inline-block;border-radius:999px;padding:.1em .7em;color:#fff;font-family:var(--display);font-size:.95rem}
+.kb.nature{background:var(--nature)} .kb.tech{background:var(--tech)} .kb.geo{background:var(--geo)}
+.booth{background:#fff;border:3px solid var(--line);border-radius:18px;overflow:hidden;display:grid}
+.booth .roof{height:16px;background:repeating-linear-gradient(90deg,var(--coral) 0 28px,#fff 28px 56px)}
+.booth.nature{border-color:var(--nature)} .booth.tech{border-color:var(--tech)} .booth.geo{border-color:var(--geo)}
+.booth .in{padding:12px 16px;display:grid;gap:8px}
+.booth .hd{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.booth .hd .e{font-size:2.6rem;line-height:1}
+.booth .hd h3{font-size:1.6rem}
+.booth .sl{font-family:var(--display);font-size:1.45rem;color:var(--coral2);line-height:1.3}
+.booth .pr{font-family:var(--display);font-size:1.15rem}
+.booth .nw{font-size:.95rem;color:var(--muted)}
+.booth.small .hd .e{font-size:2rem}.booth.small .hd h3{font-size:1.3rem}.booth.small .sl{font-size:1.15rem}
+.blist{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.blist>button{padding:0;background:none;color:var(--ink);text-align:left;font-family:var(--text);font-size:1rem;border-radius:18px}
+.blist>button{display:flex;flex-direction:column;gap:2px}
+.blist>button .booth{flex:1}
+.blist>button.got .booth{opacity:.6}
+.stamp{font-family:var(--display);color:var(--ok);font-size:1.1rem}
+.stamps{display:flex;gap:6px;flex-wrap:wrap;font-size:1.8rem;line-height:1}
+.stamps span.no{filter:grayscale(1);opacity:.3}
+.fld label{font-family:var(--display);font-size:1.2rem}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.map svg{width:100%;height:auto;display:block;border-radius:14px;border:2px solid var(--line)}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cols>div{background:#fff;border-radius:16px;padding:10px;display:grid;gap:10px;align-content:start;border-top:8px solid var(--line)}
+.cols>div.nature{border-top-color:var(--nature)} .cols>div.tech{border-top-color:var(--tech)} .cols>div.geo{border-top-color:var(--geo)}
+.cols h3{font-size:1.25rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 11em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.bar .track{height:30px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--coral);border-radius:10px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+@media (max-width:820px){
+  .hero,.tv,.two,.cols{grid-template-columns:1fr}
+  .choose,.opts,.opts.three,.kinds{grid-template-columns:1fr}
+  .prodpick{grid-template-columns:1fr 1fr}
+  .steps button{font-size:.85rem}
+  .flow{grid-template-columns:1fr}.flow>span{transform:rotate(90deg)}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🎪</i> 세계 무역 박람회</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const STAGES=[null,
+  {k:'우리나라 무역',t:'우리나라 무역의 특징 (교과서 100~101쪽)',tm:7},
+  {k:'홍보관 만들기',t:'나라별 홍보관 만들기 (교과서 103~104쪽)',tm:8},
+  {k:'박람회',t:'세계 무역 박람회 둘러보기 (교과서 105쪽)',tm:9},
+  {k:'정리 퀴즈',t:'정리 퀴즈 대결',tm:6}];
+
+// 1단계: 우리나라 주요 수입품과 수출품 (교과서 100쪽, 한국 무역 협회 2024)
+const SORT=[
+  {id:'oil',e:'🛢️',n:'원유',a:'in',tip:'불순물을 없애지 않은 자연 상태의 석유'},
+  {id:'chem',e:'⚗️',n:'정밀 화학 원료',a:'in',tip:'비료, 의약품, 배터리를 만드는 기초 원료'},
+  {id:'gas',e:'🔥',n:'천연가스',a:'in',tip:'땅속에서 뽑아내는 연료'},
+  {id:'coal',e:'⛏️',n:'석탄',a:'in',tip:'땅속에서 캐내는 연료'},
+  {id:'chip',e:'💾',n:'반도체',a:'out',tip:'컴퓨터와 스마트폰의 두뇌가 되는 부품'},
+  {id:'petro',e:'⛽',n:'석유 제품',a:'out',tip:'원유를 나누어 만든 휘발유, 경유 같은 연료'},
+  {id:'phone',e:'📱',n:'무선 통신 기기',a:'out',tip:'스마트폰처럼 전파로 통신하는 기기'},
+  {id:'car',e:'🚗',n:'자동차',a:'out',tip:'공장에서 만드는 탈것'}];
+const SN=Object.fromEntries(SORT.map(x=>[x.id,x]));
+const IN_E=SORT.filter(x=>x.a==='in').map(x=>x.e).join(''), OUT_E=SORT.filter(x=>x.a==='out').map(x=>x.e).join('');
+const WHYQ=[
+  {id:'w1',e:'🛬',q:'우리나라가 원유, 천연가스, 석탄을 주로 수입하는 까닭은?',a:'천연자원이 부족해서',o:['천연자원이 너무 많아서','물건을 만드는 기술이 없어서']},
+  {id:'w2',e:'🛫',q:'우리나라가 반도체, 자동차, 무선 통신 기기를 주로 수출하는 까닭은?',a:'상품을 만드는 기술이 발달해서',o:['땅이 아주 넓어서','땅속에 원유가 많아서']},
+  {id:'w3',e:'⛽',q:'수입한 원유로 만들어 다시 수출하는 상품은?',a:'석유 제품',o:['쌀','로봇']}];
+const FEAT_START='우리나라는 ';
+const FEAT_EASY=['천연자원을 수입해서, 발달한 기술로 상품을 만들어 수출해요.','천연자원이 부족해서 다른 나라에서 수입해요.','기술이 발달해서 반도체와 자동차를 많이 수출해요.'];
+
+// 2·3단계: 세계 여러 나라의 무역 (교과서 102~104쪽)
+const KINDS={
+  nature:{e:'🌏',n:'자연환경·천연자원',d:'넓은 땅, 알맞은 기후, 땅속 자원'},
+  tech:{e:'🔬',n:'뛰어난 기술·문화',d:'발달한 기술로 만든 제품, 영화·음악 같은 문화 상품'},
+  geo:{e:'⚓',n:'유리한 지리적 위치',d:'배가 지나는 길목의 큰 항구'}};
+const KCOL={nature:'#5E9B5A',tech:'#3D6E8C',geo:'#C27A2C'};
+const NATIONS=[
+  {id:'th',e:'🌾',n:'타이',ll:[101,15],lp:'l',kind:'nature',prod:{e:'🌾',n:'쌀'},
+   facts:['세계에서 쌀을 두 번째로 많이 수출해요. (세계 쌀 수출의 15.3%)','넓은 들판이 있고, 덥고 비가 많이 와요.','쌀을 많이 수출하는 나라는 대부분 아시아에 있어요. (인도, 타이, 베트남, 파키스탄)'],
+   q:{q:'타이가 쌀을 많이 수출할 수 있는 까닭은?',a:'넓은 땅과 쌀 농사에 알맞은 기후',o:['뛰어난 로봇 기술','유럽과 아시아를 잇는 항로']},
+   sl:['맛있는 쌀은 타이에서!','넓은 들판에서 키운 쌀을 세계로!']},
+  {id:'sa',e:'🛢️',n:'사우디아라비아',ll:[45,24],lp:'b',kind:'nature',prod:{e:'🛢️',n:'원유'},
+   facts:['세계에서 원유를 가장 많이 수출해요. (하루 약 730만 배럴)','땅속에 원유가 아주 많이 묻혀 있어요.','원유를 많이 수출하는 나라는 서아시아에 많아요.'],
+   q:{q:'사우디아라비아가 원유를 많이 수출할 수 있는 까닭은?',a:'땅속에 원유가 풍부해서',o:['쌀 농사에 알맞은 기후라서','동영상 서비스가 유명해서']},
+   sl:['세계 1위 원유, 사우디아라비아!','땅속 보물 원유를 세계로!']},
+  {id:'de',e:'💉',n:'독일',ll:[10,51],lp:'t',kind:'tech',prod:{e:'💉',n:'백신'},
+   facts:['독일의 연구소에서 백신을 연구하고 생산해 수출해요.','약을 만드는 바이오 제약 산업이 빠르게 발달하고 있어요.'],
+   q:{q:'독일이 백신을 수출할 수 있는 까닭은?',a:'백신을 만드는 기술이 발달해서',o:['땅속에 원유가 많아서','쌀 농사에 알맞은 기후라서']},
+   sl:['건강을 지키는 독일 백신!','기술로 만든 믿을 수 있는 백신!']},
+  {id:'jp',e:'🤖',n:'일본',ll:[139,36],lp:'b',kind:'tech',prod:{e:'🤖',n:'로봇'},
+   facts:['로봇을 개발해서 세계 여러 나라에 수출해요.','공장에서 일하는 로봇을 만드는 기술이 뛰어나요.'],
+   q:{q:'일본이 로봇을 수출할 수 있는 까닭은?',a:'로봇을 만드는 기술이 뛰어나서',o:['넓은 들판이 있어서','땅속에 원유가 많아서']},
+   sl:['똑똑한 로봇은 일본에서!','사람을 돕는 로봇, 일본 기술!']},
+  {id:'us',e:'🎬',n:'미국',ll:[-98,39],lp:'b',kind:'tech',prod:{e:'🎬',n:'동영상 서비스'},
+   facts:['미국 기업들은 세계적인 규모의 동영상 스트리밍 서비스를 제공해요.','전 세계 사람들이 미국에서 수입한 영화, 드라마, 음악을 즐겨요.','물건뿐 아니라 서비스와 문화 상품도 무역해요.'],
+   q:{q:'영화, 드라마, 음악 같은 문화 상품도 무역할 수 있을까요?',a:'네, 문화 상품도 수출하고 수입해요',o:['아니요, 물건만 무역해요','아니요, 쌀만 무역해요']},
+   sl:['세계가 함께 보는 동영상 서비스!','영화와 음악을 전 세계에!']},
+  {id:'sg',e:'⚓',n:'싱가포르',ll:[104,1.3],lp:'r',kind:'geo',prod:{e:'📦',n:'여러 나라 상품 다시 팔기'},
+   facts:['서울보다 약간 넓은 작은 나라예요.','유럽과 아시아를 잇는 항로(배가 다니는 바닷길)에 자리 잡고 있어요.','큰 항구에 여러 나라 상품이 모이면, 필요한 나라에 다시 팔아요.','무역과 관련된 은행과 기업이 많이 모였어요.'],
+   q:{q:'싱가포르에 큰 항구가 발달할 수 있었던 까닭은?',a:'유럽과 아시아를 잇는 항로에 있어서',o:['땅이 아주 넓어서','원유가 아주 많아서']},
+   sl:['유럽과 아시아를 잇는 무역항!','세계 상품이 모이는 싱가포르!']}];
+const NN=Object.fromEntries(NATIONS.map(x=>[x.id,x]));
+const KOREA={e:'★',n:'대한민국',ll:[127.5,36.5]};
+
+// 4단계 정리 퀴즈 (교과서 100~105쪽, 지도서 228~233쪽)
+const QUIZ=[
+  {id:'q1',e:'🛢️',q:'우리나라가 원유, 천연가스를 주로 수입하는 까닭은?',a:'천연자원이 부족해서',o:['천연자원이 남아서','원유를 수출하려고','땅이 아주 넓어서']},
+  {id:'q2',e:'💾',q:'우리나라가 반도체, 자동차를 많이 수출할 수 있는 까닭은?',a:'상품을 만드는 기술이 발달해서',o:['쌀 농사에 알맞은 기후라서','땅속에 원유가 많아서','항로 한가운데 있어서']},
+  {id:'q3',e:'⛽',q:'수입한 원유로 만들어 다시 수출하는 상품은?',a:'석유 제품',o:['쌀','김','로봇'],easy:1},
+  {id:'q4',e:'🔁',q:'우리나라는 천연자원을 ( ) 한 뒤 상품을 만들어 ( ) 해요.',a:'수입 → 수출',o:['수출 → 수입'],easy:1},
+  {id:'q5',e:'🌾',q:'타이, 베트남이 쌀을 많이 수출할 수 있는 까닭은?',a:'넓은 땅과 쌀 농사에 알맞은 기후',o:['뛰어난 로봇 기술','땅속의 풍부한 원유','유명한 동영상 서비스']},
+  {id:'q6',e:'🏜️',q:'사우디아라비아, 러시아 같은 나라가 많이 수출하는 것은?',a:'원유',o:['쌀','로봇','백신'],easy:1},
+  {id:'q7',e:'🤖',q:'일본이 로봇을, 독일이 백신을 수출할 수 있는 까닭은?',a:'뛰어난 기술이 있어서',o:['넓은 들판이 있어서','원유가 많아서','항구가 커서']},
+  {id:'q8',e:'🎬',q:'미국의 영화, 드라마, 동영상 서비스는 어떤 상품일까요?',a:'문화 상품',o:['천연자원','농산물'],easy:1},
+  {id:'q9',e:'⚓',q:'싱가포르에 큰 항구가 발달한 까닭은?',a:'유럽과 아시아를 잇는 항로에 있어서',o:['땅이 아주 넓어서','원유가 아주 많아서','쌀이 잘 자라서']},
+  {id:'q10',e:'📦',q:'싱가포르에서 발달한 무역의 모습은?',a:'여러 나라 상품을 모아 필요한 나라에 다시 팔아요',o:['다른 나라와 무역을 하지 않아요','쌀만 수출해요','원유만 수입해요']},
+  {id:'q11',e:'🎪',q:'일정한 기간과 장소를 정해 다양한 물품을 전시하는 행사는?',a:'박람회',o:['운동회','졸업식'],easy:1},
+  {id:'q12',e:'🌍',q:'세계 여러 나라는 무엇에 따라 서로 다른 무역을 할까요?',a:'자연환경, 기술, 지리적 위치 같은 나라의 특징',o:['국기의 색깔','나라 이름의 글자 수','대통령의 생일']}];
+const QQ=Object.fromEntries(QUIZ.map(g=>[g.id,g]));
+
+// 세계 지도 (Natural Earth 110m 땅 모양을 경도 -130~160, 위도 70~-45로 잘라 단순하게 그린 것)
+const MAP={L0:-130,L1:160,T:70,B:-45,W:1000,H:397};
+const LAND="M691 413L685 413L686 410L688 411L691 411L691 413ZM950 382L953 384L958 383L960 387L958 391L955 392L952 392L950 389L949 387L947 384L950 382ZM1045 383L1048 383L1049 386L1046 390L1044 391L1039 394L1039 397L1037 400L1034 402L1029 403L1027 401L1023 401L1024 397L1029 394L1031 393L1033 392L1036 390L1038 388L1040 386L1042 383L1044 381ZM1050 366L1053 370L1053 368L1055 371L1058 372L1060 373L1062 371L1063 375L1062 377L1059 377L1059 379L1057 382L1055 384L1053 386L1051 384L1053 381L1051 379L1048 378L1050 376L1051 373L1051 371L1049 368L1048 366L1045 363L1044 361L1047 363L1049 363L1050 366ZM1025 318L1021 318L1019 316L1017 315L1014 312L1017 312L1020 314L1023 317L1025 318ZM1063 302L1064 304L1060 304L1061 302L1063 302ZM1069 299L1067 300L1065 300L1066 298L1069 297ZM621 288L621 293L622 296L620 296L620 298L619 301L619 304L617 308L616 312L614 319L612 324L611 328L608 329L605 330L600 328L599 323L598 320L597 318L598 315L600 314L601 311L602 309L600 305L600 302L601 300L602 298L605 297L608 296L610 294L613 292L613 289L617 287L618 283L620 286L621 288ZM943 289L945 292L947 291L950 293L950 298L951 300L952 303L953 307L957 309L959 311L962 312L963 315L964 319L967 320L969 323L971 325L975 329L976 332L976 336L978 339L978 342L976 346L975 351L974 354L971 356L970 358L968 363L966 367L965 370L964 372L960 372L956 374L953 376L950 375L948 372L943 376L941 375L937 374L933 373L931 371L930 368L928 365L925 365L925 360L923 363L920 363L922 361L924 358L923 355L921 358L919 359L917 362L915 361L912 356L911 355L907 352L904 352L901 350L895 351L890 352L887 353L883 353L880 355L877 355L875 359L872 359L867 358L864 359L862 359L860 361L857 362L853 363L850 363L847 360L845 358L847 356L848 353L845 347L845 343L844 341L842 339L842 336L840 333L839 330L842 332L840 328L839 326L840 323L840 319L842 317L842 319L844 317L846 316L848 314L851 313L853 313L856 312L859 311L861 311L865 310L867 308L870 304L870 301L872 298L874 301L874 299L877 298L877 295L879 294L882 292L885 290L889 291L891 293L895 293L896 289L899 285L901 284L905 283L903 281L907 281L909 282L912 283L915 284L917 283L921 284L918 288L916 291L916 293L918 295L921 296L925 300L928 301L932 303L934 302L935 298L937 294L937 291L937 286L938 283L938 280L941 280L942 283L943 286L943 289ZM865 277L859 275L862 274L865 276ZM877 277L874 277L876 274L879 272L883 271L885 271L887 271L883 273L880 274L877 277ZM855 270L858 270L855 272L853 273L854 271ZM872 270L866 272L862 272L865 270L867 271L869 271L872 270ZM1000 270L997 270L995 268L999 269ZM823 265L829 265L837 266L838 268L843 268L847 271L843 272L840 270L836 271L833 270L830 270L826 268L823 268L815 267L812 265L814 262L818 262L821 264L823 265ZM913 263L911 265L911 263L912 260L913 263ZM986 265L983 264L982 262L981 259L983 261L985 263L986 265ZM972 261L970 262L966 263L962 262L960 260L963 261L966 259L968 260L971 258L973 256L974 258L972 261ZM887 254L883 254L886 252ZM898 252L899 255L897 254L894 253L889 253L894 251L898 252ZM976 257L974 255L970 252L968 251L971 251L973 253L976 255ZM911 246L912 251L915 253L918 250L922 248L925 248L928 249L931 250L934 251L940 253L947 255L949 257L951 258L957 263L955 265L956 267L959 269L961 273L963 274L966 275L968 277L966 278L962 277L958 277L956 274L954 273L952 270L947 268L944 269L942 270L943 273L940 274L935 273L932 270L928 270L923 271L924 268L926 267L926 263L924 260L917 257L914 257L909 254L907 256L906 253L903 251L907 250L910 250L904 249L903 247L900 247L898 245L903 244L910 244ZM880 237L877 240L875 241L871 240L866 240L863 241L862 243L865 247L867 245L874 244L870 247L867 248L871 253L873 258L873 260L870 260L871 257L868 258L868 256L865 254L865 251L863 252L863 256L864 261L861 261L861 257L860 254L858 251L859 249L860 246L861 241L865 237L868 238L872 239L876 238L880 236ZM892 238L892 241L890 243L891 244L889 243L888 238L888 235L892 236ZM813 262L809 262L806 259L802 256L801 254L798 251L796 249L794 244L791 241L790 238L788 235L785 233L783 230L781 228L777 224L779 223L784 224L787 227L790 229L792 231L795 234L799 234L802 237L804 240L806 241L805 244L807 245L809 248L810 250L812 250L814 252L813 257L813 262ZM855 235L859 239L855 239L853 241L854 244L850 247L850 250L849 256L844 256L843 254L841 254L835 254L831 252L828 252L828 247L824 243L824 240L824 237L826 235L829 236L832 235L832 232L838 231L840 228L842 226L846 223L849 220L851 218L854 219L856 222L859 223L857 225L855 227L853 230L855 234ZM884 213L884 215L883 220L882 216L881 218L882 221L877 220L876 218L875 215L872 216L869 218L870 214L872 213L874 212L878 212L881 211L881 208L884 210L884 213ZM728 220L725 221L724 218L723 213L725 208L727 210L729 212L730 216L730 219ZM238 207L235 207L236 205L238 204L238 207ZM876 206L873 209L870 208L872 206L874 204L874 206L876 203L876 206ZM857 209L852 213L854 210L857 208L859 206L860 202L861 205L859 207L857 209ZM869 201L871 202L873 203L869 206L869 202ZM881 200L882 204L879 203L880 206L878 204L877 202L879 201L877 198L880 198ZM867 197L866 200L865 198L863 195L866 195ZM867 178L869 179L871 183L870 186L868 187L867 189L868 192L871 192L876 194L876 197L873 197L872 195L869 194L866 195L864 192L862 190L862 185L863 181L865 178ZM222 179L219 180L216 178L220 178L222 179ZM183 180L180 180L178 179L181 178L183 178L186 180L183 180ZM198 173L201 174L204 173L206 174L210 175L213 177L210 178L207 178L205 178L202 181L199 179L195 179L192 178L195 178L198 178L197 176L195 174L198 173ZM829 177L826 179L823 178L823 175L825 173L828 172L831 174L829 177ZM-88 176L-90 174L-88 172L-86 174L-88 176ZM174 163L178 164L182 167L184 168L188 169L190 170L192 172L190 173L187 173L185 173L180 173L182 171L179 170L177 167L172 166L166 165L163 163L160 165L157 166L158 164L161 162L164 162L168 162L170 162L174 163ZM181 160L179 158L179 155L181 158ZM866 163L865 166L863 163L862 160L864 157L867 154L868 157L866 163ZM913 124L911 127L908 127L907 129L905 128L907 124L910 123L913 124ZM568 119L565 120L562 122L560 120L562 119L564 120L568 119ZM530 118L532 120L535 119L537 120L534 121L529 120ZM502 110L501 112L500 115L498 114L491 112L496 110L499 110L502 110ZM480 99L482 102L482 106L479 107L477 102L480 99ZM934 113L933 116L932 120L927 122L921 122L917 126L914 125L914 122L908 123L904 125L900 125L903 127L901 133L899 135L898 130L896 129L895 127L898 126L900 123L903 122L906 119L912 118L916 119L920 113L922 115L927 111L929 110L931 106L931 102L932 99L936 99L938 104L938 106L934 110L934 113ZM481 96L480 99L478 96L481 93L481 96ZM945 89L947 90L949 88L950 92L945 93L942 97L937 94L935 98L931 98L930 95L932 92L936 92L937 87L938 84L942 88L945 89ZM229 81L231 81L234 81L233 83L227 81L228 79ZM235 72L229 71L226 69L232 70L235 72ZM22 74L15 73L11 71L7 69L5 67L9 67L15 68L18 71L21 72L22 74ZM255 67L252 70L255 69L257 69L259 71L264 72L263 74L265 74L267 78L265 81L261 80L262 77L257 80L254 77L251 77L244 77L246 75L247 72L250 67L253 65L256 63L255 67ZM-9 55L-6 55L-7 59L-4 62L-8 60L-11 57L-11 55ZM944 66L947 73L942 71L940 76L943 80L943 82L941 80L938 83L938 80L938 77L938 73L938 70L939 66L937 62L937 58L940 56L942 60L942 63L944 66ZM425 61L419 63L414 63L417 59L415 56L420 53L422 51L425 51L429 53L427 56L427 58L425 61ZM492 50L490 52L486 51L491 48ZM-79 44L-83 46L-85 43L-82 42L-78 42L-79 44ZM438 39L434 43L438 42L442 43L441 45L438 48L441 49L444 53L447 54L449 58L454 60L454 62L453 65L450 66L446 66L440 67L436 68L433 68L430 69L433 65L437 64L431 64L434 61L432 59L432 57L438 57L436 53L432 53L432 50L429 51L429 47L427 46L428 42L431 39L434 40L438 39ZM-123 35L-127 35L-129 34L-126 33L-123 34ZM175 27L174 29L171 28L174 26ZM166 25L162 27L159 27L161 24L166 24ZM-144 21L-142 22L-137 23L-133 23L-136 24L-139 23L-143 23ZM155 15L157 16L163 18L167 19L170 21L172 22L169 23L164 22L162 20L158 22L153 24L152 22L148 22L151 21L151 18L152 15L155 15ZM398 12L397 14L401 17L397 19L387 22L384 22L379 22L370 21L373 19L366 18L372 17L364 15L367 13L372 12L377 15L383 13L387 14L393 12L398 12ZM187 10L183 10L183 6L187 6L189 7L187 10ZM1069 4L1077 6L1086 10L1088 13L1088 10L1097 11L1104 14L1100 15L1095 16L1095 19L1090 20L1087 19L1083 18L1079 15L1075 16L1073 15L1069 14L1071 16L1069 17L1065 19L1060 19L1063 20L1065 23L1067 26L1060 26L1050 28L1047 29L1042 31L1037 33L1031 33L1022 35L1017 35L1012 35L1011 37L1007 41L1011 43L1011 48L1007 48L1006 51L1001 54L1000 58L995 59L994 62L989 66L988 63L986 58L984 50L986 46L989 44L994 41L1001 37L1006 33L1013 31L1015 26L1011 26L1009 29L1000 33L998 28L989 30L980 35L983 37L975 38L970 39L970 36L965 36L961 37L950 37L939 38L927 45L914 53L920 53L921 55L925 56L927 54L931 55L936 58L936 61L933 65L933 69L931 74L926 79L925 82L920 86L916 90L913 92L909 94L904 92L900 95L896 97L896 101L893 102L890 103L888 106L891 108L894 112L895 115L895 119L893 121L890 121L888 123L884 123L885 118L883 115L886 114L883 111L880 112L878 110L880 108L881 106L878 105L872 105L869 106L866 107L868 106L870 102L868 100L865 102L861 104L859 106L855 106L854 108L855 110L858 111L861 113L865 111L868 112L870 112L866 115L864 117L861 119L859 121L863 123L864 126L866 130L869 132L869 135L866 136L869 139L869 141L868 144L863 148L861 153L857 157L853 160L848 163L844 163L842 165L839 166L834 167L830 168L829 171L826 169L822 167L816 170L813 173L813 176L815 179L818 184L822 186L824 189L825 195L825 201L822 204L818 206L815 209L811 212L810 210L811 207L808 205L805 205L804 203L802 200L799 198L796 198L796 195L793 195L793 199L791 204L790 207L790 210L793 210L794 213L795 216L797 218L800 220L803 223L805 225L805 227L805 230L806 233L808 236L805 237L802 235L798 232L795 228L795 225L794 223L794 221L792 218L790 214L788 213L787 211L788 207L788 205L789 202L788 200L788 196L787 195L785 190L785 186L783 183L781 185L777 187L773 186L774 182L774 179L771 175L769 173L767 170L766 167L764 163L760 163L760 166L757 166L752 167L748 167L748 170L747 172L742 174L738 178L735 181L732 183L730 185L727 187L724 189L725 194L725 197L724 200L724 206L720 209L718 211L717 213L712 211L711 206L709 203L706 198L706 193L705 191L702 186L700 180L699 175L699 171L699 168L694 170L691 170L687 165L687 163L683 160L681 159L680 157L677 154L671 155L665 155L660 155L654 154L650 153L646 153L645 149L640 149L637 150L633 149L629 146L626 145L624 142L621 138L617 137L614 138L614 140L615 143L617 146L619 148L621 150L621 152L623 154L623 156L623 154L625 151L626 155L626 158L630 158L632 158L637 156L639 154L642 152L643 156L644 158L646 159L649 160L652 162L655 164L653 167L651 169L650 171L648 172L648 176L643 178L642 180L639 181L637 183L633 184L629 185L628 188L625 189L619 191L616 193L614 193L612 195L609 195L606 196L604 197L602 198L598 198L597 196L597 193L596 191L596 187L595 184L594 181L590 177L589 174L587 172L583 168L583 166L581 160L578 158L576 156L576 153L573 150L571 147L569 145L568 143L569 140L567 144L565 146L563 144L560 139L561 143L563 146L566 151L567 153L568 155L571 159L571 162L575 165L577 169L576 173L578 177L581 180L583 184L584 187L586 188L590 192L592 194L594 196L597 198L598 200L598 203L600 206L605 205L609 204L612 203L615 202L618 202L622 201L625 200L624 203L624 206L623 210L621 214L619 218L616 223L613 227L609 232L605 235L600 238L597 241L593 245L592 247L589 249L587 251L587 253L585 257L582 262L584 265L583 268L583 271L585 273L586 277L588 279L588 282L588 285L588 291L588 295L587 297L584 299L581 301L577 302L573 306L570 309L568 312L570 315L570 318L571 321L571 323L569 326L566 327L562 329L561 332L561 336L560 339L557 343L555 345L552 349L548 353L546 355L543 356L539 358L537 359L533 359L530 358L526 359L523 360L520 360L517 362L514 361L512 359L511 357L510 354L511 351L509 348L507 345L505 340L502 338L501 335L500 332L499 329L498 324L498 320L496 317L494 314L493 310L492 307L489 304L489 301L489 296L490 293L491 288L494 285L496 281L494 277L494 275L493 273L494 271L493 268L492 266L490 263L489 259L487 255L483 252L481 249L479 245L479 243L480 241L481 238L482 234L482 231L481 229L478 227L474 226L471 227L469 227L467 225L466 222L463 220L461 220L458 220L455 220L452 221L447 223L445 224L442 225L438 224L434 224L432 224L428 224L426 225L422 227L417 225L414 222L411 220L409 218L405 217L404 215L403 211L401 209L399 207L398 205L394 202L392 201L391 199L390 196L389 192L391 188L391 184L393 179L392 176L392 172L389 169L390 166L392 163L393 160L395 158L397 155L398 151L401 150L403 146L405 145L408 144L411 142L415 138L414 134L416 131L418 127L422 125L424 124L427 120L428 118L430 118L432 120L436 119L439 120L444 118L448 118L450 116L453 115L459 115L465 114L470 114L474 114L477 114L481 113L483 113L486 114L485 116L486 118L486 121L483 123L486 125L488 127L492 128L496 129L501 130L502 133L506 134L510 135L514 137L517 135L517 132L520 129L523 128L527 129L530 131L534 132L540 133L543 134L546 135L551 134L555 133L558 133L562 135L565 135L567 133L569 128L571 125L572 122L572 119L572 116L568 115L566 117L560 117L558 115L554 115L551 117L547 115L544 115L542 112L539 110L541 107L539 105L542 102L548 102L549 99L556 100L560 98L564 97L570 97L576 99L581 100L585 100L587 100L592 98L591 94L589 93L586 92L582 89L578 87L575 85L577 85L580 82L578 81L583 79L580 79L577 79L575 80L572 81L569 82L571 85L574 85L570 87L565 89L564 86L560 85L564 83L558 82L554 81L553 83L550 85L549 87L547 91L545 92L544 95L545 97L548 99L544 100L539 103L538 101L534 100L530 101L532 103L529 104L527 102L527 105L529 106L529 109L531 112L528 111L527 113L528 116L526 116L523 114L522 112L521 109L518 106L515 103L515 99L513 96L509 94L507 92L503 91L501 89L500 86L497 85L494 84L491 85L491 88L495 91L497 94L500 97L503 97L506 99L509 101L512 102L509 103L506 102L505 104L507 106L506 108L504 111L503 108L502 105L500 103L497 101L493 99L490 98L487 95L485 93L483 90L479 88L475 91L471 93L464 92L459 93L459 97L455 99L451 100L449 103L447 106L449 108L447 109L446 112L443 112L441 115L437 115L433 115L431 116L428 117L426 114L423 114L419 114L418 112L416 109L416 106L417 103L418 99L417 97L417 95L421 91L425 91L430 91L433 92L436 92L442 92L444 90L444 83L441 79L438 77L433 76L432 74L437 73L443 74L442 70L445 71L453 69L454 66L457 65L460 64L465 58L469 57L472 57L476 56L479 55L478 52L476 50L476 46L478 44L481 44L485 42L484 45L486 47L482 50L483 53L486 54L490 55L495 55L499 55L505 53L509 52L512 53L516 54L522 51L521 48L521 46L523 43L526 42L529 45L531 45L532 42L529 39L533 36L537 36L541 36L545 36L549 34L545 33L539 33L533 34L527 35L525 33L522 32L523 29L521 26L523 24L526 21L534 18L536 17L531 14L525 15L521 17L516 22L510 25L507 30L510 32L513 34L510 38L506 39L505 45L503 48L499 48L497 50L493 51L492 47L489 43L486 38L484 36L477 40L473 41L468 39L467 36L465 28L469 25L478 23L485 19L491 14L499 8L505 5L514 1L522 -1L528 -1L533 -4L539 -3L545 -4L556 -2L552 -1L556 2L559 0L565 2L574 3L587 7L590 9L590 11L586 13L581 14L565 11L563 12L568 14L569 19L573 20L576 21L574 18L576 17L585 19L588 18L585 16L593 12L597 12L600 14L602 11L599 9L601 7L598 5L608 6L610 8L605 8L608 12L613 11L614 9L621 7L634 4L636 4L633 6L637 7L639 5L646 5L651 4L655 6L659 4L655 2L667 2L672 3L685 7L687 5L683 3L679 2L678 -2L685 -7L687 -10L689 -10L699 -10L696 -5L698 -4L699 -1L698 3L702 5L701 8L694 13L698 13L703 11L707 8L705 6L707 3L703 3L705 -2L700 -5L707 -7L706 -10L709 -8L708 -5L712 -4L710 -6L716 -8L723 -8L729 -6L726 -9L726 -13L732 -13L740 -13L748 -14L745 -15L749 -18L753 -18L760 -19L769 -20L779 -21L782 -20L789 -22L796 -22L800 -25L808 -27L814 -25L809 -25L817 -24L821 -23L831 -23L839 -21L842 -20L837 -17L828 -15L826 -14L830 -14L835 -13L838 -14L840 -12L847 -13L858 -12L873 -10L873 -13L881 -12L886 -12L892 -10L893 -8L891 -7L896 -4L901 -3L904 -6L910 -5L916 -6L922 -5L925 -6L931 -5L928 -8L933 -10L964 -8L967 -6L976 -3L990 -4L997 -3L999 -2L999 1L1003 2L1008 1L1014 1L1020 2L1027 1L1033 5L1037 3L1035 1L1047 1L1054 0L1064 2L1069 4ZM118 3L116 4L112 3L109 4L104 2L107 1L110 -0L113 0L116 2L118 3ZM1069 -5L1069 -3L1065 -3L1069 -5ZM-172 -5L-169 -5L-164 -4L-168 -3L-172 -3L-172 -5ZM136 2L136 5L141 3L145 5L144 7L147 10L151 7L153 4L153 0L158 1L163 1L168 3L166 6L168 8L161 12L156 13L153 12L148 17L143 20L138 21L136 22L135 24L131 25L127 28L123 31L122 34L122 38L127 39L128 42L130 45L135 44L141 45L145 47L147 48L151 49L155 51L161 51L165 51L164 54L165 58L168 62L173 65L175 64L177 60L175 55L173 53L179 51L182 49L184 46L184 44L182 41L178 39L182 35L180 32L179 27L181 26L187 27L191 27L194 26L197 27L201 29L208 31L208 34L209 38L213 39L215 41L220 39L223 35L226 33L228 36L233 41L237 45L235 47L240 49L243 51L248 52L251 53L252 56L255 56L256 62L254 63L251 64L246 65L241 68L235 69L228 68L223 68L219 68L216 71L212 72L207 77L203 80L206 79L212 75L219 72L224 72L227 73L224 76L225 79L226 82L230 84L236 83L240 79L240 82L242 83L238 85L230 87L227 89L223 91L220 91L220 88L226 85L221 85L217 86L214 89L210 90L206 91L205 93L204 96L207 97L205 98L200 99L197 99L194 100L199 100L195 101L192 102L192 105L190 107L188 105L189 108L188 110L186 113L187 111L185 109L185 107L185 110L183 110L185 111L185 114L187 119L185 121L181 123L179 125L176 126L171 129L169 131L168 133L167 136L168 138L169 141L171 143L172 149L172 151L171 155L168 155L167 152L165 149L163 147L163 143L160 138L155 139L153 138L150 137L146 137L143 137L141 137L140 140L137 141L135 141L132 139L129 140L127 139L122 140L119 142L115 144L113 146L112 150L113 152L112 155L111 158L111 162L111 166L113 170L115 173L118 177L121 178L126 178L128 178L131 177L133 176L135 175L136 170L139 168L143 167L146 168L149 168L147 172L146 174L145 179L144 181L144 185L142 187L144 187L146 187L150 187L153 187L155 186L158 188L161 189L161 192L160 195L160 197L160 201L159 203L161 206L164 209L165 211L167 211L171 210L174 208L178 209L180 211L183 212L186 209L188 205L190 203L192 203L195 203L198 201L201 199L203 200L200 202L201 206L200 208L201 210L203 208L202 204L206 202L207 200L208 202L211 202L213 204L216 205L220 205L222 206L225 207L226 206L231 205L235 205L232 206L236 208L239 209L239 212L242 213L244 214L247 216L248 218L250 220L255 222L259 221L262 222L266 223L270 226L272 229L274 235L276 238L273 241L281 242L281 246L283 244L288 245L293 247L295 249L299 250L305 252L310 252L316 254L320 258L323 259L326 259L328 265L327 273L325 275L321 280L318 284L316 287L314 289L314 296L313 301L313 303L311 309L308 314L307 317L304 319L303 321L300 321L294 322L292 324L288 325L284 328L281 331L281 334L280 339L277 343L273 349L270 351L268 353L267 356L264 358L263 360L259 362L256 362L251 361L249 361L247 359L251 363L250 366L253 367L249 373L244 375L237 376L233 376L233 380L232 383L228 384L225 383L224 387L227 388L229 389L226 390L224 392L223 395L219 397L216 399L215 401L219 404L222 405L221 408L217 410L214 414L211 415L211 420L213 422L209 422L204 424L203 427L198 426L194 424L190 422L189 420L190 418L188 416L188 410L189 406L193 404L187 403L191 400L192 394L196 395L198 388L195 387L194 391L192 391L193 386L194 380L196 377L195 374L195 370L198 364L200 359L202 354L201 348L202 346L202 341L204 337L204 330L206 323L207 316L206 310L206 305L202 303L195 298L189 294L186 292L185 289L182 284L179 277L176 271L173 266L171 264L168 263L168 258L169 256L171 253L173 251L169 249L169 245L171 243L172 240L174 238L176 237L177 234L180 232L181 230L182 228L182 226L181 222L181 219L180 217L178 214L177 212L174 211L172 213L172 216L169 217L167 215L165 213L163 213L160 212L159 210L156 208L154 208L152 206L153 203L150 201L148 199L146 197L143 196L140 195L138 194L134 194L130 191L126 188L122 186L117 187L113 187L110 186L107 184L104 184L101 182L98 181L95 180L91 179L86 175L85 173L84 170L85 168L84 165L80 160L76 157L74 155L72 153L71 150L68 148L67 145L63 143L61 142L59 138L58 135L56 133L52 132L53 135L53 138L57 141L58 144L59 146L61 148L63 150L65 153L67 156L68 158L71 161L69 163L68 161L66 159L63 157L62 154L59 151L57 149L54 148L52 146L54 145L52 141L50 140L49 137L47 135L46 132L44 129L42 126L40 124L36 123L33 123L32 120L29 117L26 112L24 110L22 107L21 104L19 102L20 100L20 97L19 94L20 91L21 84L20 80L19 77L19 75L24 76L26 79L26 75L25 72L18 69L15 68L9 66L7 63L3 60L2 57L-2 54L-4 51L-7 50L-8 47L-12 44L-14 41L-17 41L-23 41L-27 40L-34 36L-37 35L-43 34L-48 35L-55 33L-59 31L-63 32L-62 35L-68 36L-71 37L-75 37L-74 32L-70 31L-75 32L-78 34L-83 37L-80 38L-84 41L-87 42L-91 43L-97 47L-102 50L-104 50L-108 51L-111 52L-114 53L-120 54L-117 52L-113 51L-110 49L-105 48L-104 47L-99 45L-96 43L-95 40L-93 38L-97 39L-100 40L-102 38L-105 38L-108 39L-111 37L-112 35L-117 35L-120 34L-122 33L-125 29L-123 27L-120 25L-116 23L-114 24L-111 22L-109 23L-106 22L-109 19L-106 18L-112 19L-116 19L-121 19L-126 18L-131 15L-127 14L-119 12L-116 12L-109 13L-112 11L-116 10L-119 8L-122 7L-127 6L-125 4L-119 4L-114 2L-110 -1L-107 -2L-100 -3L-97 -3L-92 -5L-86 -4L-84 -2L-77 -3L-72 -1L-68 -2L-61 -1L-54 -0L-51 0L-47 -1L-42 1L-38 1L-31 2L-26 3L-22 4L-19 2L-15 1L-10 2L-5 0L1 -1L3 1L6 -0L9 -1L15 2L19 -1L20 2L24 2L29 1L35 2L43 3L47 4L51 4L56 6L51 7L57 8L66 8L69 7L73 9L77 7L73 6L75 5L79 4L82 4L85 5L88 7L92 7L98 8L104 8L109 8L111 5L117 6L117 9L119 7L122 7L123 3L120 1L116 -0L116 -4L120 -7L125 -6L128 -5L133 -1L130 1L136 2ZM55 -11L53 -9L61 -10L65 -8L69 -10L72 -9L75 -6L77 -7L74 -11L78 -11L81 -11L85 -9L87 -6L88 -3L94 -2L100 -0L94 2L96 3L89 4L83 3L79 3L72 4L62 5L58 5L56 3L51 2L48 3L44 0L46 -0L51 -1L56 -1L61 -1L54 -2L47 -2L42 -2L40 -3L48 -5L43 -4L37 -5L39 -8L42 -9L51 -11L55 -11ZM88 -12L85 -10L80 -12L85 -13L88 -12ZM185 -11L182 -10L178 -10L174 -9L169 -12L171 -13L179 -13L185 -11ZM150 -11L153 -9L156 -12L164 -13L170 -9L170 -7L177 -8L180 -9L188 -8L192 -6L199 -5L203 -3L211 -2L214 -0L217 3L211 4L219 7L225 7L230 11L235 11L234 13L228 17L224 16L218 12L214 13L217 17L222 18L225 23L224 25L220 24L211 22L216 25L220 27L211 26L203 24L199 23L195 20L190 18L180 20L177 19L180 16L186 16L193 16L193 13L198 9L195 7L190 5L183 4L185 3L182 1L179 1L176 -1L168 1L155 0L148 -1L142 -1L140 -3L143 -4L138 -4L137 -8L140 -11L143 -12L152 -13L150 -11ZM102 -13L106 -13L112 -13L110 -10L115 -9L115 -6L109 -4L106 -5L103 -6L95 -9L102 -9L98 -12L102 -13ZM943 -11L938 -11L931 -11L934 -13L938 -13L943 -12ZM127 -10L123 -7L119 -7L117 -10L119 -13L122 -14L130 -14L136 -13L131 -10L127 -10ZM33 -5L24 -3L22 -5L14 -6L18 -10L21 -13L18 -15L29 -15L34 -15L43 -14L46 -13L50 -12L46 -11L37 -9L33 -6ZM968 -18L964 -16L959 -16L952 -18L959 -18L968 -18ZM125 -17L124 -16L119 -16L114 -17L116 -19L121 -19L124 -18ZM949 -19L946 -17L933 -17L927 -16L921 -18L922 -21L927 -21L936 -21L949 -19ZM109 -23L111 -22L110 -17L104 -17L100 -17L95 -19L95 -22L98 -22L104 -23L108 -23ZM75 -21L80 -21L83 -21L82 -17L70 -17L61 -15L56 -15L63 -18L47 -17L42 -18L47 -21L50 -22L60 -21L66 -19L72 -19L67 -22L70 -23L74 -23ZM647 -2L633 -3L626 -5L629 -8L636 -13L633 -13L641 -16L648 -19L659 -22L671 -22L677 -24L683 -24L686 -23L683 -22L671 -20L661 -18L650 -15L645 -12L639 -8L640 -5L647 -2ZM122 -25L126 -23L132 -23L135 -22L139 -20L141 -19L145 -19L150 -19L156 -20L163 -20L169 -20L172 -18L171 -16L166 -15L161 -16L151 -15L144 -15L139 -16L130 -17L128 -19L125 -22L117 -22L113 -23L122 -25ZM48 -26L47 -24L44 -23L41 -22L35 -21L29 -20L25 -21L30 -24L38 -26L43 -26L48 -26ZM125 -26L117 -26L123 -27L125 -26ZM68 -27L62 -26L57 -27L60 -28L65 -28L69 -28ZM534 -27L526 -26L520 -27L522 -27L520 -28L527 -29L534 -27ZM70 -30L66 -29L60 -29L64 -31L70 -30ZM118 -28L113 -27L110 -28L108 -31L113 -30L119 -29ZM103 -29L99 -28L93 -29L86 -29L89 -30L85 -31L91 -32L101 -30L103 -29ZM811 -29L791 -27L797 -32L800 -32L803 -32L812 -30ZM511 -33L523 -31L514 -30L512 -27L509 -26L507 -24L503 -23L496 -25L499 -27L494 -28L487 -31L484 -33L494 -35L496 -33L500 -33L507 -35L511 -33ZM536 -36L543 -35L538 -33L528 -32L518 -33L512 -34L508 -36L519 -37L524 -36L527 -37L536 -36ZM625 -36L620 -36L617 -36L612 -35L609 -35L611 -36L603 -37L610 -37L615 -37L618 -37L621 -38L626 -37ZM793 -31L785 -30L776 -31L770 -33L767 -35L763 -36L772 -38L779 -39L786 -37L794 -34L793 -31ZM148 -33L152 -32L148 -31L141 -29L135 -28L128 -29L124 -30L127 -32L121 -32L117 -34L115 -35L117 -37L120 -38L123 -38L130 -39L134 -37L140 -36L145 -36L148 -33ZM212 -45L221 -45L229 -45L235 -44L226 -41L218 -40L215 -40L222 -40L214 -38L209 -37L203 -34L196 -33L194 -33L183 -32L188 -32L185 -31L188 -29L185 -28L180 -27L173 -25L180 -24L170 -21L161 -22L151 -22L146 -22L140 -22L146 -25L144 -27L155 -26L151 -28L145 -29L148 -30L154 -31L150 -34L149 -35L158 -35L161 -35L166 -36L158 -37L146 -36L140 -37L137 -39L133 -40L138 -42L142 -42L148 -42L153 -44L158 -44L161 -43L164 -44L169 -45L175 -45L185 -45L197 -46L205 -45L212 -45ZM355 -47L376 -44L370 -43L357 -42L338 -42L352 -42L363 -41L369 -42L372 -41L368 -38L377 -40L394 -41L404 -40L406 -39L392 -37L379 -35L387 -35L383 -32L380 -30L380 -26L385 -24L379 -24L374 -23L380 -21L381 -18L377 -18L381 -15L374 -15L378 -13L372 -11L367 -11L371 -9L365 -9L367 -7L372 -5L373 -2L367 -2L364 -3L360 -5L361 -3L357 -1L366 -1L371 -0L362 3L353 5L343 6L339 6L335 8L330 11L323 14L321 14L316 15L311 16L308 18L308 20L306 23L301 25L302 28L300 31L299 34L294 34L289 32L282 32L279 30L276 26L270 22L268 20L268 17L263 13L264 11L262 10L266 6L271 4L273 0L269 1L264 2L260 1L259 -1L261 -3L264 -3L271 -2L265 -4L262 -5L259 -5L256 -6L260 -9L257 -10L255 -13L251 -16L246 -18L237 -21L230 -21L220 -21L212 -21L208 -22L202 -24L211 -25L218 -25L203 -26L196 -28L209 -31L222 -32L214 -35L217 -36L229 -39L234 -39L240 -42L251 -42L262 -42L265 -41L275 -43L283 -42L288 -41L295 -40L287 -42L299 -46L311 -45L315 -47L327 -47L355 -47Z";
+const proj=([lon,lat])=>[(lon-MAP.L0)/(MAP.L1-MAP.L0)*MAP.W,(MAP.T-lat)/(MAP.T-MAP.B)*MAP.H];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+/* ---------- 공통 그림 ---------- */
+function flowHTML(){
+  return `<div class="flow"><div class="f1"><div class="ic">${IN_E}</div><b>🛬 천연자원 수입</b><small class="muted">천연자원이 부족해요</small></div><span aria-hidden="true">→</span>
+   <div class="f2"><div class="ic">🏭</div><b>우리나라에서 상품 생산</b><small class="muted">발달한 기술을 활용해요</small></div><span aria-hidden="true">→</span>
+   <div class="f3"><div class="ic">${OUT_E}</div><b>🛫 상품 수출</b><small class="muted">세계 여러 나라로</small></div></div>`;
+}
+const kindBadge=k=>`<span class="kb ${k}">${KINDS[k].e} ${KINDS[k].n}</span>`;
+function boothHTML(x,b,{small,facts=2}={}){
+  b=b||{};
+  return `<div class="booth ${x.kind}${small?' small':''}"><div class="roof"></div><div class="in">
+   <div class="hd"><span class="e" aria-hidden="true">${x.e}</span><h3>${x.n} 홍보관</h3>${kindBadge(x.kind)}</div>
+   <div class="pr">대표 수출품: ${x.prod.e} ${esc(x.prod.n)}</div>
+   ${b.slogan?`<div class="sl">“${esc(b.slogan)}”</div>`:''}
+   ${facts?`<ul class="facts">${x.facts.slice(0,facts).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>`:''}
+   ${b.news?`<div class="nw">🔎 찾은 뉴스: ${esc(b.news)}</div>`:''}</div></div>`;
+}
+// 세계 지도: 홍보관을 연 나라는 진하게, 구매 약속은 화살표로
+function mapSVG({on=new Set(),act=new Set(),lines=[],counts={}}={}){
+  let g=`<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E0704F"/></marker></defs>
+   <rect width="${MAP.W}" height="${MAP.H}" fill="#CFE3EA"/><path d="${LAND}" fill="#F6EEDA" stroke="#C9B98F" stroke-width="1"/>`;
+  lines.forEach(l=>{const a=proj(NN[l.from].ll),b=proj(NN[l.to].ll);
+    const mx=(a[0]+b[0])/2,my=Math.min(a[1],b[1])-Math.max(40,Math.abs(a[0]-b[0])*.18);
+    g+=`<path d="M${a[0].toFixed(0)} ${a[1].toFixed(0)}Q${mx.toFixed(0)} ${my.toFixed(0)} ${b[0].toFixed(0)} ${b[1].toFixed(0)}" fill="none" stroke="#F98F6E" stroke-width="${2+Math.min(6,l.n*1.5)}" stroke-linecap="round" opacity=".75" marker-end="url(#ah)"/>`;});
+  const [kx,ky]=proj(KOREA.ll);
+  g+=`<text x="${kx}" y="${ky+7}" text-anchor="middle" font-size="22" fill="#C8452D">★</text><text x="${kx-12}" y="${ky+6}" text-anchor="end" font-size="16" font-family="Jua" fill="#C8452D" stroke="#fff" stroke-width="4" paint-order="stroke">대한민국</text>`;
+  NATIONS.forEach(x=>{const [cx,cy]=proj(x.ll);const o=on.has(x.id),a=act.has(x.id);
+    const lx=x.lp==='l'?cx-28:x.lp==='r'?cx+28:cx, ly=x.lp==='t'?cy-30:x.lp==='b'?cy+44:cy+7, an=x.lp==='l'?'end':x.lp==='r'?'start':'middle';
+    const c=counts[x.id]?` 🤝${counts[x.id]}`:'';
+    g+=`<g opacity="${o?1:a?.8:.4}"><circle cx="${cx}" cy="${cy}" r="22" fill="${o?'#fff':'#EFE7D3'}" stroke="${o?KCOL[x.kind]:'#B8A88A'}" stroke-width="4"/>
+     <text x="${cx}" y="${cy+8}" text-anchor="middle" font-size="22">${x.e}</text>
+     <text x="${lx}" y="${ly}" text-anchor="${an}" font-size="20" font-family="Jua" fill="#453422" stroke="#fff" stroke-width="5" paint-order="stroke">${x.n}${c}</text></g>`;});
+  return `<div class="map"><svg viewBox="0 0 ${MAP.W} ${MAP.H}" role="img" aria-label="세계 지도: 홍보관을 연 나라와 구매 약속">${g}</svg></div>`;
+}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 사회 · 2. 시장경제와 국가 간 거래';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>세계 무역<br>박람회</h1>
+   <p>우리나라는 무엇을 사 오고 무엇을 팔까요? 짝과 함께 한 나라의 홍보관을 열고, 다른 나라 홍보관을 둘러보며 세계 여러 나라의 무역 모습을 알아봐요.</p></div>
+   <div class="panel grid">${mapSVG({on:new Set(NATIONS.map(x=>x.id))})}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- student: join ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null, MYC={}, CALL={};
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store('ex-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  let pick='';
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="panel grid"><h2>짝과 함께 맡을 홍보관 나라</h2><p class="muted" style="margin:0">짝과 같은 나라를 골라요. 다른 짝과 겹치지 않게 해요.</p>
+    <div class="nations" id="nat">${NATIONS.map(x=>`<button data-n="${x.id}" aria-pressed="false"><b>${x.e} ${x.n}</b></button>`).join('')}</div></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value)&&pick);};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $$('#nat button').forEach(b=>b.onclick=()=>{pick=b.dataset.n;$$('#nat button').forEach(x=>x.setAttribute('aria-pressed',x===b));chk();});
+  $('#home').onclick=startView;
+  ClassWatch.joinForm({checks:[{label:'홍보관 나라 고르기',ok:()=>!!pick}]});
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,c:pick,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}
+        if(c.c!==pick)await roomRef(code).child('students/'+p.num+'/c').set(pick);}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('ex-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+const myNat=()=>NN[ME.c]||NATIONS[0];
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;MYC={};CALL={};
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('ex-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    $('#sub').textContent=`${me.num}번 ${me.name} · ${myNat().e} ${myNat().n}`;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  listen(roomRef(me.room).child('c'),s=>{CALL=s.val()||{};MYC=CALL[ME.c]||{};if(ready&&typeof onNat==='function')onNat();});
+  listen(roomRef(me.room).child('award'),s=>{ROOMV.award=!!s.val();if(ready&&cur===4&&ME.quiz&&ME.quiz.done)quizDone();});
+}
+let onNat=null;
+const openBooths=()=>NATIONS.filter(x=>CALL[x.id]&&CALL[x.id].booth&&CALL[x.id].booth.open);
+function stepDone(n){
+  if(n===1)return !!(ME.s1&&ME.s1.done);
+  if(n===2)return !!(MYC.booth&&MYC.booth.open);
+  if(n===3){const b=openBooths().filter(x=>x.id!==ME.c);return b.length>0&&b.every(x=>ME.stamps&&ME.stamps[x.id]);}
+  return !!(ME.quiz&&ME.quiz.done);
+}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n>ROOMV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store('ex-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+// 선생님 '단계별 화면'에 단계 안의 작은 순서까지 따로 모이게 이름을 붙여요
+const wstep=sub=>ClassWatch.step(STAGES[cur].k+(sub?' · '+sub:''),{n:cur,total:4,wait:stepDone(cur)});
+function renderStage(){
+  onMe=()=>drawSteps();onNat=()=>drawSteps();ClassWatch.detail(null);
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  return stage4();
+}
+// 차례로 문제를 내고, 맞혀야 다음으로 넘어가요
+function runQuiz(box,qs,{band,title,fig,onRight,onWrong,onEnd,progress,few,cls}){
+  let i=0,missed=false;
+  const draw=()=>{
+    const q=qs[i];const opts=shuffle([q.a,...(few?shuffle(q.o).slice(0,1):q.o)]);missed=false;const t0=Date.now();
+    box.innerHTML=`<div><span class="band">${band}</span></div>${title?`<h2>${title}</h2>`:''}
+     <div class="prog">${qs.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     ${progress?progress():''}<div class="pop" style="width:100%">${fig?fig(q):''}</div><div class="q">${esc(q.q)}</div>
+     <div class="opts ${cls||''}">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+     <div class="msg" id="qm" role="status"></div>`;
+    ClassWatch.detail(()=>({q:'문제: '+q.q}));
+    $$('.opts button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.o===q.a){
+        b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);
+        $('#qm',box).className='msg ok';
+        const extra=onRight?await onRight(q,!missed,(Date.now()-t0)/1000,i):'';
+        $('#qm',box).textContent='맞았어요!'+(extra||'');
+        await new Promise(r=>setTimeout(r,650));
+        i++;if(i<qs.length)return draw();
+        onEnd();
+      }else{
+        missed=true;b.classList.add('wrong');b.disabled=true;
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#qm',box).className='msg bad';$('#qm',box).textContent='다시 골라 봐요';
+        if(onWrong)onWrong(q);
+      }
+    });
+  };
+  draw();
+}
+
+/* ---------- 1. 우리나라 무역 ---------- */
+function stage1(){
+  const s=ME.s1||{};
+  if(s.done)return s1Done();
+  if(s.why)return s1Write();
+  if(s.sorted)return s1Why();
+  s1Sort();
+}
+function s1Sort(){
+  wstep('나누기');
+  const order=shuffle(SORT.map(x=>x.id));
+  let i=0,first=0,missed=false;const placed={in:[],out:[]};
+  shell(`<div class="panel quiz" id="sb"></div>`);
+  const box=$('#sb');
+  const draw=()=>{
+    const x=SN[order[i]];missed=false;
+    box.innerHTML=`<div><span class="band">1단계 · 우리나라 무역 (교과서 100쪽)</span></div>
+     <h2>우리나라의 주요 수입품일까요, 주요 수출품일까요?</h2>
+     <div class="prog">${order.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     <div class="sortcard pop"><div class="emoji" aria-hidden="true">${x.e}</div><div class="nm">${esc(x.n)}</div><div class="muted">${esc(x.tip)}</div></div>
+     <div class="sortbtn"><button class="in" data-a="in">🛬 수입품<br><small>다른 나라에서 사 와요</small></button><button class="out" data-a="out">🛫 수출품<br><small>다른 나라에 팔아요</small></button></div>
+     <div class="msg" id="sm" role="status"></div>
+     <div class="board"><div class="inb"><h3>🛬 주요 수입품</h3><div class="chipz">${placed.in.map(e=>`<span>${SN[e].e} ${esc(SN[e].n)}</span>`).join('')}</div></div>
+      <div class="outb"><h3>🛫 주요 수출품</h3><div class="chipz">${placed.out.map(e=>`<span>${SN[e].e} ${esc(SN[e].n)}</span>`).join('')}</div></div></div>`;
+    ClassWatch.detail(()=>({q:'나누기: '+x.n}));
+    $$('.sortbtn button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.a===x.a){
+        $$('.sortbtn button',box).forEach(z=>z.disabled=true);
+        if(!missed)first++;
+        placed[x.a].push(x.id);
+        $('#sm',box).className='msg ok';$('#sm',box).textContent=x.a==='in'?'맞았어요! 다른 나라에서 사 와요.':'맞았어요! 다른 나라에 팔아요.';
+        await new Promise(r=>setTimeout(r,600));
+        i++;if(i<order.length)return draw();
+        await roomRef(me.room).child('students/'+me.num+'/s1').update({sorted:true,first,at:Date.now()});
+        ME.s1={...(ME.s1||{}),sorted:true,first};s1Why();
+      }else{
+        missed=true;b.disabled=true;
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#sm',box).className='msg bad';$('#sm',box).textContent='다시 생각해요. 자연에서 바로 얻는 것일까요, 공장에서 만드는 것일까요?';
+        roomRef(me.room).child(`students/${me.num}/s1/wrong/${x.id}`).transaction(v=>(v||0)+1);
+      }
+    });
+  };
+  draw();
+}
+function s1Why(){
+  wstep('까닭');
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),WHYQ,{band:'1단계 · 왜 그럴까요?',title:'우리나라는 왜 이런 것을 사 오고 팔까요?',fig:q=>`<div class="emoji" aria-hidden="true">${q.e}</div>`,
+    onEnd:async()=>{
+      await roomRef(me.room).child('students/'+me.num+'/s1').update({why:true});
+      ME.s1={...(ME.s1||{}),why:true};s1Write();
+    }});
+}
+function s1Write(){
+  wstep('특징 쓰기');
+  shell(`<div class="panel grid"><div><span class="band">1단계 · 우리나라 무역의 특징</span></div>
+   <h2 style="font-size:1.6rem">그림을 보고 우리나라 무역의 특징을 써 봐요 (교과서 101쪽)</h2>
+   ${flowHTML()}
+   <div class="fld grid"><label for="feat">${FEAT_START}…</label>
+    <input id="feat" maxlength="80" placeholder="예) 천연자원을 수입해서 기술로 상품을 만들어 수출해요." autocomplete="off"></div>
+   <details><summary style="cursor:pointer;font-family:var(--display)">쓰기 어려우면 골라요</summary><div class="chips" style="margin-top:8px">${FEAT_EASY.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></details>
+   <div class="row"><button id="send" disabled>TV로 보내기</button></div><div class="msg" id="wm" role="status"></div></div>`);
+  const chk=()=>{$('#send').disabled=$('#feat').value.trim().length<4;};
+  $('#feat').oninput=chk;
+  $$('.chips button').forEach(b=>b.onclick=()=>{$('#feat').value=b.dataset.w;$$('.chips button').forEach(x=>x.setAttribute('aria-pressed',x===b));chk();});
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    const feat=$('#feat').value.trim().slice(0,80);
+    await roomRef(me.room).child('students/'+me.num+'/s1').update({done:true,feat,at:Date.now()});
+    ME.s1={...ME.s1,done:true,feat};drawSteps();s1Done();
+  };
+}
+function s1Done(){
+  wstep('끝');
+  shell(`<div class="panel quiz pop"><div><span class="band">보냈어요!</span></div>
+   <div class="big">${esc(FEAT_START+(ME.s1.feat||''))}</div>
+   ${flowHTML()}
+   <div class="rules" style="text-align:left;width:100%"><b>꼭! 기억해요</b><ul><li>우리나라는 <b>천연자원</b>을 수입한 뒤 상품을 생산하여 수출하는 무역이 발달했어요.</li></ul></div>
+   <p class="muted">선생님이 2단계를 열면 짝과 우리 나라 홍보관을 만들어요.</p></div>`);
+}
+
+/* ---------- 2. 홍보관 만들기 ---------- */
+function stage2(){
+  if(MYC.booth&&MYC.booth.open)return s2Done();
+  const s=ME.s2||{};
+  // 짝이 먼저 홍보관을 열면 바로 완성 화면으로
+  onNat=()=>{if(MYC.booth&&MYC.booth.open&&!$('#boothDone'))s2Done();else drawSteps();};
+  if(!s.p)return s2Prod();
+  if(!s.k)return s2Kind();
+  s2Slogan();
+}
+function natHead(x){return `<div class="ncard"><div class="flag" aria-hidden="true">${x.e}</div><div><h2>${x.n}</h2><div class="muted">짝과 함께 이 나라의 홍보관을 열어요</div></div></div>`;}
+const factsHTML=x=>`<div class="grid" style="gap:6px"><h3 style="font-size:1.2rem">📋 자료 카드 (교과서 103~104쪽)</h3><ul class="facts">${x.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></div>`;
+function s2Prod(){
+  wstep('대표 수출품');
+  const x=myNat();
+  const opts=shuffle([x.prod,...shuffle(NATIONS.filter(y=>y.id!==x.id).map(y=>y.prod)).slice(0,3)]);
+  shell(`<div class="panel grid" id="pb"><div><span class="band">2단계 · 홍보관 만들기 ①</span></div>${natHead(x)}${factsHTML(x)}
+   <h2 style="font-size:1.5rem">자료를 읽고, 우리 홍보관에 내놓을 대표 수출품을 골라요</h2>
+   <div class="prodpick">${opts.map(p=>`<button data-p="${esc(p.n)}"><span aria-hidden="true">${p.e}</span>${esc(p.n)}</button>`).join('')}</div>
+   <div class="msg" id="pm" role="status"></div></div>`);
+  ClassWatch.detail(()=>({q:'대표 수출품 고르기'}));
+  $$('.prodpick button').forEach(b=>b.onclick=async()=>{
+    if(b.dataset.p===x.prod.n){
+      b.classList.add('right');$$('.prodpick button').forEach(z=>z.disabled=true);
+      $('#pm').className='msg ok';$('#pm').textContent='맞았어요!';
+      await roomRef(me.room).child('students/'+me.num+'/s2').update({p:true});
+      ME.s2={...(ME.s2||{}),p:true};
+      setTimeout(()=>{if(cur===2&&!(MYC.booth&&MYC.booth.open))s2Kind();},600);
+    }else{
+      b.classList.add('wrong');b.disabled=true;
+      const pb=$('#pb');pb.classList.remove('shake');void pb.offsetWidth;pb.classList.add('shake');
+      $('#pm').className='msg bad';$('#pm').textContent='자료 카드를 다시 읽어 봐요.';
+    }
+  });
+}
+function s2Kind(){
+  wstep('무역이 발달한 까닭');
+  const x=myNat();
+  shell(`<div class="panel grid" id="kb"><div><span class="band">2단계 · 홍보관 만들기 ②</span></div>${natHead(x)}${factsHTML(x)}
+   <h2 style="font-size:1.5rem">${x.n}에서 ${x.prod.e} ${esc(x.prod.n)} 무역이 발달한 까닭은 무엇일까요?</h2>
+   <div class="kinds">${Object.entries(KINDS).map(([k,v])=>`<button data-k="${k}"><span aria-hidden="true">${v.e}</span>${v.n}<small>${v.d}</small></button>`).join('')}</div>
+   <div class="msg" id="km" role="status"></div></div>`);
+  ClassWatch.detail(()=>({q:'무역이 발달한 까닭 고르기'}));
+  $$('.kinds button').forEach(b=>b.onclick=async()=>{
+    if(b.dataset.k===x.kind){
+      b.classList.add('right');$$('.kinds button').forEach(z=>z.disabled=true);
+      $('#km').className='msg ok';$('#km').textContent='맞았어요!';
+      await roomRef(me.room).child('students/'+me.num+'/s2').update({k:true});
+      ME.s2={...(ME.s2||{}),k:true};
+      setTimeout(()=>{if(cur===2&&!(MYC.booth&&MYC.booth.open))s2Slogan();},600);
+    }else{
+      b.classList.add('wrong');b.disabled=true;
+      const kb=$('#kb');kb.classList.remove('shake');void kb.offsetWidth;kb.classList.add('shake');
+      $('#km').className='msg bad';$('#km').textContent='자료 카드에서 까닭을 찾아봐요.';
+    }
+  });
+}
+function s2Slogan(){
+  wstep('홍보 문구');
+  const x=myNat();
+  shell(`<div class="panel grid"><div><span class="band">2단계 · 홍보관 만들기 ③</span></div>
+   ${boothHTML(x,{},{facts:0})}
+   <div class="fld grid"><label for="sl">📣 손님을 부르는 홍보 문구를 써요</label>
+    <input id="sl" maxlength="40" placeholder="예) ${esc(x.sl[0])}" autocomplete="off"></div>
+   <details><summary style="cursor:pointer;font-family:var(--display)">쓰기 어려우면 골라요</summary><div class="chips" style="margin-top:8px">${x.sl.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></details>
+   <div class="fld grid"><label for="nw">🔎 더 해 보기 (안 해도 돼요): 인터넷에서 "${x.n} 수출" 뉴스를 찾아 제목을 써요</label>
+    <input id="nw" maxlength="60" placeholder="뉴스 제목" autocomplete="off"></div>
+   <div class="row"><button id="open" disabled>🎪 홍보관 열기</button><span class="muted">짝과 의논하고 한 사람만 눌러요.</span></div><div class="msg" id="om" role="status"></div></div>`);
+  const chk=()=>{$('#open').disabled=$('#sl').value.trim().length<4;};
+  $('#sl').oninput=chk;
+  $$('.chips button').forEach(b=>b.onclick=()=>{$('#sl').value=b.dataset.w;$$('.chips button').forEach(z=>z.setAttribute('aria-pressed',z===b));chk();});
+  $('#open').onclick=async()=>{
+    $('#open').disabled=true;
+    const rec={open:true,slogan:$('#sl').value.trim().slice(0,40),news:$('#nw').value.trim().slice(0,60),by:me.num,name:me.name,at:Date.now()};
+    const r=await roomRef(me.room).child('c/'+ME.c+'/booth').transaction(c=>c&&c.open?undefined:rec);
+    if(r.committed)roomRef(me.room).child('log').push({t:`🎪 ${x.e} ${x.n} 홍보관이 열렸어요: “${rec.slogan}”`,at:Date.now()});
+    else if($('#om'))$('#om').textContent='짝이 먼저 홍보관을 열었어요!';
+  };
+}
+function s2Done(){
+  wstep('홍보관 완성');
+  const x=myNat();
+  shell(`<div class="panel grid pop" id="boothDone"><div><span class="band">홍보관이 열렸어요!</span></div>
+   ${boothHTML(x,MYC.booth,{facts:3})}
+   <div class="rules"><b>짝과 연습해요</b><ul><li>손님이 오면 “우리 나라는 ${x.prod.e} ${esc(x.prod.n)}을(를) 수출해요. 왜냐하면 …” 하고 소개해요.</li><li>${kindBadge(x.kind)} 무역이 발달한 까닭을 자료 카드에서 한 번 더 찾아요.</li></ul></div>
+   <p class="muted">선생님이 3단계를 열면 다른 나라 홍보관을 둘러봐요.</p></div>`);
+}
+
+/* ---------- 3. 박람회 둘러보기 ---------- */
+let visiting='';
+function stage3(){
+  visiting='';
+  onNat=()=>{if(!visiting)s3List();else drawSteps();};
+  onMe=()=>{if(!visiting)s3List();else drawSteps();};
+  s3List();
+}
+function visitors(cid){return Object.keys((CALL[cid]&&CALL[cid].visits)||{}).length;}
+function s3List(){
+  const others=openBooths().filter(x=>x.id!==ME.c), st=ME.stamps||{};
+  const got=others.filter(x=>st[x.id]).length, all=others.length>0&&got===others.length;
+  wstep(all?'완주':'홍보관 고르기');
+  const mine=MYC.booth&&MYC.booth.open;
+  shell(`<div class="panel grid"><div class="row" style="justify-content:space-between"><span class="band">3단계 · 세계 무역 박람회 (교과서 105쪽)</span><span class="score">도장 ${got} / ${others.length}</span></div>
+   <div class="stamps" aria-label="받은 도장">${others.map(x=>`<span class="${st[x.id]?'':'no'}" title="${x.n}">${x.e}</span>`).join('')||'<span class="muted" style="font-size:1rem">아직 열린 홍보관이 없어요</span>'}</div>
+   ${all?`<div class="rules pop"><b>🏅 박람회 완주! 세 가지 무역 모습을 정리해요</b><ul>
+      <li>${kindBadge('nature')} 넓은 땅, 알맞은 기후, 풍부한 자원으로 <b>농산물·천연자원</b>을 수출해요.</li>
+      <li>${kindBadge('tech')} 뛰어난 <b>기술</b>로 만든 제품이나 <b>문화 상품</b>을 수출해요.</li>
+      <li>${kindBadge('geo')} <b>지리적 이점</b>을 살린 큰 항구로 무역을 해요.</li></ul></div>`:''}
+   <h2 style="font-size:1.4rem">${all?'다시 보고 싶은 홍보관을 눌러요':'둘러볼 홍보관을 눌러요. 문제를 맞히면 도장을 받아요!'}</h2>
+   <div class="blist">${others.map(x=>`<button data-v="${x.id}" class="${st[x.id]?'got':''}" aria-label="${x.n} 홍보관 ${st[x.id]?'(도장 받음)':''}">${boothHTML(x,CALL[x.id].booth,{small:1,facts:0})}${st[x.id]?'<div class="stamp" style="padding:4px 12px">🏅 도장 받았어요</div>':''}</button>`).join('')}</div>
+   ${mine?`<div class="rules"><b>${myNat().e} 우리 홍보관</b>에 다녀간 손님 <b>${visitors(ME.c)}명</b> · 친구가 오면 우리 나라 무역을 소개해 줘요.</div>`:''}</div>`);
+  $$('[data-v]').forEach(b=>b.onclick=()=>s3Visit(b.dataset.v));
+}
+function s3Visit(cid){
+  visiting=cid;
+  wstep('홍보관 방문');
+  const x=NN[cid],b=(CALL[cid]&&CALL[cid].booth)||{};
+  const qs=[{id:'k_'+cid,q:`${x.n}에서 이 무역이 발달한 까닭은 어느 쪽일까요?`,a:`${KINDS[x.kind].e} ${KINDS[x.kind].n}`,o:Object.keys(KINDS).filter(k=>k!==x.kind).map(k=>`${KINDS[k].e} ${KINDS[k].n}`)},
+    {id:'q_'+cid,...x.q}];
+  shell(`<div class="panel grid">${boothHTML(x,b,{facts:4})}<div class="quiz" id="vq"></div>
+   <div><button class="ghost" id="back">← 홍보관 목록</button></div></div>`);
+  $('#back').onclick=()=>{visiting='';s3List();};
+  let ok=true;
+  runQuiz($('#vq'),qs,{band:`${x.e} ${x.n} 홍보관 문제`,cls:'three',
+    onRight:(q,first)=>{if(!first)ok=false;},
+    onEnd:async()=>{
+      const had=ME.stamps&&ME.stamps[cid];
+      if(!had){
+        await roomRef(me.room).child('students/'+me.num+'/stamps/'+cid).set({ok,at:Date.now()});
+        await roomRef(me.room).child('c/'+cid+'/visits/'+me.num).set({from:ME.c,at:Date.now()});
+        const f=myNat();
+        roomRef(me.room).child('log').push({t:`🤝 ${f.e} ${f.n}(${me.num}번) → ${x.e} ${x.n} 홍보관: ${x.prod.e} ${x.prod.n} 구매 약속!`,at:Date.now()});
+        ME.stamps={...(ME.stamps||{}),[cid]:{ok}};
+      }
+      $('#vq').innerHTML=`<div class="emoji pop" aria-hidden="true">🏅</div><div class="big">도장을 받았어요!</div>
+       <p>${x.e} ${x.n}의 ${x.prod.e} ${esc(x.prod.n)}을(를) 사기로 약속했어요. TV 지도에 무역 길이 생겨요.</p>
+       <button id="next">다른 홍보관 가기 ▶</button>`;
+      $('#next').onclick=()=>{visiting='';s3List();};
+    }});
+}
+
+/* ---------- 4. 정리 퀴즈 ---------- */
+async function stage4(){
+  if(ME.quiz&&ME.quiz.done)return quizDone();
+  let G=ME.quiz;
+  if(!G||!G.order){
+    wstep('시작');
+    shell(`<div class="panel grid quiz"><div><span class="band">4단계 · 정리 퀴즈 대결</span></div><h2 style="font-size:1.8rem">오늘 배운 내용으로 대결해요</h2>
+     <p>${QUIZ.length}문제. 한 번에 맞히면 100점 + 빠르기 보너스. 틀리면 다시 골라야 넘어가요.</p>
+     <div class="row" style="justify-content:center"><button id="qs">시작하기</button><button class="ghost" id="qe">보기 2개로 하기</button></div></div>`);
+    const go=async easy=>{
+      G={order:shuffle(QUIZ.map(g=>g.id)),i:0,score:0,easy,started:Date.now()};
+      await roomRef(me.room).child('students/'+me.num+'/quiz').set(G);ME.quiz=G;stage4();
+    };
+    $('#qs').onclick=()=>go(false);$('#qe').onclick=()=>go(true);
+    return;
+  }
+  if(cur!==4)return;
+  wstep('문제 풀기');
+  const rest=G.order.slice(G.i||0).map(id=>QQ[id]).filter(Boolean);
+  shell(`<div class="panel quiz" id="gz"></div>`);
+  if(!rest.length)return finishQuiz();
+  let score=G.score||0,idx=G.i||0;
+  runQuiz($('#gz'),rest,{band:'4단계 · 정리 퀴즈 대결',few:G.easy,fig:q=>`<div class="emoji" aria-hidden="true">${q.e}</div>`,
+    progress:()=>`<div class="score">점수 <b>${score}</b>점 · ${idx+1}/${QUIZ.length}번째 문제</div>`,
+    onRight:async(q,ok,sec)=>{
+      const pts=ok?100+Math.round(50*Math.max(0,Math.min(1,1-(sec-3)/17))):0;
+      score+=pts;idx++;
+      await roomRef(me.room).child('students/'+me.num+'/quiz').update({i:idx,score});
+      ME.quiz={...ME.quiz,i:idx,score};
+      return pts?` +${pts}점`:' (두 번째 도전은 점수 없이 넘어가요)';
+    },
+    onWrong:q=>{roomRef(me.room).child(`students/${me.num}/quiz/wrong/${q.id}`).transaction(v=>(v||0)+1);},
+    onEnd:finishQuiz});
+}
+async function finishQuiz(){
+  await roomRef(me.room).child('students/'+me.num+'/quiz').update({done:true,at:Date.now()});
+  ME.quiz={...ME.quiz,done:true};drawSteps();quizDone();
+}
+async function quizDone(){
+  const G=ME.quiz||{};
+  let rankTxt='';
+  if(ROOMV.award){
+    const all=(await roomRef(me.room).child('students').get()).val()||{};
+    const L=ranking(all);const k=L.findIndex(x=>x.n===me.num);
+    if(k>=0)rankTxt=`<div class="big">우리 반 ${k+1}등!</div>`;
+  }
+  if(cur!==4)return;
+  wstep('끝');
+  shell(`<div class="panel quiz pop"><div><span class="band">대결 끝</span></div><h2 style="font-size:2rem">무역 박람회 박사 완료!</h2>
+   <div class="score" style="font-size:2rem">${G.score||0}점</div>${rankTxt}
+   <div class="rules" style="text-align:left;width:100%"><b>꼭! 기억해요</b><ul><li>우리나라는 <b>천연자원</b>을 수입한 후 상품을 생산하여 수출하는 무역이 발달했어요.</li><li>세계 여러 나라는 <b>자연환경, 발달한 기술, 지리적 위치</b> 등 각 나라의 특징에 따른 무역이 발달했어요.</li></ul></div></div>`);
+}
+function ranking(all){
+  return Object.keys(all||{}).map(Number).map(n=>({n,...all[n]})).filter(x=>x.quiz)
+    .sort((a,b)=>(b.quiz.score||0)-(a.quiz.score||0)||(b.quiz.i||0)-(a.quiz.i||0)||(a.quiz.at||9e15)-(b.quiz.at||9e15));
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store('ex-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:'expo',stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store('ex-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});}};
+  $('#newroom').onclick=()=>{store('ex-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  $('#go').textContent=t.endAt?'멈춤':'시작';$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+const tvOpen=()=>NATIONS.filter(x=>RD.c&&RD.c[x.id]&&RD.c[x.id].booth&&RD.c[x.id].booth.open);
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students(), C=RD.c||{}, open=tvOpen();
+  $('#tsteps').innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>st===1?!!(x.s1&&x.s1.done):st===2?!!(C[x.c]&&C[x.c].booth&&C[x.c].booth.open):st===3?(open.filter(y=>y.id!==x.c).length>0&&open.filter(y=>y.id!==x.c).every(y=>x.stamps&&x.stamps[y.id])):!!(x.quiz&&x.quiz.done);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${(NN[x.c]||{}).e||''} ${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  if(st===1)return tv1(main,S);
+  if(st===2)return tv2(main,S);
+  if(st===3)return tv3(main,S);
+  return tv4(main,S);
+}
+function tv1(main,S){
+  const done=S.filter(x=>x.s1&&x.s1.done), sorted=S.filter(x=>x.s1&&x.s1.sorted);
+  const wrong={};S.forEach(x=>Object.entries((x.s1&&x.s1.wrong)||{}).forEach(([k,v])=>wrong[k]=(wrong[k]||0)+v));
+  const chip=x=>`<span class="${wrong[x.id]?'hard':''}">${x.e} ${esc(x.n)}${wrong[x.id]?` · 헷갈림 ${wrong[x.id]}`:''}</span>`;
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">우리나라의 주요 수입품과 수출품 (교과서 100쪽)</h2><span class="muted">나누기 끝 ${sorted.length}/${S.length}명</span></div>
+    <div class="board"><div class="inb"><h3>🛬 주요 수입품</h3><div class="chipz">${SORT.filter(x=>x.a==='in').map(chip).join('')}</div></div>
+     <div class="outb"><h3>🛫 주요 수출품</h3><div class="chipz">${SORT.filter(x=>x.a==='out').map(chip).join('')}</div></div></div>
+    <p class="muted" style="margin:0">빨간 칸은 우리 반이 헷갈린 것이에요. (한국 무역 협회, 2024)</p>
+    ${flowHTML()}</div>
+   <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>우리 반이 쓴 우리나라 무역의 특징</h2><span class="muted">${done.length}/${S.length}명</span></div><div class="list">${done.map(x=>`<div><b>${x.n} ${esc(x.name)}</b>${esc(FEAT_START+x.s1.feat)}</div>`).join('')||'<p class="muted">아직 보낸 친구가 없어요</p>'}</div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>우리나라가 원유, 천연가스, 석탄 등을 주로 수입하는 까닭은 무엇일까요?</li><li>우리나라가 반도체, 자동차, 무선 통신 기기 등을 주로 수출하는 까닭은 무엇일까요?</li></ul></div>`;
+}
+function tv2(main,S){
+  const C=RD.c||{}, open=tvOpen(), act=new Set(S.map(x=>x.c));
+  const prog=x=>{const m=S.filter(s=>s.c===x.id);return `${x.e} ${x.n} <small>(${m.map(s=>s.n+'번').join(', ')}) 대표 수출품 ${m.filter(s=>s.s2&&s.s2.p).length}/${m.length} · 까닭 ${m.filter(s=>s.s2&&s.s2.k).length}/${m.length}</small>`;};
+  const waiting=NATIONS.filter(x=>act.has(x.id)&&!open.includes(x));
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">나라별 홍보관 만들기 (교과서 103~104쪽)</h2><span class="muted">열린 홍보관 ${open.length}/${act.size}</span></div>
+    ${mapSVG({on:new Set(open.map(x=>x.id)),act})}
+    ${waiting.length?`<div class="people">${waiting.map(x=>`<span>🛠 ${prog(x)}</span>`).join('')}</div>`:''}</div>
+   <div class="cols">${Object.entries(KINDS).map(([k,v])=>`<div class="${k}"><h3>${v.e} ${v.n}</h3><small class="muted">${v.d}</small>${open.filter(x=>x.kind===k).map(x=>boothHTML(x,C[x.id].booth,{small:1,facts:0})).join('')||'<p class="muted" style="margin:0">아직 없어요</p>'}</div>`).join('')}</div>
+   <div class="rules"><b>핵심 질문</b><ul><li>무역에 있어 우리나라와 조건이 다른 나라들은 어떤 특징을 갖고 있나요?</li><li>싱가포르에 큰 항구가 발달할 수 있었던 까닭은 무엇일까요?</li></ul></div>`;
+}
+function tv3(main,S){
+  const C=RD.c||{}, open=tvOpen(), act=new Set(S.map(x=>x.c));
+  const agg={},counts={};
+  open.forEach(x=>Object.values((C[x.id]&&C[x.id].visits)||{}).forEach(v=>{if(!NN[v.from]||v.from===x.id)return;const k=v.from+'>'+x.id;agg[k]=(agg[k]||0)+1;counts[x.id]=(counts[x.id]||0)+1;}));
+  const lines=Object.entries(agg).map(([k,n])=>{const [from,to]=k.split('>');return {from,to,n};});
+  const L=Object.values(RD.log||{}).sort((a,b)=>b.at-a.at).slice(0,7);
+  const rankB=open.slice().sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0));
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">세계 무역 박람회</h2><span class="muted">구매 약속 ${lines.reduce((s,l)=>s+l.n,0)}번</span></div>
+    ${mapSVG({on:new Set(open.map(x=>x.id)),act,lines,counts})}</div>
+   <div class="two"><div class="panel grid"><h2>인기 홍보관</h2><div class="list">${rankB.map((x,k)=>`<div><b>${k+1}</b>${x.e} ${x.n} · ${kindBadge(x.kind)} · 손님 ${counts[x.id]||0}명</div>`).join('')||'<p class="muted">열린 홍보관이 없어요</p>'}</div>
+     <h2>도장 모으기</h2><div class="people">${S.map(x=>{const n=open.filter(y=>y.id!==x.c&&x.stamps&&x.stamps[y.id]).length,t=open.filter(y=>y.id!==x.c).length;return `<span class="${t&&n===t?'ok':''}">${x.n} ${esc(x.name)} ${n}/${t}</span>`;}).join('')}</div></div>
+    <div class="panel grid"><h2>박람회 소식</h2><div class="list">${L.map(l=>`<div>${esc(l.t)}</div>`).join('')||'<p class="muted">아직 소식이 없어요</p>'}</div></div></div>
+   <div class="rules"><b>정리해요</b><ul><li>${kindBadge('nature')} 농산물이나 풍부한 자원을 수출해요.</li><li>${kindBadge('tech')} 뛰어난 기술로 개발한 제품이나 문화 상품을 수출해요.</li><li>${kindBadge('geo')} 지리적 이점을 활용하여 무역을 해요.</li></ul></div>`;
+}
+function tv4(main,S){
+  const L=ranking(RD.students);
+  const wrong={};S.forEach(x=>Object.entries((x.quiz&&x.quiz.wrong)||{}).forEach(([k,v])=>wrong[k]=(wrong[k]||0)+v));
+  const hard=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>({q:QQ[k],v})).filter(x=>x.q);
+  const top=Math.max(1,...L.map(x=>x.quiz.score||0));
+  if(RD.award){
+    const p=[L[1],L[0],L[2]];
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">정리 퀴즈 시상식</h2><button class="ghost" id="awoff">순위표로</button></div>
+     <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.quiz.score||0}점</div>`:'<span></span>').join('')}</div></div>
+     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br>정답: <b>${esc(h.q.a)}</b> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}`;
+    $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
+    return;
+  }
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">정리 퀴즈 대결</h2><button id="awon">시상식 ▶</button></div>
+   <p class="muted" style="margin:0">한 번에 맞히면 100점 + 빠르기 보너스 최대 50점. 틀리면 다시 골라야 넘어가요. ${QUIZ.length}문제.</p>
+   <div class="rank">${L.map((x,k)=>`<div class="r"><b>${k+1}</b><span class="nm">${(NN[x.c]||{}).e||''} ${esc(x.n)} ${esc(x.name)}${x.quiz.done?' 🏁':''}</span><div class="bar trk"><div class="track"><div style="width:${(x.quiz.score||0)/top*100}%"></div></div></div><span class="pt">${x.quiz.score||0}</span></div>`).join('')||'<p class="muted">아직 시작한 친구가 없어요</p>'}</div></div>
+   <div class="rules"><b>약속</b><ul><li>친구 화면은 보지 않아요.</li><li>다 푼 친구는 조용히 기다려요.</li></ul></div>`;
+  $('#awon').onclick=()=>roomRef(ROOM).child('award').set(true);
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
