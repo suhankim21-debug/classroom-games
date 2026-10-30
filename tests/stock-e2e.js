@@ -139,13 +139,16 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].click('[data-tab="market"]');
   await S[0].click('[data-co="chip"]');
   await S[0].click('#qp'); await S[0].click('#qp');
+  check(await S[0].isDisabled('#buy'), '산 까닭을 고르기 전에는 사기 버튼이 꺼져 있음');
+  check((await S[0].textContent('.anal')).includes('돈을 버는 방법'), '회사 분석 카드가 보임');
+  await S[0].click('[data-why="news"]');
   await shot(S[0], 'stu-buy');
   await S[0].click('#buy');
   await waitR(S[0], 2);
   await S[0].waitForFunction(() => (myAcct().hold || {}).chip === 3);
   check(await S[0].evaluate(() => myAcct().cash === 3940 && myAcct().fee === 60 && myAcct().trades === 1), '1번: 반짝반도체 3주를 6,000원 + 수수료 60원에 삼');
   await S[1].click('[data-tab="market"]');
-  await S[1].click('[data-co="sea"]'); await S[1].click('#qmax'); await S[1].click('#buy');
+  await S[1].click('[data-co="sea"]'); await S[1].click('#qmax'); await S[1].click('[data-why="friend"]'); await S[1].click('#buy');
   await S[1].waitForFunction(() => (myAcct().hold || {}).sea === 19);
   ok('2번: 바다해운을 수수료까지 내고 살 수 있는 만큼(19주) 삼');
   await S[3].click('[data-tab="market"]');
@@ -157,6 +160,12 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[3].click('#x'); await S[3].click('[data-co="etfall"]'); await S[3].click('#buy');
   await S[3].waitForFunction(() => (myAcct().hold || {}).etfall === 1);
   check(await S[3].evaluate(() => myAcct().cash === 3000 - 510 - 1010), '4번: 우리반 전체 ETF 1주 삼 (최소 수수료 10원)');
+  await S[3].click('#buy');
+  await S[3].waitForFunction(() => (myAcct().hold || {}).etfall === 2);
+  check(await S[3].isDisabled('#buy'), '하루 3번 거래하면 사기 버튼이 꺼짐');
+  await S[3].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'buy', c: 'mart', q: 1 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
+  await S[3].waitForFunction(() => Object.values(MYO).some(o => o.r && /번까지만/.test(o.r.m)), null, { timeout: 10000 });
+  ok('하루 거래 횟수를 넘긴 주문은 막힘');
   // 돈보다 많이 사려고 하면 막혀요 (버튼은 꺼져 있으니 직접 보내 봐요)
   await S[2].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'buy', c: 'chip', q: 50 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
   await waitR(S[2], 2);
@@ -190,6 +199,16 @@ const check = (c, m) => c ? ok(m) : fail(m);
   ok('예측 2명 저장, TV에 예측한 친구 수');
   await shot(S[0], 'stu-news'); await shot(T, 'tv-day1');
 
+  /* ---------- 투자 계획과 일기 ---------- */
+  await S[0].click('[data-tab="wallet"]');
+  await S[0].click('[data-goal="5"]'); await S[0].click('[data-pl="0"]'); await S[0].click('[data-pl="2"]'); await S[0].click('#plsave');
+  await S[0].waitForFunction(() => MYPLAN && MYPLAN.g === '5' && MYPLAN.r.length === 2);
+  check((await S[0].textContent('#tabbox')).includes('📰 뉴스를 읽고'), '투자 일기에 산 까닭이 남음');
+  await shot(S[0], 'stu-wallet');
+  await S[0].click('[data-tab="market"]');
+  check((await S[0].textContent('#tabbox')).includes('나의 원칙'), '시장 화면에 나의 원칙이 보임');
+  await S[0].click('[data-tab="news"]');
+
   /* ---------- 은행: 환전, 예금, 적금 ---------- */
   await S[2].click('[data-tab="bank"]');
   await S[2].click('#fp'); await S[2].click('#fxb');
@@ -218,12 +237,14 @@ const check = (c, m) => c ? ok(m) : fail(m);
   check(m2.today.t === '우리 학교 체육대회가 열려요' && m2.eff.tteok === 2, '선생님이 직접 쓴 뉴스가 오늘의 뉴스');
   await S[0].waitForFunction(() => PUB.day === 2 && PUB.reveal);
   check((await S[0].textContent('#tabbox')).includes(before.today.t), '학생 화면에 어제 뉴스 결과');
+  check(!!m2.reveal.w && (await S[0].textContent('#tabbox')).includes('해설'), '어제 뉴스 해설이 학생 화면에 나옴');
   const v1 = await S[0].evaluate(() => myAcct());
   check(v1.v === v1.cash + 3 * (await M()).prices.chip, '1번 자산 = 돈 + 주식 × 오늘 값');
   const etfOk = Math.abs(m2.chg.etfall - Math.round(['sea','volt','chip','car','sun','tteok','mart','farm','game','star','drug','bank','air'].reduce((s, k) => s + m2.prices[k] / m2.hist[k][0], 0) / 13 * 1000 - 1000) / 10) <= 0.2;
   check(etfOk, `ETF 값은 담긴 회사들의 평균 움직임을 따라감 (${m2.chg.etfall}%)`);
   const a3 = m2.acct[3];
   check(a3.dpst === 1003 && a3.dInt === 3 && a3.sav.paid === 2 && m2.fxHist.length === 2, `새 날: 예금 이자 3원, 적금 자동 납입 2/5번, 환율 ${m2.fxHist[0]}→${m2.fx}원`);
+  await S[2].waitForFunction(() => PUB.day === 2 && myAcct().sav.paid === 2);
   const v3 = await S[2].evaluate(() => myAcct());
   check(v3.v === v3.cash + 2 * m2.fx + 1003 + 1000, '3번 자산 = 돈 + 달러 × 오늘 환율 + 예금 + 적금');
 
