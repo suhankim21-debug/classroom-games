@@ -46,6 +46,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
 
   const T = await mk('교사', 1400, 1000);
   await T.goto(URL + '#teacher');
+  await T.waitForSelector('#newRoom', { timeout: 20000 });
+  await T.click('#newRoom');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
   const code = (await T.textContent('.roomcode')).trim();
   console.log('방 번호', code);
@@ -137,13 +139,16 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].click('[data-tab="market"]');
   await S[0].click('[data-co="chip"]');
   await S[0].click('#qp'); await S[0].click('#qp');
+  check(await S[0].isDisabled('#buy'), '산 까닭을 고르기 전에는 사기 버튼이 꺼져 있음');
+  check((await S[0].textContent('.anal')).includes('돈을 버는 방법'), '회사 분석 카드가 보임');
+  await S[0].click('[data-why="news"]');
   await shot(S[0], 'stu-buy');
   await S[0].click('#buy');
   await waitR(S[0], 2);
   await S[0].waitForFunction(() => (myAcct().hold || {}).chip === 3);
   check(await S[0].evaluate(() => myAcct().cash === 3940 && myAcct().fee === 60 && myAcct().trades === 1), '1번: 반짝반도체 3주를 6,000원 + 수수료 60원에 삼');
   await S[1].click('[data-tab="market"]');
-  await S[1].click('[data-co="sea"]'); await S[1].click('#qmax'); await S[1].click('#buy');
+  await S[1].click('[data-co="sea"]'); await S[1].click('#qmax'); await S[1].click('[data-why="friend"]'); await S[1].click('#buy');
   await S[1].waitForFunction(() => (myAcct().hold || {}).sea === 19);
   ok('2번: 바다해운을 수수료까지 내고 살 수 있는 만큼(19주) 삼');
   await S[3].click('[data-tab="market"]');
@@ -155,6 +160,12 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[3].click('#x'); await S[3].click('[data-co="etfall"]'); await S[3].click('#buy');
   await S[3].waitForFunction(() => (myAcct().hold || {}).etfall === 1);
   check(await S[3].evaluate(() => myAcct().cash === 3000 - 510 - 1010), '4번: 우리반 전체 ETF 1주 삼 (최소 수수료 10원)');
+  await S[3].click('#buy');
+  await S[3].waitForFunction(() => (myAcct().hold || {}).etfall === 2);
+  check(await S[3].isDisabled('#buy'), '하루 3번 거래하면 사기 버튼이 꺼짐');
+  await S[3].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'buy', c: 'mart', q: 1 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
+  await S[3].waitForFunction(() => Object.values(MYO).some(o => o.r && /번까지만/.test(o.r.m)), null, { timeout: 10000 });
+  ok('하루 거래 횟수를 넘긴 주문은 막힘');
   // 돈보다 많이 사려고 하면 막혀요 (버튼은 꺼져 있으니 직접 보내 봐요)
   await S[2].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'buy', c: 'chip', q: 50 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
   await waitR(S[2], 2);
@@ -188,6 +199,16 @@ const check = (c, m) => c ? ok(m) : fail(m);
   ok('예측 2명 저장, TV에 예측한 친구 수');
   await shot(S[0], 'stu-news'); await shot(T, 'tv-day1');
 
+  /* ---------- 투자 계획과 일기 ---------- */
+  await S[0].click('[data-tab="wallet"]');
+  await S[0].click('[data-goal="5"]'); await S[0].click('[data-pl="0"]'); await S[0].click('[data-pl="2"]'); await S[0].click('#plsave');
+  await S[0].waitForFunction(() => MYPLAN && MYPLAN.g === '5' && MYPLAN.r.length === 2);
+  check((await S[0].textContent('#tabbox')).includes('📰 뉴스를 읽고'), '투자 일기에 산 까닭이 남음');
+  await shot(S[0], 'stu-wallet');
+  await S[0].click('[data-tab="market"]');
+  check((await S[0].textContent('#tabbox')).includes('나의 원칙'), '시장 화면에 나의 원칙이 보임');
+  await S[0].click('[data-tab="news"]');
+
   /* ---------- 은행: 환전, 예금, 적금 ---------- */
   await S[2].click('[data-tab="bank"]');
   await S[2].click('#fp'); await S[2].click('#fxb');
@@ -216,12 +237,14 @@ const check = (c, m) => c ? ok(m) : fail(m);
   check(m2.today.t === '우리 학교 체육대회가 열려요' && m2.eff.tteok === 2, '선생님이 직접 쓴 뉴스가 오늘의 뉴스');
   await S[0].waitForFunction(() => PUB.day === 2 && PUB.reveal);
   check((await S[0].textContent('#tabbox')).includes(before.today.t), '학생 화면에 어제 뉴스 결과');
+  check(!!m2.reveal.w && (await S[0].textContent('#tabbox')).includes('해설'), '어제 뉴스 해설이 학생 화면에 나옴');
   const v1 = await S[0].evaluate(() => myAcct());
   check(v1.v === v1.cash + 3 * (await M()).prices.chip, '1번 자산 = 돈 + 주식 × 오늘 값');
   const etfOk = Math.abs(m2.chg.etfall - Math.round(['sea','volt','chip','car','sun','tteok','mart','farm','game','star','drug','bank','air'].reduce((s, k) => s + m2.prices[k] / m2.hist[k][0], 0) / 13 * 1000 - 1000) / 10) <= 0.2;
   check(etfOk, `ETF 값은 담긴 회사들의 평균 움직임을 따라감 (${m2.chg.etfall}%)`);
   const a3 = m2.acct[3];
   check(a3.dpst === 1003 && a3.dInt === 3 && a3.sav.paid === 2 && m2.fxHist.length === 2, `새 날: 예금 이자 3원, 적금 자동 납입 2/5번, 환율 ${m2.fxHist[0]}→${m2.fx}원`);
+  await S[2].waitForFunction(() => PUB.day === 2 && myAcct().sav.paid === 2);
   const v3 = await S[2].evaluate(() => myAcct());
   check(v3.v === v3.cash + 2 * m2.fx + 1003 + 1000, '3번 자산 = 돈 + 달러 × 오늘 환율 + 예금 + 적금');
 
@@ -264,6 +287,36 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await T2.waitForSelector('#retry', { timeout: 15000 });
   ok('같은 컴퓨터의 두 번째 창은 장부를 열지 않음');
   await T2.close();
+
+  /* ---------- 여러 컴퓨터에서 관리 ---------- */
+  await T.click('#bakBtn'); await T.fill('#cp1', 'sujang123'); await T.fill('#cp2', 'sujang123'); await T.click('#con');
+  await T.waitForSelector('#coff', { timeout: 30000 });
+  const vault = await T.evaluate(c => roomRef(c).child('vault').get().then(s => s.val()), code);
+  check(vault && vault.ct && !JSON.stringify(vault).includes('TESTKEY') && !JSON.stringify(vault).includes('김하나'), '장부를 비밀번호로 잠가 서버에 저장 (키·이름이 그대로 보이지 않음)');
+  await T.click('#mx');
+  const P2 = await mk('교사-노트북', 1400, 1000);
+  await P2.goto(URL + '#teacher'); await P2.waitForSelector('#resume', { timeout: 20000 });
+  await P2.fill('#rc', code); await P2.fill('#rp', 'wrongpass'); await P2.click('#resume');
+  await P2.waitForFunction(() => /맞지 않/.test(document.querySelector('#rm').textContent), null, { timeout: 30000 });
+  ok('틀린 비밀번호로는 장부를 못 가져옴');
+  await P2.fill('#rp', 'sujang123'); await P2.click('#resume');
+  await P2.waitForSelector('.roomcode', { timeout: 30000 });
+  await T.waitForSelector('#retake', { timeout: 15000 });
+  const mT = await M(), mP = await P2.evaluate(() => M);
+  check(mP.day === mT.day && JSON.stringify(mP.acct) === JSON.stringify(mT.acct) && await P2.evaluate(() => DH.key === 'TESTKEY'), '다른 컴퓨터에서 같은 장부(다했니 설정 포함)를 이어받고, 원래 컴퓨터는 멈춤');
+  // 노트북에서 주문을 처리해요
+  await S[1].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'dep', w: 100 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
+  await S[1].waitForFunction(() => myAcct().dpst === 100, null, { timeout: 15000 });
+  ok('이어받은 컴퓨터가 학생 주문을 처리');
+  // 학생이 가짜 boss 기록을 써도 멈추지 않아요
+  await S[2].evaluate(c => roomRef(c).child('boss').set({ id: 'fake', at: Date.now() + 99999, h: 'AAAA' }), code);
+  await P2.waitForTimeout(1500);
+  check(await P2.evaluate(() => LEADER) && !(await P2.$('#retake')), '가짜 boss 기록으로는 선생님 화면을 멈출 수 없음');
+  await T.click('#retake');
+  await T.waitForSelector('.roomcode', { timeout: 30000 });
+  await P2.waitForSelector('#retake', { timeout: 15000 });
+  check((await M()).acct[2].dpst === 100, '원래 컴퓨터로 다시 가져오면 노트북에서 한 일도 그대로');
+  await P2.close();
 
   /* ---------- 프로젝트 끝 ---------- */
   await T.click('#endBtn');
