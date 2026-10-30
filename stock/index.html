@@ -1225,7 +1225,7 @@ function tvAward(main){
    <div class="two2"><div class="panel grid"><h3 style="font-size:1.4rem">🧺 분산 투자왕 (여러 바구니에 골고루)</h3><div class="rank">${dv.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.d.toFixed(1)}개</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div>
     <div class="panel grid"><h3 style="font-size:1.4rem">🐢 꾸준한 투자왕 (적게 사고팔고 이익)</h3><div class="rank">${st.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${x.trades}번</span><span class="rt ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div></div>
    <div class="panel grid"><h3>수수료로 나간 돈</h3><p style="margin:0;font-size:1.15rem">우리 반이 3주 동안 낸 수수료는 모두 <b>${won(Object.values(M.acct).reduce((s,a)=>s+(a.fee||0),0))}</b>이에요. 가장 많이 사고판 친구는 ${(()=>{const t=Object.values(M.acct).sort((x,y)=>(y.trades||0)-(x.trades||0))[0];return t?`${t.trades||0}번 거래하고 수수료 ${won(t.fee||0)}를 냈어요`:'없어요';})()}.</p></div>
-   <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요? 자주 사고판 친구와 오래 가진 친구는요?</p></div>`;
+   <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요? 자주 사고판 친구와 오래 가진 친구는요? 처음에 정한 나의 투자 원칙을 지켰나요? 친구 따라 산 주식은 어떻게 됐나요?</p></div>`;
   $('#awoff').onclick=()=>{M.award=false;saveM();publish();};
 }
 function approve(n,quiet){
