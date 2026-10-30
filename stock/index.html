@@ -45,6 +45,7 @@ main{padding-block:18px 24px}
 .rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px;color:var(--ink)}
 .rules ul{margin:.3em 0 0;padding-left:1.2em}
 .warn{background:#FBE3DC;border:2px solid var(--bad);border-radius:14px;padding:10px 14px;color:var(--ink)}
+.ok-box{background:#E3F4E8;border:2px solid #3F8A5A;border-radius:14px;padding:10px 14px;color:var(--ink)}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
 .num{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){
@@ -679,7 +680,93 @@ function fixM(m){
   if(!m.mom)m.mom={};
   return m;
 }
-const saveM=()=>store('stock-master',M);
+const saveM=()=>{M.rev=(M.rev||0)+1;store('stock-master',M);if(VK&&LEADER&&M.cloud)upload();};
+/* ---------- 여러 컴퓨터에서 관리: 장부를 선생님 비밀번호로 잠가 서버에도 둬요 ----------
+   rooms/<방>/vault = {s:소금, iv, ct:잠긴 장부, rev}  비밀번호 → PBKDF2 → AES-GCM 열쇠 (서버와 학생은 못 열어요)
+   rooms/<방>/boss  = {id, at, h}  지금 장부를 가진 창. h는 비밀번호 열쇠로 만든 서명이라 학생이 흉내 낼 수 없어요
+   다른 컴퓨터가 비밀번호로 장부를 가져가면 원래 창은 스스로 멈춰요. 비밀번호는 이 컴퓨터(localStorage)에만 둬요 */
+let VK=null,BOSS=null,upBusy=false,upAgain=false,lastIv='',VSNAP=null,vguardT=null;
+const CLOUD={ok:null,at:0,err:''};
+const te=new TextEncoder();
+const bigb64=buf=>{const a=new Uint8Array(buf);let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s);};
+async function vkFrom(pw,salt){
+  const base=await crypto.subtle.importKey('raw',te.encode(pw),'PBKDF2',false,['deriveBits']);
+  const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:unb64(salt),iterations:150000,hash:'SHA-256'},base,512));
+  return {salt,aes:await crypto.subtle.importKey('raw',bits.slice(0,32),'AES-GCM',false,['encrypt','decrypt']),
+    mac:await crypto.subtle.importKey('raw',bits.slice(32),{name:'HMAC',hash:'SHA-256'},false,['sign','verify'])};
+}
+async function openVault(v){
+  try{return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(v.iv)},VK.aes,unb64(v.ct))));}
+  catch(e){throw new Error('비밀번호가 맞지 않거나 서버의 장부가 망가졌어요');}
+}
+async function upload(){
+  if(upBusy){upAgain=true;return;}
+  upBusy=true;
+  try{
+    do{
+      upAgain=false;
+      const iv=crypto.getRandomValues(new Uint8Array(12));
+      const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},VK.aes,te.encode(JSON.stringify({M,DH})));
+      lastIv=b64(iv);
+      await withTimeout(roomRef(M.room).child('vault').set({s:VK.salt,iv:lastIv,ct:bigb64(ct),rev:M.rev||0}));
+      CLOUD.ok=true;CLOUD.at=Date.now();CLOUD.err='';
+    }while(upAgain&&LEADER);
+  }catch(e){CLOUD.ok=false;CLOUD.err=e.code||e.message;}
+  finally{upBusy=false;}
+}
+const bossMsg=(id,at,room)=>te.encode(`${id}|${at}|${room}`);
+async function claimBoss(room){
+  const at=now();const h=b64(await crypto.subtle.sign('HMAC',VK.mac,bossMsg(TAB_ID,at,room)));
+  BOSS={id:TAB_ID,at,h};await withTimeout(roomRef(room).child('boss').set(BOSS));
+}
+async function onBoss(b){
+  if(!LEADER||!VK||!BOSS)return;
+  if(b&&b.id===BOSS.id&&b.at===BOSS.at)return;
+  let real=false;
+  try{real=!!b&&b.id!==TAB_ID&&b.at>BOSS.at&&await crypto.subtle.verify('HMAC',VK.mac,unb64(b.h),bossMsg(b.id,b.at,ROOM));}catch(e){}
+  if(real)return lostBoss();
+  roomRef(ROOM).child('boss').set(BOSS); // 가짜거나 예전 기록이면 되돌려요
+}
+function lostBoss(){
+  LEADER=false;clearInterval(tick);clearOffs();closeModal();store('stock-leader',null);
+  $('#sub').textContent='선생님 화면 · 멈춤';
+  app.innerHTML=`<div class="panel grid center"><div class="emoji">💻</div><h2 style="font-size:1.7rem">다른 컴퓨터가 장부를 가져갔어요</h2>
+   <p style="margin:0">장부가 둘로 나뉘지 않게 이 창은 멈췄어요. 여기서 다시 하려면 아래 버튼을 눌러요. 그러면 저쪽 컴퓨터가 멈춰요.</p>
+   <div class="row" style="justify-content:center"><button id="retake">이 컴퓨터로 다시 가져오기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retake').onclick=teacherView;$('#home').onclick=()=>{location.hash='';startView();};
+}
+// 서버의 잠긴 장부를 열어 이 창으로 가져와요 (먼저 boss를 차지하고, 저쪽이 멈출 때까지 잠깐 기다려요)
+async function cloudTake(room,pw){
+  const R=roomRef(room);
+  const v0=(await withTimeout(R.child('vault').get())).val();
+  if(!v0||!v0.s||!v0.ct)throw new Error('이 방에는 서버에 잠가 둔 장부가 없어요');
+  VK=await vkFrom(pw,v0.s);
+  try{await openVault(v0);}catch(e){VK=null;throw e;}
+  await claimBoss(room);
+  await sleep(1500);
+  const o=await openVault((await withTimeout(R.child('vault').get())).val());
+  if(!o||!o.M||o.M.room!==room)throw new Error('다른 방의 장부예요');
+  if(!M||M.room!==room||(o.M.rev||0)>=(M.rev||0))M=fixM(o.M);
+  if(o.DH&&o.DH.key)DH=o.DH;
+  M.cloud=true;store('stock-master',M);store('stock-dh',DH);store('stock-pw',pw);
+}
+async function cloudOn(pw){
+  const salt=b64(crypto.getRandomValues(new Uint8Array(16)));
+  VK=await vkFrom(pw,salt);
+  await claimBoss(ROOM);
+  M.cloud=true;store('stock-pw',pw);saveM();
+  listenCloud();
+}
+function cloudOff(){
+  M.cloud=false;VK=null;BOSS=null;store('stock-pw',null);
+  roomRef(ROOM).child('vault').remove();roomRef(ROOM).child('boss').remove();saveM();
+}
+function listenCloud(){
+  const R=roomRef(ROOM);
+  listen(R.child('boss'),s=>onBoss(s.val()));
+  // 누가 잠긴 장부를 지우거나 바꾸면 다시 올려요
+  listen(R.child('vault'),s=>{VSNAP=s.val();clearTimeout(vguardT);vguardT=setTimeout(()=>{if(LEADER&&VK&&M.cloud&&!upBusy&&(!VSNAP||VSNAP.iv!==lastIv))upload();},1500);});
+}
 function claimLeader(){const l=store('stock-leader');if(l&&l.id!==TAB_ID&&Date.now()-l.t<6000)return false;store('stock-leader',{id:TAB_ID,t:Date.now()});return true;}
 async function teacherView(){
   clearOffs();$('#foot').innerHTML='';closeModal();
@@ -688,18 +775,46 @@ async function teacherView(){
     app.innerHTML=`<div class="panel grid"><h2>이 컴퓨터의 다른 창에서 선생님 화면이 열려 있어요</h2><p>장부가 둘로 나뉘지 않게 한 창에서만 열 수 있어요. 다른 창을 쓰거나 닫고 다시 시도해요.</p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
     $('#retry').onclick=teacherView;$('#home').onclick=()=>{location.hash='';startView();};return;
   }
-  LEADER=true;
+  LEADER=true;VK=null;BOSS=null;
   app.innerHTML='<div class="panel grid center"><h2>장부를 여는 중이에요…</h2></div>';
   M=store('stock-master');if(M)fixM(M);DH=store('stock-dh')||{key:'',codes:{}};
-  try{
-    if(!M){
-      let code;
+  if(!M)return chooseRoom();
+  let cerr='';
+  const pw=store('stock-pw');
+  if(M.cloud&&pw){try{await cloudTake(M.room,pw);}catch(e){cerr=e.message;VK=null;}}
+  return openRoom(cerr);
+}
+// 이 컴퓨터에 장부가 없을 때: 새 방을 만들거나, 다른 컴퓨터에서 하던 방을 비밀번호로 이어 해요
+function chooseRoom(){
+  $('#sub').textContent='선생님 화면';
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2 style="font-size:1.7rem">🆕 새 쿠키 증권 시작</h2><p style="margin:0">새 방을 만들어요. 장부는 이 컴퓨터에 저장돼요.</p><div class="row"><button id="newRoom">새 방 만들기</button></div></div>
+   <div class="panel grid"><h2 style="font-size:1.7rem">💻 다른 컴퓨터에서 하던 방 이어 하기</h2>
+    <p style="margin:0">다른 컴퓨터의 ⚙️ 설정에서 "여러 컴퓨터에서 관리"를 켰다면, 방 번호와 그때 정한 비밀번호로 장부를 가져와요. 가져오면 원래 컴퓨터의 선생님 화면은 멈춰요.</p>
+    <div class="f2"><label class="fld"><span class="lb">방 번호</span><input id="rc" inputmode="numeric" maxlength="6" autocomplete="off"></label><label class="fld"><span class="lb">비밀번호</span><input id="rp" type="password" autocomplete="off"></label></div>
+    <div class="row"><button class="ghost" id="resume">장부 가져오기</button></div><div class="msg bad" id="rm"></div></div>
+   <div class="row"><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#home').onclick=()=>{location.hash='';LEADER=false;store('stock-leader',null);startView();};
+  $('#newRoom').onclick=async()=>{
+    $('#newRoom').disabled=true;
+    try{let code;
       for(let i=0;i<20;i++){code=String(Math.floor(1000+Math.random()*9000));if(!(await withTimeout(roomRef(code).child('open').get())).exists())break;}
-      M=fixM(newMaster(code));saveM();
-    }
-    await withTimeout(roomRef(M.room).update({open:M.created,app:'stock'}));
-  }catch(e){LEADER=false;return showError(e);}
+      M=fixM(newMaster(code));saveM();openRoom('');}
+    catch(e){LEADER=false;showError(e);}
+  };
+  $('#resume').onclick=async()=>{
+    const rc=$('#rc').value.trim(),rp=$('#rp').value;
+    if(!/^\d{4,6}$/.test(rc)||!rp){$('#rm').textContent='방 번호와 비밀번호를 넣어 주세요.';return;}
+    $('#resume').disabled=true;$('#rm').className='msg';$('#rm').textContent='장부를 여는 중이에요… (몇 초 걸려요)';
+    try{M=null;await cloudTake(rc,rp);openRoom('');}
+    catch(e){VK=null;BOSS=null;M=null;$('#rm').className='msg bad';$('#rm').textContent=e.message||String(e);$('#resume').disabled=false;}
+  };
+}
+async function openRoom(cerr){
+  try{await withTimeout(roomRef(M.room).update({open:M.created,app:'stock'}));}
+  catch(e){LEADER=false;return showError(e);}
   ROOM=M.room;
+  if(cerr)setTimeout(()=>alert('서버에 잠가 둔 장부를 열지 못해서 이 컴퓨터의 장부로 열었어요.\n'+cerr+'\n⚙️ 설정에서 "여러 컴퓨터에서 관리"를 다시 켜 주세요.'),300);
   ClassWatch.teacher({db,room:ROOM});
   const url=location.origin+location.pathname+'?room='+ROOM;
   $('#sub').textContent='선생님 화면 · 이 컴퓨터가 장부를 가지고 있어요';
@@ -709,7 +824,7 @@ async function teacherView(){
     <div class="panel grid"><div class="row between"><h2>계좌</h2><span class="muted" id="cnt"></span></div><div id="reqs" class="req"></div><div class="people" id="ppl"></div></div>
     <button id="cookieBtn">🍪 쿠키 처리</button>
     <button class="ghost" id="setBtn">⚙️ 설정 · 다했니 연결</button>
-    <button class="ghost" id="bakBtn">💾 장부 백업</button>
+    <button class="ghost" id="bakBtn">💾 장부 백업 · 다른 컴퓨터</button>
     <button class="ghost" id="home">처음으로</button>
    </div>
    <div class="grid" id="main"></div></div>`;
@@ -717,10 +832,12 @@ async function teacherView(){
   $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#bakBtn').onclick=()=>openModal('backup');
   $('#home').onclick=()=>{location.hash='';LEADER=false;store('stock-leader',null);startView();};
   const R=roomRef(ROOM);
+  if(M.cloud&&!VK){M.cloud=false;saveM();}
   listen(R.child('players'),s=>{PL=s.val()||{};renderTV();});
   listen(R.child('orders'),s=>{ORD=s.val()||{};pump();});
   listen(R.child('pub'),s=>{PUBNOW=s.val();guard();});
   listenPred();
+  if(VK&&M.cloud){listenCloud();upload();}
   publish();
   clearInterval(tick);tick=setInterval(teacherTick,500);
 }
@@ -1182,21 +1299,39 @@ function drawSet(){
   };
 }
 function drawBackup(){
-  modal.innerHTML=`<div class="panel grid">${mhead('💾 장부 백업')}
-   <p style="margin:0">장부는 이 컴퓨터의 브라우저에 저장돼요. 브라우저 기록을 지우거나 다른 컴퓨터로 옮길 때를 위해 가끔 백업 파일을 내려받아 두세요. (다했니 키와 학생 코드는 백업 파일에 들어가지 않아요)</p>
+  modal.innerHTML=`<div class="panel grid">${mhead('💾 장부 백업 · 다른 컴퓨터')}
+   <h3 style="font-size:1.4rem">☁️ 여러 컴퓨터에서 관리</h3>
+   ${M.cloud&&VK?`<div class="ok-box">✔ 켜져 있어요. 장부가 바뀔 때마다 비밀번호로 잠가 서버에 저장해요. ${CLOUD.ok===false?`<b class="down">마지막 저장 실패: ${esc(CLOUD.err)}</b>`:CLOUD.at?`마지막 저장 ${new Date(CLOUD.at).toLocaleTimeString('ko-KR')}`:''}</div>
+     <p style="margin:0">다른 컴퓨터에서: 쿠키 증권 → 선생님 화면 → "다른 컴퓨터에서 하던 방 이어 하기"에 방 번호 <b>${esc(ROOM)}</b>와 비밀번호를 넣어요. 그러면 이 창은 멈춰요.</p>
+     <div class="row"><button class="ghost small" id="coff">끄기 (서버의 잠긴 장부 지우기)</button></div>`
+    :`<p style="margin:0">비밀번호를 정하면 장부를 잠가서 서버에 저장해요. 다른 컴퓨터에서 방 번호와 비밀번호로 이어서 관리할 수 있어요. 학생은 비밀번호가 없어서 장부를 열 수 없어요. <b>비밀번호를 잊으면 서버의 장부는 열 수 없으니</b> 꼭 기억해 두세요.</p>
+     <div class="f2"><label class="fld"><span class="lb">비밀번호 (6자 이상)</span><input type="password" id="cp1" autocomplete="new-password"></label><label class="fld"><span class="lb">한 번 더</span><input type="password" id="cp2" autocomplete="new-password"></label></div>
+     <div class="row"><button id="con">켜기</button></div>`}
+   <div class="msg" id="cm"></div>
+   <h3 style="font-size:1.4rem">💾 백업 파일</h3>
+   <p style="margin:0">장부는 이 컴퓨터의 브라우저에도 저장돼요. 혹시를 위해 가끔 백업 파일을 내려받아 두세요. (다했니 키와 학생 코드는 백업 파일에 들어가지 않아요)</p>
    <div class="row"><button id="dl">백업 파일 내려받기</button><label class="ghost" style="display:inline-block;border:2px solid var(--coral);color:var(--coral2);border-radius:14px;padding:.6em 1.1em;font-family:var(--display);cursor:pointer">백업 파일 불러오기<input type="file" id="ul" accept=".json,application/json" hidden></label></div>
    <div class="msg" id="bm"></div>
    <details><summary>처음부터 다시 시작</summary><p>새 방을 만들고 장부를 비워요. 지금 장부는 먼저 백업해 두세요.</p><button class="ghost" id="reset">새 방 만들기</button></details></div>`;
   bindClose();
+  if($('#con'))$('#con').onclick=async()=>{
+    const a=$('#cp1').value,b=$('#cp2').value;
+    if(a.length<6){$('#cm').className='msg bad';$('#cm').textContent='비밀번호는 6자 이상으로 정해 주세요.';return;}
+    if(a!==b){$('#cm').className='msg bad';$('#cm').textContent='두 비밀번호가 달라요.';return;}
+    $('#con').disabled=true;$('#cm').className='msg';$('#cm').textContent='잠그는 중이에요…';
+    try{await cloudOn(a);await sleep(300);while(upBusy)await sleep(200);drawBackup();}
+    catch(e){$('#cm').className='msg bad';$('#cm').textContent='켜지 못했어요: '+(e.message||e);$('#con').disabled=false;}
+  };
+  if($('#coff'))$('#coff').onclick=()=>{if(confirm('여러 컴퓨터에서 관리를 끌까요? 서버의 잠긴 장부를 지우고, 이 컴퓨터에서만 관리해요.')){cloudOff();drawBackup();}};
   $('#dl').onclick=()=>{const d=new Date();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(M)],{type:'application/json'}));a.download=`쿠키증권_장부_${d.getMonth()+1}월${d.getDate()}일_${M.day}일째.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);};
   $('#ul').onchange=async e=>{
     const f=e.target.files[0];if(!f)return;
     try{const o=JSON.parse(await f.text());if(!o||!o.room||!o.acct||!o.prices)throw 0;
       if(!confirm(`${o.room}번 방, ${o.day}일째 장부로 바꿀까요? 지금 장부는 사라져요.`))return;
-      M=fixM(o);saveM();closeModal();teacherView();}
+      const keep=M.cloud;M=fixM(o);M.cloud=keep&&o.room===ROOM;saveM();closeModal();teacherView();}
     catch(err){$('#bm').className='msg bad';$('#bm').textContent='쿠키 증권 백업 파일이 아니에요.';}
   };
-  $('#reset').onclick=()=>{if(confirm('정말 새 방을 만들까요? 지금 장부는 사라지고 학생들은 다시 들어와야 해요.')){store('stock-master',null);closeModal();teacherView();}};
+  $('#reset').onclick=()=>{if(confirm('정말 새 방을 만들까요? 지금 장부는 사라지고 학생들은 다시 들어와야 해요.')){if(M.cloud)cloudOff();store('stock-master',null);store('stock-pw',null);closeModal();teacherView();}};
 }
 
 /* ---------- 길 찾기 ---------- */

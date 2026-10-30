@@ -46,6 +46,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
 
   const T = await mk('교사', 1400, 1000);
   await T.goto(URL + '#teacher');
+  await T.waitForSelector('#newRoom', { timeout: 20000 });
+  await T.click('#newRoom');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
   const code = (await T.textContent('.roomcode')).trim();
   console.log('방 번호', code);
@@ -264,6 +266,36 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await T2.waitForSelector('#retry', { timeout: 15000 });
   ok('같은 컴퓨터의 두 번째 창은 장부를 열지 않음');
   await T2.close();
+
+  /* ---------- 여러 컴퓨터에서 관리 ---------- */
+  await T.click('#bakBtn'); await T.fill('#cp1', 'sujang123'); await T.fill('#cp2', 'sujang123'); await T.click('#con');
+  await T.waitForSelector('#coff', { timeout: 30000 });
+  const vault = await T.evaluate(c => roomRef(c).child('vault').get().then(s => s.val()), code);
+  check(vault && vault.ct && !JSON.stringify(vault).includes('TESTKEY') && !JSON.stringify(vault).includes('김하나'), '장부를 비밀번호로 잠가 서버에 저장 (키·이름이 그대로 보이지 않음)');
+  await T.click('#mx');
+  const P2 = await mk('교사-노트북', 1400, 1000);
+  await P2.goto(URL + '#teacher'); await P2.waitForSelector('#resume', { timeout: 20000 });
+  await P2.fill('#rc', code); await P2.fill('#rp', 'wrongpass'); await P2.click('#resume');
+  await P2.waitForFunction(() => /맞지 않/.test(document.querySelector('#rm').textContent), null, { timeout: 30000 });
+  ok('틀린 비밀번호로는 장부를 못 가져옴');
+  await P2.fill('#rp', 'sujang123'); await P2.click('#resume');
+  await P2.waitForSelector('.roomcode', { timeout: 30000 });
+  await T.waitForSelector('#retake', { timeout: 15000 });
+  const mT = await M(), mP = await P2.evaluate(() => M);
+  check(mP.day === mT.day && JSON.stringify(mP.acct) === JSON.stringify(mT.acct) && await P2.evaluate(() => DH.key === 'TESTKEY'), '다른 컴퓨터에서 같은 장부(다했니 설정 포함)를 이어받고, 원래 컴퓨터는 멈춤');
+  // 노트북에서 주문을 처리해요
+  await S[1].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'dep', w: 100 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
+  await S[1].waitForFunction(() => myAcct().dpst === 100, null, { timeout: 15000 });
+  ok('이어받은 컴퓨터가 학생 주문을 처리');
+  // 학생이 가짜 boss 기록을 써도 멈추지 않아요
+  await S[2].evaluate(c => roomRef(c).child('boss').set({ id: 'fake', at: Date.now() + 99999, h: 'AAAA' }), code);
+  await P2.waitForTimeout(1500);
+  check(await P2.evaluate(() => LEADER) && !(await P2.$('#retake')), '가짜 boss 기록으로는 선생님 화면을 멈출 수 없음');
+  await T.click('#retake');
+  await T.waitForSelector('.roomcode', { timeout: 30000 });
+  await P2.waitForSelector('#retake', { timeout: 15000 });
+  check((await M()).acct[2].dpst === 100, '원래 컴퓨터로 다시 가져오면 노트북에서 한 일도 그대로');
+  await P2.close();
 
   /* ---------- 프로젝트 끝 ---------- */
   await T.click('#endBtn');
