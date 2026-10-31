@@ -1,6 +1,6 @@
 // 우리 반 쿠키 증권 자동 테스트: 교사 화면 1개 + 학생 4명(🌟 쉬운 화면 1명)이 실제 Firebase 방에서
 // 계좌 승인 → 쿠키 맡기기(가짜 다했니 API로 확인) → 첫 거래일 → 사고팔기 → 장부 고치기·남의 이름 주문 막기
-// → 예측 → 새 날(주가 변동·예측 점수) → 쿠키로 바꾸기 → 장 마감 → 새로고침 → 프로젝트 끝(정산) → 시상식까지 해 봐요.
+// → 예측 → 새 날(주가 변동·예측 점수) → 쿠키로 바꾸기 → 장 마감 → 새로고침 → 평일 아침 자동 개장 → 프로젝트 끝(정산) → 시상식까지 해 봐요.
 // 실행: node tests/stock-e2e.js   (다른 주소: URL=http://localhost:8000/stock/ node tests/stock-e2e.js)
 // 다했니 API는 진짜로 부르지 않고 브라우저 안에서 가짜로 대답해요. 끝나면 테스트로 만든 방은 지워요.
 const { chromium } = require('playwright');
@@ -174,6 +174,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   /* ---------- 장부 지키기 ---------- */
   await S[2].evaluate(() => roomRef(me.room).child('pub/acct/3/cash').set(999999));
   await S[2].waitForFunction(() => myAcct().cash === 5000, null, { timeout: 10000 });
+  await T.waitForFunction(() => M.tamper >= 1, null, { timeout: 10000 }).catch(() => {});
   check((await M()).tamper >= 1, '학생이 보여 주는 장부(돈)를 고쳐도 선생님 화면이 되돌림');
   await S[2].evaluate(() => roomRef(me.room).child('pub/prices/chip').set(1));
   await S[2].waitForFunction(() => PUB.prices.chip === 2000, null, { timeout: 10000 });
@@ -299,6 +300,21 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await T2.waitForSelector('#retry', { timeout: 15000 });
   ok('같은 컴퓨터의 두 번째 창은 장부를 열지 않음');
   await T2.close();
+
+  /* ---------- 평일 아침 자동 개장 ---------- */
+  check((await T.textContent('body')).includes('저절로 장이 열려요'), 'TV에 자동 개장 안내 (기본 오전 8시 30분)');
+  await T.click('#nextDay'); await T.waitForSelector('#qgo');
+  await T.click('[data-i="5"]'); await T.click('#qgo');
+  await T.waitForFunction(() => M.qn && M.qn.i === 5);
+  check((await T.textContent('body')).includes('예약한 뉴스'), '내일 뉴스를 미리 예약함');
+  // 시계를 다음 월요일 오전 9시로 옮겨서 선생님 출근 전 아침을 흉내 내요
+  await T.evaluate(() => { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); d.setHours(9, 0, 0, 0); skew = d.getTime() - Date.now(); });
+  await T.waitForFunction(() => M.day === 3 && M.phase === 'open', null, { timeout: 10000 });
+  const m3a = await M();
+  check(m3a.today.t === (await T.evaluate(() => NEWS[5].t)) && !m3a.qn && m3a.used.includes(5), '평일 아침 여는 시간이 되면 예약한 뉴스로 저절로 새 날이 시작됨');
+  await S[0].waitForFunction(() => PUB.day === 3 && isOpen(PUB));
+  ok('학생 화면도 장이 열림');
+  await T.evaluate(() => { skew = 0; });
 
   /* ---------- 여러 컴퓨터에서 관리 ---------- */
   await T.click('#bakBtn'); await T.fill('#cp1', 'sujang123'); await T.fill('#cp2', 'sujang123'); await T.click('#con');
