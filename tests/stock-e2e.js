@@ -221,6 +221,17 @@ const check = (c, m) => c ? ok(m) : fail(m);
   check(await S[2].evaluate(() => myAcct().cash === 5000 - 2 * PUB.fx - 1000 - 500 && myAcct().v === 5000), '3번: 예금 1,000원, 하루 500원 적금 가입 (자산은 그대로 5,000원)');
   await shot(S[2], 'stu-bank');
 
+  /* ---------- 채권: 나라 채권을 사서 만기에 이자와 함께 받기 ---------- */
+  await T.evaluate(() => { M.cfg.bTerm = 1; saveM(); publish(); });
+  await S[0].click('[data-tab="bank"]');
+  await S[0].waitForFunction(() => PUB.cfg.bTerm === 1);
+  await S[0].click('[data-bb="gov"]');
+  await S[0].waitForFunction(() => (myAcct().bonds || []).length === 1);
+  check(await S[0].evaluate(() => myAcct().cash === 2940 && myAcct().bonds[0].due === 2), '1번: 나라 채권 1,000원을 삼 (내일 돌려받음)');
+  check(await S[0].evaluate(() => myAcct().v === myAcct().cash + 3 * PUB.prices.chip + 1000), '채권도 자산에 들어감');
+  await shot(S[0], 'stu-bond');
+  await S[0].click('[data-tab="news"]');
+
   /* ---------- 새 날 ---------- */
   const before = await M();
   await T.click('#nextDay'); await T.waitForSelector('#go');
@@ -238,6 +249,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => PUB.day === 2 && PUB.reveal);
   check((await S[0].textContent('#tabbox')).includes(before.today.t), '학생 화면에 어제 뉴스 결과');
   check(!!m2.reveal.w && (await S[0].textContent('#tabbox')).includes('해설'), '어제 뉴스 해설이 학생 화면에 나옴');
+  check(m2.acct[1].cash === 3960 && !(m2.acct[1].bonds || []).length, '새 날: 나라 채권 만기, 1,000원 + 이자 20원을 돌려받음');
   const v1 = await S[0].evaluate(() => myAcct());
   check(v1.v === v1.cash + 3 * (await M()).prices.chip, '1번 자산 = 돈 + 주식 × 오늘 값');
   const etfOk = Math.abs(m2.chg.etfall - Math.round(['sea','volt','chip','car','sun','tteok','mart','farm','game','star','drug','bank','air'].reduce((s, k) => s + m2.prices[k] / m2.hist[k][0], 0) / 13 * 1000 - 1000) / 10) <= 0.2;
@@ -255,10 +267,10 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].click('#sell');
   await S[0].waitForFunction(() => (myAcct().hold || {}).chip === 2);
   const chipNow = (await M()).prices.chip, sf = Math.max(10, Math.round(chipNow * 0.04));
-  check(await S[0].evaluate(([p, f]) => myAcct().cash === 3940 + p - f, [chipNow, sf]), `1번: 산 다음 날 팔아서 단기 매매 수수료까지 4%(${sf}원)를 냄`);
+  check(await S[0].evaluate(([p, f]) => myAcct().cash === 3960 + p - f, [chipNow, sf]), `1번: 산 다음 날 팔아서 단기 매매 수수료까지 4%(${sf}원)를 냄`);
   await S[0].click('[data-tab="cookie"]'); await S[0].click('#op'); await S[0].click('#outb');
   await S[0].waitForFunction(() => myAcct().res === 2000);
-  check(await S[0].evaluate(([p, f]) => myAcct().cash === 1940 + p - f, [chipNow, sf]), '쿠키 2개로 바꾸기 신청: 돈 2,000원을 따로 둠');
+  check(await S[0].evaluate(([p, f]) => myAcct().cash === 1960 + p - f, [chipNow, sf]), '쿠키 2개로 바꾸기 신청: 돈 2,000원을 따로 둠');
   DH.C1.cookie += 2;
   await T.click('#cookieBtn'); await T.waitForSelector('[data-v="1|out"]');
   await T.click('[data-v="1|out"]');

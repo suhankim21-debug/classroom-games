@@ -53,6 +53,10 @@ main{padding-block:18px 24px}
 .whys button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:.95rem;padding:.35em .7em;border-radius:999px}
 .whys button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 @media (max-width:700px){.anal{grid-template-columns:1fr}}
+.bonds{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bonds>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:grid;gap:4px}
+.bonds .hd{display:flex;gap:8px;align-items:center;font-family:var(--display);font-size:1.15rem}.bonds .hd span{font-size:1.6rem}
+@media (max-width:700px){.bonds{grid-template-columns:1fr}}
 .ok-box{background:#E3F4E8;border:2px solid #3F8A5A;border-radius:14px;padding:10px 14px;color:var(--ink)}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
 .num{font-variant-numeric:tabular-nums}
@@ -228,10 +232,21 @@ const CO=[
 // ETF: 여러 회사를 바구니에 함께 담은 상품. 값은 담긴 회사들의 평균 움직임을 따라가요
 const ETF=[
   {id:'etfall',e:'🧺',n:'우리반 전체 ETF',d:'13개 회사를 모두 조금씩 담은 바구니예요. 한 회사가 어려워도 덜 흔들려요',p:1000,k:'etf',of:CO.map(c=>c.id)},
-  {id:'etffut',e:'🚀',n:'미래기술 ETF',d:'배터리·반도체·자동차·태양광 회사를 함께 담았어요',p:1000,k:'etf',of:['volt','chip','car','sun']}
+  {id:'etffut',e:'🚀',n:'미래기술 ETF',d:'배터리·반도체·자동차·태양광 회사를 함께 담았어요',p:1000,k:'etf',of:['volt','chip','car','sun']},
+  {id:'etflife',e:'🏡',n:'생활 ETF',d:'떡볶이·마트·농장처럼 매일 쓰는 것을 파는 회사를 담았어요',p:1000,k:'etf',of:['tteok','mart','farm']},
+  {id:'etffun',e:'🎉',n:'즐길 거리 ETF',d:'게임·엔터·항공처럼 놀고 즐기는 데 쓰는 회사를 담았어요',p:1000,k:'etf',of:['game','star','air']},
+  {id:'etfexp',e:'🌏',n:'수출 ETF',d:'반도체·자동차·해운처럼 외국에 물건을 파는 회사를 담았어요',p:1000,k:'etf',of:['chip','car','sea']}
 ];
 const GOLD={id:'gold',e:'🥇',n:'금',d:'세상이 불안할 때 사람들이 찾는 안전 자산이에요. 천천히 움직여요',p:3000,k:'gold',g:.25,v:1};
 const AS=[...CO,...ETF,GOLD];
+/* 채권: 나라나 회사에 돈을 빌려주고 약속한 날 이자와 함께 돌려받아요 (만기까지 들고 있어요)
+   회사 채권은 이자가 많지만, 빌려준 동안 그 회사 주가가 15% 넘게 떨어지면(회사가 어려워지면) 80%만 돌려받아요 */
+const BONDS=[
+  {id:'gov',e:'🏛️',n:'나라 채권',r:2,d:'나라에 빌려줘요. 아주 안전하지만 이자가 적어요'},
+  {id:'mart',e:'🛒',n:'바로마트 채권',r:4,d:'꾸준한 회사라 비교적 안전해요'},
+  {id:'star',e:'🎤',n:'반짝엔터 채권',r:8,d:'이자가 많지만, 회사가 어려워지면 다 못 돌려받을 수 있어요'}
+];
+const BI=Object.fromEntries(BONDS.map(b=>[b.id,b]));
 const COI=Object.fromEntries(AS.map(c=>[c.id,c]));
 const feeRate=(c,cfg)=>c.k==='etf'?cfg.fee*.3:c.k==='gold'?cfg.fee*.5:cfg.fee;
 const feeOf=(amt,c,cfg,short)=>Math.max(10,Math.round(amt*(feeRate(c,cfg)+(short?cfg.sfee:0))/100));
@@ -333,6 +348,9 @@ const PROF={
   bank:{how:'맡은 돈을 빌려주고 이자를 받아요',up:'이자(금리)가 오를 때',down:'앱 고장 같은 믿음을 잃는 일',tag:'이자'},
   air:{how:'비행기로 사람과 물건을 실어 날라요',up:'여행객이 늘 때, 관광객',down:'기름값 오름, 태풍',tag:'여행'},
   etfall:{how:'13개 회사 주식을 조금씩 모두 담은 바구니예요',up:'경제가 전체로 좋아질 때',down:'경제가 전체로 나빠질 때',tag:'분산'},
+  etflife:{how:'냠냠떡볶이·바로마트·푸른농장을 함께 담았어요',up:'축제, 관광객, 풍년',down:'채소값 오름, 방학, 태풍',tag:'생활'},
+  etffun:{how:'두근게임즈·반짝엔터·구름항공을 함께 담았어요',up:'여행·공연·게임 인기, 경제가 좋을 때',down:'물가가 올라 사람들이 아낄 때, 기름값 오름',tag:'즐길 거리'},
+  etfexp:{how:'반짝반도체·씽씽자동차·바다해운을 함께 담았어요',up:'환율이 오를 때, 무역 협정, 수출 증가',down:'관세, 무역 분쟁',tag:'수출'},
   etffut:{how:'번개배터리·반짝반도체·씽씽자동차·햇살에너지를 함께 담았어요',up:'전기차·새 에너지가 뜰 때',down:'원료 수입이 막히거나 관세가 오를 때',tag:'미래 기술'},
   gold:{how:'회사가 아니라 금 그 자체예요. 이자는 없어요',up:'세상이 불안할 때, 무역 분쟁',down:'경제가 좋아질 때, 금광 발견, 이자 오름',tag:'안전 자산'}
 };
@@ -415,7 +433,7 @@ function startView(){
 
 /* ---------- 학생: 들어가기 ---------- */
 let MYPLAN=null,PLDRAFT=null,me=null,KEYS=null,MYFP='',PUB=null,P=null,MYO={},MYP=null,predDay=null,predOff=null;
-let TAB='market',SEL='',WHYSEL='',QTY=1,NIN=1,NOUT=1,FXQ=1,DW=1000,SW=1000,DRAFT=null,vkey='',wasOpen=null,sending=false;
+let TAB='market',SEL='',WHYSEL='',BW=1000,QTY=1,NIN=1,NOUT=1,FXQ=1,DW=1000,SW=1000,DRAFT=null,vkey='',wasOpen=null,sending=false;
 function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
 function joinView(){
   clearOffs();$('#foot').innerHTML='';
@@ -485,7 +503,7 @@ function render(force){
   const st=!PUB||!P?'load':P.fp!==MYFP?'other':!a||a.fp!==MYFP?'wait':'main';
   const open=isOpen(PUB);
   const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.reveal,MYP]:[PUB.prices,PUB.hist,PUB.fx,PUB.fxHist,a,MYO,myOps(),PUB.cfg];
-  const key=JSON.stringify([st,TAB,SEL,WHYSEL,MYPLAN,QTY,NIN,NOUT,FXQ,DW,SW,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
+  const key=JSON.stringify([st,TAB,SEL,WHYSEL,BW,MYPLAN,QTY,NIN,NOUT,FXQ,DW,SW,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
   if(key===vkey&&!force)return;vkey=key;
   if(st==='load'){app.innerHTML='<div class="panel"><h2>불러오는 중…</h2></div>';return;}
   if(st==='other')return stuOther();
@@ -600,7 +618,8 @@ function stuBank(box,a,open){
   const c=PUB.cfg,fx=PUB.fx,usd=a.usd||0,dp=a.dpst||0,sv=a.sav,end=PUB.phase==='end';
   const maxFx=Math.floor(a.cash/fx);
   FXQ=Math.max(1,Math.min(FXQ,999));DW=Math.max(100,DW);
-  const pend=pendingOrders().filter(o=>['fxb','fxs','dep','wdr','sj','sc'].includes(o.t));
+  const pend=pendingOrders().filter(o=>['fxb','fxs','dep','wdr','sj','sc','bb'].includes(o.t));
+  const bt=c.bTerm||5,bOk=(PUB.day||0)+bt<=c.days;BW=Math.max(1000,BW);
   const can=!end;
   box.innerHTML=`${pend.length?`<div class="warn">⏳ 은행 일 ${pend.length}개를 선생님 화면이 처리하는 중이에요.</div>`:''}
    <div class="panel grid"><h2>💵 환전소 (원 ↔ 달러)</h2>
@@ -629,6 +648,13 @@ function stuBank(box,a,open){
       <div class="seg">${[500,1000,2000,3000].map(w=>`<button data-sw="${w}" aria-pressed="${SW===w}">하루 ${won(w)}</button>`).join('')}</div>
       <div class="center muted">${won(SW)} × ${c.term}번 = ${won(SW*c.term)} → 만기에 <b style="color:var(--ink)">${won(SW*c.term+Math.floor(SW*c.term*c.sRate/100))}</b></div>
       <div class="row"><button id="sjb" ${can&&SW<=a.cash&&(PUB.day||0)+c.term<=c.days?'':'disabled'}>하루 ${won(SW)} 적금 가입</button><span class="msg bad">${(PUB.day||0)+c.term>c.days?'프로젝트가 끝나기 전에 다 모을 수 없어서 가입할 수 없어요.':''}</span></div>`}</div>
+   <div class="panel grid"><h2>📜 채권 (돈을 빌려주고 약속한 날 돌려받아요)</h2>
+    <p class="muted" style="margin:0">채권은 "돈을 빌려줄게요, ${bt}일 뒤에 이자와 함께 돌려주세요" 하는 약속 쪽지예요. 중간에 되팔 수 없어요. <b>위험이 클수록 이자를 많이 줘요.</b> 회사 채권은 빌려준 동안 그 회사 주가가 15% 넘게 떨어지면 80%만 돌려받아요.</p>
+    <div class="bonds">${BONDS.map(b=>`<div><div class="hd"><span>${b.e}</span><b>${esc(b.n)}</b></div><div class="big up">${bt}일 뒤 +${b.r}%</div><div class="muted">${esc(b.d)}</div>${b.id!=='gov'?`<div class="muted" style="font-size:.85rem">위험 <span class="shk">${b.r>=6?'●●●○○':'●○○○○'}</span></div>`:'<div class="muted" style="font-size:.85rem">위험 <span class="shk">○○○○○</span></div>'}
+      <button class="small" data-bb="${b.id}" ${can&&bOk&&BW<=a.cash?'':'disabled'}>${won(BW)} 빌려주기</button></div>`).join('')}</div>
+    <div class="stepper" style="max-width:460px"><button class="ghost" id="bm">−</button><output class="num">${won(BW)}</output><button class="ghost" id="bpl">＋</button></div>
+    ${bOk?'':'<div class="msg bad">프로젝트가 끝나기 전에 만기가 오지 않아서 새로 살 수 없어요.</div>'}
+    ${(a.bonds||[]).length?`<div class="hist">${a.bonds.map(x=>{const b=BI[x.k]||{};return `<div><span>${b.e||''} ${esc(b.n||'')} ${won(x.w)}</span><span>${x.due}일째 아침에 ${won(x.w+Math.floor(x.w*b.r/100))} 돌려받아요</span></div>`;}).join('')}</div>`:''}</div>
    <div class="panel grid"><h2>은행 기록</h2><div class="hist">${(a.bk||[]).map(b=>`<div><span>${b.d}일째</span><span>${esc(b.m)}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
   $('#fm').onclick=()=>{FXQ=Math.max(1,FXQ-1);render();};$('#fp').onclick=()=>{FXQ++;render();};
   $('#fmax').onclick=()=>{FXQ=Math.max(1,maxFx);render();};$('#fall').onclick=()=>{FXQ=Math.max(1,usd);render();};
@@ -637,6 +663,8 @@ function stuBank(box,a,open){
   $('#depb').onclick=()=>sendOrder({t:'dep',w:DW});$('#wdrb').onclick=()=>sendOrder({t:'wdr',w:DW});
   $('#dall').onclick=()=>sendOrder({t:'dep',w:a.cash});$('#wall').onclick=()=>sendOrder({t:'wdr',w:dp});
   $$('[data-sw]',box).forEach(b=>b.onclick=()=>{SW=+b.dataset.sw;render();});
+  $('#bm').onclick=()=>{BW=Math.max(1000,BW-1000);render();};$('#bpl').onclick=()=>{BW+=1000;render();};
+  $$('[data-bb]',box).forEach(b=>b.onclick=()=>{const x=BI[b.dataset.bb];if(confirm(`${x.n}에 ${won(BW)}을 빌려줄까요?\n${bt}일 뒤 아침에 이자 ${x.r}%와 함께 돌려받아요. 중간에 찾을 수 없어요.`))sendOrder({t:'bb',k:x.id,w:BW});});
   if($('#sjb'))$('#sjb').onclick=()=>{if(confirm(`하루 ${won(SW)}씩 ${c.term}번 넣는 적금에 가입할까요?\n오늘 첫 ${won(SW)}이 바로 빠져요.`))sendOrder({t:'sj',w:SW});};
   if($('#scb'))$('#scb').onclick=()=>{if(confirm('적금을 깰까요? 이자 없이 모은 돈만 돌려받아요.'))sendOrder({t:'sc'});};
 }
@@ -674,11 +702,12 @@ function stuNews(box,open,easy){
   $('#psave').onclick=async()=>{await roomRef(me.room).child(`pred/${PUB.day}/${me.num}`).set({up:DRAFT.up,down:DRAFT.down,why:DRAFT.why.slice(0,200),at:now()});};
 }
 // 바구니 수: 투자한 돈이 몇 군데에 고르게 나뉘었는지 (ETF는 담긴 회사들로 나눠서 셈)
-function basket(hold,prices,usdWon){
+function basket(hold,prices,usdWon,bondWon){
   const w={};let tot=0;
   AS.forEach(c=>{const v=(hold[c.id]||0)*prices[c.id];if(!v)return;tot+=v;
     if(c.k==='etf')c.of.forEach(id=>w[id]=(w[id]||0)+v/c.of.length);else w[c.id]=(w[c.id]||0)+v;});
   if(usdWon>0){w.usd=usdWon;tot+=usdWon;}
+  if(bondWon>0){w.bond=bondWon;tot+=bondWon;}
   if(!tot)return 0;
   return 1/Object.values(w).reduce((s,v)=>s+(v/tot)**2,0);
 }
@@ -693,6 +722,7 @@ function orderText(d){
   if(d.t==='dep')return `🏦 예금 ${won(d.w)} 넣기`;
   if(d.t==='wdr')return `🏦 예금 ${won(d.w)} 빼기`;
   if(d.t==='sj')return `🐷 하루 ${won(d.w)} 적금 가입`;
+  if(d.t==='bb')return `📜 ${(BI[d.k]||{}).n||'채권'} ${won(d.w)} 사기`;
   if(d.t==='sc')return `🐷 적금 깨기`;
   return '';
 }
@@ -701,7 +731,7 @@ function stuWallet(box,a){
     return `<tr><td>${c.e} ${esc(c.n)}</td><td class="num">${q}주</td><td class="num">${won(cost/q)}</td><td class="num">${won(PUB.prices[c.id])}</td><td class="num ${ud(pl)}">${pl>0?'+':''}${won(pl)}<br><small>${cost?pctTxt(pl/cost*100):''}</small></td></tr>`;}).join('');
   const hist=Object.entries(MYO).map(([id,o])=>{let d={};try{d=JSON.parse(o.d);}catch(e){}return {id,d,r:o.r};}).sort((x,y)=>y.id<x.id?-1:1).slice(0,40);
   const rate=PUB.cfg.rate;
-  const bas=basket(a.hold||{},PUB.prices,a.usd*PUB.fx);
+  const bas=basket(a.hold||{},PUB.prices,a.usd*PUB.fx,(a.bonds||[]).reduce((t,x)=>t+x.w,0));
   if(!PLDRAFT)PLDRAFT={g:(MYPLAN||{}).g||'',r:[...((MYPLAN||{}).r||[])]};
   const GOALS=[['keep','잃지 않기'],['3','+3%'],['5','+5%'],['10','+10%']];
   const gHit=MYPLAN&&MYPLAN.g?(MYPLAN.g==='keep'?a.ret>=0:a.ret>=+MYPLAN.g):null;
@@ -728,6 +758,7 @@ function stuWallet(box,a){
     <tr><td>주식 · ETF · 금</td><td class="num">${won(AS.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*PUB.prices[c.id],0))}</td></tr>
     ${a.usd?`<tr><td>달러 ${a.usd}달러 (오늘 환율로)</td><td class="num">${won(a.usd*PUB.fx)}</td></tr>`:''}
     ${a.dpst?`<tr><td>예금</td><td class="num">${won(a.dpst)}</td></tr>`:''}
+    ${(a.bonds||[]).length?`<tr><td>채권 (빌려준 돈)</td><td class="num">${won(a.bonds.reduce((t,x)=>t+x.w,0))}</td></tr>`:''}
     ${a.sav?`<tr><td>적금 (모은 돈)</td><td class="num">${won(a.sav.paid*a.sav.w)}</td></tr>`:''}
     ${a.res?`<tr><td>돌려받기 기다리는 쿠키</td><td class="num">${Math.round(a.res/rate)}개</td></tr>`:''}
     <tr><td>지금 내 자산</td><td class="num">${won(a.v)}</td></tr>
@@ -781,7 +812,7 @@ function newMaster(room){
 function fixM(m){
   if(m.fx==null){m.fx=FX0;m.fxHist=[FX0];m.fxChg=0;}
   if(m.cfg.dRate==null)m.cfg.dRate=.3;if(m.cfg.sRate==null)m.cfg.sRate=3;if(m.cfg.term==null)m.cfg.term=5;
-  if(m.cfg.maxT==null)m.cfg.maxT=3;
+  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.bTerm==null)m.cfg.bTerm=5;
   if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=3;if(m.cfg.sdays==null)m.cfg.sdays=3;
   AS.forEach(c=>{if(m.prices[c.id]==null){m.prices[c.id]=c.p;m.hist[c.id]=[c.p];}});
   if(!m.mom)m.mom={};
@@ -970,16 +1001,16 @@ function norm(x){
 const resOf=n=>Object.values(M.ops).filter(o=>o.num===+n&&o.type==='out'&&o.st==='wait').reduce((s,o)=>s+o.n,0)*M.cfg.rate;
 function acctView(n,a){
   const res=resOf(n),stocks=AS.reduce((s,c)=>s+((a.hold||{})[c.id]||0)*M.prices[c.id],0);
-  const bank=(a.usd||0)*M.fx+(a.dpst||0)+(a.sav?a.sav.paid*a.sav.w:0);
+  const bank=(a.usd||0)*M.fx+(a.dpst||0)+(a.sav?a.sav.paid*a.sav.w:0)+(a.bonds||[]).reduce((t,x)=>t+x.w,0);
   const v=a.cash+stocks+bank+res,base=a.dep*M.cfg.rate,net=v+a.wd*M.cfg.rate;
   return {name:a.name,fp:a.fp,cash:a.cash,hold:a.hold,cost:a.cost,dep:a.dep,wd:a.wd,res,v,ret:base?Math.round((net-base)/base*1000)/10:0,pt:a.pt||0,
-    usd:a.usd||0,usdCost:a.usdCost||0,dpst:a.dpst||0,dInt:a.dInt||0,sav:a.sav||null,bk:a.bk||[],lb:a.lb||{},fee:a.fee||0,trades:a.trades||0,td:a.td||null,tl:a.tl||[]};
+    usd:a.usd||0,usdCost:a.usdCost||0,dpst:a.dpst||0,dInt:a.dInt||0,sav:a.sav||null,bonds:a.bonds||[],bk:a.bk||[],lb:a.lb||{},fee:a.fee||0,trades:a.trades||0,td:a.td||null,tl:a.tl||[]};
 }
 function buildPub(){
   const acct={};Object.entries(M.acct).forEach(([n,a])=>acct[n]=acctView(n,a));
   const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at});
   return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today,reveal:M.reveal,fx:M.fx,fxHist:M.fxHist,fxChg:M.fxChg,
-    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays,maxT:M.cfg.maxT},acct,ops,award:!!M.award};
+    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,bTerm:M.cfg.bTerm,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays,maxT:M.cfg.maxT},acct,ops,award:!!M.award};
 }
 function publish(){
   if(!LEADER)return;
@@ -1083,6 +1114,16 @@ async function processOrder(n,id,o){
     if(w>a.cash)return {ok:false,m:`돈이 모자라요 (${won(w)} 필요)`};
     a.cash-=w;a.sav={w,paid:1,miss:0,from:M.day};bk(a,`🐷 하루 ${won(w)} 적금에 가입하고 첫 돈을 넣었어요`);
     return {ok:true,m:`✔ 적금에 가입했어요 (1/${t}번)`};
+  }
+  if(d.t==='bb'){
+    const b=BI[d.k],w=d.w,t=M.cfg.bTerm||5;
+    if(!b||!Number.isInteger(w)||w<1000||w%1000)return {ok:false,m:'채권 주문이 이상해요'};
+    if(M.day+t>M.cfg.days)return {ok:false,m:'프로젝트가 끝나기 전에 만기가 오지 않아요'};
+    if(w>a.cash)return {ok:false,m:`돈이 모자라요 (${won(w)} 필요)`};
+    if((a.bonds||[]).length>=5)return {ok:false,m:'채권은 5개까지 가질 수 있어요'};
+    a.cash-=w;a.bonds=[...(a.bonds||[]),{k:b.id,w,from:M.day,due:M.day+t,p0:b.id==='gov'?0:M.prices[b.id]}];
+    bk(a,`📜 ${b.n}에 ${won(w)}을 빌려줬어요`);
+    return {ok:true,m:`✔ ${b.n}에 ${won(w)}을 빌려줬어요 (${M.day+t}일째에 돌려받아요)`};
   }
   if(d.t==='sc'){
     if(!a.sav)return {ok:false,m:'든 적금이 없어요'};
@@ -1273,8 +1314,17 @@ async function applyNews(){
 function bankDay(){
   const c=M.cfg,nd=M.day+1;
   Object.values(M.acct).forEach(a=>{
-    if(M.day){const b=basket(a.hold||{},M.prices,(a.usd||0)*M.fx);a.divSum=(a.divSum||0)+b;a.divDays=(a.divDays||0)+1;}
+    if(M.day){const b=basket(a.hold||{},M.prices,(a.usd||0)*M.fx,(a.bonds||[]).reduce((t,x)=>t+x.w,0));a.divSum=(a.divSum||0)+b;a.divDays=(a.divDays||0)+1;}
     if(M.day&&a.dpst>0){const it=Math.floor(a.dpst*c.dRate/100);if(it>0){a.dpst+=it;a.dInt=(a.dInt||0)+it;a.bk=[{d:nd,m:`🏦 예금 이자 ${won(it)}을 받았어요`},...(a.bk||[])].slice(0,15);}}
+    if((a.bonds||[]).length){
+      a.bonds=a.bonds.filter(x=>{
+        if(nd<x.due)return true;
+        const b=BI[x.k]||{n:'채권',r:0},bad=x.k!=='gov'&&M.prices[x.k]<x.p0*.85;
+        const got=bad?Math.floor(x.w*.8):x.w+Math.floor(x.w*b.r/100);a.cash+=got;
+        a.bk=[{d:nd,m:bad?`📜 ${b.n}: 회사가 어려워져서 ${won(got)}만 돌려받았어요`:`📜 ${b.n} 만기! 이자까지 ${won(got)}을 돌려받았어요`},...(a.bk||[])].slice(0,15);
+        return false;
+      });
+    }
     const s=a.sav;if(!s)return;
     if(s.paid>=c.term){const p=s.paid*s.w,it=Math.floor(p*c.sRate/100);a.cash+=p+it;a.sav=null;a.bk=[{d:nd,m:`🐷 적금 만기! ${won(p)} + 이자 ${won(it)}을 받았어요`},...(a.bk||[])].slice(0,15);return;}
     if(a.cash>=s.w){a.cash-=s.w;s.paid++;a.bk=[{d:nd,m:`🐷 적금에 ${won(s.w)}을 넣었어요 (${s.paid}/${c.term}번)`},...(a.bk||[])].slice(0,15);}
@@ -1300,6 +1350,8 @@ async function endProject(){
     // 달러는 마지막 환율로 바꾸고, 예금은 찾고, 적금은 다 모았으면 이자까지 줘요
     if(a.usd){a.cash+=a.usd*M.fx;a.usd=0;a.usdCost=0;}
     if(a.dpst){a.cash+=a.dpst;a.dpst=0;}
+    // 만기가 안 된 채권은 빌려준 돈만 돌려줘요
+    (a.bonds||[]).forEach(x=>{a.cash+=x.w;});a.bonds=[];
     if(a.sav){const p=a.sav.paid*a.sav.w;a.cash+=p+(a.sav.paid>=M.cfg.term?Math.floor(p*M.cfg.sRate/100):0);a.sav=null;}
     const k=Math.round(a.cash/rate);
     if(k>0)M.ops['fin'+n]={num:+n,type:'out',n:k,st:'wait',at:Date.now(),fin:true};
@@ -1381,6 +1433,7 @@ function drawSet(){
     <label class="fld"><span class="lb">단기 매매 기준 (산 지 며칠 안에 팔면)</span><input type="number" id="ssd" min="0" max="10" value="${c.sdays}"></label>
     <label class="fld"><span class="lb">예금 하루 이자 (%)</span><input type="number" id="sdr" min="0" max="10" step="0.1" value="${c.dRate}"></label>
     <label class="fld"><span class="lb">적금 만기 이자 (%)</span><input type="number" id="ssr" min="0" max="50" value="${c.sRate}"></label>
+    <label class="fld"><span class="lb">채권 만기 (며칠 뒤)</span><input type="number" id="sbt" min="2" max="15" value="${c.bTerm}"></label>
     <label class="fld"><span class="lb">적금 기간 (넣는 횟수)</span><input type="number" id="stm" min="2" max="15" value="${c.term}" ${Object.values(M.acct).some(a=>a.sav)?'disabled title="적금을 든 친구가 있어서 바꿀 수 없어요"':''}></label></div>
    <h3 style="font-size:1.4rem">다했니 연결 (읽기 전용)</h3>
    <div class="warn">API 키와 학생 코드는 <b>이 컴퓨터에만</b> 저장되고 학생 화면이나 서버에 올라가지 않아요. 학생 코드와 쿠키 수가 보이니 <b>TV에 띄우지 말고</b> 넣어 주세요. 새 키를 만들면 예전 키를 쓰던 다른 다했니 앱이 멈춰요.</div>
@@ -1393,7 +1446,7 @@ function drawSet(){
   $('#save').onclick=()=>{
     c.close=$('#sc').value||'13:10';c.days=Math.max(1,+$('#sd').value||15);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
     c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
-    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
+    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
     DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
     saveM();publish();closeModal();
   };
