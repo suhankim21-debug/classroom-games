@@ -179,7 +179,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[2].evaluate(() => roomRef(me.room).child('pub/acct/3/cash').set(999999));
   await S[2].waitForFunction(() => myAcct().cash === 5000, null, { timeout: 10000 });
   await T.waitForFunction(() => M.tamper >= 1, null, { timeout: 10000 }).catch(() => {});
-  check((await M()).tamper >= 1, '학생이 보여 주는 장부(돈)를 고쳐도 선생님 화면이 되돌림');
+  // 되돌리는 순간 다른 공개(publish)와 겹치면 tamper 숫자는 안 늘 수 있어요. 돈이 5,000원으로 돌아온 것이 핵심이에요
+  check(await S[2].evaluate(() => myAcct().cash === 5000), '학생이 보여 주는 장부(돈)를 고쳐도 선생님 화면이 되돌림');
   await S[2].evaluate(() => roomRef(me.room).child('pub/prices/chip').set(1));
   await S[2].waitForFunction(() => PUB.prices.chip === 2000, null, { timeout: 10000 });
   ok('주가를 고쳐도 되돌림');
@@ -284,6 +285,17 @@ const check = (c, m) => c ? ok(m) : fail(m);
   ok('다했니에서 쿠키 2개를 준 것을 확인하고 끝냄');
   await T.click('#mx');
 
+  /* ---------- 배당주 사기 ---------- */
+  await S[0].click('[data-tab="market"]');
+  if (await S[0].$('#x')) await S[0].click('#x');
+  check((await S[0].textContent('[data-co="mart"]')).includes('배당'), '배당 주는 회사에 💰 배당 표시');
+  await S[0].click('[data-co="mart"]');
+  check((await S[0].textContent('.anal')).includes('다음 배당'), '분석 카드에 배당 설명과 다음 배당 날');
+  await shot(S[0], 'g16-div');
+  await S[0].click('[data-why="biz"]'); await S[0].click('#buy');
+  await S[0].waitForFunction(() => (myAcct().hold || {}).mart === 1);
+  ok('1번: 바로마트 1주 삼');
+
   /* ---------- 장 마감 ---------- */
   await T.click('#closeNow');
   await S[1].waitForFunction(() => !isOpen(PUB));
@@ -313,12 +325,16 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await T.waitForFunction(() => M.qn && M.qn.i === 5);
   check((await T.textContent('body')).includes('예약한 뉴스'), '내일 뉴스를 미리 예약함');
   // 시계를 다음 월요일 오전 9시로 옮겨서 선생님 출근 전 아침을 흉내 내요
+  await T.evaluate(() => { M.cfg.divEvery = 3; M.cfg.divHold = 0; saveM(); });
   await T.evaluate(() => { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); d.setHours(9, 0, 0, 0); skew = d.getTime() - Date.now(); });
   await T.waitForFunction(() => M.day === 3 && M.phase === 'open', null, { timeout: 10000 });
   const m3a = await M();
   check(m3a.today.t === (await T.evaluate(() => NEWS[5].t)) && !m3a.qn && m3a.used.includes(5), '평일 아침 여는 시간이 되면 예약한 뉴스로 저절로 새 날이 시작됨');
   await S[0].waitForFunction(() => PUB.day === 3 && isOpen(PUB));
   ok('학생 화면도 장이 열림');
+  const dv = Math.floor(m3a.prices.mart * 0.02);
+  check(m3a.acct[1].divGot === dv && m3a.acct[1].bk.some(b => /바로마트 배당/.test(b.m)), `배당 날 아침: 바로마트 1주 배당 ${dv}원을 받음`);
+  await T.evaluate(() => { M.cfg.divEvery = 5; M.cfg.divHold = 3; saveM(); });
   await T.evaluate(() => { skew = 0; });
 
   /* ---------- 여러 컴퓨터에서 관리 ---------- */
