@@ -812,7 +812,7 @@ let tick=null,M=null,LEADER=false,ORD={},PL={},PRED={},DH={key:'',codes:{}},EXP=
 const TAB_ID=(()=>{try{let t=sessionStorage.getItem('stock-tab');if(!t){t=Math.random().toString(36).slice(2);sessionStorage.setItem('stock-tab',t);}return t;}catch(e){return Math.random().toString(36).slice(2);}})();
 window.addEventListener('pagehide',()=>{const l=store('stock-leader');if(LEADER&&l&&l.id===TAB_ID)store('stock-leader',null);});
 function newMaster(room){
-  return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:15,showRank:true},
+  return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:20,showRank:true},
     day:0,phase:'setup',closeAt:0,prices:Object.fromEntries(AS.map(c=>[c.id,c.p])),hist:Object.fromEntries(AS.map(c=>[c.id,[c.p]])),chg:{},
     today:null,eff:null,reveal:null,used:[],log:[],acct:{},ops:{},done:{},feed:[],award:false,tamper:0,fx:FX0,fxHist:[FX0],fxChg:0};
 }
@@ -1491,7 +1491,7 @@ function drawSet(){
   bindClose();
   const readCodes=()=>{const o={};$('#dc').value.split('\n').forEach(l=>{const p=l.trim().split(/\s+/);if(p.length>=2&&/^\d{1,2}$/.test(p[0]))o[+p[0]]=p[p.length-1];});return o;};
   $('#save').onclick=()=>{
-    c.close=$('#sc').value||'13:10';c.open=$('#sop').value||'';if(c.open&&c.open>=c.close){alert('여는 시간은 마감 시간보다 빨라야 해요.');return;}c.days=Math.max(1,+$('#sd').value||15);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
+    c.close=$('#sc').value||'13:10';c.open=$('#sop').value||'';if(c.open&&c.open>=c.close){alert('여는 시간은 마감 시간보다 빨라야 해요.');return;}c.days=Math.max(1,+$('#sd').value||20);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
     c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
     c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.divRate=Math.min(10,Math.max(0,+$('#sdv').value||0));c.divEvery=Math.min(15,Math.max(2,Math.round(+$('#sde').value||5)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
     DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
