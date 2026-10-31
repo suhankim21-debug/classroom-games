@@ -61,6 +61,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
     await p.goto(URL + '?room=' + code);
     await p.fill('#cw-name', `${i + 1} ${NAMES[i]}`);
     if (i === 3) await p.check('#ez');
+    if (i === 0) await shot(p, 'g01-join');
     await p.click('#enter');
     await p.waitForSelector('.fp', { timeout: 15000 });
     S.push(p);
@@ -69,7 +70,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   const fps = await Promise.all(S.map(p => p.textContent('.fp')));
   const tvReq = await T.textContent('#reqs');
   check(fps.every(f => tvReq.includes(f.trim())), '선생님 화면에 학생 기기 그림이 똑같이 보임');
-  await shot(S[0], 'stu-wait'); await shot(T, 'tv-approve');
+  await shot(S[0], 'stu-wait'); await shot(S[0], 'g02-wait'); await shot(T, 'tv-approve');
   await T.click('#okAll');
   for (const p of S) await p.waitForSelector('.tabs', { timeout: 10000 });
   ok('학생 4명 계좌 승인');
@@ -96,7 +97,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
     await p.click('#inb');
     await p.waitForFunction(() => Object.values(MYO).some(o => o.r), null, { timeout: 15000 });
   };
-  await deposit(S[0], 10); await deposit(S[1], 20); await deposit(S[2], 5); await deposit(S[3], 3);
+  await deposit(S[0], 10); await shot(S[0], 'g03-cookie'); await deposit(S[1], 20); await deposit(S[2], 5); await deposit(S[3], 3);
   await T.waitForFunction(() => Object.values(M.ops).filter(o => o.st === 'wait' && o.snap).length === 4, null, { timeout: 15000 });
   ok('쿠키 맡기기 신청 4개, 신청할 때 다했니 쿠키를 읽어 둠');
   // 21개째는 한도(20개)를 넘어서 막혀요
@@ -119,6 +120,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   for (const [i, c] of [10000, 20000, 5000, 3000].entries()) await S[i].waitForFunction(c => myAcct().cash === c, c, { timeout: 10000 }).catch(() => {});
   const cash0 = await Promise.all(S.map(p => p.evaluate(() => myAcct().cash)));
   check(JSON.stringify(cash0) === JSON.stringify([10000, 20000, 5000, 3000]), '쿠키를 맡긴 만큼 투자할 돈이 들어옴: ' + cash0);
+  await S[0].click('[data-tab="market"]'); await shot(S[0], 'g04-before');
 
   /* ---------- 첫 거래일 ---------- */
   await T.click('#nextDay');
@@ -131,18 +133,20 @@ const check = (c, m) => c ? ok(m) : fail(m);
   const firstNews = (await M()).today.t;
   await S[0].click('[data-tab="news"]');
   check((await S[0].textContent('#tabbox')).includes(firstNews), '학생 화면에 오늘의 뉴스');
+  await shot(S[0], 'g05-news');
   const effLeak = await S[0].evaluate(() => JSON.stringify(PUB));
   check(!/"eff"|"x":/.test(effLeak), '뉴스가 주가에 주는 영향은 학생에게 보이지 않음');
 
   /* ---------- 사고팔기 ---------- */
   const waitR = (p, k) => p.waitForFunction(k => Object.values(MYO).filter(o => o.r).length >= k, k, { timeout: 15000 });
   await S[0].click('[data-tab="market"]');
+  await shot(S[0], 'g06-market');
   await S[0].click('[data-co="chip"]');
   await S[0].click('#qp'); await S[0].click('#qp');
   check(await S[0].isDisabled('#buy'), '산 까닭을 고르기 전에는 사기 버튼이 꺼져 있음');
   check((await S[0].textContent('.anal')).includes('돈을 버는 방법'), '회사 분석 카드가 보임');
   await S[0].click('[data-why="news"]');
-  await shot(S[0], 'stu-buy');
+  await shot(S[0], 'stu-buy'); await shot(S[0], 'g07-buy');
   await S[0].click('#buy');
   await waitR(S[0], 2);
   await S[0].waitForFunction(() => (myAcct().hold || {}).chip === 3);
@@ -198,14 +202,14 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => MYP && MYP.up === 'volt');
   await T.waitForFunction(() => Object.keys(PRED).length === 2);
   ok('예측 2명 저장, TV에 예측한 친구 수');
-  await shot(S[0], 'stu-news'); await shot(T, 'tv-day1');
+  await shot(S[0], 'stu-news'); await shot(S[0], 'g08-predict'); await shot(S[3], 'g09-easy'); await shot(T, 'tv-day1');
 
   /* ---------- 투자 계획과 일기 ---------- */
   await S[0].click('[data-tab="wallet"]');
   await S[0].click('[data-goal="5"]'); await S[0].click('[data-pl="0"]'); await S[0].click('[data-pl="2"]'); await S[0].click('#plsave');
   await S[0].waitForFunction(() => MYPLAN && MYPLAN.g === '5' && MYPLAN.r.length === 2);
   check((await S[0].textContent('#tabbox')).includes('📰 뉴스를 읽고'), '투자 일기에 산 까닭이 남음');
-  await shot(S[0], 'stu-wallet');
+  await shot(S[0], 'stu-wallet'); await shot(S[0], 'g10-wallet');
   await S[0].click('[data-tab="market"]');
   check((await S[0].textContent('#tabbox')).includes('나의 원칙'), '시장 화면에 나의 원칙이 보임');
   await S[0].click('[data-tab="news"]');
@@ -220,7 +224,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[2].click('[data-sw="500"]'); await S[2].click('#sjb');
   await S[2].waitForFunction(() => myAcct().sav && myAcct().sav.paid === 1);
   check(await S[2].evaluate(() => myAcct().cash === 5000 - 2 * PUB.fx - 1000 - 500 && myAcct().v === 5000), '3번: 예금 1,000원, 하루 500원 적금 가입 (자산은 그대로 5,000원)');
-  await shot(S[2], 'stu-bank');
+  await shot(S[2], 'stu-bank'); await shot(S[2], 'g11-bank');
 
   /* ---------- 채권: 나라 채권을 사서 만기에 이자와 함께 받기 ---------- */
   await T.evaluate(() => { M.cfg.bTerm = 1; saveM(); publish(); });
@@ -230,7 +234,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => (myAcct().bonds || []).length === 1);
   check(await S[0].evaluate(() => myAcct().cash === 2940 && myAcct().bonds[0].due === 2), '1번: 나라 채권 1,000원을 삼 (내일 돌려받음)');
   check(await S[0].evaluate(() => myAcct().v === myAcct().cash + 3 * PUB.prices.chip + 1000), '채권도 자산에 들어감');
-  await shot(S[0], 'stu-bond');
+  await shot(S[0], 'stu-bond'); await shot(S[0], 'g12-bond');
   await S[0].click('[data-tab="news"]');
 
   /* ---------- 새 날 ---------- */
@@ -250,6 +254,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => PUB.day === 2 && PUB.reveal);
   check((await S[0].textContent('#tabbox')).includes(before.today.t), '학생 화면에 어제 뉴스 결과');
   check(!!m2.reveal.w && (await S[0].textContent('#tabbox')).includes('해설'), '어제 뉴스 해설이 학생 화면에 나옴');
+  await shot(S[0], 'g13-reveal');
   check(m2.acct[1].cash === 3960 && !(m2.acct[1].bonds || []).length, '새 날: 나라 채권 만기, 1,000원 + 이자 20원을 돌려받음');
   const v1 = await S[0].evaluate(() => myAcct());
   check(v1.v === v1.cash + 3 * (await M()).prices.chip, '1번 자산 = 돈 + 주식 × 오늘 값');
@@ -288,7 +293,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[1].evaluate(async () => { const ref = roomRef(me.room).child('orders/' + me.num).push(); const d = JSON.stringify({ id: ref.key, num: me.num, day: PUB.day, ts: now(), t: 'sell', c: 'sea', q: 5 }); await ref.set({ d, s: await signStr(KEYS.priv, d) }); });
   await S[1].waitForFunction(() => Object.values(MYO).some(o => o.r && /닫힌 뒤/.test(o.r.m)), null, { timeout: 10000 });
   check(await S[1].evaluate(() => myAcct().hold.sea === 19), '장이 닫힌 뒤 보낸 주문은 막힘');
-  await shot(S[1], 'stu-closed');
+  await shot(S[1], 'stu-closed'); await shot(S[1], 'g14-closed');
 
   /* ---------- 새로고침해도 그대로 ---------- */
   await S[1].reload(); await S[1].waitForSelector('.tabs', { timeout: 15000 });
@@ -357,6 +362,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[2].waitForFunction(() => PUB.phase === 'end');
   await S[2].click('[data-tab="cookie"]');
   check((await S[2].textContent('#tabbox')).includes('돌려받기'), '학생 화면에 돌려받을 쿠키');
+  await shot(S[2], 'g15-end');
   await T.click('#cookieBtn'); await T.waitForSelector('[data-v="3|out"]');
   check(!(await T.$('[data-c="3|out"]')), '마지막 정산은 취소할 수 없음');
   DH.C3.cookie += m3.ops.fin3.n;
