@@ -430,9 +430,9 @@ async function fpOf(pub){const h=new Uint8Array(await crypto.subtle.digest('SHA-
 /* ---------- 첫 화면 ---------- */
 function startView(){
   clearOffs();$('#foot').innerHTML='';clearInterval(tick);ClassWatch.teacherStop();closeModal();
-  $('#sub').textContent='3주 모의 주식 투자 · 다했니 쿠키로 투자해요';
+  $('#sub').textContent='4주 모의 주식 투자 · 다했니 쿠키로 투자해요';
   app.innerHTML=`<section class="hero"><div class="grid"><h1>뉴스를 읽고<br>투자해 봐요</h1>
-   <p>매일 아침 새 뉴스가 나와요. 뉴스가 어떤 회사에 좋을지 나쁠지 생각해서 주식을 사고팔아요. 다음 날 아침 주가가 바뀌어요. 3주 뒤 내 쿠키는 늘어날까요?</p></div>
+   <p>매일 아침 새 뉴스가 나와요. 뉴스가 어떤 회사에 좋을지 나쁠지 생각해서 주식을 사고팔아요. 다음 날 아침 주가가 바뀌어요. 4주 뒤 내 쿠키는 늘어날까요?</p></div>
    <div class="minis">${AS.map(c=>`<div><span>${c.e}</span>${esc(c.n)}</div>`).join('')}</div></section>
    <div class="choose"><button id="goStu">학생으로 들어가기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
   $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
@@ -454,7 +454,7 @@ function joinView(){
    <label class="check"><input type="checkbox" id="ez"> 🌟 쉬운 화면 (그림과 글자를 크게, 한 주씩 사고팔기)</label>
    <div class="msg bad" id="jm" role="status"></div>
    <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div>
-   <p class="muted" style="margin:0">이 태블릿이 내 증권 계좌가 돼요. 3주 동안 같은 태블릿으로 들어와요.</p></div>`;
+   <p class="muted" style="margin:0">이 태블릿이 내 증권 계좌가 돼요. 4주 동안 같은 태블릿으로 들어와요.</p></div>`;
   const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
   $('#rm').oninput=chk;$('#nm').oninput=chk;
   $('#home').onclick=startView;
@@ -745,7 +745,7 @@ function stuWallet(box,a){
   const gHit=MYPLAN&&MYPLAN.g?(MYPLAN.g==='keep'?a.ret>=0:a.ret>=+MYPLAN.g):null;
   const tl=(a.tl||[]);const wc={};tl.forEach(t=>{if(t.t==='buy')wc[t.why||'']=(wc[t.why||'']||0)+1;});
   box.innerHTML=`<div class="panel grid"><h2>🎯 나의 투자 계획</h2>
-    <div class="fld"><span class="lb">3주 뒤 목표</span><div class="seg">${GOALS.map(([k,l])=>`<button data-goal="${k}" aria-pressed="${PLDRAFT.g===k}">${l}</button>`).join('')}</div></div>
+    <div class="fld"><span class="lb">프로젝트 끝 목표</span><div class="seg">${GOALS.map(([k,l])=>`<button data-goal="${k}" aria-pressed="${PLDRAFT.g===k}">${l}</button>`).join('')}</div></div>
     <div class="fld"><span class="lb">나의 투자 원칙 (2~3개 골라요)</span><div class="whys">${PLANS.map((t,i)=>`<button data-pl="${i}" aria-pressed="${PLDRAFT.r.includes(i)}">${esc(t)}</button>`).join('')}</div></div>
     <div class="row"><button id="plsave" ${PLDRAFT.g&&PLDRAFT.r.length?'':'disabled'}>계획 저장</button><span class="msg ok">${MYPLAN&&JSON.stringify({g:MYPLAN.g,r:MYPLAN.r||[]})===JSON.stringify(PLDRAFT)?'✔ 저장했어요':''}</span>
      ${gHit===null?'':`<span class="chips"><span>${gHit?'🎯 지금은 목표에 닿았어요':'🌱 아직 목표까지 가는 중'}</span></span>`}</div></div>
@@ -1267,7 +1267,7 @@ function renderTV(){
   }
   if(ph==='end'){
     const fin=Object.values(M.ops).filter(o=>o.fin);
-    body=`<div class="panel grid center pop"><div class="emoji">🏁</div><div class="huge">3주 투자가 끝났어요</div><p style="font-size:1.2rem;margin:0">모든 주식을 마지막 날 값으로 팔고 쿠키로 바꿨어요. 🍪 쿠키 처리에서 다했니로 돌려줘요.</p>
+    body=`<div class="panel grid center pop"><div class="emoji">🏁</div><div class="huge">투자가 끝났어요</div><p style="font-size:1.2rem;margin:0">모든 주식을 마지막 날 값으로 팔고 쿠키로 바꿨어요. 🍪 쿠키 처리에서 다했니로 돌려줘요.</p>
       <div class="muted">돌려줄 쿠키 ${fin.filter(o=>o.st==='wait').length}명 남음 · ${fin.filter(o=>o.st==='done').length}명 끝</div></div>`;
   }
   const rk=rankList();
@@ -1297,7 +1297,7 @@ function tvAward(main){
    <div class="panel grid"><h3 style="font-size:1.4rem">📰 뉴스 해석왕 (예측을 가장 많이 맞힌 친구)</h3><div class="rank">${pt.slice(0,5).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.pt}점</span></div>`).join('')}</div></div>
    <div class="two2"><div class="panel grid"><h3 style="font-size:1.4rem">🧺 분산 투자왕 (여러 바구니에 골고루)</h3><div class="rank">${dv.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.d.toFixed(1)}개</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div>
     <div class="panel grid"><h3 style="font-size:1.4rem">🐢 꾸준한 투자왕 (적게 사고팔고 이익)</h3><div class="rank">${st.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${x.trades}번</span><span class="rt ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div></div>
-   <div class="panel grid"><h3>수수료로 나간 돈</h3><p style="margin:0;font-size:1.15rem">우리 반이 3주 동안 낸 수수료는 모두 <b>${won(Object.values(M.acct).reduce((s,a)=>s+(a.fee||0),0))}</b>이에요. 가장 많이 사고판 친구는 ${(()=>{const t=Object.values(M.acct).sort((x,y)=>(y.trades||0)-(x.trades||0))[0];return t?`${t.trades||0}번 거래하고 수수료 ${won(t.fee||0)}를 냈어요`:'없어요';})()}.</p></div>
+   <div class="panel grid"><h3>수수료로 나간 돈</h3><p style="margin:0;font-size:1.15rem">우리 반이 프로젝트 동안 낸 수수료는 모두 <b>${won(Object.values(M.acct).reduce((s,a)=>s+(a.fee||0),0))}</b>이에요. 가장 많이 사고판 친구는 ${(()=>{const t=Object.values(M.acct).sort((x,y)=>(y.trades||0)-(x.trades||0))[0];return t?`${t.trades||0}번 거래하고 수수료 ${won(t.fee||0)}를 냈어요`:'없어요';})()}.</p></div>
    <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요? 자주 사고판 친구와 오래 가진 친구는요? 처음에 정한 나의 투자 원칙을 지켰나요? 친구 따라 산 주식은 어떻게 됐나요?</p></div>`;
   $('#awoff').onclick=()=>{M.award=false;saveM();publish();};
 }
