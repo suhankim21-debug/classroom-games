@@ -298,6 +298,21 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => (myAcct().hold || {}).mart === 1);
   ok('1번: 바로마트 1주 삼');
 
+  /* ---------- 선생님: 학생 계좌 현황 ---------- */
+  await T.click('#acctBtn'); await T.waitForSelector('.actbl');
+  check(await T.$$eval('.acrow', r => r.length) === 4, '계좌 현황 창에 학생 4명');
+  await T.click('[data-acn="1"]'); await T.waitForSelector('.acdet');
+  const det = await T.textContent('.acdet');
+  check(det.includes('반짝반도체') && det.includes('바로마트') && det.includes('최근 거래'), '학생을 누르면 가진 종목과 최근 거래가 자세히 보임');
+  const t1 = await T.evaluate(() => { const r = acctRows().find(r => r.n === 1); return r.v.v === r.a.cash + r.stocks + r.bank + r.v.res; });
+  check(t1, '계좌 현황의 총자산 = 현금 + 주식 + 은행 + 쿠키 대기');
+  await T.click('[data-acs="ret"]');
+  await shot(T, 'tv-acct');
+  const [dl] = await Promise.all([T.waitForEvent('download'), T.click('#accsv')]);
+  const csvTxt = require('fs').readFileSync(await dl.path(), 'utf8');
+  check(csvTxt.includes('총자산') && csvTxt.includes('김하나') && csvTxt.split('\n').length === 5, 'CSV로 저장 (학생 4명 + 제목 줄)');
+  await T.click('#mx');
+
   /* ---------- 장 마감 ---------- */
   await T.click('#closeNow');
   await S[1].waitForFunction(() => !isOpen(PUB));
