@@ -110,6 +110,10 @@ button.co{cursor:pointer}
 .tbl th,.tbl td{border-bottom:2px solid var(--line);padding:6px 8px;text-align:right}
 .tbl th:first-child,.tbl td:first-child{text-align:left}
 .tbl th{font-family:var(--display);font-weight:400;color:var(--muted)}
+.actbl td{white-space:nowrap}.actbl td.hold{white-space:normal;text-align:left;font-size:.9rem;min-width:200px}
+.actbl .acrow{cursor:pointer}.actbl .acrow:hover,.actbl .acrow.on{background:#FFF6E0}
+.actbl .acdet>td{background:#FFFBF0;text-align:left}
+.achide td.m,.achide .acdet{filter:blur(7px)}
 .hist{display:grid;gap:6px;max-height:340px;overflow:auto}
 .hist div{background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;gap:8px;justify-content:space-between}
 .newsc{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:16px;display:grid;gap:8px}
@@ -1076,13 +1080,14 @@ async function openRoom(cerr){
     <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${ROOM}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
     <div class="panel grid"><div class="row between"><h2>계좌</h2><span class="muted" id="cnt"></span></div><div id="reqs" class="req"></div><div class="people" id="ppl"></div></div>
     <button id="cookieBtn">🍪 쿠키 처리</button>
+    <button class="ghost" id="acctBtn">👥 학생 계좌 현황</button>
     <button class="ghost" id="setBtn">⚙️ 설정 · 다했니 연결</button>
     <button class="ghost" id="bakBtn">💾 장부 백업 · 다른 컴퓨터</button>
     <button class="ghost" id="home">처음으로</button>
    </div>
    <div class="grid" id="main"></div></div>`;
   if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
-  $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#bakBtn').onclick=()=>openModal('backup');
+  $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#acctBtn').onclick=()=>openModal('acct');$('#bakBtn').onclick=()=>openModal('backup');
   $('#home').onclick=()=>{location.hash='';LEADER=false;store('stock-leader',null);startView();};
   const R=roomRef(ROOM);
   if(M.cloud&&!VK){M.cloud=false;saveM();}
@@ -1153,7 +1158,7 @@ function publish(){
   if(!LEADER)return;
   const p=buildPub();EXP=JSON.stringify(norm(p));
   roomRef(ROOM).child('pub').set(p);
-  renderTV();if(MODAL==='cookie')drawCookie();
+  renderTV();if(MODAL==='cookie')drawCookie();if(MODAL==='acct')drawAcct();
 }
 // 누가 pub(보여 주는 장부)을 고치면 선생님 장부대로 되돌려요
 function guard(){
@@ -1484,7 +1489,11 @@ async function startDay(nw,side){
   await applyNews();
   bankDay();
   M.day++;M.today={e:nw.e,t:nw.t,b:nw.b,src:nw.src||'우리 반 기자',w:nw.w||'',day:M.day};
-  const si=side||pickSide(M.cfg.sideN||0,M.sUsed,nw.x);M.sUsed=[...(M.sUsed||[]),...si];
+  // 큰 뉴스와 같은 회사를 다루는 작은 소식은 빼고 다른 것으로 채워요
+  const bx=Object.keys(nw.x||{}).filter(k=>k!=='fx');
+  let si=(side||[]).filter(k=>!Object.keys(SIDE[k].x).some(c=>bx.includes(c)));
+  const want=side?side.length:(M.cfg.sideN||0);
+  if(si.length<want){const av={...(nw.x||{})};si.forEach(k=>Object.assign(av,SIDE[k].x));si=[...si,...pickSide(want-si.length,[...(M.sUsed||[]),...si],av)];}M.sUsed=[...(M.sUsed||[]),...si];
   M.side=si.map(k=>({...SIDE[k]}));M.eff=mergeEff(nw.x,M.side.map(n=>n.x));
   if(nw.i!=null&&!M.used.includes(nw.i))M.used.push(nw.i);
   M.closeAt=nextClose(M.cfg.close);M.sDate=dkey(now());M.phase='open';M.feed=[];M.award=false;
@@ -1513,10 +1522,55 @@ async function endProject(){
 }
 
 /* ---------- 창 (새 날 · 쿠키 처리 · 설정 · 백업) ---------- */
-function openModal(k){MODAL=k;modal.classList.add('on');({day:drawDay,cookie:drawCookie,set:drawSet,backup:drawBackup})[k]();}
+function openModal(k){MODAL=k;modal.classList.add('on');({day:drawDay,cookie:drawCookie,set:drawSet,backup:drawBackup,acct:drawAcct})[k]();}
 function closeModal(){MODAL='';modal.classList.remove('on');modal.innerHTML='';}
 const mhead=t=>`<div class="row between"><h2 style="font-size:1.7rem">${t}</h2><button class="ghost small" id="mx">닫기 ✕</button></div>`;
 const bindClose=()=>{$('#mx').onclick=closeModal;};
+/* 👥 학생 계좌 현황: 선생님만 보는 창 (TV에 띄워 두면 학생도 볼 수 있으니 주의) */
+let ACSORT='num',ACOPEN=null,ACHIDE=false;
+function acctRows(){
+  return Object.entries(M.acct).map(([n,a])=>{
+    const v=acctView(n,a),stocks=AS.reduce((t,c)=>t+((a.hold||{})[c.id]||0)*M.prices[c.id],0);
+    const usdW=(a.usd||0)*M.fx,bondW=(a.bonds||[]).reduce((t,x)=>t+x.w,0),savW=a.sav?a.sav.paid*a.sav.w:0;
+    return {n:+n,a,v,stocks,usdW,bondW,savW,bank:usdW+(a.dpst||0)+savW+bondW,bas:basket(a.hold||{},M.prices,usdW,bondW)};
+  });
+}
+function drawAcct(){
+  const sc=modal.scrollTop;
+  const rows=acctRows().sort(ACSORT==='ret'?(x,y)=>y.v.ret-x.v.ret||x.n-y.n:ACSORT==='v'?(x,y)=>y.v.v-x.v.v||x.n-y.n:(x,y)=>x.n-y.n);
+  const live=rows.filter(r=>r.a.dep);
+  const sum=k=>live.reduce((t,r)=>t+k(r),0);
+  const avg=live.length?Math.round(sum(r=>r.v.ret)/live.length*10)/10:0;
+  const hold=r=>AS.filter(c=>(r.a.hold||{})[c.id]).map(c=>`${c.e}${esc(c.n)} ${r.a.hold[c.id]}`).join(', ');
+  const detail=r=>{
+    const a=r.a,hs=AS.filter(c=>(a.hold||{})[c.id]).map(c=>{const q=a.hold[c.id],avgp=Math.round(((a.cost||{})[c.id]||0)/q),pr=M.prices[c.id],pl=avgp?Math.round((pr-avgp)/avgp*1000)/10:0;
+      return `<tr><td>${c.e} ${esc(c.n)}</td><td>${q}</td><td>${won(avgp)}</td><td>${won(pr)}</td><td>${won(q*pr)}</td><td class="${ud(pl)}">${pctTxt(pl)}</td></tr>`;}).join('');
+    const tl=(a.tl||[]).slice(-8).reverse().map(t=>{const c=COI[t.c]||{};return `<div><span>${t.d}일째 ${c.e||''} ${esc(c.n||'')} ${t.q}주 ${t.t==='buy'?'삼':'팖'} (${won(t.p)})</span><span class="muted">${t.why?(WHY.find(w=>w[0]===t.why)||['',''])[1]:''}</span></div>`;}).join('');
+    return `<tr class="acdet"><td colspan="11"><div class="grid" style="gap:10px">
+      ${hs?`<table class="tbl"><tr><th>종목</th><th>수</th><th>산 값(평균)</th><th>지금 값</th><th>평가액</th><th>손익</th></tr>${hs}</table>`:'<div class="muted">가진 주식이 없어요.</div>'}
+      <div class="chips"><span>💵 달러 ${a.usd||0}달러 (${won(r.usdW)})</span><span>🏦 예금 ${won(a.dpst||0)} · 받은 이자 ${won(a.dInt||0)}</span><span>🐷 적금 ${a.sav?`하루 ${won(a.sav.w)} · ${a.sav.paid}/${M.cfg.term}번`:'없음'}</span><span>📜 채권 ${(a.bonds||[]).length?a.bonds.map(x=>`${(BI[x.k]||{}).n||''} ${won(x.w)} (${x.due}일째)`).join(', '):'없음'}</span>${a.divGot?`<span>💰 받은 배당 ${won(a.divGot)}</span>`:''}</div>
+      ${tl?`<div><b>최근 거래와 산 까닭</b><div class="hist">${tl}</div></div>`:''}</div></td></tr>`;
+  };
+  const csv=()=>{
+    const head=['번호','이름','맡긴 쿠키','돌려받은 쿠키','현금','주식','달러(원)','예금','적금','채권','쿠키로 바꾸기 대기','총자산','수익률(%)','거래','수수료','바구니','예측 점수','가진 종목'];
+    const body=rows.map(r=>[r.n,r.a.name,r.a.dep,r.a.wd,r.a.cash,r.stocks,r.usdW,r.a.dpst||0,r.savW,r.bondW,r.v.res,r.v.v,r.v.ret,r.a.trades||0,r.a.fee||0,r.bas.toFixed(1),r.a.pt||0,AS.filter(c=>(r.a.hold||{})[c.id]).map(c=>`${c.n} ${r.a.hold[c.id]}`).join(' / ')]);
+    const t='\ufeff'+[head,...body].map(l=>l.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const u=URL.createObjectURL(new Blob([t],{type:'text/csv'}));const el=document.createElement('a');el.href=u;el.download=`쿠키증권_계좌현황_${M.day}일째.csv`;document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);
+  };
+  modal.innerHTML=`<div class="panel grid" style="max-width:1300px">${mhead('👥 학생 계좌 현황')}
+   <div class="row between"><p class="muted" style="margin:0">${M.day?`${M.day}일째`:'준비'} · 오늘 값으로 계산했어요. TV에 띄워져 있으면 학생들도 볼 수 있어요.</p>
+    <div class="row"><button class="ghost small" id="achide">${ACHIDE?'🙈 금액 보이기':'🙈 금액 가리기'}</button><button class="ghost small" id="accsv">⬇ 엑셀(CSV) 저장</button></div></div>
+   <div class="chips"><span>계좌 ${live.length}명</span><span>맡긴 쿠키 모두 ${sum(r=>r.a.dep)}개</span><span>총자산 모두 ${won(sum(r=>r.v.v))}</span><span>평균 수익률 <b class="${ud(avg)}">${pctTxt(avg)}</b></span><span>반 전체 수수료 ${won(sum(r=>r.a.fee||0))}</span></div>
+   <div class="seg"><button data-acs="num" aria-pressed="${ACSORT==='num'}">번호순</button><button data-acs="ret" aria-pressed="${ACSORT==='ret'}">수익률순</button><button data-acs="v" aria-pressed="${ACSORT==='v'}">총자산순</button></div>
+   <div style="overflow-x:auto" class="${ACHIDE?'achide':''}"><table class="tbl actbl"><tr><th>번호 이름</th><th>맡긴 쿠키</th><th>현금</th><th>주식</th><th>은행</th><th>총자산</th><th>수익률</th><th>거래·수수료</th><th>바구니</th><th>예측</th><th>가진 종목</th></tr>
+    ${rows.map(r=>`<tr data-acn="${r.n}" class="acrow${ACOPEN===r.n?' on':''}"><td>${ACOPEN===r.n?'▾':'▸'} ${r.n} ${esc(r.a.name)}</td><td>${r.a.dep}${r.a.wd?` (−${r.a.wd})`:''}</td><td class="m">${won(r.a.cash)}</td><td class="m">${won(r.stocks)}</td><td class="m">${won(r.bank)}</td><td class="m"><b>${won(r.v.v)}</b>${r.v.res?`<div class="muted" style="font-size:.8rem">쿠키 대기 ${won(r.v.res)}</div>`:''}${r.a.wd?`<div class="muted" style="font-size:.8rem">돌려받은 쿠키 포함 ${won(r.v.v+r.a.wd*M.cfg.rate)}</div>`:''}</td><td class="${ud(r.v.ret)}">${pctTxt(r.v.ret)}</td><td>${r.a.trades||0}번 · ${won(r.a.fee||0)}</td><td>${r.bas.toFixed(1)}</td><td>${r.a.pt||0}점</td><td class="hold">${hold(r)||'<span class="muted">없음</span>'}</td></tr>${ACOPEN===r.n?detail(r):''}`).join('')||'<tr><td colspan="11" class="muted">아직 계좌가 없어요.</td></tr>'}
+   </table></div></div>`;
+  bindClose();modal.scrollTop=sc;
+  $$('[data-acs]').forEach(b=>b.onclick=()=>{ACSORT=b.dataset.acs;drawAcct();});
+  $$('[data-acn]').forEach(tr=>tr.onclick=()=>{const n=+tr.dataset.acn;ACOPEN=ACOPEN===n?null:n;drawAcct();});
+  $('#achide').onclick=()=>{ACHIDE=!ACHIDE;drawAcct();};
+  $('#accsv').onclick=csv;
+}
 let DAYPICK=null;
 function drawDay(){
   if(!DAYPICK||DAYPICK.day!==M.day){const i=NEWS.findIndex((_,k)=>!M.used.includes(k));DAYPICK={day:M.day,i:i<0?0:i,own:false,e:'📰',t:'',b:'',x:{},side:pickSide(M.cfg.sideN||0,M.sUsed)};}
