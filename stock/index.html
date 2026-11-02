@@ -58,6 +58,9 @@ main{padding-block:18px 24px}
 .bonds .hd{display:flex;gap:8px;align-items:center;font-family:var(--display);font-size:1.15rem}.bonds .hd span{font-size:1.6rem}
 @media (max-width:700px){.bonds{grid-template-columns:1fr}}
 .anal .dvt b{display:inline}
+.sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.nside{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;gap:10px;align-items:flex-start}
+.nside .se{font-size:1.8rem;line-height:1}
 .ok-box{background:#E3F4E8;border:2px solid #3F8A5A;border-radius:14px;padding:10px 14px;color:var(--ink)}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
 .num{font-variant-numeric:tabular-nums}
@@ -337,6 +340,103 @@ NEWS.push(
  {e:'💬',t:'"반짝엔터 가수가 그만둔대!" 단톡방 소문',b:'친구들 단톡방에 반짝엔터 인기 가수가 곧 그만둔다는 말이 돌아요. 누가 처음 말했는지는 아무도 몰라요.',x:{},src:'친구 단톡방 (확인 안 됨)',w:'회사는 사실이 아니라고 했어요. 출처를 모르는 말은 먼저 확인해야 해요. 소문만 듣고 팔았다면 수수료만 냈겠죠?'},
  {e:'🎥',t:'유튜버 "냠냠떡볶이 주식 무조건 오른다!"',b:'구독자가 많은 유튜버가 냠냠떡볶이 주식은 무조건 오른다고 했어요. 까닭은 말하지 않았어요.',x:{},src:'유튜브 영상 (광고일 수도 있어요)',w:'까닭 없는 "무조건"은 조심해야 해요. 회사 형편은 그대로라서 주가도 크게 바뀌지 않았어요.'}
 );
+/* 큰 뉴스 더 (출처와 해설 포함) */
+NEWS.push(
+ {e:'🏟️',t:'국제 스포츠 대회가 우리나라에서 열려요',b:'다음 달 세계 여러 나라 선수와 응원단이 우리나라에 와요. 경기장 근처 가게와 공연장도 바빠질 것 같아요.',x:{air:1,tteok:1,star:1,mart:1,fx:-1},src:'정부 발표',w:'외국 손님이 오면 비행기·음식·공연이 잘 팔려요. 손님들이 달러를 원화로 바꾸면서 원화가 귀해져 환율은 조금 내려갔어요.'},
+ {e:'🔌',t:'공장에서 쓰는 전기 요금이 오른대요',b:'다음 달부터 공장이 쓰는 전기 값이 많이 오른대요. 반도체 공장은 전기를 아주 많이 써요.',x:{chip:-1,sun:2},src:'신문 경제면',w:'전기를 많이 쓰는 반도체 회사는 비용이 늘었고, 직접 전기를 만드는 태양광 회사는 인기가 많아졌어요.'},
+ {e:'🏦',t:'든든은행 어린이 통장에 손님이 몰려요',b:'든든은행이 만든 어린이 통장이 인기예요. 은행 앞에 부모님과 어린이들이 줄을 섰어요.',x:{bank:2},src:'신문 경제면',w:'맡기는 돈이 많아지면 은행은 그 돈을 빌려주고 이자를 더 벌 수 있어요.'},
+ {e:'🧪',t:'튼튼제약 새 약 시험이 실패했어요',b:'튼튼제약이 오랫동안 만든 새 약이 마지막 시험을 통과하지 못했어요.',x:{drug:-2},src:'회사 발표',w:'약을 만드는 데는 시간과 돈이 많이 들고 실패할 수도 있어요. 제약 회사는 이런 날 크게 흔들려요.'},
+ {e:'🚢',t:'바다해운이 큰 새 배 10척을 샀어요',b:'바다해운이 짐을 아주 많이 실을 수 있는 새 배를 샀어요. 당장은 큰돈이 나갔어요.',x:{sea:1},src:'회사 발표',w:'지금은 돈이 나가지만 앞으로 더 많이 실어 나를 수 있어서 기대가 커졌어요. 회사가 미래를 위해 투자하는 거예요.'},
+ {e:'✈️',t:'구름항공 비행기가 고장으로 멈췄어요',b:'구름항공 비행기 여러 대가 점검 때문에 일주일 동안 뜨지 못한대요.',x:{air:-2},src:'신문',w:'비행기가 못 뜨면 표 값을 돌려줘야 하고 손님도 다른 항공사로 가요.'},
+ {e:'🎫',t:'반짝엔터 콘서트 표가 1분 만에 매진',b:'반짝엔터 가수의 콘서트 표가 열리자마자 다 팔렸어요. 공연을 더 늘린대요.',x:{star:2},src:'방송 뉴스',w:'공연이 늘면 엔터 회사가 버는 돈이 늘어요.'},
+ {e:'🛵',t:'바로마트가 집 앞 배달을 시작했어요',b:'바로마트에서 산 물건을 한 시간 안에 집까지 가져다줘요. 첫날부터 주문이 많았대요.',x:{mart:2},src:'회사 발표',w:'새로운 서비스로 손님이 늘면 회사가 더 벌어요.'},
+ {e:'🌾',t:'값싼 외국 쌀이 많이 들어와요',b:'외국 쌀 수입이 늘어 가게에서 파는 쌀값이 내려갔어요.',x:{farm:-2,mart:1},src:'신문 경제면',w:'값싼 수입 쌀이 들어오면 우리 농장 쌀이 덜 팔려요. 마트는 싸게 사서 팔 수 있어서 좋아요. 무역은 누군가에게는 좋고 누군가에게는 어려워요.'},
+ {e:'🏆',t:'씽씽자동차 새 전기차가 "올해의 차"',b:'씽씽자동차의 새 전기차가 올해 가장 좋은 차로 뽑혔어요.',x:{car:2,volt:1},src:'자동차 잡지',w:'상을 받으면 차가 더 잘 팔려요. 그 차에 들어가는 배터리 회사도 함께 좋아졌어요.'},
+ {e:'🔥',t:'반짝반도체 공장에 불이 났어요',b:'다친 사람은 없지만 공장 한 곳이 한 달 동안 멈춘대요.',x:{chip:-2},src:'방송 뉴스',w:'공장이 멈추면 물건을 못 만들어 팔 수 없어요.'},
+ {e:'🌧️',t:'장마가 길어져 햇빛이 모자라요',b:'비가 한 달 넘게 계속 와요. 사람들은 밖에 잘 안 나가요.',x:{sun:-2,farm:-1,tteok:-1,game:1},src:'기상청',w:'햇빛이 없으면 태양광 전기가 덜 만들어지고, 농사도 어려워요. 집에서 하는 게임은 오히려 잘 됐어요.'},
+ {e:'⏰',t:'어린이 게임 시간을 줄이자는 법이 나왔어요',b:'어린이가 하루에 게임을 할 수 있는 시간을 줄이자는 의견이 나왔어요.',x:{game:-2},src:'국회 소식',w:'나라의 규칙(법)이 바뀌면 회사의 돈벌이가 크게 바뀔 수 있어요.'},
+ {e:'📉',t:'다른 나라 경제가 나빠져 수출이 줄었어요',b:'우리 물건을 많이 사 가던 나라의 경제가 어려워졌어요.',x:{chip:-1,car:-1,sea:-1,fx:1},src:'신문 경제면',w:'우리 물건을 사 가는 나라가 어려우면 수출 회사들이 덜 팔아요. 달러가 덜 들어와 환율은 올랐어요.'},
+ {e:'💱',t:'외국 돈이 우리나라로 많이 들어와요',b:'외국 사람들이 우리나라 회사에 투자하려고 달러를 원화로 많이 바꿔요.',x:{fx:-2,chip:-1,car:-1},src:'신문 경제면',w:'원화를 찾는 사람이 많아져 환율이 내려갔어요. 환율이 내려가면 수출 회사가 받은 달러를 원화로 바꿀 때 덜 받아요.'},
+ {e:'💍',t:'결혼식 철, 금반지가 잘 팔려요',b:'결혼하는 사람이 많은 계절이라 금반지를 사는 사람이 늘었어요.',x:{gold:1},src:'신문',w:'금을 사려는 사람이 늘면(수요가 늘면) 금 값이 올라요.'},
+ {e:'💉',t:'모든 어린이가 독감 예방 주사를 맞아요',b:'올겨울 모든 어린이가 독감 예방 주사를 무료로 맞을 수 있어요.',x:{drug:2},src:'정부 발표',w:'백신을 많이 만들어야 하니 제약 회사에 주문이 늘어요.'},
+ {e:'📺',t:'TV 맛집 프로그램에 냠냠떡볶이가 나왔어요',b:'유명한 맛집 프로그램에서 냠냠떡볶이를 "꼭 가 볼 집"으로 소개했어요.',x:{tteok:2},src:'방송',w:'방송에 나오면 손님이 늘어요. 하지만 이런 인기는 오래 가지 않을 수도 있어요.'},
+ {e:'⚓',t:'항구 일꾼들이 일을 멈췄어요',b:'항구에서 짐을 싣는 사람들이 일을 멈춰서 배가 떠나지 못해요.',x:{sea:-2,car:-1},src:'방송 뉴스',w:'배가 못 떠나면 해운 회사가 돈을 못 벌고, 자동차를 외국에 보내는 것도 늦어져요.'},
+ {e:'🧯',t:'전기차 배터리 불 사고가 났어요',b:'주차장에 있던 전기차 배터리에서 불이 나 사람들이 걱정해요.',x:{volt:-2,car:-1},src:'방송 뉴스',w:'안전 걱정이 커지면 사람들이 사는 것을 망설여요.'},
+ {e:'💰',t:'일자리가 늘고 월급이 올랐어요',b:'올해 일자리가 많이 생기고 어른들 월급도 올랐대요.',x:{mart:1,tteok:1,star:1,air:1,game:1},src:'정부 발표',w:'쓸 돈이 많아지면 사람들은 먹고 놀고 즐기는 데 더 써요. 생활·즐길 거리 회사가 함께 좋아졌어요.'},
+ {e:'🍱',t:'학교 급식에 우리 농산물을 쓰기로 했어요',b:'전국 학교 급식에 우리 농장에서 기른 쌀과 과일을 쓰기로 했어요.',x:{farm:2},src:'교육청 발표',w:'꾸준히 사 주는 곳이 생기면 농장의 돈벌이가 든든해져요.'},
+ {e:'🎖️',t:'반짝엔터 인기 가수가 군대에 가요',b:'반짝엔터에서 가장 인기 있는 가수가 2년 동안 군대에 간대요.',x:{star:-2},src:'회사 발표',w:'한 사람에게 많이 기대는 회사는 그 사람이 쉬면 크게 흔들려요.'},
+ {e:'🥶',t:'아주 추운 겨울이 온대요',b:'올겨울은 몇십 년 만에 가장 추울 거래요.',x:{drug:1,mart:1,air:-1,farm:-1},src:'기상청',w:'추우면 감기약과 집에서 먹을 것이 잘 팔리고, 눈 때문에 비행기와 농사는 어려워요.'},
+ {e:'💬',t:'"번개배터리가 큰 상 받는대" 인터넷 글',b:'인터넷 게시판에 번개배터리가 곧 큰 상을 받는다는 글이 올라왔어요. 글쓴이는 알 수 없어요.',x:{},src:'확인 안 된 인터넷 글',w:'누가 썼는지 모르는 글이었고, 사실이 아니었어요. 주가는 평소처럼 움직였어요.'},
+ {e:'📢',t:'"바로마트 주식 사면 부자 돼요" 광고 전단',b:'길에서 바로마트 주식을 사면 무조건 부자가 된다는 전단을 나눠 줘요.',x:{},src:'광고',w:'"무조건"이라는 말은 조심해요. 광고는 주가와 상관없었어요.'}
+);
+/* 작은 소식: 하루에 몇 개씩 함께 나와요. 영향은 한 단계(±1)이고, 소문·광고는 영향이 없어요 */
+const SIDE=[
+ {e:'🗺️',t:'바다해운, 새 바닷길을 열었어요',b:'바다해운 배가 갈 수 있는 나라가 하나 더 늘었어요.',x:{sea:1},src:'회사 발표',w:'갈 수 있는 나라가 늘면 일감이 늘어요.'},
+ {e:'🌫️',t:'안개 때문에 바다해운 배가 늦어졌어요',b:'짙은 안개로 배가 하루 늦게 도착했어요.',x:{sea:-1},src:'신문',w:'약속한 날보다 늦으면 받을 돈이 줄 수 있어요.'},
+ {e:'📦',t:'항구에 수출할 짐이 가득 쌓였어요',b:'외국으로 보낼 짐이 많아 항구가 북적여요.',x:{sea:1},src:'방송 뉴스',w:'실어 나를 짐이 많으면 해운 회사가 바빠져요.'},
+ {e:'🏭',t:'번개배터리 공장을 하나 더 지어요',b:'주문이 많아 번개배터리가 새 공장을 짓기로 했어요.',x:{volt:1},src:'회사 발표',w:'공장을 더 짓는다는 건 앞으로 더 많이 팔 거라는 뜻이에요.'},
+ {e:'⛏️',t:'배터리 원료 값이 내려갔어요',b:'배터리를 만드는 원료 값이 싸졌대요.',x:{volt:1},src:'신문 경제면',w:'재료값이 싸지면 남는 돈이 늘어요.'},
+ {e:'👔',t:'번개배터리 사장이 갑자기 바뀌었어요',b:'번개배터리 사장이 갑자기 회사를 떠났어요.',x:{volt:-1},src:'신문',w:'회사가 어떻게 될지 몰라 사람들이 걱정했어요.'},
+ {e:'🤝',t:'반짝반도체가 외국 큰 회사와 계약했어요',b:'외국의 유명한 회사가 반짝반도체 반도체를 사 가기로 했어요.',x:{chip:1},src:'회사 발표',w:'큰 손님이 생기면 꾸준히 팔 수 있어요.'},
+ {e:'💻',t:'컴퓨터가 덜 팔린대요',b:'올해 새 컴퓨터를 사는 사람이 줄었어요.',x:{chip:-1},src:'신문 경제면',w:'컴퓨터에는 반도체가 들어가요. 컴퓨터가 덜 팔리면 반도체 주문도 줄어요.'},
+ {e:'🧑‍🔬',t:'반짝반도체 기술자들이 다른 회사로 옮겨요',b:'실력 좋은 기술자 여러 명이 경쟁 회사로 옮겼어요.',x:{chip:-1},src:'신문',w:'기술 회사는 사람이 가장 중요한 재산이에요.'},
+ {e:'📝',t:'씽씽자동차 새 차 예약이 몰려요',b:'아직 나오지도 않은 새 차를 사겠다는 예약이 많아요.',x:{car:1},src:'회사 발표',w:'미리 예약이 많으면 앞으로 많이 팔릴 거예요.'},
+ {e:'🔩',t:'부품이 모자라 자동차 공장이 쉬어요',b:'작은 부품 하나가 모자라 씽씽자동차 공장이 이틀 쉬었어요.',x:{car:-1},src:'방송 뉴스',w:'부품 하나만 없어도 차를 만들 수 없어요. 여러 나라에서 부품을 사 오기 때문이에요.'},
+ {e:'🛡️',t:'씽씽자동차, 안전 평가 1등',b:'자동차 안전 검사에서 씽씽자동차가 가장 좋은 점수를 받았어요.',x:{car:1},src:'자동차 잡지',w:'안전한 차라는 믿음이 생기면 더 잘 팔려요.'},
+ {e:'🏠',t:'지붕에 태양광을 다는 집이 늘어요',b:'우리 동네에도 지붕에 태양광 판을 단 집이 많아졌어요.',x:{sun:1},src:'신문',w:'태양광을 사는 사람이 늘면 태양광 회사가 더 벌어요.'},
+ {e:'🏷️',t:'태양광 판 값 경쟁이 치열해요',b:'여러 회사가 태양광 판을 너무 싸게 팔기 시작했어요.',x:{sun:-1},src:'신문 경제면',w:'경쟁이 심해 값을 내리면 남는 돈이 줄어요.'},
+ {e:'🏜️',t:'햇살에너지가 사막에 큰 발전소를 지어요',b:'햇빛이 강한 사막 나라에 큰 태양광 발전소를 짓기로 했어요.',x:{sun:1},src:'회사 발표',w:'외국에서 큰일을 맡으면 버는 돈이 늘어요.'},
+ {e:'🏪',t:'냠냠떡볶이 2호점이 문을 열어요',b:'옆 동네에 냠냠떡볶이 두 번째 가게가 생겨요.',x:{tteok:1},src:'회사 발표',w:'가게가 늘면 팔 수 있는 떡볶이도 늘어요.'},
+ {e:'🥢',t:'냠냠떡볶이 옆에 새 분식집이 생겼어요',b:'바로 옆에 값이 싼 분식집이 새로 문을 열었어요.',x:{tteok:-1},src:'우리 동네 소식',w:'경쟁 가게가 생기면 손님이 나뉘어요.'},
+ {e:'🍡',t:'떡 값이 올랐어요',b:'쌀값이 올라 떡 값도 함께 올랐어요.',x:{tteok:-1},src:'신문',w:'재료값이 오르면 가게에 남는 돈이 줄어요.'},
+ {e:'📚',t:'시험이 끝나 분식집이 북적여요',b:'시험이 끝난 학생들이 분식집에 몰렸어요.',x:{tteok:1},src:'우리 동네 소식',w:'손님이 늘면 가게가 더 벌어요.'},
+ {e:'🌙',t:'바로마트가 밤 늦게까지 문을 열어요',b:'바로마트가 문 닫는 시간을 밤 11시로 늦췄어요.',x:{mart:1},src:'회사 발표',w:'여는 시간이 길면 더 많이 팔 수 있어요.'},
+ {e:'🏬',t:'바로마트 근처에 큰 할인점이 생겨요',b:'바로마트 바로 옆에 아주 큰 할인점이 문을 연대요.',x:{mart:-1},src:'우리 동네 소식',w:'비슷한 물건을 파는 가게가 생기면 손님이 나뉘어요.'},
+ {e:'🎑',t:'명절이 다가와 장보는 사람이 많아요',b:'명절 음식을 준비하려고 마트와 시장이 붐벼요.',x:{mart:1,farm:1},src:'방송 뉴스',w:'명절에는 음식 재료가 많이 팔려요. 마트와 농장이 함께 좋아졌어요.'},
+ {e:'🍎',t:'푸른농장 사과가 품질 대회 1등',b:'푸른농장 사과가 전국에서 가장 맛있는 사과로 뽑혔어요.',x:{farm:1},src:'신문',w:'이름이 알려지면 더 비싸게, 더 많이 팔 수 있어요.'},
+ {e:'🧊',t:'우박이 내려 과일에 상처가 났어요',b:'갑자기 내린 우박에 과일이 상처를 입었어요.',x:{farm:-1},src:'기상청',w:'상처 난 과일은 제값을 받기 어려워요.'},
+ {e:'🏕️',t:'푸른농장이 새 비닐하우스를 지었어요',b:'겨울에도 딸기를 기를 수 있는 비닐하우스를 지었어요.',x:{farm:1},src:'회사 발표',w:'날씨와 상관없이 기를 수 있으면 더 꾸준히 팔 수 있어요.'},
+ {e:'🎉',t:'두근게임즈 게임 이용자 100만 명 돌파',b:'두근게임즈 새 게임을 하는 사람이 100만 명을 넘었어요.',x:{game:1},src:'회사 발표',w:'이용자가 많으면 게임 안에서 파는 물건도 많이 팔려요.'},
+ {e:'🐞',t:'두근게임즈 게임 오류에 불평이 많아요',b:'게임이 자꾸 멈춘다는 불평이 쏟아졌어요.',x:{game:-1},src:'게임 잡지',w:'불편하면 이용자가 떠나요.'},
+ {e:'🎬',t:'두근게임즈 게임이 영화로 만들어져요',b:'두근게임즈 게임 이야기를 영화로 만들기로 했어요.',x:{game:1},src:'방송',w:'영화가 나오면 게임도 더 알려져요.'},
+ {e:'🌟',t:'반짝엔터 새 아이돌 그룹이 데뷔해요',b:'반짝엔터가 새 그룹을 내놓았어요. 첫 노래 반응이 좋아요.',x:{star:1},src:'방송',w:'인기 가수가 늘면 회사가 한 사람에게만 기대지 않아도 돼요.'},
+ {e:'📉',t:'반짝엔터 드라마 시청률이 낮아요',b:'반짝엔터가 만든 드라마를 보는 사람이 적대요.',x:{star:-1},src:'방송',w:'인기가 없으면 광고비를 덜 받아요.'},
+ {e:'📸',t:'반짝엔터 가수가 광고 모델이 됐어요',b:'반짝엔터 가수가 큰 회사 광고에 나오게 됐어요.',x:{star:1},src:'신문',w:'광고 모델료는 엔터 회사의 수입이 돼요.'},
+ {e:'🌍',t:'튼튼제약 약을 외국에 수출해요',b:'튼튼제약 감기약을 다른 나라에서도 팔게 됐어요.',x:{drug:1},src:'회사 발표',w:'팔 수 있는 곳이 넓어지면 더 많이 벌어요.'},
+ {e:'📋',t:'튼튼제약 공장이 검사에서 지적을 받았어요',b:'약 공장 검사에서 고쳐야 할 점이 나왔어요.',x:{drug:-1},src:'정부 발표',w:'약은 안전이 가장 중요해요. 믿음이 흔들리면 주가도 흔들려요.'},
+ {e:'🌸',t:'꽃가루가 많아 알레르기 약이 잘 팔려요',b:'봄 꽃가루 때문에 재채기하는 사람이 많아요.',x:{drug:1},src:'방송 뉴스',w:'약을 찾는 사람이 늘면 제약 회사가 더 벌어요.'},
+ {e:'📱',t:'든든은행 새 앱이 편하다고 칭찬받아요',b:'든든은행 새 앱이 쓰기 쉽다는 칭찬이 많아요.',x:{bank:1},src:'신문',w:'편리하면 손님이 늘어요.'},
+ {e:'💸',t:'빌린 돈을 못 갚는 사람이 늘었어요',b:'은행에서 돈을 빌리고 제때 갚지 못하는 사람이 많아졌어요.',x:{bank:-1},src:'신문 경제면',w:'빌려준 돈을 못 받으면 은행이 손해를 봐요.'},
+ {e:'🏢',t:'든든은행 지점이 새로 생겨요',b:'우리 동네에 든든은행 지점이 새로 문을 열어요.',x:{bank:1},src:'우리 동네 소식',w:'지점이 늘면 손님도 늘어요.'},
+ {e:'🛫',t:'구름항공이 새 노선을 열어요',b:'구름항공이 새로운 여행지로 가는 비행기를 띄워요.',x:{air:1},src:'회사 발표',w:'갈 수 있는 곳이 늘면 손님이 늘어요.'},
+ {e:'🎟️',t:'구름항공 표가 비싸다는 불평',b:'구름항공 비행기 표 값이 다른 곳보다 비싸다는 말이 많아요.',x:{air:-1},src:'신문',w:'비싸다고 느끼면 손님이 다른 항공사로 가요.'},
+ {e:'🛬',t:'공항이 넓어져요',b:'공항에 새 활주로가 생겨 비행기가 더 많이 뜰 수 있어요.',x:{air:1},src:'정부 발표',w:'비행기를 더 띄울 수 있으면 항공사가 더 벌 수 있어요.'},
+ {e:'🏛️',t:'여러 나라가 금을 사 모아요',b:'여러 나라 중앙은행이 금을 사들이고 있대요.',x:{gold:1},src:'신문 경제면',w:'사려는 곳이 많으면 금 값이 올라요.'},
+ {e:'🪙',t:'금을 팔려는 사람이 많아요',b:'금 값이 많이 올라서 금을 팔려는 사람이 늘었어요.',x:{gold:-1},src:'신문 경제면',w:'팔려는 사람이 많으면(공급이 늘면) 값이 내려가요.'},
+ {e:'📈',t:'외국 사람들이 우리 주식을 많이 사요',b:'외국 투자자들이 우리나라 회사 주식을 많이 사들였어요.',x:{fx:-1},src:'신문 경제면',w:'주식을 사려면 달러를 원화로 바꿔야 해요. 원화가 귀해져 환율이 내려갔어요.'},
+ {e:'🧳',t:'해외여행 가는 사람이 많아 달러를 바꿔요',b:'방학을 맞아 해외여행을 가려고 달러로 바꾸는 사람이 많아요.',x:{fx:1},src:'방송 뉴스',w:'달러를 찾는 사람이 많으면 달러 값(환율)이 올라요.'},
+ {e:'🇺🇸',t:'미국이 이자를 올린대요',b:'미국 중앙은행이 이자를 올리기로 했어요.',x:{fx:1},src:'신문 경제면',w:'이자를 더 주는 미국으로 돈이 몰리면 달러가 귀해져 환율이 올라요.'},
+ {e:'💬',t:'"구름항공 비행기 공짜래!" 단톡방 소문',b:'단톡방에 구름항공 표가 공짜라는 말이 돌아요.',x:{},src:'소문',w:'사실이 아니었어요. 소문은 주가와 상관없었어요.'},
+ {e:'🎥',t:'유튜버 "햇살에너지 10배 간다!"',b:'유튜버가 까닭도 말하지 않고 햇살에너지 주식이 10배 오른대요.',x:{},src:'유튜버',w:'까닭 없는 큰소리는 믿지 않아요. 주가는 평소처럼 움직였어요.'},
+ {e:'💬',t:'"씽씽자동차가 하늘 나는 차 만든대" 인터넷 글',b:'인터넷에 씽씽자동차가 곧 하늘을 나는 차를 판다는 글이 있어요.',x:{},src:'확인 안 된 인터넷 글',w:'회사가 발표한 적이 없는 이야기였어요.'},
+ {e:'📢',t:'"두근게임즈 주식 사면 아이템 공짜!" 광고',b:'게임 아이템을 준다며 주식을 사라는 광고가 보여요.',x:{},src:'광고',w:'주식은 아이템과 상관없어요. 광고에 넘어가지 않아요.'},
+ {e:'💬',t:'"튼튼제약이 모든 병 고치는 약 만들었대" 소문',b:'모든 병을 고치는 약이 나왔다는 말이 돌아요.',x:{},src:'소문',w:'너무 좋은 이야기는 의심해 봐요. 사실이 아니었어요.'},
+ {e:'💬',t:'"바다해운 배가 사라졌대" 인터넷 글',b:'바다해운 배가 바다에서 사라졌다는 글이 퍼졌어요.',x:{},src:'확인 안 된 인터넷 글',w:'회사가 "배는 무사해요"라고 확인했어요. 주가는 평소처럼 움직였어요.'},
+ {e:'💬',t:'"든든은행이 문 닫는대" 단톡방 소문',b:'든든은행이 곧 문을 닫는다는 말이 단톡방에 돌아요.',x:{},src:'소문',w:'근거 없는 소문이었어요. 출처가 없는 말은 한 번 더 확인해요.'},
+ {e:'🍉',t:'"푸른농장 수박 안에 금이 들었대" 소문',b:'푸른농장 수박을 자르면 금이 나온다는 말이 돌아요.',x:{},src:'소문',w:'말도 안 되는 이야기였어요. 웃고 넘겨요.'},
+ {e:'🎥',t:'유튜버 "금 사면 무조건 부자!"',b:'유튜버가 금만 사면 무조건 부자가 된다고 했어요.',x:{},src:'유튜버',w:'"무조건"은 없어요. 금도 오르고 내려요.'},
+ {e:'💬',t:'"반짝반도체 사장님이 우리 학교 온대" 소문',b:'반짝반도체 사장님이 우리 학교에 온다는 말이 돌아요.',x:{},src:'소문',w:'사실이어도 회사 돈벌이와는 상관없는 이야기예요.'}
+];
+/* 하루 작은 소식 뽑기: 아직 안 나온 것 중에서 고르고, 한 회사가 두 번 겹치지 않게 해요. 다 쓰면 처음부터 다시 */
+function pickSide(n,used,avoid){
+  used=used||[];const pool=SIDE.map((_,k)=>k).filter(k=>!used.includes(k));const src=pool.length>=n?pool:SIDE.map((_,k)=>k);
+  const out=[],seen=new Set(Object.keys(avoid||{}).filter(k=>k!=='fx'));
+  for(const k of src.sort(()=>Math.random()-.5)){if(out.length>=n)break;const ks=Object.keys(SIDE[k].x);if(ks.some(c=>c!=='fx'&&seen.has(c)))continue;ks.forEach(c=>seen.add(c));out.push(k);}
+  return out;
+}
+const mergeEff=(a,list)=>{const e={...(a||{})};list.forEach(x=>Object.entries(x||{}).forEach(([k,v])=>{e[k]=Math.max(-2,Math.min(2,(e[k]||0)+v));}));return e;};
+const isRumor=src=>/확인 안|광고|소문|유튜버/.test(src||'');
+
 /* 회사 분석 카드: 돈을 버는 방법, 좋아지는 때, 나빠지는 때 */
 const PROF={
   sea:{how:'다른 나라로 가는 물건을 배에 실어 주고 운임을 받아요',up:'수출입이 늘 때, 배가 모자랄 때',down:'태풍, 기름값 오름, 무역 분쟁',tag:'무역'},
@@ -509,7 +609,7 @@ function render(force){
   const a=myAcct();
   const st=!PUB||!P?'load':P.fp!==MYFP?'other':!a||a.fp!==MYFP?'wait':'main';
   const open=isOpen(PUB);
-  const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.reveal,MYP]:[PUB.prices,PUB.hist,PUB.fx,PUB.fxHist,a,MYO,myOps(),PUB.cfg];
+  const data=st!=='main'?[a&&a.fp]:TAB==='news'?[PUB.news,PUB.side,PUB.reveal,MYP]:[PUB.prices,PUB.hist,PUB.fx,PUB.fxHist,a,MYO,myOps(),PUB.cfg];
   const key=JSON.stringify([st,TAB,SEL,WHYSEL,BW,MYPLAN,QTY,NIN,NOUT,FXQ,DW,SW,open,!!(P&&P.easy),PUB&&PUB.day,PUB&&PUB.phase,data]);
   if(key===vkey&&!force)return;vkey=key;
   if(st==='load'){app.innerHTML='<div class="panel"><h2>불러오는 중…</h2></div>';return;}
@@ -686,11 +786,17 @@ async function sendOrder(o){
   }catch(e){alert('주문을 보내지 못했어요: '+(e.code||e.message));}
   finally{sending=false;}
 }
-function newsCard(n){return n?`<div class="newsc pop"><div class="nh"><span>${n.e}</span><div><div class="muted">${n.day}일째 아침 뉴스${n.src?` · 출처: <b class="${/확인 안|광고/.test(n.src)?'down':''}">${esc(n.src)}</b>`:''}</div><h2>${esc(n.t)}</h2></div></div><p>${esc(n.b)}</p>
+function newsCard(n){return n?`<div class="newsc pop"><div class="nh"><span>${n.e}</span><div><div class="muted">${n.day}일째 아침 뉴스${n.src?` · 출처: <b class="${isRumor(n.src)?'down':''}">${esc(n.src)}</b>`:''}</div><h2>${esc(n.t)}</h2></div></div><p>${esc(n.b)}</p>
   <div class="muted" style="font-size:.95rem">🔍 생각해 봐요: 이 뉴스로 누가 물건을 더 사거나 덜 살까요? 그 회사는 수출·수입과 관계가 있나요? 믿을 만한 출처인가요?</div></div>`:'';}
+const sideReveal=l=>l&&l.length?`<div class="sides">${l.map(n=>`<div class="nside"><span class="se">${n.e}</span><div><b>${esc(n.t)}</b> <span class="muted" style="font-size:.85rem">(${esc(n.src||'')})</span><div>📘 ${esc(n.w||'')}</div></div></div>`).join('')}</div>`:'';
+function sideList(list,day){
+  if(!list||!list.length)return '';
+  return `<div class="panel grid"><h2>🗞️ 오늘의 작은 소식 ${list.length}개</h2><p class="muted" style="margin:0">작은 소식은 영향이 작거나, 소문이라 영향이 없을 수도 있어요. 출처를 꼭 봐요.</p>
+   <div class="sides">${list.map(n=>`<div class="nside"><span class="se">${n.e}</span><div><b>${esc(n.t)}</b><div>${esc(n.b)}</div><div class="muted" style="font-size:.85rem">출처: <b class="${isRumor(n.src)?'down':''}">${esc(n.src||'')}</b></div></div></div>`).join('')}</div></div>`;
+}
 function revealBox(r){
   if(!r)return '';
-  return `<div class="panel grid"><h2>어제 뉴스는 이렇게 됐어요</h2><div class="muted">${r.e} ${esc(r.t)}</div>${r.w?`<div class="tip">📘 해설: ${esc(r.w)}</div>`:''}
+  return `<div class="panel grid"><h2>어제 뉴스는 이렇게 됐어요</h2><div class="muted">${r.e} ${esc(r.t)}</div>${r.w?`<div class="tip">📘 해설: ${esc(r.w)}</div>`:''}${sideReveal(r.side)}
    <div class="chips">${AS.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(r.chg[c.id])}">${pctTxt(r.chg[c.id]||0)}</b></span>`).join('')}${r.fx!=null?`<span>💵 환율 <b class="${ud(r.fx)}">${pctTxt(r.fx)}</b></span>`:''}</div></div>`;
 }
 function stuNews(box,open,easy){
@@ -699,8 +805,8 @@ function stuNews(box,open,easy){
   if(DRAFT===null)DRAFT={up:(MYP||{}).up||'',down:(MYP||{}).down||'',why:(MYP||{}).why||''};
   const saved=MYP&&MYP.up===DRAFT.up&&MYP.down===DRAFT.down&&(MYP.why||'')===DRAFT.why;
   const pk=(cls,k)=>`<div class="picks ${cls}">${CO.map(c=>`<button data-k="${k}" data-c="${c.id}" aria-pressed="${DRAFT[k]===c.id}"><span>${c.e}</span>${esc(c.n)}</button>`).join('')}</div>`;
-  box.innerHTML=`${newsCard(n)}${revealBox(PUB.reveal)}
-   <div class="panel grid"><h2>내일 아침 주가를 예측해요</h2><p class="muted" style="margin:0">맞히면 "뉴스 해석왕" 점수 1점씩! (쿠키와는 상관없어요)</p>
+  box.innerHTML=`${newsCard(n)}${sideList(PUB.side)}${revealBox(PUB.reveal)}
+   <div class="panel grid"><h2>내일 아침 주가를 예측해요</h2><p class="muted" style="margin:0">큰 뉴스와 작은 소식을 모두 읽고 골라요.</p><p class="muted" style="margin:0">맞히면 "뉴스 해석왕" 점수 1점씩! (쿠키와는 상관없어요)</p>
     <div class="fld"><span class="lb up">⬆ 오를 것 같은 회사</span>${pk('upk','up')}</div>
     <div class="fld"><span class="lb down">⬇ 내릴 것 같은 회사</span>${pk('dnk','down')}</div>
     ${easy?'':`<div class="fld"><span class="lb">왜 그렇게 생각해요?</span><textarea id="why" maxlength="200" placeholder="예) 태풍이 오면 배가 못 떠서 바다해운이 돈을 못 벌어요">${esc(DRAFT.why)}</textarea></div>`}
@@ -812,7 +918,7 @@ let tick=null,M=null,LEADER=false,ORD={},PL={},PRED={},DH={key:'',codes:{}},EXP=
 const TAB_ID=(()=>{try{let t=sessionStorage.getItem('stock-tab');if(!t){t=Math.random().toString(36).slice(2);sessionStorage.setItem('stock-tab',t);}return t;}catch(e){return Math.random().toString(36).slice(2);}})();
 window.addEventListener('pagehide',()=>{const l=store('stock-leader');if(LEADER&&l&&l.id===TAB_ID)store('stock-leader',null);});
 function newMaster(room){
-  return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:20,showRank:true},
+  return {room,ver:1,created:Date.now(),cfg:{rate:1000,ratio:.5,cap:20,close:'13:10',days:20,sideN:3,showRank:true},
     day:0,phase:'setup',closeAt:0,prices:Object.fromEntries(AS.map(c=>[c.id,c.p])),hist:Object.fromEntries(AS.map(c=>[c.id,[c.p]])),chg:{},
     today:null,eff:null,reveal:null,used:[],log:[],acct:{},ops:{},done:{},feed:[],award:false,tamper:0,fx:FX0,fxHist:[FX0],fxChg:0};
 }
@@ -821,7 +927,7 @@ function fixM(m){
   if(m.fx==null){m.fx=FX0;m.fxHist=[FX0];m.fxChg=0;}
   if(m.cfg.dRate==null)m.cfg.dRate=.3;if(m.cfg.sRate==null)m.cfg.sRate=3;if(m.cfg.term==null)m.cfg.term=5;
   if(m.cfg.open==null)m.cfg.open='08:30';if(m.sDate==null&&m.closeAt)m.sDate=dkey(m.closeAt);
-  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
+  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.sideN==null)m.cfg.sideN=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
   if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=3;if(m.cfg.sdays==null)m.cfg.sdays=3;
   AS.forEach(c=>{if(m.prices[c.id]==null){m.prices[c.id]=c.p;m.hist[c.id]=[c.p];}});
   if(!m.mom)m.mom={};
@@ -1014,7 +1120,7 @@ function autoDue(){
 async function autoOpen(){
   if(!autoDue())return;
   AUTOING=true;
-  try{const nw=autoNews();M.qn=null;DAYPICK=null;if(MODAL==='day')closeModal();await startDay(nw);M.autoed=(M.autoed||0)+1;saveM();}
+  try{const nw=autoNews();M.qn=null;DAYPICK=null;if(MODAL==='day')closeModal();await startDay(nw,nw.qs);M.autoed=(M.autoed||0)+1;saveM();}
   catch(e){console.warn('자동 개장 실패',e);}
   finally{AUTOING=false;}
 }
@@ -1040,7 +1146,7 @@ function acctView(n,a){
 function buildPub(){
   const acct={};Object.entries(M.acct).forEach(([n,a])=>acct[n]=acctView(n,a));
   const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at});
-  return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today,reveal:M.reveal,fx:M.fx,fxHist:M.fxHist,fxChg:M.fxChg,
+  return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today?{e:M.today.e,t:M.today.t,b:M.today.b,src:M.today.src,day:M.today.day}:null,side:(M.side||[]).map(n=>({e:n.e,t:n.t,b:n.b,src:n.src})),reveal:M.reveal,fx:M.fx,fxHist:M.fxHist,fxChg:M.fxChg,
     cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,open:M.cfg.open,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,bTerm:M.cfg.bTerm,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays,maxT:M.cfg.maxT,divRate:M.cfg.divRate,divEvery:M.cfg.divEvery,divHold:M.cfg.divHold},acct,ops,award:!!M.award};
 }
 function publish(){
@@ -1260,9 +1366,9 @@ function renderTV(){
   }
   const rv=M.reveal&&M.reveal.day===M.day-1?M.reveal:null;
   if(ph==='open'||ph==='closed'){
-    body=`${rv?`<div class="panel grid pop"><h2>☀️ 어제 뉴스 결과: ${rv.e} ${esc(rv.t)}</h2><div class="chips">${AS.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(rv.chg[c.id])}">${pctTxt(rv.chg[c.id]||0)}</b></span>`).join('')}${rv.fx!=null?`<span>💵 환율 <b class="${ud(rv.fx)}">${pctTxt(rv.fx)}</b></span>`:''}</div>${rv.w?`<div class="tip">📘 해설: ${esc(rv.w)}</div>`:''}
+    body=`${rv?`<div class="panel grid pop"><h2>☀️ 어제 뉴스 결과: ${rv.e} ${esc(rv.t)}</h2><div class="chips">${AS.map(c=>`<span>${c.e} ${esc(c.n)} <b class="${ud(rv.chg[c.id])}">${pctTxt(rv.chg[c.id]||0)}</b></span>`).join('')}${rv.fx!=null?`<span>💵 환율 <b class="${ud(rv.fx)}">${pctTxt(rv.fx)}</b></span>`:''}</div>${rv.w?`<div class="tip">📘 해설: ${esc(rv.w)}</div>`:''}${sideReveal(rv.side)}
        <div class="muted">예측한 친구 ${rv.n}명 중 ${rv.right}명이 하나 이상 맞혔어요.</div></div>`:''}
-     ${newsCard(M.today)}
+     ${newsCard(M.today)}${sideList((M.side||[]))}
      <div class="muted" style="text-align:right">오늘 예측한 친구 ${Object.keys(PRED).length}명</div>`;
   }
   if(ph==='end'){
@@ -1339,8 +1445,9 @@ async function applyNews(){
   M.fx=nfx;M.fxHist.push(nfx);M.fxChg=Math.round((nfx-ofx)/ofx*1000)/10;
   let right=0;
   Object.entries(P).forEach(([n,p])=>{const a=M.acct[n];if(!a||!p)return;let pt=0;if(p.up&&chg[p.up]>0)pt++;if(p.down&&chg[p.down]<0)pt++;a.pt=(a.pt||0)+pt;if(pt)right++;});
-  M.reveal={day:M.day,e:M.today.e,t:M.today.t,w:M.today.w||'',chg,fx:M.fxChg,right,n:Object.keys(P).length};
-  M.log.push({day:M.day,e:M.today.e,t:M.today.t,eff:M.eff,chg,fx:M.fx});
+  const side=(M.side||[]).map(n=>({e:n.e,t:n.t,src:n.src,w:n.w||''}));
+  M.reveal={day:M.day,e:M.today.e,t:M.today.t,w:M.today.w||'',side,chg,fx:M.fxChg,right,n:Object.keys(P).length};
+  M.log.push({day:M.day,e:M.today.e,t:M.today.t,side:side.map(n=>n.t),eff:M.eff,chg,fx:M.fx});
 }
 /* 새 날 아침 은행 일: 예금 이자(복리), 적금 자동 납입과 만기 */
 function bankDay(){
@@ -1372,11 +1479,13 @@ function bankDay(){
     else{s.miss=(s.miss||0)+1;a.bk=[{d:nd,m:`🐷 돈이 모자라서 오늘은 적금을 건너뛰었어요`},...(a.bk||[])].slice(0,15);}
   });
 }
-async function startDay(nw){
+async function startDay(nw,side){
   await drain();
   await applyNews();
   bankDay();
-  M.day++;M.today={e:nw.e,t:nw.t,b:nw.b,src:nw.src||'우리 반 기자',w:nw.w||'',day:M.day};M.eff=nw.x||{};
+  M.day++;M.today={e:nw.e,t:nw.t,b:nw.b,src:nw.src||'우리 반 기자',w:nw.w||'',day:M.day};
+  const si=side||pickSide(M.cfg.sideN||0,M.sUsed,nw.x);M.sUsed=[...(M.sUsed||[]),...si];
+  M.side=si.map(k=>({...SIDE[k]}));M.eff=mergeEff(nw.x,M.side.map(n=>n.x));
   if(nw.i!=null&&!M.used.includes(nw.i))M.used.push(nw.i);
   M.closeAt=nextClose(M.cfg.close);M.sDate=dkey(now());M.phase='open';M.feed=[];M.award=false;
   saveM();listenPred();publish();
@@ -1399,7 +1508,7 @@ async function endProject(){
     a.fin={cash:a.cash,n:k};a.cash=0;
     if(k>0)snapOp('fin'+n);
   });
-  M.phase='end';M.today=null;M.closeAt=0;
+  M.phase='end';M.today=null;M.side=[];M.closeAt=0;
   saveM();publish();
 }
 
@@ -1410,7 +1519,7 @@ const mhead=t=>`<div class="row between"><h2 style="font-size:1.7rem">${t}</h2><
 const bindClose=()=>{$('#mx').onclick=closeModal;};
 let DAYPICK=null;
 function drawDay(){
-  if(!DAYPICK||DAYPICK.day!==M.day){const i=NEWS.findIndex((_,k)=>!M.used.includes(k));DAYPICK={day:M.day,i:i<0?0:i,own:false,e:'📰',t:'',b:'',x:{}};}
+  if(!DAYPICK||DAYPICK.day!==M.day){const i=NEWS.findIndex((_,k)=>!M.used.includes(k));DAYPICK={day:M.day,i:i<0?0:i,own:false,e:'📰',t:'',b:'',x:{},side:pickSide(M.cfg.sideN||0,M.sUsed)};}
   const P=DAYPICK,sel=P.own?P:NEWS[P.i];
   modal.innerHTML=`<div class="panel grid">${mhead(M.day?`🌅 ${M.day+1}일째 시작`:'🔔 첫 거래일 시작')}
    <div class="rules">${M.day?`<b>누르면 이렇게 돼요</b><ul><li>남은 주문을 모두 처리해요.</li><li>어제 뉴스(${esc(M.today?M.today.t:'')})의 영향으로 주가와 환율이 바뀌고, 예측 점수를 매겨요.</li><li>예금 이자를 주고, 적금을 자동으로 넣어요.</li><li>아래 고른 뉴스가 오늘의 뉴스로 나오고 장이 열려요 (마감 오후 ${esc(M.cfg.close)}).</li></ul>`:'첫 뉴스가 나오고 장이 열려요. 주가는 내일 아침 이 뉴스에 따라 바뀌어요.'}</div>
@@ -1422,24 +1531,26 @@ function drawDay(){
     :`<div class="nlist">${NEWS.map((n,k)=>`<button data-i="${k}" aria-pressed="${P.i===k}" class="${M.used.includes(k)?'used':''}">${n.e} ${esc(n.t)}${M.used.includes(k)?' (썼어요)':''}</button>`).join('')}</div>
      ${newsCard({...sel,day:M.day+1})}
      <button class="ghost" id="peek">🔒 내일 주가 영향 보기 (꾹 누르기 · 학생에게 보이지 않게)</button>
-     <div class="secret" id="sec">${EFF.map(c=>`${c.e} ${esc(c.n)} ${(LV.find(l=>l[0]===(sel.x[c.id]||0))||LV[2])[1]}`).join(' · ')}</div>`}
+     <div class="secret" id="sec">${(()=>{const ex=mergeEff(sel.x,P.side.map(k=>SIDE[k].x));return EFF.map(c=>`${c.e} ${esc(c.n)} ${(LV.find(l=>l[0]===(ex[c.id]||0))||LV[2])[1]}`).join(' · ');})()}</div>`}
+   ${P.side.length?`<div class="row between"><b>🗞️ 함께 나올 작은 소식 ${P.side.length}개</b><button class="ghost small" id="reside">🔄 다시 뽑기</button></div><div class="sides">${P.side.map(k=>`<div class="nside"><span class="se">${SIDE[k].e}</span><div><b>${esc(SIDE[k].t)}</b><div class="muted" style="font-size:.85rem">${esc(SIDE[k].src)}</div></div></div>`).join('')}</div>`:''}
    ${M.qn?`<div class="ok-box">⏰ 예약한 뉴스: <b>${esc(M.qn.t)}</b> <button class="ghost small" id="unq">예약 지우기</button></div>`:''}
    <div class="row" style="justify-content:center"><button id="go" style="font-size:1.3rem">${M.day?'🌅 지금 새 날 시작':'🔔 장 열기'}</button>${M.day&&M.cfg.open?`<button class="ghost" id="qgo" style="font-size:1.1rem">⏰ 이 뉴스로 ${ampm(M.cfg.open)} 자동 시작 예약</button>`:''}</div>
    <div class="msg bad" id="dm"></div></div>`;
   bindClose();
   $$('[data-own]').forEach(b=>b.onclick=()=>{P.own=b.dataset.own==='1';drawDay();});
   $$('[data-i]').forEach(b=>b.onclick=()=>{P.i=+b.dataset.i;drawDay();});
+  if($('#reside'))$('#reside').onclick=()=>{P.side=pickSide(M.cfg.sideN||0,M.sUsed);drawDay();};
   $$('.seg[data-c]').forEach(s=>$$('button',s).forEach(b=>b.onclick=()=>{P.x[s.dataset.c]=+b.dataset.v;drawDay();}));
   ['ne','nt','nb','nw'].forEach(id=>{const el=$('#'+id);if(el)el.oninput=()=>{P[id[1]]=el.value;};});
   if($('#peek')){const s=$('#sec');$('#peek').onpointerdown=e=>{e.preventDefault();s.classList.add('on');};['pointerup','pointerleave','pointercancel'].forEach(t=>$('#peek').addEventListener(t,()=>s.classList.remove('on')));}
   const pick=()=>P.own?{e:P.e||'📰',t:P.t.trim(),b:P.b.trim(),w:(P.w||'').trim(),x:{...P.x}}:{...NEWS[P.i],i:P.i};
   if($('#unq'))$('#unq').onclick=()=>{M.qn=null;saveM();drawDay();};
-  if($('#qgo'))$('#qgo').onclick=()=>{const nw=pick();if(!nw.t){$('#dm').textContent='뉴스 제목을 써 주세요.';return;}M.qn=nw;saveM();DAYPICK=null;closeModal();render();};
+  if($('#qgo'))$('#qgo').onclick=()=>{const nw=pick();if(!nw.t){$('#dm').textContent='뉴스 제목을 써 주세요.';return;}M.qn={...nw,qs:P.side};saveM();DAYPICK=null;closeModal();render();};
   $('#go').onclick=async()=>{
     const nw=pick();
     if(!nw.t){$('#dm').textContent='뉴스 제목을 써 주세요.';return;}
     $('#go').disabled=true;
-    try{if(M.qn&&!P.own&&M.qn.i===nw.i)M.qn=null;await startDay(nw);M.qn=null;DAYPICK=null;closeModal();}catch(e){$('#dm').textContent='시작하지 못했어요: '+(e.message||e);$('#go').disabled=false;}
+    try{if(M.qn&&!P.own&&M.qn.i===nw.i)M.qn=null;await startDay(nw,P.side);M.qn=null;DAYPICK=null;closeModal();}catch(e){$('#dm').textContent='시작하지 못했어요: '+(e.message||e);$('#go').disabled=false;}
   };
 }
 function drawCookie(){
@@ -1480,6 +1591,7 @@ function drawSet(){
     <label class="fld"><span class="lb">적금 만기 이자 (%)</span><input type="number" id="ssr" min="0" max="50" value="${c.sRate}"></label>
     <label class="fld"><span class="lb">배당 (주가의 %, 0이면 없음)</span><input type="number" id="sdv" min="0" max="10" step="0.5" value="${c.divRate}"></label>
     <label class="fld"><span class="lb">배당 주기 (며칠마다)</span><input type="number" id="sde" min="2" max="15" value="${c.divEvery}"></label>
+    <label class="fld"><span class="lb">하루 작은 소식 수 (0~5)</span><input type="number" id="ssn" min="0" max="5" value="${c.sideN}"></label>
     <label class="fld"><span class="lb">채권 만기 (며칠 뒤)</span><input type="number" id="sbt" min="2" max="15" value="${c.bTerm}"></label>
     <label class="fld"><span class="lb">적금 기간 (넣는 횟수)</span><input type="number" id="stm" min="2" max="15" value="${c.term}" ${Object.values(M.acct).some(a=>a.sav)?'disabled title="적금을 든 친구가 있어서 바꿀 수 없어요"':''}></label></div>
    <h3 style="font-size:1.4rem">다했니 연결 (읽기 전용)</h3>
@@ -1493,7 +1605,7 @@ function drawSet(){
   $('#save').onclick=()=>{
     c.close=$('#sc').value||'13:10';c.open=$('#sop').value||'';if(c.open&&c.open>=c.close){alert('여는 시간은 마감 시간보다 빨라야 해요.');return;}c.days=Math.max(1,+$('#sd').value||20);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
     c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
-    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.divRate=Math.min(10,Math.max(0,+$('#sdv').value||0));c.divEvery=Math.min(15,Math.max(2,Math.round(+$('#sde').value||5)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
+    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.sideN=Math.min(5,Math.max(0,Math.round(+$('#ssn').value||0)));c.divRate=Math.min(10,Math.max(0,+$('#sdv').value||0));c.divEvery=Math.min(15,Math.max(2,Math.round(+$('#sde').value||5)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
     DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
     saveM();publish();closeModal();
   };
