@@ -135,7 +135,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
   check((await S[0].textContent('#tabbox')).includes(firstNews), '학생 화면에 오늘의 뉴스');
   await shot(S[0], 'g05-news');
   const effLeak = await S[0].evaluate(() => JSON.stringify(PUB));
-  check(!/"eff"|"x":/.test(effLeak), '뉴스가 주가에 주는 영향은 학생에게 보이지 않음');
+  check(!/"eff"|"x":|"w":/.test(effLeak), '뉴스가 주가에 주는 영향과 해설은 학생에게 미리 보이지 않음');
+  check(await S[0].evaluate(() => PUB.side.length === 3) && (await S[0].textContent('#tabbox')).includes('오늘의 작은 소식 3개'), '큰 뉴스와 함께 작은 소식 3개가 나옴');
 
   /* ---------- 사고팔기 ---------- */
   const waitR = (p, k) => p.waitForFunction(k => Object.values(MYO).filter(o => o.r).length >= k, k, { timeout: 15000 });
@@ -255,6 +256,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].waitForFunction(() => PUB.day === 2 && PUB.reveal);
   check((await S[0].textContent('#tabbox')).includes(before.today.t), '학생 화면에 어제 뉴스 결과');
   check(!!m2.reveal.w && (await S[0].textContent('#tabbox')).includes('해설'), '어제 뉴스 해설이 학생 화면에 나옴');
+  check(m2.reveal.side.length === 3 && m2.reveal.side.every(n => n.w) && m2.side.length === 3 && !m2.side.some(n => m2.reveal.side.some(r => r.t === n.t)), '어제 작은 소식 해설이 나오고, 오늘은 다른 작은 소식 3개');
   await shot(S[0], 'g13-reveal');
   check(m2.acct[1].cash === 3960 && !(m2.acct[1].bonds || []).length, '새 날: 나라 채권 만기, 1,000원 + 이자 20원을 돌려받음');
   const v1 = await S[0].evaluate(() => myAcct());
