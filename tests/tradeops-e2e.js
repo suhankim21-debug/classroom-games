@@ -18,6 +18,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     return p;
   };
   const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: `${SHOTS}/${name}.png`, fullPage: true }); };
+  if (SHOTS) { const H = await mk('첫 화면', 1280, 800); await H.goto(URL); await H.waitForSelector('.hero'); await H.waitForTimeout(800); await H.screenshot({ path: `${SHOTS}/start.png` }); await H.close(); }
   const T = await mk('교사', 1400, 900);
   await T.goto(URL + '#teacher');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
@@ -57,6 +58,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       for (let k = 0; k < D.PARTS.length; k++) {
         await p.waitForSelector('#pb .opts button:not([disabled])', { timeout: 10000 });
         const nm = (await p.textContent('.clue b')).trim();
+        if (n === 4 && k === 1) await shot(p, 's1-parts');
         const part = D.PARTS.find(x => x.n === nm); if (!part) { fail('모르는 부품: ' + nm); return; }
         if (n === 2 && k === 0) {
           await p.click(`#pb .opts button:not([data-c="${part.c}"]) >> nth=0`);
@@ -121,6 +123,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         const yr = await p.textContent('#go');
         if (!yr.includes(`${y + 1}년`)) fail(`${n}번 ${y + 1}년차가 아님: ${yr}`);
         await p.$eval('#tar', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, String(plans[n][y]));
+        if (n === 2 && y === 2) await shot(p, 's3-sim');
         await p.click('#go');
         await p.waitForFunction(() => /곳<\/b>이 우리 철강을 샀어요/.test(document.querySelector('#ym')?.innerHTML || '') || /5년 결과/.test(document.body.textContent), null, { timeout: 10000 });
       }
@@ -188,6 +191,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         await solve(p, '#gz', 8, false);
       } else {
         if (n === 6) { await p.waitForSelector('#gz .q'); if ((await p.$$('#gz .opts button')).length !== 2) fail('보기 2개 모드가 아님'); }
+        if (n === 4) { await p.waitForSelector('#gz .q'); await shot(p, 's5-quiz'); }
         await solve(p, '#gz', 12, n % 3 === 0);
       }
       await p.waitForSelector('#cd button', { timeout: 10000 });

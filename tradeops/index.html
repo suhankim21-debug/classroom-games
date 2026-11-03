@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>세계 무역 작전실</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
 body{margin:0}
 /* Same classroom notice-board look as 세계 무역 박람회. Single light look by choice (classroom TV). */
@@ -184,6 +184,131 @@ main{padding-block:18px 48px}
   .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
   .lane{grid-template-columns:6em 1fr 2.5em}
 }
+
+/* ================= 고급 디자인 (2026-11-03) =================
+   작전실 콘셉트: 깊은 남색 + 금색 포인트, 흰 카드에 부드러운 그림자, Pretendard 글꼴.
+   위의 기본 모양을 덮어쓰기만 해서 화면 구조와 기능은 그대로예요. */
+:root{
+  --wall:#F3F0E8; --card:#FFFFFF; --cream:#F6F1E4; --coral:#E8684A; --coral2:#C24F31; --ink:#18202E; --body:#3A4352; --muted:#7A8190;
+  --line:#E5DFD1; --ok:#2E8B66; --bad:#C8452D; --blue:#2F5F8A; --blue2:#9DB8CE; --gold:#D99A2B; --navy:#18202E; --navy2:#26324A;
+  --tech:#2F5F8A; --geo:#C27A2C; --nature:#2E8B66;
+  --display:'Pretendard Variable','Pretendard',system-ui,sans-serif; --text:'Pretendard Variable','Pretendard','Malgun Gothic',system-ui,sans-serif;
+  --shadow:0 1px 2px rgba(24,32,46,.06),0 10px 30px -12px rgba(24,32,46,.18);
+  --shadow-lg:0 2px 4px rgba(24,32,46,.06),0 24px 48px -20px rgba(24,32,46,.28);
+}
+body{background:radial-gradient(1200px 600px at 85% -10%,#FBE9DA 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#E6EEF3 0,transparent 55%),var(--wall);background-attachment:fixed;color:var(--ink);letter-spacing:-.01em}
+h1,h2,h3,.q,.big,.brand,.roomcode,.timer,.score{font-weight:800;letter-spacing:-.025em}
+h2{font-size:1.45rem}
+button{font-weight:700;border-radius:14px;background:linear-gradient(180deg,#EF7A5C,var(--coral));box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 6px 16px -6px rgba(232,104,74,.6);transition:transform .12s ease,box-shadow .12s ease,background .12s}
+button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 10px 22px -8px rgba(232,104,74,.7)}
+button:active:not(:disabled){transform:translateY(0)}
+button.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:var(--shadow)}
+input,select{border:1.5px solid var(--line);border-radius:12px;background:#FCFBF8}
+input:focus{border-color:var(--coral);background:#fff}
+/* 머리띠 */
+.top{background:linear-gradient(100deg,var(--navy) 0,var(--navy2) 100%);border-bottom:3px solid var(--gold);padding-block:14px;box-shadow:0 6px 24px -10px rgba(24,32,46,.5)}
+.brand{font-size:1.35rem;gap:10px}
+.brand i{background:linear-gradient(135deg,#F2C66D,var(--gold));color:var(--navy);width:1.7em;height:1.7em;border-radius:10px;font-size:.85em;box-shadow:0 0 0 3px rgba(242,198,109,.18)}
+.top small{color:#D8DEE8;opacity:1;font-weight:500}
+/* 카드 */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px}
+.band{background:var(--navy);color:#F2C66D;border-radius:999px;padding:.32em 1em;font-size:.88rem;font-weight:700;letter-spacing:.01em}
+.rules{background:linear-gradient(180deg,#FFFBF2,#FFF6E4);border:1px solid #F0DDB5;border-left:5px solid var(--gold);border-radius:16px;padding:14px 18px}
+.rules b{color:var(--ink)}
+.msg.ok{color:var(--ok)} .msg{font-weight:700}
+.big{color:var(--ink)}
+.muted{color:var(--muted)}
+/* 단계 표시: 작전 진행 바 */
+.steps{gap:10px;counter-reset:st}
+.steps button{background:#fff;color:var(--muted);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:.7em .4em;font-weight:600;font-size:.92rem;display:grid;justify-items:center;gap:4px}
+.steps button b{display:grid;place-items:center;width:2em;height:2em;border-radius:50%;background:var(--cream);color:var(--muted);font-size:1rem}
+.steps button[aria-current="step"]{background:linear-gradient(160deg,var(--navy2),var(--navy));border-color:var(--navy);color:#fff;box-shadow:var(--shadow-lg)}
+.steps button[aria-current="step"] b{background:linear-gradient(135deg,#F2C66D,var(--gold));color:var(--navy)}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:#BFDDD0}
+.steps button.done:not([aria-current="step"]) b{background:#E3F2EB;color:var(--ok)}
+.steps button:disabled{opacity:.55;box-shadow:none;background:transparent}
+/* 문제 */
+.quiz .q,.q{font-size:clamp(1.35rem,3.6vw,1.85rem);line-height:1.35;color:var(--ink)}
+.opts{gap:12px}
+.opts button{background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);font-weight:600;font-size:1.12rem;padding:1em .8em}
+.opts button:hover:not(:disabled){border-color:var(--coral);box-shadow:0 0 0 4px rgba(232,104,74,.12),var(--shadow)}
+.opts button.right{background:#E6F4EC;border-color:var(--ok);color:#1F6B4D;box-shadow:0 0 0 4px rgba(46,139,102,.14)}
+.opts button.wrong{background:#FBEAE5;border-color:var(--bad);color:var(--bad)}
+.prog span{width:22px;height:6px;border-radius:999px}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--gold)}
+.emoji{filter:drop-shadow(0 6px 10px rgba(24,32,46,.15))}
+.chips button{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none;font-weight:500}
+.chips button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* 1단계 */
+.clue{border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);background:linear-gradient(180deg,#fff,#FCFAF5)}
+.clue b{font-weight:800;color:var(--ink)}
+.phone{background:linear-gradient(160deg,#2A3346,#121824);border-radius:34px;padding:26px 14px 18px;box-shadow:inset 0 0 0 3px #3A4560,0 0 0 6px #0E131C,var(--shadow-lg)}
+.phone span{background:#323C52;border-radius:14px}
+.phone span.on{background:linear-gradient(160deg,#FFF6E4,#F6E3BD);box-shadow:0 0 0 2px rgba(242,198,109,.7)}
+.phone small{color:#F2C66D;font-weight:700}
+.article{border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);background:#fff;position:relative;padding-top:18px}
+.article::before{content:'NEWS';position:absolute;top:-10px;right:16px;background:var(--navy);color:#F2C66D;font-size:.7rem;font-weight:800;letter-spacing:.12em;padding:.25em .7em;border-radius:6px}
+.article h3{font-weight:800;color:var(--ink)}
+.article mark{background:linear-gradient(transparent 55%,#FFE1A3 55%);padding:0}
+.map svg{border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+/* 2단계 */
+.multi button,.comp button,.locs button{border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);font-weight:600}
+.multi button[aria-pressed="true"]{border-color:var(--navy);background:#EEF2F8;box-shadow:0 0 0 4px rgba(38,50,74,.1)}
+.comp button:hover:not(:disabled),.locs button:hover:not(:disabled),.multi button:hover:not(:disabled){border-color:var(--coral)}
+.comp button.right,.locs button.right,.multi button.right{background:#E6F4EC;border-color:var(--ok)}
+.cols>div{border:1px solid var(--line);border-top-width:6px;border-radius:18px;box-shadow:var(--shadow)}
+.cards div{background:var(--cream);border-radius:12px}
+.bars i{background:linear-gradient(180deg,#4F7FAA,var(--blue));border-radius:10px 10px 4px 4px}
+/* 3단계 관세 실험실 */
+.prices>div{border:1px solid var(--line);border-top:6px solid var(--line);border-radius:18px;box-shadow:var(--shadow);background:#fff}
+.prices .kr{border-top-color:var(--coral)} .prices .im{border-top-color:var(--blue)}
+.prices b{font-weight:800;font-size:2.6rem;letter-spacing:-.03em}
+.prices .kr b{color:var(--coral2)} .prices .im b{color:var(--blue)}
+.slider{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow)}
+.slider .tv{display:inline-block;background:var(--navy);color:#F2C66D;border-radius:10px;padding:.05em .5em;font-weight:800}
+.slider input[type=range]{-webkit-appearance:none;appearance:none;height:10px;border-radius:999px;background:linear-gradient(90deg,#E6EEF3,#F6D7CC);margin:14px 0 4px}
+.slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:6px solid var(--coral);box-shadow:0 4px 10px rgba(24,32,46,.25);cursor:grab}
+.slider input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:6px solid var(--coral);box-shadow:0 4px 10px rgba(24,32,46,.25)}
+.years span{background:#fff;border:1px solid var(--line);font-weight:700;font-size:.9rem}
+.years span.now{background:var(--navy);color:#F2C66D;border-color:var(--navy)}
+.chart svg{border:1px solid var(--line);border-radius:18px}
+.factories span{border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.factories span.kr{border-color:var(--coral);background:#FDEDE7}
+.factories span.im{border-color:var(--blue);background:#E9F0F6}
+/* 5단계 */
+.truck i{border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.sent .fill{border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);font-weight:700}
+.sent .fill u{border-bottom-color:var(--gold);color:var(--ink);background:#FFF4DC;border-radius:4px}
+.stars .it{border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.stars .it .row button{background:#fff;border:1.5px solid var(--line);color:#C9C2B1;box-shadow:none}
+.stars .it .row button[aria-pressed="true"]{background:linear-gradient(180deg,#F2C66D,var(--gold));color:#fff;border-color:var(--gold)}
+/* 첫 화면 */
+.hero h1{font-size:clamp(2.6rem,6.5vw,4.4rem);background:linear-gradient(120deg,var(--navy) 0,#3B4F75 60%,var(--coral2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.1em}
+.hero p{color:var(--body)}
+.choose button{border-radius:18px}
+/* 선생님 화면 */
+.tv>.grid>.panel:nth-child(2){background:linear-gradient(160deg,var(--navy2),var(--navy));border-color:var(--navy);color:#fff}
+.tv>.grid>.panel:nth-child(2) .timer{color:#fff;font-variant-numeric:tabular-nums}
+.tv>.grid>.panel:nth-child(2) .timer.end{color:#FF9C84}
+.tv>.grid>.panel:nth-child(2) button.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.25);box-shadow:none}
+.roomcode{color:var(--coral2);font-size:2.6rem}
+.tsteps button{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:none;font-weight:600;font-size:1rem;line-height:1.35}
+.tsteps button b{display:inline-grid;place-items:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--cream);margin-right:6px}
+.tsteps button[aria-current="step"]{background:linear-gradient(160deg,var(--navy2),var(--navy));color:#fff;border-color:var(--navy)}
+.tsteps button[aria-current="step"] b{background:linear-gradient(135deg,#F2C66D,var(--gold));color:var(--navy)}
+.people span{background:#fff;border:1px solid var(--line);font-weight:600;font-size:.95rem}
+.people span.ok{background:var(--ok);border-color:var(--ok)}
+.list div{border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;background:#fff}
+.list b{color:var(--coral2);font-weight:800}
+.lane{border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.lane .road{background:repeating-linear-gradient(90deg,#EEE8DA 0 22px,#F8F5EE 22px 30px)}
+.rank .r{border:1px solid var(--line);box-shadow:var(--shadow)}
+.podium div{border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg)}
+.podium .p1{background:linear-gradient(180deg,#F2C66D,#C98A1E)}
+.podium .p2{background:linear-gradient(180deg,#C9D3DE,#8E9DAF)}
+.podium div *{font-weight:800}
+.podium .p3{background:linear-gradient(180deg,#E7A57E,#B4673E)}
+@media (prefers-reduced-motion:reduce){button{transition:none}button:hover:not(:disabled){transform:none}}
 </style></head><body>
 <header class="top"><div class="wrap"><div class="brand"><i>🌐</i> 세계 무역 작전실</div><small id="sub"></small></div></header>
 <main class="wrap" id="app"></main>
@@ -349,7 +474,7 @@ function mapSVG({found={},label=true}={}){
   PARTS.forEach(p=>{const pl=PLACES[p.c];const [cx,cy]=proj(pl.ll);const on=(found[p.id]||0)>0;
     const lx=pl.lp==='l'?cx-24:pl.lp==='r'?cx+24:cx, ly=pl.lp==='t'?cy-26:pl.lp==='b'?cy+38:cy+6, an=pl.lp==='l'?'end':pl.lp==='r'?'start':'middle';
     g+=`<g opacity="${on?1:.45}"><circle cx="${cx}" cy="${cy}" r="18" fill="#fff" stroke="${on?'#E0704F':'#B8A88A'}" stroke-width="4"/><text x="${cx}" y="${cy+7}" text-anchor="middle" font-size="19">${p.e}</text>
-     ${label?`<text x="${lx}" y="${ly}" text-anchor="${an}" font-size="18" font-family="Jua" fill="#453422" stroke="#fff" stroke-width="5" paint-order="stroke">${pl.n}</text>`:''}</g>`;});
+     ${label?`<text x="${lx}" y="${ly}" text-anchor="${an}" font-size="18" font-family="Pretendard Variable, Pretendard, sans-serif" font-weight="800" fill="#453422" stroke="#fff" stroke-width="5" paint-order="stroke">${pl.n}</text>`:''}</g>`;});
   return `<div class="map"><svg viewBox="0 0 ${MAP.W} ${MAP.H}" role="img" aria-label="세계 지도: 스마트폰 부품이 온 나라와 조립하는 나라">${g}</svg></div>`;
 }
 function phoneHTML(got){return `<div class="phone" aria-label="스마트폰 조립 ${got.length}/${PARTS.length}">${PARTS.map(p=>`<span class="${got.includes(p.id)?'on':''}">${got.includes(p.id)?p.e:''}</span>`).join('')}<small>📱 ${got.length} / ${PARTS.length}</small></div>`;}
