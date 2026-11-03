@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>세계 무역 작전실</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 세계 무역 박람회. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --nature:#5E9B5A; --tech:#3D6E8C; --geo:#C27A2C;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input,select{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.9em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q,.q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.opts.three{grid-template-columns:repeat(3,1fr)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.map svg{width:100%;height:auto;display:block;border-radius:14px;border:2px solid var(--line)}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cols>div{background:#fff;border-radius:16px;padding:10px;display:grid;gap:10px;align-content:start;border-top:8px solid var(--line)}
+.cols>div.nature{border-top-color:var(--nature)} .cols>div.tech{border-top-color:var(--tech)} .cols>div.geo{border-top-color:var(--geo)}
+.cols h3{font-size:1.25rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 11em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.bar .track{height:30px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--coral);border-radius:10px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.steps{grid-template-columns:repeat(5,1fr)}
+/* 1단계: 스마트폰 조립 */
+.phone{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#2F2A26;border-radius:26px;padding:22px 12px;width:min(100%,260px);margin:0 auto;box-shadow:inset 0 0 0 4px #5A4E44}
+.phone span{aspect-ratio:1;border-radius:12px;background:#4A413A;display:grid;place-items:center;font-size:2rem;line-height:1}
+.phone span.on{background:#FFF4DF}
+.phone small{grid-column:1/-1;color:#fff;text-align:center;font-family:var(--display);font-size:1rem}
+.clue{background:#fff;border:3px solid var(--line);border-radius:18px;padding:12px 18px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;text-align:left;width:100%}
+.clue .e{font-size:3rem;line-height:1}
+.clue b{font-family:var(--display);font-weight:400;font-size:1.4rem}
+.article{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 18px;text-align:left;width:100%}
+.article h3{font-size:1.35rem;margin-bottom:6px}
+.article p{margin:.3em 0}
+.article .src{font-size:.85rem;color:var(--muted)}
+.article mark{background:#FFE7A8;padding:0 .15em;border-radius:4px}
+/* 2단계: 경쟁 */
+.multi{display:grid;gap:10px;width:100%}
+.multi button{background:#fff;color:var(--ink);border:2px solid var(--line);text-align:left;font-family:var(--text);font-size:1.15rem;padding:.8em 1em}
+.multi button[aria-pressed="true"]{border-color:var(--coral);background:#FFF4DF}
+.multi button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.multi button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.comp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.comp button{background:#fff;color:var(--ink);border:3px solid var(--line);display:grid;gap:4px;justify-items:center;padding:12px 6px;font-size:1.15rem;line-height:1.25}
+.comp button span{font-size:2.2rem;line-height:1}
+.cols>div.tech{border-top-color:var(--tech)} .cols>div.build{border-top-color:var(--geo)} .cols>div.port{border-top-color:var(--nature)}
+.cards{display:grid;gap:6px}
+.cards div{background:var(--cream);border-radius:10px;padding:6px 10px}
+.cards div.hard{background:#F6E1DB}
+.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;height:180px;text-align:center}
+.bars div{display:grid;align-content:end;gap:4px;height:100%}
+.bars i{display:block;background:var(--blue);border-radius:8px 8px 0 0}
+.bars b{font-family:var(--display);font-weight:400}
+/* 3단계: 관세 실험실 */
+.lab{display:grid;gap:14px;width:100%}
+.prices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prices>div{background:#fff;border:3px solid var(--line);border-radius:16px;padding:10px 14px;text-align:center}
+.prices .kr{border-color:var(--coral2)} .prices .im{border-color:var(--blue)}
+.prices b{display:block;font-family:var(--display);font-weight:400;font-size:2.2rem;font-variant-numeric:tabular-nums}
+.prices small{color:var(--muted)}
+.slider{display:grid;gap:6px}
+.slider input[type=range]{padding:0;border:0;accent-color:var(--coral2);height:36px}
+.slider .tv{font-family:var(--display);font-size:1.6rem;color:var(--coral2)}
+.factories{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;text-align:center}
+.factories span{display:grid;gap:2px;justify-items:center;background:#fff;border-radius:10px;padding:6px 0;border:2px solid var(--line);font-size:1.4rem;line-height:1}
+.factories span em{font-style:normal;font-size:1rem}
+.factories span.kr{border-color:var(--coral2);background:#FDE7DE}
+.factories span.im{border-color:var(--blue);background:#E2EDF3}
+.years{display:flex;gap:6px;flex-wrap:wrap}
+.years span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.years span.now{background:var(--coral);color:#fff}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:12px;border:2px solid var(--line)}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.meter .track{height:22px;border-radius:999px;background:var(--cream);overflow:hidden}
+.meter .track div{height:100%;background:var(--coral);border-radius:999px}
+/* 4단계: 공장 어디에 */
+.locs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}
+.locs button{background:#fff;color:var(--ink);border:3px solid var(--line);text-align:left;display:grid;gap:6px;align-content:start;font-family:var(--text);font-size:1rem;padding:12px 14px;line-height:1.4}
+.locs button b{font-family:var(--display);font-weight:400;font-size:1.5rem}
+.locs button ul{margin:0;padding-left:1.1em}
+.locs button.right{background:#E3F1E7;border-color:var(--ok)}
+.locs button.wrong{background:#F6E1DB;border-color:var(--bad)}
+/* 5단계 */
+.truck{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;font-size:1.8rem;line-height:1}
+.truck i{font-style:normal;display:inline-block;width:26px;height:20px;border-radius:3px;background:var(--coral)}
+.truck i:nth-child(3n){background:var(--blue)} .truck i:nth-child(3n+1){background:var(--gold)}
+.lanes{display:grid;gap:8px}
+.lane{display:grid;grid-template-columns:9em 1fr 3em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px}
+.lane .nm{font-family:var(--display);font-size:1.15rem}
+.lane .road{position:relative;height:34px;background:repeating-linear-gradient(90deg,var(--cream) 0 22px,#fff 22px 30px);border-radius:8px}
+.lane .road span{position:absolute;top:0;font-size:1.7rem;line-height:34px;transition:left .6s}
+.lane .road::after{content:'🚢';position:absolute;right:-4px;top:0;font-size:1.6rem;line-height:34px}
+.sent{display:grid;gap:10px}
+.sent .fill{font-family:var(--display);font-size:1.35rem;line-height:1.5;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px}
+.sent .fill u{text-decoration:none;border-bottom:3px solid var(--coral);color:var(--coral2);padding:0 .2em}
+.stars{display:grid;gap:10px}
+.stars .it{background:#fff;border-radius:12px;padding:10px 14px;display:grid;gap:6px}
+.stars .it .row button{background:var(--cream);color:var(--ink);font-size:1.4rem;padding:.3em .8em}
+.stars .it .row button[aria-pressed="true"]{background:var(--gold);color:#fff}
+@media (max-width:820px){
+  .hero,.tv,.two,.cols{grid-template-columns:1fr}
+  .choose,.opts,.opts.three,.comp,.locs,.prices{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(5,1fr)}.steps button{font-size:.8rem}
+  .factories{grid-template-columns:repeat(5,1fr)}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+  .lane{grid-template-columns:6em 1fr 2.5em}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🌐</i> 세계 무역 작전실</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+// 사회 2단원 17~18차시 "무역을 통한 세계 여러 나라의 상호 의존과 경쟁 관계를 살펴볼까요" (교과서 106~111쪽)
+// 성취기준 [6사11-03] 사례를 통해 무역의 의미를 이해하고, 국가 간 무역이 발생하는 이유를 탐구한다.
+const STAGES=[null,
+  {k:'함께 만들기',t:'상호 의존: 스마트폰과 광물 협력 (교과서 106쪽)',tm:8},
+  {k:'경쟁하기',t:'경쟁: 세 가지 경쟁 모습 (교과서 107쪽)',tm:5},
+  {k:'관세 실험실',t:'관세 실험실: 우리 철강 키우기 (교과서 108쪽)',tm:9},
+  {k:'공장 어디에',t:'기업의 세계화: 공장을 어디에 지을까 (교과서 109쪽)',tm:5},
+  {k:'정리',t:'컨테이너 퀴즈 · 한 문장 설명 · 자기 평가 (교과서 110~111쪽)',tm:7}];
+const NST=5;
+
+// 1단계: 스마트폰 한 대에 담긴 여러 나라 (지도서 248쪽 '스마트폰에 담긴 세계 여러 나라의 상호 의존', 그린피스 누리집)
+const PLACES={
+  cd:{n:'콩고 민주 공화국',ll:[23,-3],lp:'l'},
+  za:{n:'남아프리카 공화국',ll:[25,-29],lp:'l'},
+  kr:{n:'대한민국',ll:[127.5,36.5],lp:'t'},
+  jp:{n:'일본',ll:[139,36],lp:'r'},
+  my:{n:'말레이시아',ll:[102,3.5],lp:'b'},
+  vn:{n:'베트남',ll:[106,16],lp:'l'}};
+const PARTS=[
+  {id:'co',e:'🔋',n:'배터리 속 코발트',c:'cd',clue:'배터리에 쓰이는 코발트는 아프리카 한가운데에 있는 이 나라에서 많이 나와요.'},
+  {id:'pd',e:'🔌',n:'전자 부품 속 팔라듐',c:'za',clue:'전자 부품에 쓰이는 팔라듐은 아프리카 남쪽 끝에 있는 이 나라와 러시아에서 주로 나와요.'},
+  {id:'ap',e:'🧠',n:'반도체 (AP·메모리)',c:'kr',clue:'많은 정보를 처리하는 반도체와 메모리는 반도체를 가장 많이 수출하는 이 나라의 기업들이 앞서 만들어요.'},
+  {id:'cam',e:'📷',n:'카메라 센서',c:'jp',clue:'정밀한 카메라 센서는 로봇 같은 정밀 기계 기술이 뛰어난 우리나라 동쪽 섬나라 기업들도 많이 만들어요.'},
+  {id:'coil',e:'🧲',n:'코일 같은 기본 부품',c:'my',clue:'콘덴서나 코일 같은 기본 부품은 타이와 함께 동남아시아의 이 나라에서도 만들어요.'},
+  {id:'asm',e:'🏭',n:'마지막 조립',c:'vn',clue:'부품을 모아 마지막으로 조립하는 공장이 많은 나라예요. 중국과 국경을 맞대고 있어요.'}];
+const PN=Object.fromEntries(PARTS.map(x=>[x.id,x]));
+const S1Q=[
+  {id:'i1',e:'📱',q:'스마트폰처럼 여러 나라의 우수한 물자를 한데 모아 새 제품을 만들어요. 나라들은 서로 어떤 관계일까요?',a:'서로 기대어 돕는 관계 (상호 의존)',o:['서로 아무 상관 없는 관계','한 나라가 혼자 다 만드는 관계']},
+  {id:'i2',e:'🇰🇷',q:'기사에서 우리나라가 얻을 수 있는 이익은?',a:'니켈, 주석 같은 자원을 안정적으로 얻어요',o:['인도네시아의 땅을 사요','인도네시아에 기술을 팔지 않아요']},
+  {id:'i3',e:'⛏️',q:'기사에서 인도네시아가 얻을 수 있는 이익은?',a:'우리나라의 광물 탐사 기술로 자원을 개발해요',o:['우리나라에 니켈을 공짜로 줘요','다른 나라와 무역을 그만둬요']}];
+const PRED_EASY=['두 나라가 더 친해질 거예요.','다른 분야에서도 함께 일할 거예요.','두 나라 모두 더 잘살게 될 거예요.'];
+
+// 2단계: 무역을 통한 경쟁 (교과서 107쪽)
+const GOOD=[
+  {id:'g1',t:'🏭 산업이 성장해요',ok:1},{id:'g2',t:'👷 일자리가 늘어나요',ok:1},{id:'g3',t:'💰 사람들의 소득이 늘어나요',ok:1},
+  {id:'g4',t:'📦 물건을 더 만들 필요가 없어요',ok:0},{id:'g5',t:'🚫 다른 나라와 사이가 꼭 나빠져요',ok:0}];
+const COMP={
+  tech:{e:'🔬',n:'첨단 기술 개발 경쟁'},
+  build:{e:'🏗️',n:'다른 나라 시설 건설 경쟁'},
+  port:{e:'⚓',n:'더 나은 무역 환경 경쟁'}};
+const CARDS=[
+  {id:'ai',e:'🤖',t:'더 좋은 생성형 인공지능 제품을 먼저 만들어 세계에 수출하려고 해요.',k:'tech'},
+  {id:'chip',e:'💾',t:'더 빠르고 전기를 덜 쓰는 반도체를 먼저 개발하려고 해요.',k:'tech'},
+  {id:'bridge',e:'🌉',t:'우리나라 기업이 인도의 큰 다리를 짓는 사업에 참여해 완공했어요.',k:'build'},
+  {id:'power',e:'⚡',t:'여러 나라 기업이 다른 나라의 철도와 발전소를 짓는 일을 맡으려고 해요.',k:'build'},
+  {id:'busan',e:'🏗️',t:'부산항에 컨테이너를 자동으로 옮기는 자동화 항만 시스템을 갖췄어요.',k:'port'},
+  {id:'air',e:'✈️',t:'항구와 공항에 물건을 빨리 처리하는 시설을 갖춰 무역을 편하게 하려고 해요.',k:'port'}];
+const CN=Object.fromEntries(CARDS.map(x=>[x.id,x]));
+const S2Q=[{id:'c1',e:'🌉',q:'세계 여러 나라가 다른 나라의 시설을 맡아 지으려고 경쟁하는 까닭은?',a:'큰 이익을 얻고 뛰어난 기술을 세계에 알릴 수 있어서',o:['시설을 공짜로 지어 주고 싶어서','자기 나라에는 지을 곳이 없어서']}];
+
+// 3단계: 관세 실험실 (교과서 108쪽, 1970년대 우리나라 철강 산업)
+// 수입 철강 값 100. 우리 철강은 처음 150. 관세를 매기면 수입 철강 값이 올라가요.
+// 공장 10곳은 더 싼 쪽을 사요(공장마다 조금씩 다르게 생각해요). 우리 철강을 많이 팔수록 기술이 늘어 만드는 값이 내려가요.
+// 공장들이 더 낸 돈(소비자 부담) = 관세 없는 값 100보다 더 낸 돈. 관세를 계속 높게 두면 이 돈이 쌓여요.
+const STEEL={imp:100,start:150,min:70,years:5,tariffs:[0,10,20,30,40,50,60]};
+function steelYear(c,t){
+  const imp=STEEL.imp*(1+t/100);let n=0;const pick=[];
+  for(let i=0;i<10;i++){const k=c+(i-4.5)*4<=imp;pick.push(k?1:0);if(k)n++;}
+  // 관세가 있으면 우리 회사는 경쟁이 줄어 수입 철강 값 가까이 받아요(만드는 값보다 싸게는 안 팔아요)
+  const p=t>0?Math.max(c,Math.round(imp)-5):c;
+  const burden=Math.round(n*Math.max(0,p-STEEL.imp)+(10-n)*(imp-STEEL.imp));
+  const nc=Math.max(STEEL.min,Math.round(c-(1+2.2*n)));
+  return {n,pick,burden,imp:Math.round(imp),nc,p};
+}
+const S3PRE=[
+  {id:'t1',e:'📦',q:'수입이 너무 많이 늘어나면 생길 수 있는 문제는?',a:'우리나라 기업이 피해를 입고 산업이 자라기 어려워요',o:['우리나라 기업이 무조건 커져요','물건을 하나도 살 수 없어요']},
+  {id:'t2',e:'🧾',q:'다른 나라에서 수입하는 상품에 매기는 세금을 무엇이라고 할까요?',a:'관세',o:['용돈','입장료']}];
+const S3POST=[
+  {id:'t3',e:'🏗️',q:'1970년대 우리나라가 수입 철강 제품에 높은 관세를 매긴 까닭은?',a:'우리나라 철강이 시장에서 경쟁력을 갖추게 하려고',o:['수입 철강을 더 많이 팔려고','철강을 아예 쓰지 않으려고']},
+  {id:'t4',e:'🚧',q:'관세 말고 나라에서 국내 산업을 보호하는 또 다른 방법은?',a:'일정한 양 이하로만 수입하게 해요',o:['수입품 값을 깎아 줘요','수출을 모두 막아요']}];
+const OPIN=[{id:'keep',t:'🛡️ 관세를 계속 높게 둬요',d:'우리 회사를 지켜야 해요'},{id:'down',t:'⚖️ 회사가 크면 관세를 낮춰요',d:'공장과 소비자도 생각해야 해요'}];
+
+// 4단계: 기업의 세계화 (교과서 109쪽, 『한국 무역 신문』 2022. 12. 11.)
+const LOCS=[
+  {id:'a',e:'🏙️',n:'가 나라',ok:0,f:['💰 일하는 사람의 임금이 높아요','🗺️ 큰 시장(중국)과 멀어요','🧾 이 나라 물건에 낮은 관세를 약속한 나라가 적어요'],why:'임금이 높으면 운동화 값이 비싸져요.'},
+  {id:'vn',e:'🏭',n:'베트남',ok:1,f:['💰 일하는 사람의 임금이 낮은 편이에요','🗺️ 중국과 국경을 맞대고 있어 큰 시장에 쉽게 보내요','🧾 베트남 물건에 낮은 관세를 약속한 나라가 많아요'],why:''},
+  {id:'c',e:'🏝️',n:'다 나라',ok:0,f:['💰 일하는 사람의 임금이 낮아요','🗺️ 큰 시장과 멀고 항구가 작아요','🧾 이 나라 물건에 낮은 관세를 약속한 나라가 적어요'],why:'임금은 낮지만, 시장과 멀고 관세가 높아 팔기 어려워요.'}];
+const S4Q=[
+  {id:'v1',e:'👷',q:'베트남의 외국 기업 공장에서 일하는 사람들이 얻는 좋은 점은?',a:'일을 하며 필요한 소득을 얻어요',o:['일을 안 해도 돈을 받아요','공장이 모두 문을 닫아요']},
+  {id:'v2',e:'🛍️',q:'베트남에서 만든 제품을 사는 전 세계 사람들이 얻는 좋은 점은?',a:'더 싼 값에 다양한 제품을 살 수 있어요',o:['제품 값이 두 배로 올라요','제품을 살 수 없게 돼요']},
+  {id:'v3',e:'⚠️',q:'한 기업이 여러 나라에 공장을 운영할 때 생길 수 있는 문제는?',a:'일하는 사람이 정당한 임금을 못 받거나 환경이 오염될 수 있어요',o:['아무 문제도 생기지 않아요','모든 나라의 임금이 똑같아져요']}];
+
+// 5단계: 정리 (교과서 110~111쪽 '재미있게 확인해요', '별별 직업 속으로', '얼마나 잘했을까')
+const OX=['⭕ 맞아요','❌ 틀려요'];
+const QUIZ=[
+  {id:'q1',e:'🚚',q:'무역이란 나라와 나라 사이에 물자나 서비스를 주고받는 것이다.',a:OX[0],o:[OX[1]],easy:1},
+  {id:'q2',e:'🚚',q:'우리나라는 원유, 천연가스, 철광석 같은 천연자원을 주로 수출한다.',a:OX[1],o:[OX[0]],easy:1},
+  {id:'q3',e:'🚚',q:'세계 여러 나라는 무역을 통해 상호 의존과 경쟁을 하고 있다.',a:OX[0],o:[OX[1]],easy:1},
+  {id:'q4',e:'🚚',q:'자유롭게 무역을 하면 모든 나라의 경제가 나빠진다.',a:OX[1],o:[OX[0]],easy:1},
+  {id:'q5',e:'📱',q:'스마트폰 한 대를 만드는 데 여러 나라의 자원과 부품이 쓰여요. 이것은 어떤 관계일까요?',a:'상호 의존',o:['경쟁','관세']},
+  {id:'q6',e:'⚓',q:'부산항이 자동화 항만 시스템을 갖춘 것은 어떤 경쟁일까요?',a:'더 나은 무역 환경을 만들기 위한 경쟁',o:['첨단 기술 개발 경쟁','다른 나라 시설 건설 경쟁']},
+  {id:'q7',e:'🤖',q:'여러 나라가 더 좋은 생성형 인공지능 제품을 만들려는 것은 어떤 경쟁일까요?',a:'첨단 기술 개발 경쟁',o:['다른 나라 시설 건설 경쟁','더 나은 무역 환경 경쟁']},
+  {id:'q8',e:'💼',q:'수출이 늘어나면 좋아지는 점은?',a:'일자리와 사람들의 소득이 늘어요',o:['물건을 덜 만들어도 돼요','다른 나라 물건을 못 사요']},
+  {id:'q9',e:'🧾',q:'나라에서 수입품에 높은 관세를 매기는 까닭은?',a:'국내 산업을 보호하고 성장시키려고',o:['수입품을 더 많이 팔려고','소비자에게 돈을 나눠 주려고']},
+  {id:'q10',e:'🏭',q:'외국 기업이 베트남에 공장을 짓는 까닭이 아닌 것은?',a:'눈이 많이 오는 추운 나라라서',o:['임금이 저렴해서','중국과 가까워서']},
+  {id:'q11',e:'🧑‍💼',q:'수출입 법을 잘 알고 기업의 무역 절차를 대신 처리하며 수출입 물품을 신고하는 직업은?',a:'관세사',o:['항해사','요리사']},
+  {id:'q12',e:'⛏️',q:'우리나라와 인도네시아가 광물 탐사 기술과 자원을 나누어 함께 이익을 얻는 관계는?',a:'상호 의존',o:['경쟁','보호 무역']}];
+const QQ=Object.fromEntries(QUIZ.map(g=>[g.id,g]));
+const EX_DEP=['스마트폰 부품을 여러 나라에서 모아 만들어요','우리나라와 인도네시아가 광물 개발을 함께 해요','외국 기업이 베트남에 공장을 지어요'];
+const EX_COMP=['더 좋은 인공지능 제품을 먼저 만들려고 해요','다른 나라의 다리와 철도를 지으려고 해요','부산항처럼 자동화 항만을 갖추려고 해요','관세로 우리나라 철강 산업을 키웠어요'];
+const SELF=[
+  {id:'k',t:'무역의 의미와 나라 사이에 무역이 일어나는 까닭을 설명할 수 있어요.'},
+  {id:'p',t:'무역 사례에서 여러 나라가 서로 의존하고 경쟁하는 관계를 찾을 수 있어요.'},
+  {id:'v',t:'무역 사례에 관심을 갖고 무역이 필요하다는 것을 존중해요.'}];
+
+// 세계 지도 (Natural Earth 110m 땅 모양, 세계 무역 박람회와 같은 그림)
+const MAP={L0:-130,L1:160,T:70,B:-45,W:1000,H:397};
+const LAND="M691 413L685 413L686 410L688 411L691 411L691 413ZM950 382L953 384L958 383L960 387L958 391L955 392L952 392L950 389L949 387L947 384L950 382ZM1045 383L1048 383L1049 386L1046 390L1044 391L1039 394L1039 397L1037 400L1034 402L1029 403L1027 401L1023 401L1024 397L1029 394L1031 393L1033 392L1036 390L1038 388L1040 386L1042 383L1044 381ZM1050 366L1053 370L1053 368L1055 371L1058 372L1060 373L1062 371L1063 375L1062 377L1059 377L1059 379L1057 382L1055 384L1053 386L1051 384L1053 381L1051 379L1048 378L1050 376L1051 373L1051 371L1049 368L1048 366L1045 363L1044 361L1047 363L1049 363L1050 366ZM1025 318L1021 318L1019 316L1017 315L1014 312L1017 312L1020 314L1023 317L1025 318ZM1063 302L1064 304L1060 304L1061 302L1063 302ZM1069 299L1067 300L1065 300L1066 298L1069 297ZM621 288L621 293L622 296L620 296L620 298L619 301L619 304L617 308L616 312L614 319L612 324L611 328L608 329L605 330L600 328L599 323L598 320L597 318L598 315L600 314L601 311L602 309L600 305L600 302L601 300L602 298L605 297L608 296L610 294L613 292L613 289L617 287L618 283L620 286L621 288ZM943 289L945 292L947 291L950 293L950 298L951 300L952 303L953 307L957 309L959 311L962 312L963 315L964 319L967 320L969 323L971 325L975 329L976 332L976 336L978 339L978 342L976 346L975 351L974 354L971 356L970 358L968 363L966 367L965 370L964 372L960 372L956 374L953 376L950 375L948 372L943 376L941 375L937 374L933 373L931 371L930 368L928 365L925 365L925 360L923 363L920 363L922 361L924 358L923 355L921 358L919 359L917 362L915 361L912 356L911 355L907 352L904 352L901 350L895 351L890 352L887 353L883 353L880 355L877 355L875 359L872 359L867 358L864 359L862 359L860 361L857 362L853 363L850 363L847 360L845 358L847 356L848 353L845 347L845 343L844 341L842 339L842 336L840 333L839 330L842 332L840 328L839 326L840 323L840 319L842 317L842 319L844 317L846 316L848 314L851 313L853 313L856 312L859 311L861 311L865 310L867 308L870 304L870 301L872 298L874 301L874 299L877 298L877 295L879 294L882 292L885 290L889 291L891 293L895 293L896 289L899 285L901 284L905 283L903 281L907 281L909 282L912 283L915 284L917 283L921 284L918 288L916 291L916 293L918 295L921 296L925 300L928 301L932 303L934 302L935 298L937 294L937 291L937 286L938 283L938 280L941 280L942 283L943 286L943 289ZM865 277L859 275L862 274L865 276ZM877 277L874 277L876 274L879 272L883 271L885 271L887 271L883 273L880 274L877 277ZM855 270L858 270L855 272L853 273L854 271ZM872 270L866 272L862 272L865 270L867 271L869 271L872 270ZM1000 270L997 270L995 268L999 269ZM823 265L829 265L837 266L838 268L843 268L847 271L843 272L840 270L836 271L833 270L830 270L826 268L823 268L815 267L812 265L814 262L818 262L821 264L823 265ZM913 263L911 265L911 263L912 260L913 263ZM986 265L983 264L982 262L981 259L983 261L985 263L986 265ZM972 261L970 262L966 263L962 262L960 260L963 261L966 259L968 260L971 258L973 256L974 258L972 261ZM887 254L883 254L886 252ZM898 252L899 255L897 254L894 253L889 253L894 251L898 252ZM976 257L974 255L970 252L968 251L971 251L973 253L976 255ZM911 246L912 251L915 253L918 250L922 248L925 248L928 249L931 250L934 251L940 253L947 255L949 257L951 258L957 263L955 265L956 267L959 269L961 273L963 274L966 275L968 277L966 278L962 277L958 277L956 274L954 273L952 270L947 268L944 269L942 270L943 273L940 274L935 273L932 270L928 270L923 271L924 268L926 267L926 263L924 260L917 257L914 257L909 254L907 256L906 253L903 251L907 250L910 250L904 249L903 247L900 247L898 245L903 244L910 244ZM880 237L877 240L875 241L871 240L866 240L863 241L862 243L865 247L867 245L874 244L870 247L867 248L871 253L873 258L873 260L870 260L871 257L868 258L868 256L865 254L865 251L863 252L863 256L864 261L861 261L861 257L860 254L858 251L859 249L860 246L861 241L865 237L868 238L872 239L876 238L880 236ZM892 238L892 241L890 243L891 244L889 243L888 238L888 235L892 236ZM813 262L809 262L806 259L802 256L801 254L798 251L796 249L794 244L791 241L790 238L788 235L785 233L783 230L781 228L777 224L779 223L784 224L787 227L790 229L792 231L795 234L799 234L802 237L804 240L806 241L805 244L807 245L809 248L810 250L812 250L814 252L813 257L813 262ZM855 235L859 239L855 239L853 241L854 244L850 247L850 250L849 256L844 256L843 254L841 254L835 254L831 252L828 252L828 247L824 243L824 240L824 237L826 235L829 236L832 235L832 232L838 231L840 228L842 226L846 223L849 220L851 218L854 219L856 222L859 223L857 225L855 227L853 230L855 234ZM884 213L884 215L883 220L882 216L881 218L882 221L877 220L876 218L875 215L872 216L869 218L870 214L872 213L874 212L878 212L881 211L881 208L884 210L884 213ZM728 220L725 221L724 218L723 213L725 208L727 210L729 212L730 216L730 219ZM238 207L235 207L236 205L238 204L238 207ZM876 206L873 209L870 208L872 206L874 204L874 206L876 203L876 206ZM857 209L852 213L854 210L857 208L859 206L860 202L861 205L859 207L857 209ZM869 201L871 202L873 203L869 206L869 202ZM881 200L882 204L879 203L880 206L878 204L877 202L879 201L877 198L880 198ZM867 197L866 200L865 198L863 195L866 195ZM867 178L869 179L871 183L870 186L868 187L867 189L868 192L871 192L876 194L876 197L873 197L872 195L869 194L866 195L864 192L862 190L862 185L863 181L865 178ZM222 179L219 180L216 178L220 178L222 179ZM183 180L180 180L178 179L181 178L183 178L186 180L183 180ZM198 173L201 174L204 173L206 174L210 175L213 177L210 178L207 178L205 178L202 181L199 179L195 179L192 178L195 178L198 178L197 176L195 174L198 173ZM829 177L826 179L823 178L823 175L825 173L828 172L831 174L829 177ZM-88 176L-90 174L-88 172L-86 174L-88 176ZM174 163L178 164L182 167L184 168L188 169L190 170L192 172L190 173L187 173L185 173L180 173L182 171L179 170L177 167L172 166L166 165L163 163L160 165L157 166L158 164L161 162L164 162L168 162L170 162L174 163ZM181 160L179 158L179 155L181 158ZM866 163L865 166L863 163L862 160L864 157L867 154L868 157L866 163ZM913 124L911 127L908 127L907 129L905 128L907 124L910 123L913 124ZM568 119L565 120L562 122L560 120L562 119L564 120L568 119ZM530 118L532 120L535 119L537 120L534 121L529 120ZM502 110L501 112L500 115L498 114L491 112L496 110L499 110L502 110ZM480 99L482 102L482 106L479 107L477 102L480 99ZM934 113L933 116L932 120L927 122L921 122L917 126L914 125L914 122L908 123L904 125L900 125L903 127L901 133L899 135L898 130L896 129L895 127L898 126L900 123L903 122L906 119L912 118L916 119L920 113L922 115L927 111L929 110L931 106L931 102L932 99L936 99L938 104L938 106L934 110L934 113ZM481 96L480 99L478 96L481 93L481 96ZM945 89L947 90L949 88L950 92L945 93L942 97L937 94L935 98L931 98L930 95L932 92L936 92L937 87L938 84L942 88L945 89ZM229 81L231 81L234 81L233 83L227 81L228 79ZM235 72L229 71L226 69L232 70L235 72ZM22 74L15 73L11 71L7 69L5 67L9 67L15 68L18 71L21 72L22 74ZM255 67L252 70L255 69L257 69L259 71L264 72L263 74L265 74L267 78L265 81L261 80L262 77L257 80L254 77L251 77L244 77L246 75L247 72L250 67L253 65L256 63L255 67ZM-9 55L-6 55L-7 59L-4 62L-8 60L-11 57L-11 55ZM944 66L947 73L942 71L940 76L943 80L943 82L941 80L938 83L938 80L938 77L938 73L938 70L939 66L937 62L937 58L940 56L942 60L942 63L944 66ZM425 61L419 63L414 63L417 59L415 56L420 53L422 51L425 51L429 53L427 56L427 58L425 61ZM492 50L490 52L486 51L491 48ZM-79 44L-83 46L-85 43L-82 42L-78 42L-79 44ZM438 39L434 43L438 42L442 43L441 45L438 48L441 49L444 53L447 54L449 58L454 60L454 62L453 65L450 66L446 66L440 67L436 68L433 68L430 69L433 65L437 64L431 64L434 61L432 59L432 57L438 57L436 53L432 53L432 50L429 51L429 47L427 46L428 42L431 39L434 40L438 39ZM-123 35L-127 35L-129 34L-126 33L-123 34ZM175 27L174 29L171 28L174 26ZM166 25L162 27L159 27L161 24L166 24ZM-144 21L-142 22L-137 23L-133 23L-136 24L-139 23L-143 23ZM155 15L157 16L163 18L167 19L170 21L172 22L169 23L164 22L162 20L158 22L153 24L152 22L148 22L151 21L151 18L152 15L155 15ZM398 12L397 14L401 17L397 19L387 22L384 22L379 22L370 21L373 19L366 18L372 17L364 15L367 13L372 12L377 15L383 13L387 14L393 12L398 12ZM187 10L183 10L183 6L187 6L189 7L187 10ZM1069 4L1077 6L1086 10L1088 13L1088 10L1097 11L1104 14L1100 15L1095 16L1095 19L1090 20L1087 19L1083 18L1079 15L1075 16L1073 15L1069 14L1071 16L1069 17L1065 19L1060 19L1063 20L1065 23L1067 26L1060 26L1050 28L1047 29L1042 31L1037 33L1031 33L1022 35L1017 35L1012 35L1011 37L1007 41L1011 43L1011 48L1007 48L1006 51L1001 54L1000 58L995 59L994 62L989 66L988 63L986 58L984 50L986 46L989 44L994 41L1001 37L1006 33L1013 31L1015 26L1011 26L1009 29L1000 33L998 28L989 30L980 35L983 37L975 38L970 39L970 36L965 36L961 37L950 37L939 38L927 45L914 53L920 53L921 55L925 56L927 54L931 55L936 58L936 61L933 65L933 69L931 74L926 79L925 82L920 86L916 90L913 92L909 94L904 92L900 95L896 97L896 101L893 102L890 103L888 106L891 108L894 112L895 115L895 119L893 121L890 121L888 123L884 123L885 118L883 115L886 114L883 111L880 112L878 110L880 108L881 106L878 105L872 105L869 106L866 107L868 106L870 102L868 100L865 102L861 104L859 106L855 106L854 108L855 110L858 111L861 113L865 111L868 112L870 112L866 115L864 117L861 119L859 121L863 123L864 126L866 130L869 132L869 135L866 136L869 139L869 141L868 144L863 148L861 153L857 157L853 160L848 163L844 163L842 165L839 166L834 167L830 168L829 171L826 169L822 167L816 170L813 173L813 176L815 179L818 184L822 186L824 189L825 195L825 201L822 204L818 206L815 209L811 212L810 210L811 207L808 205L805 205L804 203L802 200L799 198L796 198L796 195L793 195L793 199L791 204L790 207L790 210L793 210L794 213L795 216L797 218L800 220L803 223L805 225L805 227L805 230L806 233L808 236L805 237L802 235L798 232L795 228L795 225L794 223L794 221L792 218L790 214L788 213L787 211L788 207L788 205L789 202L788 200L788 196L787 195L785 190L785 186L783 183L781 185L777 187L773 186L774 182L774 179L771 175L769 173L767 170L766 167L764 163L760 163L760 166L757 166L752 167L748 167L748 170L747 172L742 174L738 178L735 181L732 183L730 185L727 187L724 189L725 194L725 197L724 200L724 206L720 209L718 211L717 213L712 211L711 206L709 203L706 198L706 193L705 191L702 186L700 180L699 175L699 171L699 168L694 170L691 170L687 165L687 163L683 160L681 159L680 157L677 154L671 155L665 155L660 155L654 154L650 153L646 153L645 149L640 149L637 150L633 149L629 146L626 145L624 142L621 138L617 137L614 138L614 140L615 143L617 146L619 148L621 150L621 152L623 154L623 156L623 154L625 151L626 155L626 158L630 158L632 158L637 156L639 154L642 152L643 156L644 158L646 159L649 160L652 162L655 164L653 167L651 169L650 171L648 172L648 176L643 178L642 180L639 181L637 183L633 184L629 185L628 188L625 189L619 191L616 193L614 193L612 195L609 195L606 196L604 197L602 198L598 198L597 196L597 193L596 191L596 187L595 184L594 181L590 177L589 174L587 172L583 168L583 166L581 160L578 158L576 156L576 153L573 150L571 147L569 145L568 143L569 140L567 144L565 146L563 144L560 139L561 143L563 146L566 151L567 153L568 155L571 159L571 162L575 165L577 169L576 173L578 177L581 180L583 184L584 187L586 188L590 192L592 194L594 196L597 198L598 200L598 203L600 206L605 205L609 204L612 203L615 202L618 202L622 201L625 200L624 203L624 206L623 210L621 214L619 218L616 223L613 227L609 232L605 235L600 238L597 241L593 245L592 247L589 249L587 251L587 253L585 257L582 262L584 265L583 268L583 271L585 273L586 277L588 279L588 282L588 285L588 291L588 295L587 297L584 299L581 301L577 302L573 306L570 309L568 312L570 315L570 318L571 321L571 323L569 326L566 327L562 329L561 332L561 336L560 339L557 343L555 345L552 349L548 353L546 355L543 356L539 358L537 359L533 359L530 358L526 359L523 360L520 360L517 362L514 361L512 359L511 357L510 354L511 351L509 348L507 345L505 340L502 338L501 335L500 332L499 329L498 324L498 320L496 317L494 314L493 310L492 307L489 304L489 301L489 296L490 293L491 288L494 285L496 281L494 277L494 275L493 273L494 271L493 268L492 266L490 263L489 259L487 255L483 252L481 249L479 245L479 243L480 241L481 238L482 234L482 231L481 229L478 227L474 226L471 227L469 227L467 225L466 222L463 220L461 220L458 220L455 220L452 221L447 223L445 224L442 225L438 224L434 224L432 224L428 224L426 225L422 227L417 225L414 222L411 220L409 218L405 217L404 215L403 211L401 209L399 207L398 205L394 202L392 201L391 199L390 196L389 192L391 188L391 184L393 179L392 176L392 172L389 169L390 166L392 163L393 160L395 158L397 155L398 151L401 150L403 146L405 145L408 144L411 142L415 138L414 134L416 131L418 127L422 125L424 124L427 120L428 118L430 118L432 120L436 119L439 120L444 118L448 118L450 116L453 115L459 115L465 114L470 114L474 114L477 114L481 113L483 113L486 114L485 116L486 118L486 121L483 123L486 125L488 127L492 128L496 129L501 130L502 133L506 134L510 135L514 137L517 135L517 132L520 129L523 128L527 129L530 131L534 132L540 133L543 134L546 135L551 134L555 133L558 133L562 135L565 135L567 133L569 128L571 125L572 122L572 119L572 116L568 115L566 117L560 117L558 115L554 115L551 117L547 115L544 115L542 112L539 110L541 107L539 105L542 102L548 102L549 99L556 100L560 98L564 97L570 97L576 99L581 100L585 100L587 100L592 98L591 94L589 93L586 92L582 89L578 87L575 85L577 85L580 82L578 81L583 79L580 79L577 79L575 80L572 81L569 82L571 85L574 85L570 87L565 89L564 86L560 85L564 83L558 82L554 81L553 83L550 85L549 87L547 91L545 92L544 95L545 97L548 99L544 100L539 103L538 101L534 100L530 101L532 103L529 104L527 102L527 105L529 106L529 109L531 112L528 111L527 113L528 116L526 116L523 114L522 112L521 109L518 106L515 103L515 99L513 96L509 94L507 92L503 91L501 89L500 86L497 85L494 84L491 85L491 88L495 91L497 94L500 97L503 97L506 99L509 101L512 102L509 103L506 102L505 104L507 106L506 108L504 111L503 108L502 105L500 103L497 101L493 99L490 98L487 95L485 93L483 90L479 88L475 91L471 93L464 92L459 93L459 97L455 99L451 100L449 103L447 106L449 108L447 109L446 112L443 112L441 115L437 115L433 115L431 116L428 117L426 114L423 114L419 114L418 112L416 109L416 106L417 103L418 99L417 97L417 95L421 91L425 91L430 91L433 92L436 92L442 92L444 90L444 83L441 79L438 77L433 76L432 74L437 73L443 74L442 70L445 71L453 69L454 66L457 65L460 64L465 58L469 57L472 57L476 56L479 55L478 52L476 50L476 46L478 44L481 44L485 42L484 45L486 47L482 50L483 53L486 54L490 55L495 55L499 55L505 53L509 52L512 53L516 54L522 51L521 48L521 46L523 43L526 42L529 45L531 45L532 42L529 39L533 36L537 36L541 36L545 36L549 34L545 33L539 33L533 34L527 35L525 33L522 32L523 29L521 26L523 24L526 21L534 18L536 17L531 14L525 15L521 17L516 22L510 25L507 30L510 32L513 34L510 38L506 39L505 45L503 48L499 48L497 50L493 51L492 47L489 43L486 38L484 36L477 40L473 41L468 39L467 36L465 28L469 25L478 23L485 19L491 14L499 8L505 5L514 1L522 -1L528 -1L533 -4L539 -3L545 -4L556 -2L552 -1L556 2L559 0L565 2L574 3L587 7L590 9L590 11L586 13L581 14L565 11L563 12L568 14L569 19L573 20L576 21L574 18L576 17L585 19L588 18L585 16L593 12L597 12L600 14L602 11L599 9L601 7L598 5L608 6L610 8L605 8L608 12L613 11L614 9L621 7L634 4L636 4L633 6L637 7L639 5L646 5L651 4L655 6L659 4L655 2L667 2L672 3L685 7L687 5L683 3L679 2L678 -2L685 -7L687 -10L689 -10L699 -10L696 -5L698 -4L699 -1L698 3L702 5L701 8L694 13L698 13L703 11L707 8L705 6L707 3L703 3L705 -2L700 -5L707 -7L706 -10L709 -8L708 -5L712 -4L710 -6L716 -8L723 -8L729 -6L726 -9L726 -13L732 -13L740 -13L748 -14L745 -15L749 -18L753 -18L760 -19L769 -20L779 -21L782 -20L789 -22L796 -22L800 -25L808 -27L814 -25L809 -25L817 -24L821 -23L831 -23L839 -21L842 -20L837 -17L828 -15L826 -14L830 -14L835 -13L838 -14L840 -12L847 -13L858 -12L873 -10L873 -13L881 -12L886 -12L892 -10L893 -8L891 -7L896 -4L901 -3L904 -6L910 -5L916 -6L922 -5L925 -6L931 -5L928 -8L933 -10L964 -8L967 -6L976 -3L990 -4L997 -3L999 -2L999 1L1003 2L1008 1L1014 1L1020 2L1027 1L1033 5L1037 3L1035 1L1047 1L1054 0L1064 2L1069 4ZM118 3L116 4L112 3L109 4L104 2L107 1L110 -0L113 0L116 2L118 3ZM1069 -5L1069 -3L1065 -3L1069 -5ZM-172 -5L-169 -5L-164 -4L-168 -3L-172 -3L-172 -5ZM136 2L136 5L141 3L145 5L144 7L147 10L151 7L153 4L153 0L158 1L163 1L168 3L166 6L168 8L161 12L156 13L153 12L148 17L143 20L138 21L136 22L135 24L131 25L127 28L123 31L122 34L122 38L127 39L128 42L130 45L135 44L141 45L145 47L147 48L151 49L155 51L161 51L165 51L164 54L165 58L168 62L173 65L175 64L177 60L175 55L173 53L179 51L182 49L184 46L184 44L182 41L178 39L182 35L180 32L179 27L181 26L187 27L191 27L194 26L197 27L201 29L208 31L208 34L209 38L213 39L215 41L220 39L223 35L226 33L228 36L233 41L237 45L235 47L240 49L243 51L248 52L251 53L252 56L255 56L256 62L254 63L251 64L246 65L241 68L235 69L228 68L223 68L219 68L216 71L212 72L207 77L203 80L206 79L212 75L219 72L224 72L227 73L224 76L225 79L226 82L230 84L236 83L240 79L240 82L242 83L238 85L230 87L227 89L223 91L220 91L220 88L226 85L221 85L217 86L214 89L210 90L206 91L205 93L204 96L207 97L205 98L200 99L197 99L194 100L199 100L195 101L192 102L192 105L190 107L188 105L189 108L188 110L186 113L187 111L185 109L185 107L185 110L183 110L185 111L185 114L187 119L185 121L181 123L179 125L176 126L171 129L169 131L168 133L167 136L168 138L169 141L171 143L172 149L172 151L171 155L168 155L167 152L165 149L163 147L163 143L160 138L155 139L153 138L150 137L146 137L143 137L141 137L140 140L137 141L135 141L132 139L129 140L127 139L122 140L119 142L115 144L113 146L112 150L113 152L112 155L111 158L111 162L111 166L113 170L115 173L118 177L121 178L126 178L128 178L131 177L133 176L135 175L136 170L139 168L143 167L146 168L149 168L147 172L146 174L145 179L144 181L144 185L142 187L144 187L146 187L150 187L153 187L155 186L158 188L161 189L161 192L160 195L160 197L160 201L159 203L161 206L164 209L165 211L167 211L171 210L174 208L178 209L180 211L183 212L186 209L188 205L190 203L192 203L195 203L198 201L201 199L203 200L200 202L201 206L200 208L201 210L203 208L202 204L206 202L207 200L208 202L211 202L213 204L216 205L220 205L222 206L225 207L226 206L231 205L235 205L232 206L236 208L239 209L239 212L242 213L244 214L247 216L248 218L250 220L255 222L259 221L262 222L266 223L270 226L272 229L274 235L276 238L273 241L281 242L281 246L283 244L288 245L293 247L295 249L299 250L305 252L310 252L316 254L320 258L323 259L326 259L328 265L327 273L325 275L321 280L318 284L316 287L314 289L314 296L313 301L313 303L311 309L308 314L307 317L304 319L303 321L300 321L294 322L292 324L288 325L284 328L281 331L281 334L280 339L277 343L273 349L270 351L268 353L267 356L264 358L263 360L259 362L256 362L251 361L249 361L247 359L251 363L250 366L253 367L249 373L244 375L237 376L233 376L233 380L232 383L228 384L225 383L224 387L227 388L229 389L226 390L224 392L223 395L219 397L216 399L215 401L219 404L222 405L221 408L217 410L214 414L211 415L211 420L213 422L209 422L204 424L203 427L198 426L194 424L190 422L189 420L190 418L188 416L188 410L189 406L193 404L187 403L191 400L192 394L196 395L198 388L195 387L194 391L192 391L193 386L194 380L196 377L195 374L195 370L198 364L200 359L202 354L201 348L202 346L202 341L204 337L204 330L206 323L207 316L206 310L206 305L202 303L195 298L189 294L186 292L185 289L182 284L179 277L176 271L173 266L171 264L168 263L168 258L169 256L171 253L173 251L169 249L169 245L171 243L172 240L174 238L176 237L177 234L180 232L181 230L182 228L182 226L181 222L181 219L180 217L178 214L177 212L174 211L172 213L172 216L169 217L167 215L165 213L163 213L160 212L159 210L156 208L154 208L152 206L153 203L150 201L148 199L146 197L143 196L140 195L138 194L134 194L130 191L126 188L122 186L117 187L113 187L110 186L107 184L104 184L101 182L98 181L95 180L91 179L86 175L85 173L84 170L85 168L84 165L80 160L76 157L74 155L72 153L71 150L68 148L67 145L63 143L61 142L59 138L58 135L56 133L52 132L53 135L53 138L57 141L58 144L59 146L61 148L63 150L65 153L67 156L68 158L71 161L69 163L68 161L66 159L63 157L62 154L59 151L57 149L54 148L52 146L54 145L52 141L50 140L49 137L47 135L46 132L44 129L42 126L40 124L36 123L33 123L32 120L29 117L26 112L24 110L22 107L21 104L19 102L20 100L20 97L19 94L20 91L21 84L20 80L19 77L19 75L24 76L26 79L26 75L25 72L18 69L15 68L9 66L7 63L3 60L2 57L-2 54L-4 51L-7 50L-8 47L-12 44L-14 41L-17 41L-23 41L-27 40L-34 36L-37 35L-43 34L-48 35L-55 33L-59 31L-63 32L-62 35L-68 36L-71 37L-75 37L-74 32L-70 31L-75 32L-78 34L-83 37L-80 38L-84 41L-87 42L-91 43L-97 47L-102 50L-104 50L-108 51L-111 52L-114 53L-120 54L-117 52L-113 51L-110 49L-105 48L-104 47L-99 45L-96 43L-95 40L-93 38L-97 39L-100 40L-102 38L-105 38L-108 39L-111 37L-112 35L-117 35L-120 34L-122 33L-125 29L-123 27L-120 25L-116 23L-114 24L-111 22L-109 23L-106 22L-109 19L-106 18L-112 19L-116 19L-121 19L-126 18L-131 15L-127 14L-119 12L-116 12L-109 13L-112 11L-116 10L-119 8L-122 7L-127 6L-125 4L-119 4L-114 2L-110 -1L-107 -2L-100 -3L-97 -3L-92 -5L-86 -4L-84 -2L-77 -3L-72 -1L-68 -2L-61 -1L-54 -0L-51 0L-47 -1L-42 1L-38 1L-31 2L-26 3L-22 4L-19 2L-15 1L-10 2L-5 0L1 -1L3 1L6 -0L9 -1L15 2L19 -1L20 2L24 2L29 1L35 2L43 3L47 4L51 4L56 6L51 7L57 8L66 8L69 7L73 9L77 7L73 6L75 5L79 4L82 4L85 5L88 7L92 7L98 8L104 8L109 8L111 5L117 6L117 9L119 7L122 7L123 3L120 1L116 -0L116 -4L120 -7L125 -6L128 -5L133 -1L130 1L136 2ZM55 -11L53 -9L61 -10L65 -8L69 -10L72 -9L75 -6L77 -7L74 -11L78 -11L81 -11L85 -9L87 -6L88 -3L94 -2L100 -0L94 2L96 3L89 4L83 3L79 3L72 4L62 5L58 5L56 3L51 2L48 3L44 0L46 -0L51 -1L56 -1L61 -1L54 -2L47 -2L42 -2L40 -3L48 -5L43 -4L37 -5L39 -8L42 -9L51 -11L55 -11ZM88 -12L85 -10L80 -12L85 -13L88 -12ZM185 -11L182 -10L178 -10L174 -9L169 -12L171 -13L179 -13L185 -11ZM150 -11L153 -9L156 -12L164 -13L170 -9L170 -7L177 -8L180 -9L188 -8L192 -6L199 -5L203 -3L211 -2L214 -0L217 3L211 4L219 7L225 7L230 11L235 11L234 13L228 17L224 16L218 12L214 13L217 17L222 18L225 23L224 25L220 24L211 22L216 25L220 27L211 26L203 24L199 23L195 20L190 18L180 20L177 19L180 16L186 16L193 16L193 13L198 9L195 7L190 5L183 4L185 3L182 1L179 1L176 -1L168 1L155 0L148 -1L142 -1L140 -3L143 -4L138 -4L137 -8L140 -11L143 -12L152 -13L150 -11ZM102 -13L106 -13L112 -13L110 -10L115 -9L115 -6L109 -4L106 -5L103 -6L95 -9L102 -9L98 -12L102 -13ZM943 -11L938 -11L931 -11L934 -13L938 -13L943 -12ZM127 -10L123 -7L119 -7L117 -10L119 -13L122 -14L130 -14L136 -13L131 -10L127 -10ZM33 -5L24 -3L22 -5L14 -6L18 -10L21 -13L18 -15L29 -15L34 -15L43 -14L46 -13L50 -12L46 -11L37 -9L33 -6ZM968 -18L964 -16L959 -16L952 -18L959 -18L968 -18ZM125 -17L124 -16L119 -16L114 -17L116 -19L121 -19L124 -18ZM949 -19L946 -17L933 -17L927 -16L921 -18L922 -21L927 -21L936 -21L949 -19ZM109 -23L111 -22L110 -17L104 -17L100 -17L95 -19L95 -22L98 -22L104 -23L108 -23ZM75 -21L80 -21L83 -21L82 -17L70 -17L61 -15L56 -15L63 -18L47 -17L42 -18L47 -21L50 -22L60 -21L66 -19L72 -19L67 -22L70 -23L74 -23ZM647 -2L633 -3L626 -5L629 -8L636 -13L633 -13L641 -16L648 -19L659 -22L671 -22L677 -24L683 -24L686 -23L683 -22L671 -20L661 -18L650 -15L645 -12L639 -8L640 -5L647 -2ZM122 -25L126 -23L132 -23L135 -22L139 -20L141 -19L145 -19L150 -19L156 -20L163 -20L169 -20L172 -18L171 -16L166 -15L161 -16L151 -15L144 -15L139 -16L130 -17L128 -19L125 -22L117 -22L113 -23L122 -25ZM48 -26L47 -24L44 -23L41 -22L35 -21L29 -20L25 -21L30 -24L38 -26L43 -26L48 -26ZM125 -26L117 -26L123 -27L125 -26ZM68 -27L62 -26L57 -27L60 -28L65 -28L69 -28ZM534 -27L526 -26L520 -27L522 -27L520 -28L527 -29L534 -27ZM70 -30L66 -29L60 -29L64 -31L70 -30ZM118 -28L113 -27L110 -28L108 -31L113 -30L119 -29ZM103 -29L99 -28L93 -29L86 -29L89 -30L85 -31L91 -32L101 -30L103 -29ZM811 -29L791 -27L797 -32L800 -32L803 -32L812 -30ZM511 -33L523 -31L514 -30L512 -27L509 -26L507 -24L503 -23L496 -25L499 -27L494 -28L487 -31L484 -33L494 -35L496 -33L500 -33L507 -35L511 -33ZM536 -36L543 -35L538 -33L528 -32L518 -33L512 -34L508 -36L519 -37L524 -36L527 -37L536 -36ZM625 -36L620 -36L617 -36L612 -35L609 -35L611 -36L603 -37L610 -37L615 -37L618 -37L621 -38L626 -37ZM793 -31L785 -30L776 -31L770 -33L767 -35L763 -36L772 -38L779 -39L786 -37L794 -34L793 -31ZM148 -33L152 -32L148 -31L141 -29L135 -28L128 -29L124 -30L127 -32L121 -32L117 -34L115 -35L117 -37L120 -38L123 -38L130 -39L134 -37L140 -36L145 -36L148 -33ZM212 -45L221 -45L229 -45L235 -44L226 -41L218 -40L215 -40L222 -40L214 -38L209 -37L203 -34L196 -33L194 -33L183 -32L188 -32L185 -31L188 -29L185 -28L180 -27L173 -25L180 -24L170 -21L161 -22L151 -22L146 -22L140 -22L146 -25L144 -27L155 -26L151 -28L145 -29L148 -30L154 -31L150 -34L149 -35L158 -35L161 -35L166 -36L158 -37L146 -36L140 -37L137 -39L133 -40L138 -42L142 -42L148 -42L153 -44L158 -44L161 -43L164 -44L169 -45L175 -45L185 -45L197 -46L205 -45L212 -45ZM355 -47L376 -44L370 -43L357 -42L338 -42L352 -42L363 -41L369 -42L372 -41L368 -38L377 -40L394 -41L404 -40L406 -39L392 -37L379 -35L387 -35L383 -32L380 -30L380 -26L385 -24L379 -24L374 -23L380 -21L381 -18L377 -18L381 -15L374 -15L378 -13L372 -11L367 -11L371 -9L365 -9L367 -7L372 -5L373 -2L367 -2L364 -3L360 -5L361 -3L357 -1L366 -1L371 -0L362 3L353 5L343 6L339 6L335 8L330 11L323 14L321 14L316 15L311 16L308 18L308 20L306 23L301 25L302 28L300 31L299 34L294 34L289 32L282 32L279 30L276 26L270 22L268 20L268 17L263 13L264 11L262 10L266 6L271 4L273 0L269 1L264 2L260 1L259 -1L261 -3L264 -3L271 -2L265 -4L262 -5L259 -5L256 -6L260 -9L257 -10L255 -13L251 -16L246 -18L237 -21L230 -21L220 -21L212 -21L208 -22L202 -24L211 -25L218 -25L203 -26L196 -28L209 -31L222 -32L214 -35L217 -36L229 -39L234 -39L240 -42L251 -42L262 -42L265 -41L275 -43L283 -42L288 -41L295 -40L287 -42L299 -46L311 -45L315 -47L327 -47L355 -47Z";
+const proj=([lon,lat])=>[(lon-MAP.L0)/(MAP.L1-MAP.L0)*MAP.W,(MAP.T-lat)/(MAP.T-MAP.B)*MAP.H];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+/* ---------- 공통 그림 ---------- */
+// 세계 지도: 부품이 나온 나라에서 조립하는 베트남으로 화살표
+function mapSVG({found={},label=true}={}){
+  const to=proj(PLACES.vn.ll);
+  let g=`<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#E0704F"/></marker></defs>
+   <rect width="${MAP.W}" height="${MAP.H}" fill="#CFE3EA"/><path d="${LAND}" fill="#F6EEDA" stroke="#C9B98F" stroke-width="1"/>`;
+  PARTS.filter(p=>p.c!=='vn').forEach(p=>{const n=found[p.id]||0;if(!n)return;const a=proj(PLACES[p.c].ll);
+    const mx=(a[0]+to[0])/2,my=Math.min(a[1],to[1])-Math.max(30,Math.abs(a[0]-to[0])*.15);
+    g+=`<path d="M${a[0].toFixed(0)} ${a[1].toFixed(0)}Q${mx.toFixed(0)} ${my.toFixed(0)} ${to[0].toFixed(0)} ${to[1].toFixed(0)}" fill="none" stroke="#F98F6E" stroke-width="${2+Math.min(5,n*.6)}" stroke-linecap="round" opacity=".8" marker-end="url(#ah)"/>`;});
+  PARTS.forEach(p=>{const pl=PLACES[p.c];const [cx,cy]=proj(pl.ll);const on=(found[p.id]||0)>0;
+    const lx=pl.lp==='l'?cx-24:pl.lp==='r'?cx+24:cx, ly=pl.lp==='t'?cy-26:pl.lp==='b'?cy+38:cy+6, an=pl.lp==='l'?'end':pl.lp==='r'?'start':'middle';
+    g+=`<g opacity="${on?1:.45}"><circle cx="${cx}" cy="${cy}" r="18" fill="#fff" stroke="${on?'#E0704F':'#B8A88A'}" stroke-width="4"/><text x="${cx}" y="${cy+7}" text-anchor="middle" font-size="19">${p.e}</text>
+     ${label?`<text x="${lx}" y="${ly}" text-anchor="${an}" font-size="18" font-family="Jua" fill="#453422" stroke="#fff" stroke-width="5" paint-order="stroke">${pl.n}</text>`:''}</g>`;});
+  return `<div class="map"><svg viewBox="0 0 ${MAP.W} ${MAP.H}" role="img" aria-label="세계 지도: 스마트폰 부품이 온 나라와 조립하는 나라">${g}</svg></div>`;
+}
+function phoneHTML(got){return `<div class="phone" aria-label="스마트폰 조립 ${got.length}/${PARTS.length}">${PARTS.map(p=>`<span class="${got.includes(p.id)?'on':''}">${got.includes(p.id)?p.e:''}</span>`).join('')}<small>📱 ${got.length} / ${PARTS.length}</small></div>`;}
+const ARTICLE=`<div class="article"><h3>📰 한국–인도네시아 핵심 광물 연구 개발 협력 가속화</h3>
+ <p>우리나라와 인도네시아가 ‘한국-인도네시아 핵심 광물 공동 연구 센터’를 운영하기로 했다. 인도네시아는 니켈, 주석 등 광물 매장량이 풍부한 국가로, 우리나라는 인도네시아와 협력을 함으로써 <mark>더 안정적인 자원 확보</mark>가 가능할 것으로 보인다. 인도네시아는 우리나라의 <mark>뛰어난 광물 탐사 기술을 활용하여 효율적으로 자원을 개발</mark>할 수 있을 것으로 기대하고 있다.</p>
+ <div class="src">『전자 신문』, 2023. 11. 28. (교과서 106쪽)</div></div>`;
+// 철강 값 그래프: 해마다 우리 철강 값과 관세를 붙인 수입 철강 값
+function steelChart(hist,{w=520,h=230,many}={}){
+  const X=i=>40+i*(w-60)/STEEL.years, Y=v=>h-28-(v-60)/(170-60)*(h-48);
+  let g=`<rect width="${w}" height="${h}" fill="#fff"/>`;
+  [60,100,140].forEach(v=>{g+=`<line x1="36" x2="${w-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="#EADFC4"/><text x="30" y="${Y(v)+5}" text-anchor="end" font-size="13" fill="#8A7458">${v}</text>`;});
+  g+=`<line x1="36" x2="${w-10}" y1="${Y(100)}" y2="${Y(100)}" stroke="#3D6E8C" stroke-dasharray="6 5" stroke-width="2"/><text x="${w-12}" y="${Y(100)-6}" text-anchor="end" font-size="13" fill="#3D6E8C">관세 없는 수입 철강 100</text>`;
+  for(let i=0;i<=STEEL.years;i++)g+=`<text x="${X(i)}" y="${h-8}" text-anchor="middle" font-size="13" fill="#8A7458">${i===0?'처음':i+'년'}</text>`;
+  const lines=many||[hist];
+  lines.forEach((H,k)=>{if(!H||!H.length)return;
+    const pts=[[0,STEEL.start],...H.map((y,i)=>[i+1,y.nc])];
+    g+=`<polyline points="${pts.map(([i,v])=>`${X(i).toFixed(0)},${Y(v).toFixed(0)}`).join(' ')}" fill="none" stroke="#E0704F" stroke-width="${many?2.5:4}" opacity="${many?.55:1}" stroke-linejoin="round"/>`;
+    if(!many)H.forEach((y,i)=>{g+=`<circle cx="${X(i+1)}" cy="${Y(y.nc)}" r="5" fill="#E0704F"/><text x="${X(i+1)}" y="${Y(y.nc)-10}" text-anchor="middle" font-size="12" fill="#453422">관세 ${y.t}%</text>`;});});
+  return `<div class="chart"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="해마다 우리 철강 값이 바뀐 그래프">${g}</svg></div>`;
+}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 사회 · 2. 시장경제와 국가 간 거래';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>세계 무역<br>작전실</h1>
+   <p>스마트폰 한 대에는 몇 나라가 들어 있을까요? 세계 여러 나라가 무역으로 서로 돕고, 또 서로 경쟁하는 모습을 작전을 풀며 알아봐요.</p></div>
+   <div class="panel grid">${mapSVG({found:Object.fromEntries(PARTS.map(p=>[p.id,3]))})}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- student: join ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store('to-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm({});
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('to-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('to-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    $('#sub').textContent=`${me.num}번 ${me.name}`;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  listen(roomRef(me.room).child('award'),s=>{ROOMV.award=!!s.val();if(ready&&cur===5&&ME.s5&&ME.s5.done)s5Done();});
+}
+const meRef=k=>roomRef(me.room).child('students/'+me.num+(k?'/'+k:''));
+function stepDone(n){
+  const s=ME['s'+n]||{};
+  return !!s.done;
+}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4,5].map(n=>`<button data-s="${n}" ${n>ROOMV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store('to-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+const wstep=sub=>ClassWatch.step(STAGES[cur].k+(sub?' · '+sub:''),{n:cur,total:NST,wait:stepDone(cur)});
+function renderStage(){
+  onMe=()=>drawSteps();ClassWatch.detail(null);
+  return [null,stage1,stage2,stage3,stage4,stage5][cur]();
+}
+// 차례로 문제를 내고, 맞혀야 다음으로 넘어가요
+function runQuiz(box,qs,{band,title,fig,onRight,onWrong,onEnd,progress,few,cls,pre}){
+  let i=0,missed=false;
+  const draw=()=>{
+    const q=qs[i];const opts=shuffle([q.a,...(few?shuffle(q.o).slice(0,1):q.o)]);missed=false;const t0=Date.now();
+    box.innerHTML=`<div><span class="band">${band}</span></div>${title?`<h2>${title}</h2>`:''}
+     <div class="prog">${qs.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     ${progress?progress():''}${pre||''}<div class="pop" style="width:100%">${fig?fig(q):''}</div><div class="q">${esc(q.q)}</div>
+     <div class="opts ${cls||''}">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+     <div class="msg" id="qm" role="status"></div>`;
+    ClassWatch.detail(()=>({q:'문제: '+q.q}));
+    $$('.opts button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.o===q.a){
+        b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);
+        $('#qm',box).className='msg ok';
+        const extra=onRight?await onRight(q,!missed,(Date.now()-t0)/1000,i):'';
+        $('#qm',box).textContent='맞았어요!'+(extra||'');
+        await wait(650);
+        i++;if(i<qs.length)return draw();
+        onEnd();
+      }else{
+        missed=true;b.classList.add('wrong');b.disabled=true;
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#qm',box).className='msg bad';$('#qm',box).textContent='다시 골라 봐요';
+        if(onWrong)onWrong(q);
+      }
+    });
+  };
+  draw();
+}
+const emojiFig=q=>`<div class="emoji" aria-hidden="true">${q.e}</div>`;
+const wrongCount=(k,id)=>meRef(`${k}/wrong/${id}`).transaction(v=>(v||0)+1);
+function remember(t){return `<div class="rules" style="text-align:left;width:100%"><b>꼭! 기억해요</b><ul>${t.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;}
+
+/* ---------- 1. 함께 만들기 (상호 의존) ---------- */
+function stage1(){
+  const s=ME.s1||{};
+  if(s.done)return s1Done();
+  if(s.parts)return s1Article();
+  s1Parts();
+}
+function s1Parts(){
+  wstep('스마트폰 조립');
+  const got=[];let i=0;const order=PARTS.map(p=>p.id);
+  shell(`<div class="panel quiz" id="pb"></div>`);
+  const box=$('#pb');
+  const draw=()=>{
+    const p=PN[order[i]];
+    const opts=shuffle([p.c,...shuffle(Object.keys(PLACES).filter(c=>c!==p.c)).slice(0,2)]);
+    box.innerHTML=`<div><span class="band">1단계 · 스마트폰 한 대에 담긴 세계</span></div>
+     <h2>이 부품은 어느 나라에서 왔을까요? 단서를 읽고 골라요</h2>
+     <div class="two" style="width:100%"><div class="grid">
+      <div class="clue pop"><div class="e" aria-hidden="true">${p.e}</div><div><b>${esc(p.n)}</b><div>${esc(p.clue)}</div></div></div>
+      <div class="opts three">${opts.map(c=>`<button data-c="${c}">${PLACES[c].n}</button>`).join('')}</div>
+      <div class="msg" id="pm" role="status"></div></div>
+      <div class="grid">${phoneHTML(got)}</div></div>`;
+    ClassWatch.detail(()=>({q:'부품: '+p.n}));
+    $$('.opts button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.c===p.c){
+        b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);
+        got.push(p.id);$('.phone',box).outerHTML=phoneHTML(got);
+        $('#pm',box).className='msg ok';$('#pm',box).textContent=`맞았어요! ${PLACES[p.c].n}의 ${p.n}이(가) 스마트폰에 들어갔어요.`;
+        meRef('s1/got/'+p.id).set(true);
+        await wait(900);
+        i++;if(i<order.length)return draw();
+        await meRef('s1').update({parts:true});
+        ME.s1={...(ME.s1||{}),parts:true};s1Article();
+      }else{
+        b.classList.add('wrong');b.disabled=true;
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#pm',box).className='msg bad';$('#pm',box).textContent='단서를 다시 읽어 봐요. 지도의 위치도 떠올려요.';
+        wrongCount('s1',p.id);
+      }
+    });
+  };
+  draw();
+}
+function s1Article(){
+  if(ME.s1&&ME.s1.qz)return s1Write();
+  wstep('기사 읽기');
+  shell(`<div class="panel grid"><div class="row" style="justify-content:center">${phoneHTML(PARTS.map(p=>p.id))}</div>
+   <p class="big" style="text-align:center;margin:0">스마트폰 한 대에 6나라가 힘을 모았어요!</p></div>
+   <div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),S1Q,{band:'1단계 · 서로 기대어 사는 나라들',fig:emojiFig,
+    pre:'',
+    onWrong:q=>wrongCount('s1',q.id),
+    onEnd:async()=>{await meRef('s1').update({qz:true});ME.s1={...ME.s1,qz:true};s1Write();}});
+  // 2·3번 문제는 기사를 보며 풀어요
+  const obs=new MutationObserver(()=>{const q=$('#qz .q');if(q&&/기사/.test(q.textContent)&&!$('#qz .article')){q.insertAdjacentHTML('beforebegin',ARTICLE);}});
+  obs.observe($('#qz'),{childList:true,subtree:true});
+  const q=$('#qz .q');if(q&&/기사/.test(q.textContent))q.insertAdjacentHTML('beforebegin',ARTICLE);
+}
+function s1Write(){
+  wstep('관계 예상하기');
+  shell(`<div class="panel grid"><div><span class="band">1단계 · 생각을 써요</span></div>${ARTICLE}
+   <div class="fld grid"><label for="pred" style="font-family:var(--display);font-size:1.25rem">이런 협력으로 앞으로 두 나라의 관계는 어떻게 변할까요?</label>
+    <input id="pred" maxlength="70" placeholder="예) 두 나라가 다른 분야에서도 함께 일하게 될 거예요." autocomplete="off"></div>
+   <details><summary style="cursor:pointer;font-family:var(--display)">쓰기 어려우면 골라요</summary><div class="chips" style="margin-top:8px">${PRED_EASY.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></details>
+   <div class="row"><button id="send" disabled>TV로 보내기</button></div></div>`);
+  const chk=()=>{$('#send').disabled=$('#pred').value.trim().length<4;};
+  $('#pred').oninput=chk;
+  $$('.chips button').forEach(b=>b.onclick=()=>{$('#pred').value=b.dataset.w;$$('.chips button').forEach(x=>x.setAttribute('aria-pressed',x===b));chk();});
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    const pred=$('#pred').value.trim().slice(0,70);
+    await meRef('s1').update({done:true,pred,at:Date.now()});
+    ME.s1={...ME.s1,done:true,pred};drawSteps();s1Done();
+  };
+}
+function s1Done(){
+  wstep('끝');
+  shell(`<div class="panel quiz pop"><div><span class="band">보냈어요!</span></div>
+   <div class="big">“${esc(ME.s1.pred||'')}”</div>
+   ${remember(['무역을 통해 여러 나라의 우수한 물자를 한데 모아 <b>새로운 제품</b>을 만들어요. (스마트폰)','여러 나라가 각자 <b>잘하는 분야</b>를 중심으로 협력해요. (우리나라 기술 + 인도네시아 광물)','이렇게 서로 기대어 함께 이익을 얻는 관계를 <b>상호 의존</b>이라고 해요.'])}
+   <p class="muted">선생님이 2단계를 열면 나라들이 경쟁하는 모습을 살펴봐요.</p></div>`);
+}
+
+/* ---------- 2. 경쟁하기 ---------- */
+function stage2(){
+  const s=ME.s2||{};
+  if(s.done)return s2Done();
+  if(s.sorted)return s2Why();
+  if(s.good)return s2Sort();
+  s2Good();
+}
+function s2Good(){
+  wstep('수출이 늘면');
+  const pick=new Set();
+  shell(`<div class="panel quiz" id="gb"><div><span class="band">2단계 · 왜 경쟁할까요?</span></div>
+   <h2>수출이 늘어나면 우리나라에 어떤 점이 좋아질까요? 맞는 것을 <u>모두</u> 골라요</h2>
+   <div class="multi">${shuffle(GOOD).map(g=>`<button data-g="${g.id}" aria-pressed="false">${esc(g.t)}</button>`).join('')}</div>
+   <button id="chk" disabled>확인하기</button><div class="msg" id="gm" role="status"></div></div>`);
+  ClassWatch.detail(()=>({q:'수출이 늘면 좋아지는 점 고르기'}));
+  $$('.multi button').forEach(b=>b.onclick=()=>{const id=b.dataset.g;if(pick.has(id))pick.delete(id);else pick.add(id);b.setAttribute('aria-pressed',pick.has(id));b.classList.remove('wrong');$('#chk').disabled=!pick.size;});
+  $('#chk').onclick=async()=>{
+    const okIds=GOOD.filter(g=>g.ok).map(g=>g.id);
+    const bad=[...pick].filter(id=>!okIds.includes(id)), miss=okIds.filter(id=>!pick.has(id));
+    if(!bad.length&&!miss.length){
+      $$('.multi button').forEach(b=>{b.disabled=true;if(pick.has(b.dataset.g))b.classList.add('right');});$('#chk').disabled=true;
+      $('#gm').className='msg ok';$('#gm').textContent='맞았어요! 그래서 세계 여러 나라는 수출을 늘리려고 서로 경쟁해요.';
+      await meRef('s2').update({good:true});ME.s2={...(ME.s2||{}),good:true};
+      await wait(1600);if(cur===2)s2Sort();
+    }else{
+      bad.forEach(id=>$(`.multi button[data-g="${id}"]`).classList.add('wrong'));
+      const gb=$('#gb');gb.classList.remove('shake');void gb.offsetWidth;gb.classList.add('shake');
+      $('#gm').className='msg bad';$('#gm').textContent=bad.length?'빨간 것은 좋아지는 점이 아니에요. 다시 골라요.':`좋아지는 점이 ${miss.length}개 더 있어요.`;
+      wrongCount('s2','good');
+    }
+  };
+}
+function s2Sort(){
+  wstep('경쟁 카드 나누기');
+  const order=shuffle(CARDS.map(c=>c.id));let i=0;const placed={tech:[],build:[],port:[]};
+  shell(`<div class="panel quiz" id="sb"></div>`);
+  const box=$('#sb');
+  const draw=()=>{
+    const c=CN[order[i]];
+    box.innerHTML=`<div><span class="band">2단계 · 어떤 경쟁일까요? (교과서 107쪽)</span></div>
+     <div class="prog">${order.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+     <div class="clue pop"><div class="e" aria-hidden="true">${c.e}</div><div style="font-size:1.25rem">${esc(c.t)}</div></div>
+     <div class="comp">${Object.entries(COMP).map(([k,v])=>`<button data-k="${k}"><span aria-hidden="true">${v.e}</span>${v.n}</button>`).join('')}</div>
+     <div class="msg" id="sm" role="status"></div>
+     <div class="cols" style="width:100%;text-align:left">${Object.entries(COMP).map(([k,v])=>`<div class="${k}"><h3>${v.e} ${v.n}</h3><div class="cards">${placed[k].map(id=>`<div>${CN[id].e} ${esc(CN[id].t)}</div>`).join('')}</div></div>`).join('')}</div>`;
+    ClassWatch.detail(()=>({q:'카드: '+c.t}));
+    $$('.comp button',box).forEach(b=>b.onclick=async()=>{
+      if(b.dataset.k===c.k){
+        $$('.comp button',box).forEach(z=>z.disabled=true);b.classList.add('right');
+        placed[c.k].push(c.id);
+        $('#sm',box).className='msg ok';$('#sm',box).textContent='맞았어요!';
+        await wait(650);
+        i++;if(i<order.length)return draw();
+        await meRef('s2').update({sorted:true});ME.s2={...ME.s2,sorted:true};s2Why();
+      }else{
+        b.disabled=true;b.classList.add('wrong');
+        box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+        $('#sm',box).className='msg bad';$('#sm',box).textContent='무엇을 하려고 경쟁하는지 다시 읽어 봐요. 새 기술? 다른 나라에 짓기? 무역을 편하게?';
+        wrongCount('s2',c.id);
+      }
+    });
+  };
+  draw();
+}
+function s2Why(){
+  wstep('까닭');
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),S2Q,{band:'2단계 · 왜 경쟁할까요?',fig:emojiFig,onWrong:q=>wrongCount('s2',q.id),
+    onEnd:async()=>{await meRef('s2').update({done:true,at:Date.now()});ME.s2={...ME.s2,done:true};drawSteps();s2Done();}});
+}
+function s2Done(){
+  wstep('끝');
+  shell(`<div class="panel quiz pop"><div><span class="band">2단계 끝!</span></div>
+   <div class="cols" style="width:100%;text-align:left">${Object.entries(COMP).map(([k,v])=>`<div class="${k}"><h3>${v.e} ${v.n}</h3><div class="cards">${CARDS.filter(c=>c.k===k).map(c=>`<div>${c.e} ${esc(c.t)}</div>`).join('')}</div></div>`).join('')}</div>
+   ${remember(['세계 여러 나라는 물자나 서비스를 수출하여 더 많은 이익을 얻으려고 서로 <b>경쟁</b>해요.','첨단 기술 개발, 다른 나라 시설 건설, 더 나은 무역 환경 만들기 같은 분야에서 경쟁해요.'])}
+   <p class="muted">선생님이 3단계를 열면 관세 실험실에 들어가요.</p></div>`);
+}
+
+/* ---------- 3. 관세 실험실 ---------- */
+function stage3(){
+  const s=ME.s3||{};
+  if(s.done)return s3Done();
+  if(s.post)return s3Opinion();
+  if(s.sim)return s3Post();
+  if(s.pre)return s3Sim();
+  s3Pre();
+}
+function s3Pre(){
+  wstep('관세 알기');
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),S3PRE,{band:'3단계 · 관세 실험실 준비',fig:emojiFig,onWrong:q=>wrongCount('s3',q.id),
+    onEnd:async()=>{await meRef('s3').update({pre:true});ME.s3={...(ME.s3||{}),pre:true};s3Sim();}});
+}
+function s3Sim(){
+  const s=ME.s3||{};const hist=s.hist?Object.values(s.hist):[];
+  const year=hist.length, c=year?hist[year-1].nc:STEEL.start;
+  if(year>=STEEL.years)return s3Result();
+  wstep(`철강 ${year+1}년차`);
+  let t=s.lastT??30;
+  shell(`<div class="panel grid"><div class="row" style="justify-content:space-between"><span class="band">3단계 · 관세 실험실: 1970년대 우리 철강 키우기</span>
+    <div class="years">${Array.from({length:STEEL.years},(_,k)=>`<span class="${k===year?'now':''}">${k<year?'✓':''}${k+1}년</span>`).join('')}</div></div>
+   <div class="rules"><b>작전</b> 우리나라가 제철소를 막 지었어요. 아직 기술이 부족해서 우리 철강은 비싸요. <b>관세</b>를 정해서 우리 철강 회사가 자라게 해요. 5년 뒤 우리 철강을 만드는 값이 <b>100 이하</b>가 되면 성공! 하지만 관세가 있는 동안에는 철강을 사는 공장들(소비자)이 돈을 더 내요. 성공하면서 <b>공장들이 더 낸 돈</b>이 적을수록 좋은 작전이에요.</div>
+   <div class="lab" id="lab"></div></div>`);
+  const draw=()=>{
+    const imp=Math.round(STEEL.imp*(1+t/100));
+    const sp=t>0?Math.max(c,imp-5):c;
+    $('#lab').innerHTML=`<div class="prices"><div class="kr"><small>🇰🇷 우리 철강을 만드는 값</small><b>${c}</b><small>많이 팔수록 기술이 늘어 내려가요${sp>c?`<br>관세가 있으면 경쟁이 줄어 <b style="display:inline;font-size:1em">${sp}</b>에 팔아요`:''}</small></div>
+      <div class="im"><small>🚢 수입 철강 값 (관세 포함)</small><b>${imp}</b><small>원래 100 + 관세 ${imp-100}</small></div></div>
+     <div class="slider"><label for="tar" style="font-family:var(--display);font-size:1.2rem">올해 수입 철강에 매길 관세: <span class="tv" id="tv">${t}%</span></label>
+      <input type="range" id="tar" min="0" max="60" step="10" value="${t}" aria-valuetext="${t}%"><div class="row muted" style="justify-content:space-between"><span>0% (관세 없음)</span><span>60%</span></div></div>
+     ${year?steelChart(hist,{}):''}
+     <div class="row"><button id="go">📅 ${year+1}년 지나가기</button></div><div class="msg" id="ym" role="status"></div>`;
+    $('#tar').oninput=e=>{t=+e.target.value;draw();};
+    ClassWatch.detail(()=>({q:`${year+1}년차 관세 ${t}% · 우리 철강 ${c}`}));
+    $('#go').onclick=async()=>{
+      $('#go').disabled=true;$('#tar').disabled=true;
+      const r=steelYear(c,t);
+      // 먼저 저장해서, 애니메이션 도중 새로고침해도 이 해가 사라지지 않아요
+      const rec={t,c,n:r.n,nc:r.nc,burden:r.burden};
+      await meRef('s3/hist/'+year).set(rec);await meRef('s3').update({lastT:t});
+      ME.s3={...ME.s3,hist:{...(ME.s3.hist||{}),[year]:rec},lastT:t};
+      $('#ym').innerHTML=`<div class="factories" aria-label="철강을 사는 공장 10곳">${r.pick.map(()=>`<span>🏭<em>…</em></span>`).join('')}</div>`;
+      for(let k=0;k<10;k++){await wait(140);const el=$$('#ym .factories span')[k];if(!el)return;el.className=r.pick[k]?'kr':'im';el.innerHTML=`🏭<em>${r.pick[k]?'🇰🇷':'🚢'}</em>`;}
+      $('#ym').insertAdjacentHTML('beforeend',`<p class="big" style="margin:.4em 0 0">공장 10곳 중 <b>${r.n}곳</b>이 우리 철강을 샀어요.</p>
+        <p style="margin:.2em 0">만드는 값 ${c} → <b>${r.nc}</b> ${r.n>=5?'(많이 팔아서 기술이 쑥쑥!)':r.n>0?'(조금 팔아서 조금 늘었어요)':'(못 팔아서 기술이 거의 그대로예요)'} · 공장들이 더 낸 돈 <b>${r.burden}</b></p>`);
+      await wait(1800);if(cur===3)s3Sim();
+    };
+  };
+  draw();
+}
+function steelSummary(s){
+  const hist=s.hist?Object.values(s.hist):[];
+  const last=hist[hist.length-1]||{nc:STEEL.start,t:0};
+  const burden=hist.reduce((a,y)=>a+y.burden,0);
+  const ok=last.nc<=STEEL.imp;
+  return {hist,final:last.nc,burden,ok,lastT:last.t};
+}
+function s3Result(){
+  wstep('결과');
+  const R=steelSummary(ME.s3);
+  const msg=R.ok?(R.lastT===0?'🏆 성공! 우리 철강이 관세 없이도 수입 철강과 겨룰 수 있게 되었어요. 세계적인 철강 나라로 자랐어요!'
+      :'🏗️ 성공! 우리 철강이 크게 자랐어요. 그런데 아직 관세를 매기고 있어요. 이제 관세를 낮춰도 될까요? 관세가 높으면 공장(소비자)은 비싼 값을 내고, 우리 회사는 더 노력할 까닭이 줄어요.')
+    :'😢 아쉬워요. 우리 철강 값이 아직 100보다 비싸요. 관세가 낮아서 수입 철강만 팔렸거나, 관세가 어중간해서 우리 철강을 사는 공장이 적었어요.';
+  shell(`<div class="panel grid pop"><div><span class="band">3단계 · 5년 결과</span></div>
+   ${steelChart(R.hist,{})}
+   <div class="prices"><div class="kr"><small>5년 뒤 우리 철강을 만드는 값</small><b>${R.final}</b></div><div class="im"><small>5년 동안 공장들이 더 낸 돈</small><b>${R.burden}</b></div></div>
+   <p class="big" style="font-size:1.4rem;margin:0">${msg}</p>
+   <div class="row"><button id="next">정리 문제 풀기 ▶</button>${R.ok?'':'<button class="ghost" id="again">한 번 더 해 보기</button>'}</div></div>`);
+  $('#next').onclick=async()=>{await meRef('s3').update({sim:true,final:R.final,burden:R.burden,ok:R.ok});ME.s3={...ME.s3,sim:true};s3Post();};
+  if($('#again'))$('#again').onclick=async()=>{const tries=(ME.s3.tries||0)+1;await meRef('s3').update({hist:null,lastT:null,tries,first:ME.s3.first||{final:R.final,burden:R.burden,ok:R.ok}});ME.s3={...ME.s3,hist:null,lastT:null,tries};s3Sim();};
+}
+function s3Post(){
+  wstep('정리 문제');
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),S3POST,{band:'3단계 · 실험 정리 (교과서 108쪽)',fig:emojiFig,onWrong:q=>wrongCount('s3',q.id),
+    pre:`<div class="article"><p style="margin:0">1970년대 우리나라는 제철소를 짓고 자체 기술로 철강 제품을 만들기 위해 노력했어요. 당시 우리나라는 수입 철강 제품에는 높은 관세를 부과했어요. 그 결과 국내에서 생산한 철강 제품이 수입 철강 제품보다 더 높은 경쟁력을 갖출 수 있었어요. 오늘날 우리나라는 세계적인 철강 산업 국가로 성장했어요.</p></div>`,
+    onEnd:async()=>{await meRef('s3').update({post:true});ME.s3={...ME.s3,post:true};s3Opinion();}});
+}
+function s3Opinion(){
+  wstep('내 생각');
+  let pick='';
+  shell(`<div class="panel grid"><div><span class="band">3단계 · 내 생각은?</span></div>
+   <h2 style="font-size:1.6rem">우리 철강 회사가 충분히 자랐어요. 관세를 어떻게 할까요?</h2>
+   <div class="multi">${OPIN.map(o=>`<button data-o="${o.id}" aria-pressed="false"><b style="font-family:var(--display);font-weight:400">${o.t}</b><br><small class="muted">${o.d}</small></button>`).join('')}</div>
+   <div class="fld grid"><label for="why" style="font-family:var(--display);font-size:1.15rem">까닭 (짧게 써도 돼요)</label><input id="why" maxlength="60" placeholder="예) 공장들이 계속 비싼 철강을 사야 하니까요." autocomplete="off"></div>
+   <div class="row"><button id="send" disabled>TV로 보내기</button></div></div>`);
+  $$('.multi button').forEach(b=>b.onclick=()=>{pick=b.dataset.o;$$('.multi button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#send').disabled=false;});
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    const why=$('#why').value.trim().slice(0,60);
+    await meRef('s3').update({done:true,op:pick,why,at:Date.now()});
+    ME.s3={...ME.s3,done:true,op:pick,why};drawSteps();s3Done();
+  };
+}
+function s3Done(){
+  wstep('끝');
+  const R=steelSummary(ME.s3);
+  shell(`<div class="panel quiz pop"><div><span class="band">3단계 끝!</span></div>
+   ${R.hist.length?steelChart(R.hist,{}):''}
+   ${remember(['수입이 늘면 국내에서 얻기 힘든 물자를 쓸 수 있지만, 국내 기업이 피해를 입거나 산업이 자라기 어려울 수 있어요.','그래서 나라는 국내 산업을 보호하고 키우려고 수입품에 높은 <b>관세</b>를 매기거나, 일정한 양 이하로 <b>수입을 제한</b>하기도 해요.','관세가 높으면 소비자는 더 비싼 값을 내요. 그래서 언제, 얼마나 매길지 잘 생각해야 해요.'])}
+   <p class="muted">선생님이 4단계를 열면 우리 회사 공장 자리를 찾아요.</p></div>`);
+}
+
+/* ---------- 4. 공장 어디에 (기업의 세계화) ---------- */
+function stage4(){
+  const s=ME.s4||{};
+  if(s.done)return s4Done();
+  if(s.loc)return s4Q();
+  s4Loc();
+}
+function s4Loc(){
+  wstep('공장 자리 고르기');
+  shell(`<div class="panel grid" id="lb"><div><span class="band">4단계 · 기업의 세계화 (교과서 109쪽)</span></div>
+   <h2 style="font-size:1.6rem">👟 우리 회사는 운동화를 만들어 세계에 팔아요. 새 공장을 어느 나라에 지을까요?</h2>
+   <p class="muted" style="margin:0">짝과 의논해요. 운동화를 <b>싸게</b> 만들고, <b>많이</b> 팔 수 있는 곳이 좋아요.</p>
+   <div class="locs">${LOCS.map(l=>`<button data-l="${l.id}"><b>${l.e} ${l.n}</b><ul>${l.f.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></button>`).join('')}</div>
+   <div class="msg" id="lm" role="status"></div></div>`);
+  ClassWatch.detail(()=>({q:'공장 자리 고르기'}));
+  let first=true;
+  $$('.locs button').forEach(b=>b.onclick=async()=>{
+    const l=LOCS.find(x=>x.id===b.dataset.l);
+    meRef('s4/'+(first?'first':'tries')+'/'+l.id).set(true);
+    if(l.ok){
+      b.classList.add('right');$$('.locs button').forEach(z=>z.disabled=true);
+      $('#lm').className='msg ok';$('#lm').innerHTML='맞았어요! 실제로 미국, 중국, 우리나라 기업들도 베트남에 공장을 운영해요. 저렴한 노동력, 중국과 가까운 위치, 낮은 관세 혜택 때문이에요.';
+      await meRef('s4').update({loc:true,firstOk:first});ME.s4={...(ME.s4||{}),loc:true};
+      await wait(2600);if(cur===4)s4Q();
+    }else{
+      first=false;b.classList.add('wrong');b.disabled=true;
+      const lb=$('#lb');lb.classList.remove('shake');void lb.offsetWidth;lb.classList.add('shake');
+      $('#lm').className='msg bad';$('#lm').textContent=l.why+' 다시 골라 봐요.';
+    }
+  });
+}
+function s4Q(){
+  wstep('누가 이익일까');
+  shell(`<div class="panel quiz" id="qz"></div>`);
+  runQuiz($('#qz'),S4Q,{band:'4단계 · 공장이 베트남으로 오면?',fig:emojiFig,onWrong:q=>wrongCount('s4',q.id),
+    onEnd:async()=>{await meRef('s4').update({done:true,at:Date.now()});ME.s4={...ME.s4,done:true};drawSteps();s4Done();}});
+}
+function s4Done(){
+  wstep('끝');
+  shell(`<div class="panel quiz pop"><div><span class="band">4단계 끝!</span></div>
+   <div class="emoji" aria-hidden="true">🏭👟🌏</div>
+   ${remember(['무역이 활발해지면서 기업들은 물자를 만들기 좋은 환경을 갖춘 나라에서 경제활동을 하기도 해요.','공장이 들어선 나라 사람은 일자리와 소득을, 세계 소비자는 더 싼 제품을 얻어요. → <b>상호 의존</b>','기업들은 더 싸게 만들려고 공장 자리를 두고 <b>경쟁</b>해요. 일하는 사람이 정당한 임금을 받고 환경을 지키는 것도 중요해요.'])}
+   <p class="muted">선생님이 5단계를 열면 정리 퀴즈 대결을 해요.</p></div>`);
+}
+
+/* ---------- 5. 정리 ---------- */
+function stage5(){
+  const s=ME.s5||{};
+  if(s.done)return s5Done();
+  if(s.sent)return s5Self();
+  if(s.quizDone)return s5Sentence();
+  s5Quiz();
+}
+function s5Quiz(){
+  let G=(ME.s5||{}).quiz;
+  if(!G||!G.order){
+    wstep('퀴즈 시작');
+    shell(`<div class="panel grid quiz"><div><span class="band">5단계 · 컨테이너 퀴즈 대결</span></div><h2 style="font-size:1.8rem">맞히면 내 트럭에 컨테이너를 실어요 🚚</h2>
+     <p>${QUIZ.length}문제. 한 번에 맞히면 컨테이너 한 개와 100점 + 빠르기 보너스. 틀리면 다시 골라야 넘어가요. 트럭이 항구 🚢 에 먼저 닿도록!</p>
+     <div class="row" style="justify-content:center"><button id="qs">시작하기</button><button class="ghost" id="qe">보기 2개로 하기</button></div></div>`);
+    const go=async easy=>{
+      G={order:shuffle(QUIZ.map(g=>g.id)),i:0,score:0,box:0,easy,started:Date.now()};
+      await meRef('s5/quiz').set(G);ME.s5={...(ME.s5||{}),quiz:G};s5Quiz();
+    };
+    $('#qs').onclick=()=>go(false);$('#qe').onclick=()=>go(true);
+    return;
+  }
+  if(cur!==5)return;
+  wstep('퀴즈 풀기');
+  const rest=G.order.slice(G.i||0).map(id=>QQ[id]).filter(Boolean);
+  shell(`<div class="panel quiz" id="gz"></div>`);
+  if(!rest.length)return finishQuiz();
+  let score=G.score||0,idx=G.i||0,boxes=G.box||0;
+  runQuiz($('#gz'),rest,{band:'5단계 · 컨테이너 퀴즈 대결',few:G.easy,fig:emojiFig,cls:'',
+    progress:()=>`<div class="score">점수 <b>${score}</b>점 · ${idx+1}/${QUIZ.length}번째 문제</div><div class="truck" aria-label="실은 컨테이너 ${boxes}개">🚚${'<i></i>'.repeat(boxes)}</div>`,
+    onRight:async(q,ok,sec)=>{
+      const pts=ok?100+Math.round(50*Math.max(0,Math.min(1,1-(sec-3)/17))):0;
+      score+=pts;idx++;if(ok)boxes++;
+      await meRef('s5/quiz').update({i:idx,score,box:boxes});
+      ME.s5.quiz={...ME.s5.quiz,i:idx,score,box:boxes};
+      return pts?` 📦 +${pts}점`:' (두 번째 도전은 컨테이너 없이 넘어가요)';
+    },
+    onWrong:q=>{meRef(`s5/quiz/wrong/${q.id}`).transaction(v=>(v||0)+1);},
+    onEnd:finishQuiz});
+}
+async function finishQuiz(){
+  await meRef('s5').update({quizDone:true});await meRef('s5/quiz').update({done:true,at:Date.now()});
+  ME.s5={...ME.s5,quizDone:true};ME.s5.quiz={...ME.s5.quiz,done:true};s5Sentence();
+}
+function s5Sentence(){
+  wstep('한 문장 설명');
+  let d='',c='';
+  const draw=()=>{
+    $('#fill').innerHTML=`세계 여러 나라는 무역을 통해 서로 <u>의존</u>하기도 하고 <u>경쟁</u>하기도 해요. 예를 들어 <u>${esc(d||'……')}</u>, 또 <u>${esc(c||'……')}</u>.`;
+    $('#send').disabled=!(d&&c);
+  };
+  shell(`<div class="panel grid"><div><span class="band">5단계 · 오늘 배운 것을 한 문장으로</span></div>
+   <h2 style="font-size:1.5rem">오늘 본 사례로 “상호 의존과 경쟁”을 설명해요</h2>
+   <div class="sent"><div class="fill" id="fill"></div>
+    <div><b style="font-family:var(--display)">🤝 서로 기대어 돕는 사례 하나</b><div class="chips" id="cd" style="margin-top:6px">${EX_DEP.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></div>
+    <div><b style="font-family:var(--display)">🏁 서로 경쟁하는 사례 하나</b><div class="chips" id="cc" style="margin-top:6px">${EX_COMP.map(w=>`<button data-w="${esc(w)}" aria-pressed="false">${esc(w)}</button>`).join('')}</div></div>
+    <div class="fld grid"><label for="own" style="font-family:var(--display)">✏️ 내 생각을 더 써도 좋아요 (선택)</label><input id="own" maxlength="60" placeholder="예) 우리 집 물건도 여러 나라에서 왔을 것 같아요." autocomplete="off"></div></div>
+   <div class="row"><button id="send" disabled>TV로 보내기</button></div></div>`);
+  $$('#cd button').forEach(b=>b.onclick=()=>{d=b.dataset.w;$$('#cd button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw();});
+  $$('#cc button').forEach(b=>b.onclick=()=>{c=b.dataset.w;$$('#cc button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw();});
+  draw();
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    const own=$('#own').value.trim().slice(0,60);
+    await meRef('s5').update({sent:true,dep:d,comp:c,own});
+    ME.s5={...ME.s5,sent:true,dep:d,comp:c,own};s5Self();
+  };
+}
+function s5Self(){
+  wstep('자기 평가');
+  const v={};
+  shell(`<div class="panel grid"><div><span class="band">5단계 · 얼마나 잘했을까 (교과서 111쪽)</span></div>
+   <h2 style="font-size:1.5rem">공부한 내용을 되돌아보고 별을 칠해요</h2>
+   <div class="stars">${SELF.map(s=>`<div class="it"><div>${esc(s.t)}</div><div class="row" data-k="${s.id}">${[1,2,3].map(n=>`<button data-n="${n}" aria-pressed="false" aria-label="별 ${n}개">${'★'.repeat(n)}</button>`).join('')}</div></div>`).join('')}</div>
+   <div class="row"><button id="send" disabled>다 했어요</button></div></div>`);
+  $$('.stars .row').forEach(r=>$$('button',r).forEach(b=>b.onclick=()=>{v[r.dataset.k]=+b.dataset.n;$$('button',r).forEach(x=>x.setAttribute('aria-pressed',x===b));$('#send').disabled=Object.keys(v).length<SELF.length;}));
+  $('#send').onclick=async()=>{
+    $('#send').disabled=true;
+    await meRef('s5').update({done:true,self:v,at:Date.now()});
+    ME.s5={...ME.s5,done:true,self:v};drawSteps();s5Done();
+  };
+}
+async function s5Done(){
+  const G=(ME.s5||{}).quiz||{};
+  let rankTxt='';
+  if(ROOMV.award){
+    const all=(await roomRef(me.room).child('students').get()).val()||{};
+    const L=ranking(all);const k=L.findIndex(x=>x.n===me.num);
+    if(k>=0)rankTxt=`<div class="big">우리 반 ${k+1}등!</div>`;
+  }
+  if(cur!==5)return;
+  wstep('끝');
+  const low=Object.values(ME.s5.self||{}).some(n=>n<=2);
+  shell(`<div class="panel quiz pop"><div><span class="band">작전 완료!</span></div><h2 style="font-size:2rem">세계 무역 작전실 졸업</h2>
+   <div class="truck">🚚${'<i></i>'.repeat(G.box||0)}</div>
+   <div class="score" style="font-size:2rem">${G.score||0}점 · 컨테이너 ${G.box||0}개</div>${rankTxt}
+   <div class="sent"><div class="fill">세계 여러 나라는 무역을 통해 서로 의존하기도 하고 경쟁하기도 해요. 예를 들어 <u>${esc(ME.s5.dep||'')}</u>, 또 <u>${esc(ME.s5.comp||'')}</u>.</div></div>
+   ${low?'<p class="muted">별을 두 개 이하로 칠한 것은 “꼭! 기억해요”를 한 번 더 읽어 봐요. 위의 단계 버튼을 눌러 다시 볼 수 있어요.</p>':''}
+   ${remember(['세계 여러 나라는 무역을 통해 <b>상호 의존</b>과 <b>경쟁</b>을 하고 있어요.','국내 산업을 보호하고 키우려고 <b>관세</b>를 매기거나 수입을 제한하기도 해요.'])}</div>`);
+}
+function ranking(all){
+  return Object.keys(all||{}).map(Number).map(n=>({n,...all[n]})).filter(x=>x.s5&&x.s5.quiz)
+    .sort((a,b)=>(b.s5.quiz.score||0)-(a.s5.quiz.score||0)||(b.s5.quiz.i||0)-(a.s5.quiz.i||0)||(a.s5.quiz.at||9e15)-(b.s5.quiz.at||9e15));
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={},showSelf=false;
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store('to-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:'tradeops',stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store('to-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});}};
+  $('#newroom').onclick=()=>{store('to-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  $('#go').textContent=t.endAt?'멈춤':'시작';$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2,3,4,5].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>!!(x['s'+st]&&x['s'+st].done);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  return [null,tv1,tv2,tv3,tv4,tv5][st](main,S);
+}
+const sumWrong=(S,k)=>{const w={};S.forEach(x=>Object.entries((x[k]&&x[k].wrong)||{}).forEach(([id,v])=>w[id]=(w[id]||0)+v));return w;};
+function tv1(main,S){
+  const found={};S.forEach(x=>Object.keys((x.s1&&x.s1.got)||{}).forEach(id=>found[id]=(found[id]||0)+1));
+  const W=sumWrong(S,'s1'), done=S.filter(x=>x.s1&&x.s1.done);
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">📱 스마트폰 한 대에 담긴 세계</h2><span class="muted">조립 끝 ${S.filter(x=>x.s1&&x.s1.parts).length}/${S.length}명</span></div>
+    ${mapSVG({found})}
+    <div class="people">${PARTS.map(p=>`<span>${p.e} ${esc(p.n)} → ${PLACES[p.c].n}${W[p.id]?` · 헷갈림 ${W[p.id]}`:''}</span>`).join('')}</div>
+    <p class="muted" style="margin:0">자료: 지도서 248쪽 ‘스마트폰에 담긴 세계 여러 나라의 상호 의존’(그린피스 누리집). 실제로는 약 20가지 자원과 더 많은 나라가 함께해요.</p></div>
+   <div class="two"><div class="panel grid">${ARTICLE}</div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>앞으로 두 나라의 관계는?</h2><span class="muted">${done.length}/${S.length}명</span></div><div class="list">${done.map(x=>`<div><b>${x.n} ${esc(x.name)}</b>${esc(x.s1.pred)}</div>`).join('')||'<p class="muted">아직 보낸 친구가 없어요</p>'}</div></div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>스마트폰 부품 생산국을 통해 무엇을 알 수 있나요?</li><li>무역을 통해 두 나라가 기대할 수 있는 이익은 각각 무엇인가요?</li></ul></div>`;
+}
+function tv2(main,S){
+  const W=sumWrong(S,'s2');
+  const AI=[[2023,37],[2026,194],[2028,363]];const top=363;
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">세계 여러 나라는 무엇을 두고 경쟁할까요? (교과서 107쪽)</h2><span class="muted">나누기 끝 ${S.filter(x=>x.s2&&x.s2.sorted).length}/${S.length}명</span></div>
+    <div class="cols">${Object.entries(COMP).map(([k,v])=>`<div class="${k}"><h3>${v.e} ${v.n}</h3><div class="cards">${CARDS.filter(c=>c.k===k).map(c=>`<div class="${W[c.id]?'hard':''}">${c.e} ${esc(c.t)}${W[c.id]?` <small>· 헷갈림 ${W[c.id]}</small>`:''}</div>`).join('')}</div></div>`).join('')}</div>
+    <p class="muted" style="margin:0">빨간 카드는 우리 반이 헷갈린 것이에요.</p></div>
+   <div class="two"><div class="panel grid"><h2>전 세계 생성형 인공지능 시장 전망 (달러)</h2>
+     <div class="bars">${AI.map(([y,v])=>`<div><b>${v}억</b><i style="height:${v/top*120}px"></i><span>${y}년</span></div>`).join('')}</div>
+     <p class="muted" style="margin:0">S&P 글로벌 마켓 인텔리전트, 2023. 시장이 커질수록 경쟁도 치열해져요.</p></div>
+    <div class="panel grid"><h2>수출이 늘어나면?</h2><div class="list"><div>🏭 산업이 성장해요</div><div>👷 일자리가 늘어나요</div><div>💰 사람들의 소득이 늘어나요</div></div>
+     <p class="muted" style="margin:0">처음에 틀린 친구 ${Object.values(W).length?S.filter(x=>x.s2&&x.s2.wrong&&x.s2.wrong.good).length:0}명</p></div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>수출이 늘어나면 어떤 점이 좋아질까요? 이를 얻기 위해 세계 여러 나라는 어떤 노력을 하나요?</li><li>세계 여러 나라가 다른 나라의 시설을 맡아서 짓기 위해 노력하는 까닭은 무엇인가요?</li></ul></div>`;
+}
+function tv3(main,S){
+  const R=S.filter(x=>x.s3&&x.s3.hist).map(x=>({x,...steelSummary(x.s3)}));
+  const fin=R.filter(r=>r.hist.length>=STEEL.years);
+  const okN=fin.filter(r=>r.ok).length;
+  const tCount={};R.forEach(r=>r.hist.forEach((y,i)=>{if(i===0)tCount[y.t]=(tCount[y.t]||0)+1;}));
+  const best=fin.filter(r=>r.ok).sort((a,b)=>a.burden-b.burden).slice(0,3);
+  const op=S.filter(x=>x.s3&&x.s3.op);
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🏗️ 관세 실험실: 1970년대 우리 철강 키우기</h2><span class="muted">5년 끝 ${fin.length}/${S.length}명 · 성공 ${okN}명</span></div>
+    ${steelChart(null,{w:900,h:300,many:R.map(r=>r.hist)})}
+    <p class="muted" style="margin:0">선 하나가 친구 한 명이에요. 파란 점선(100) 아래로 내려오면 관세 없이도 수입 철강과 겨룰 수 있어요.</p></div>
+   <div class="two"><div class="panel grid"><h2>첫해에 고른 관세</h2><div class="people">${STEEL.tariffs.map(t=>`<span>${t}% · ${tCount[t]||0}명</span>`).join('')}</div>
+     <h2>공장 부담이 적은 성공 작전</h2><div class="list">${best.map((r,k)=>`<div><b>${k+1}위</b>${r.x.n}번 ${esc(r.x.name)} · 관세 ${r.hist.map(y=>y.t+'%').join(' → ')} · 공장 부담 ${r.burden}</div>`).join('')||'<p class="muted">아직 성공한 작전이 없어요</p>'}</div></div>
+    <div class="panel grid"><h2>회사가 크면 관세를 어떻게 할까?</h2>
+     <div class="people">${OPIN.map(o=>`<span>${o.t} · ${op.filter(x=>x.s3.op===o.id).length}명</span>`).join('')}</div>
+     <div class="list">${op.filter(x=>x.s3.why).map(x=>`<div><b>${x.n} ${esc(x.name)}</b>${esc((OPIN.find(o=>o.id===x.s3.op)||{}).t||'')} · ${esc(x.s3.why)}</div>`).join('')||'<p class="muted">아직 보낸 친구가 없어요</p>'}</div></div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>수입이 늘어나면 어떤 문제가 생길 수 있을까요?</li><li>국내 산업을 보호하고 성장시키기 위해 나라에서 어떤 조치를 취하나요?</li><li>관세를 높게 매기면 누가 이익이고, 누가 손해일까요?</li></ul></div>`;
+}
+function tv4(main,S){
+  const first={};S.forEach(x=>Object.keys((x.s4&&x.s4.first)||{}).forEach(id=>first[id]=(first[id]||0)+1));
+  const W=sumWrong(S,'s4');
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">👟 운동화 공장을 어디에 지을까요? (교과서 109쪽)</h2><span class="muted">고르기 끝 ${S.filter(x=>x.s4&&x.s4.loc).length}/${S.length}명</span></div>
+    <div class="locs">${LOCS.map(l=>`<div class="panel" style="border-color:${l.ok?'var(--ok)':'var(--line)'}"><h3 style="font-size:1.5rem">${l.e} ${l.n} <small class="muted">처음 고른 친구 ${first[l.id]||0}명</small></h3><ul style="margin:.4em 0 0;padding-left:1.1em">${l.f.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></div>`).join('')}</div></div>
+   <div class="panel grid"><h2>공장이 베트남으로 오면 누가 무엇을 얻을까요?</h2><div class="list">${S4Q.map(q=>`<div><b>${q.e}</b>${esc(q.q)}<br>→ ${esc(q.a)}${W[q.id]?` <span class="muted">(헷갈림 ${W[q.id]})</span>`:''}</div>`).join('')}</div></div>
+   <div class="rules"><b>핵심 질문</b><ul><li>외국 기업이 베트남에서 생산 시설을 운영하는 까닭은 무엇인가요?</li><li>한 기업이 세계 여러 나라에서 생산 시설을 운영하면 생길 수 있는 문제는 무엇인가요?</li></ul></div>`;
+}
+function tv5(main,S){
+  const L=ranking(RD.students);
+  const wrong={};S.forEach(x=>Object.entries((x.s5&&x.s5.quiz&&x.s5.quiz.wrong)||{}).forEach(([k,v])=>wrong[k]=(wrong[k]||0)+v));
+  const hard=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>({q:QQ[k],v})).filter(x=>x.q);
+  const sent=S.filter(x=>x.s5&&x.s5.sent);
+  const selfed=S.filter(x=>x.s5&&x.s5.self);
+  const selfBox=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2>얼마나 잘했을까 (${selfed.length}명)</h2><button class="ghost" id="selfT">${showSelf?'이름 가리기':'선생님만 이름 보기'}</button></div>
+    <div class="list">${SELF.map(s=>{const low=selfed.filter(x=>(x.s5.self[s.id]||0)<=2);const avg=selfed.length?(selfed.reduce((a,x)=>a+(x.s5.self[s.id]||0),0)/selfed.length).toFixed(1):'-';
+      return `<div>${esc(s.t)}<br>평균 ★ ${avg} · 별 두 개 이하 <b>${low.length}명</b>${showSelf&&low.length?` <span class="muted">(${low.map(x=>x.n+'번').join(', ')})</span>`:''}</div>`;}).join('')}</div>
+    <p class="muted" style="margin:0">별 두 개 이하인 친구는 지도서 ‘주요 내용 정리’로 부족한 내용을 되짚어 주세요.</p></div>`;
+  const sentBox=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2>우리 반 한 문장 설명</h2><span class="muted">${sent.length}/${S.length}명</span></div>
+    <div class="list">${sent.map(x=>`<div><b>${x.n} ${esc(x.name)}</b>예: ${esc(x.s5.dep)} / ${esc(x.s5.comp)}${x.s5.own?`<br><small>✏️ ${esc(x.s5.own)}</small>`:''}</div>`).join('')||'<p class="muted">아직 보낸 친구가 없어요</p>'}</div></div>`;
+  if(RD.award){
+    const p=[L[1],L[0],L[2]];
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">컨테이너 퀴즈 시상식</h2><button class="ghost" id="awoff">순위표로</button></div>
+     <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.s5.quiz.score||0}점 · 📦${x.s5.quiz.box||0}</div>`:'<span></span>').join('')}</div></div>
+     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br>정답: <b>${esc(h.q.a)}</b> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}
+     <div class="two">${sentBox}${selfBox}</div>`;
+    $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
+  }else{
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🚚 컨테이너 퀴즈 대결</h2><button id="awon">시상식 ▶</button></div>
+     <p class="muted" style="margin:0">한 번에 맞히면 컨테이너 1개 + 100점 + 빠르기 보너스 최대 50점. ${QUIZ.length}문제.</p>
+     <div class="lanes">${L.map(x=>{const b=x.s5.quiz.box||0;return `<div class="lane"><span class="nm">${esc(x.n)} ${esc(x.name)}${x.s5.quiz.done?' 🏁':''}</span><div class="road"><span style="left:calc(${b/QUIZ.length*80}%)">🚚</span></div><span class="pt" style="font-family:var(--display);text-align:right">${x.s5.quiz.score||0}</span></div>`;}).join('')||'<p class="muted">아직 시작한 친구가 없어요</p>'}</div></div>
+     <div class="two">${sentBox}${selfBox}</div>
+     <div class="rules"><b>약속</b><ul><li>친구 화면은 보지 않아요.</li><li>다 푼 친구는 한 문장 설명과 자기 평가를 해요.</li></ul></div>`;
+    $('#awon').onclick=()=>roomRef(ROOM).child('award').set(true);
+  }
+  $('#selfT').onclick=()=>{showSelf=!showSelf;renderTV();};
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
