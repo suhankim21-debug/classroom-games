@@ -18,6 +18,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     return p;
   };
   const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: `${SHOTS}/${name}.png`, fullPage: true }); };
+  if (SHOTS) { const H = await mk('첫 화면', 1280, 800); await H.goto(URL); await H.waitForSelector('.hero'); await H.waitForTimeout(800); await H.screenshot({ path: `${SHOTS}/start.png` }); await H.close(); }
   const T = await mk('교사', 1400, 900);
   await T.goto(URL + '#teacher');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
@@ -57,6 +58,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       for (let k = 0; k < D.PARTS.length; k++) {
         await p.waitForSelector('#pb .opts button:not([disabled])', { timeout: 10000 });
         const nm = (await p.textContent('.clue b')).trim();
+        if (n === 4 && k === 1) await shot(p, 's1-parts');
         const part = D.PARTS.find(x => x.n === nm); if (!part) { fail('모르는 부품: ' + nm); return; }
         if (n === 2 && k === 0) {
           await p.click(`#pb .opts button:not([data-c="${part.c}"]) >> nth=0`);
@@ -121,6 +123,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         const yr = await p.textContent('#go');
         if (!yr.includes(`${y + 1}년`)) fail(`${n}번 ${y + 1}년차가 아님: ${yr}`);
         await p.$eval('#tar', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, String(plans[n][y]));
+        if (n === 2 && y === 2) await shot(p, 's3-sim');
         await p.click('#go');
         await p.waitForFunction(() => /곳<\/b>이 우리 철강을 샀어요/.test(document.querySelector('#ym')?.innerHTML || '') || /5년 결과/.test(document.body.textContent), null, { timeout: 10000 });
       }
@@ -188,6 +191,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
         await solve(p, '#gz', 8, false);
       } else {
         if (n === 6) { await p.waitForSelector('#gz .q'); if ((await p.$$('#gz .opts button')).length !== 2) fail('보기 2개 모드가 아님'); }
+        if (n === 4) { await p.waitForSelector('#gz .q'); await shot(p, 's5-quiz'); }
         await solve(p, '#gz', 12, n % 3 === 0);
       }
       await p.waitForSelector('#cd button', { timeout: 10000 });
@@ -206,6 +210,19 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     if (/9번\)/.test(selfTxt)) fail('이름 가리기 전에 학생 번호가 보임');
     await T.click('#selfT');
     if (!/\(9번\)/.test(await T.textContent('#main'))) fail('선생님만 이름 보기를 눌러도 9번이 안 보임');
+    // 문제별 정답률: 12문제, 120번 풀이 중 117번 한 번에 정답, 3·6·9번이 한 문제씩 틀림
+    const qs = await T.$$eval('#qstat .qr', rs => rs.map(r => ({ low: r.classList.contains('low'), n: r.querySelector('.qb small').textContent, w: r.querySelector('.qw').textContent, who: r.querySelector('.who') ? r.querySelector('.who').textContent : '' })));
+    if (qs.length !== 12) fail('문제별 정답률이 12문제가 아님: ' + qs.length);
+    const sum = qs.reduce((a, r) => { const [o, d] = r.n.replace('명', '').split('/').map(Number); return [a[0] + o, a[1] + d]; }, [0, 0]);
+    if (sum[0] !== 117 || sum[1] !== 120) fail('문제별 정답 수 합이 맞지 않음: ' + sum);
+    if (qs.some(r => r.who)) fail('이름 보기 전에 틀린 학생 이름이 보임');
+    const wrongN = qs.reduce((a, r) => a + (+(r.w.match(/(\d+)명/) || [0, 0])[1]), 0);
+    if (wrongN !== 3) fail('틀린 학생 수 합이 3이 아님: ' + wrongN);
+    await T.click('#wrongT');
+    const who = (await T.$$eval('#qstat .who', e => e.map(x => x.textContent))).join(', ');
+    for (const n of [3, 6, 9]) if (!who.includes(`${n} 학생${n}`)) fail(`틀린 학생 이름에 ${n}번이 없음: ` + who);
+    if (/(^|, )1 학생1/.test(who)) fail('안 틀린 1번이 틀린 학생에 나옴');
+    console.log('문제별 정답률:', qs.map(r => r.n).join(' '), '| 틀린 학생:', who);
     await shot(T, 't5');
     await T.click('#awon');
     await T.waitForSelector('.podium', { timeout: 8000 }).catch(() => fail('시상식 화면이 안 나옴'));
