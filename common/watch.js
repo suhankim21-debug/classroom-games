@@ -12,6 +12,8 @@
      ClassWatch.step('조 고르기', {n:2, total:4, wait:false})   화면이 바뀔 때
      ClassWatch.detail(()=>({q:'문제: …', w:'쓰는 중인 글자'}))  카드에 보일 '지금 하는 일' (없으면 화면 제목·입력 글자로 알아서)
      ClassWatch.teacher({db, room})          선생님 화면에서
+     gate:true 를 student·teacher 둘 다에 넣으면 '시작 전 대기': 선생님이 ▶ 학생 활동 시작을 누르기 전까지
+       들어간 학생 화면은 '기다려요' 화면으로 덮여요. 시작한 뒤에는 ⏸ 잠깐 멈추기로 다시 멈출 수 있어요(rooms/<방>/go).
      ClassWatch.steps(['들어가기','조 고르기','기다리기','게임'], 1)  학생 화면 위에 붙일 단계 표시 HTML
      ClassWatch.joinForm({checks:[{label:'나라 고르기', ok:()=>!!pick}]})  들어가기 화면을 그린 뒤 */
 (function(){
@@ -46,6 +48,10 @@ const CSS=`
 .cw-roomok{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--display,system-ui);font-size:1.3rem}
 .cw-roomok .cw-chg{font-size:.9rem;padding:.3em .8em}
 .cw-open{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:80;font-family:var(--display,system-ui);font-size:1.1rem;border-radius:999px;padding:.6em 1.1em;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.cw-wait{position:fixed;inset:0;z-index:85;background:rgba(242,238,227,.97);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:var(--display,system-ui);color:var(--ink,#333);word-break:keep-all;overflow-wrap:break-word}
+.cw-wait b{display:block;font-size:2rem;margin-bottom:.4em}.cw-wait p{font-size:1.2rem;margin:.3em 0}
+.cw-go{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:80;font-family:var(--display,system-ui);font-size:1.15rem;border:0;border-radius:999px;padding:.65em 1.3em;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.2);background:#2E7D4F;color:#fff;word-break:keep-all}
+.cw-go.on{background:#fff;color:var(--ink,#333);border:2px solid var(--line,#ddd);font-size:1rem}
 .cw-open .cw-badge{display:inline-block;background:var(--bad,#C8452D);color:#fff;border-radius:999px;padding:0 .5em;margin-left:.4em}
 @media (prefers-reduced-motion:no-preference){.cw-open.alert{animation:cwp 1s ease-in-out infinite alternate}@keyframes cwp{to{transform:scale(1.06)}}}
 .cw-ov,.cw-toast,.cw-steps,.cw-todo,.cw-help,.cw-open,.cw-who,.cw-roomok{word-break:keep-all;overflow-wrap:break-word}
@@ -160,6 +166,7 @@ function send(force){
 }
 function later(){
   if(!S.on)return;
+  gate();
   const t=Date.now();if(!S.first)S.first=t;
   clearTimeout(S.timer);
   S.timer=setTimeout(send,t-S.first>2000?0:700);
@@ -194,11 +201,23 @@ function student(o){
   document.addEventListener('input',S.onInput,true);document.addEventListener('change',S.onInput,true);
   window.addEventListener('scroll',S.onInput,{passive:true});window.addEventListener('resize',S.onInput);
   S.hb=setInterval(()=>S.ref&&S.ref.update({at:TS(),on:true}).catch(()=>{}),20000);
+  if(o.gate){const gr=S.db.ref('rooms/'+room+'/go');const gh=gr.on('value',v=>{S.go=v.val()===true;gate();});S.offGate=()=>{gr.off('value',gh);S.go=true;gate();};}
+  else S.go=true;
   helpBtn();send(true);
+}
+// 선생님이 시작하기 전에는 (들어가기 화면이 끝난 뒤) '기다려요' 화면으로 덮어요
+function gate(){
+  const need=S.on&&S.go===false&&!document.getElementById('enter');
+  let w=document.querySelector('.cw-wait');
+  if(!need){if(w)w.remove();return;}
+  if(w)return;
+  css();w=document.createElement('div');w.className='cw-wait';w.setAttribute('role','status');
+  w.innerHTML='<div><b>⏳ 잠깐 기다려요</b><p>선생님이 시작 버튼을 누르면 활동이 열려요.</p><p>지금은 선생님 설명을 잘 들어요.</p></div>';
+  document.body.appendChild(w);
 }
 function stop(){
   if(!S.on)return;
-  S.on=false;clearTimeout(S.timer);clearInterval(S.hb);S.obs&&S.obs.disconnect();S.offAck&&S.offAck();
+  S.on=false;S.offGate&&S.offGate();S.offGate=null;gate();clearTimeout(S.timer);clearInterval(S.hb);S.obs&&S.obs.disconnect();S.offAck&&S.offAck();
   document.removeEventListener('input',S.onInput,true);document.removeEventListener('change',S.onInput,true);
   window.removeEventListener('scroll',S.onInput);window.removeEventListener('resize',S.onInput);
   S.ref&&S.ref.update({on:false}).catch(()=>{});S.ref&&S.ref.onDisconnect().cancel();
@@ -448,8 +467,16 @@ function teacher(o){
   T.tick=setInterval(()=>{badge();if(T.open)render();},5000);
   if(T.solo){show(true);return;}
   T.btn=document.createElement('button');T.btn.type='button';T.btn.className='cw-open';T.btn.onclick=()=>show(true);document.body.appendChild(T.btn);badge();
+  if(o.gate){
+    const gr=T.db.ref('rooms/'+T.room+'/go');let go=false;
+    const g=T.go=document.createElement('button');g.type='button';
+    const draw=()=>{g.className='cw-go '+(go?'on':'off');g.textContent=go?'⏸ 학생 잠깐 멈추기':'▶ 학생 활동 시작';g.title=go?'누르면 학생 화면이 다시 기다려요 화면이 돼요':'누르기 전까지 학생 화면은 기다려요';};
+    g.onclick=()=>{gr.set(!go);if(!go)toast('▶ 학생 화면이 열렸어요');};
+    const gh=gr.on('value',v=>{go=v.val()===true;draw();});T.offGo=()=>gr.off('value',gh);
+    draw();document.body.appendChild(g);
+  }
 }
-function teacherStop(){T.off&&T.off();T.off=null;clearInterval(T.tick);T.btn&&T.btn.remove();T.btn=null;T.ov&&T.ov.remove();T.ov=null;T.open=false;}
+function teacherStop(){T.offGo&&T.offGo();T.offGo=null;T.go&&T.go.remove();T.go=null;T.off&&T.off();T.off=null;clearInterval(T.tick);T.btn&&T.btn.remove();T.btn=null;T.ov&&T.ov.remove();T.ov=null;T.open=false;}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&T.open&&!T.solo){if(T.zoom){T.zoom='';render();}else if(T.stepBig){T.stepBig='';render();}else show(false);}});
 
 window.ClassWatch={student,stop,who,step,detail:setDetail,steps,joinForm,teacher,teacherStop,show,toast,_S:S,_T:T,cleanHtml};

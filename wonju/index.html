@@ -282,7 +282,7 @@ function joinView(){
   if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
   $('#sub').textContent='학생 화면';
   // 선생님의 👀 학생 화면에 들어가기 화면부터 보여요
-  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  ClassWatch.student({db,room:ROOM,root:app,gate:true});ClassWatch.step('들어가기');
   app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
    <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
    <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
@@ -308,7 +308,7 @@ function joinView(){
   };
 }
 function enterRoom(){
-  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  clearOffs();ClassWatch.student({db,room:me.room,root:app,gate:true});ClassWatch.who(me.num,me.name);
   $('#sub').textContent=`${me.num}번 ${me.name}`;
   app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
   let ready=false;ROOMV={};onMe=null;
@@ -537,7 +537,7 @@ async function teacherView(){
     }
   }catch(e){return showError(e);}
   ROOM=code;
-  ClassWatch.teacher({db,room:code});
+  ClassWatch.teacher({db,room:code,gate:true});
   const url=location.origin+location.pathname+'?room='+code;
   $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
   app.innerHTML=`<div class="tv">

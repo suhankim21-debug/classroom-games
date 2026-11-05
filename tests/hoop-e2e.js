@@ -23,6 +23,7 @@ const r2 = x => String(Math.round(x * 100 + 1e-9) / 100);
   await T.goto(URL + '#teacher');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
   const code = (await T.textContent('.roomcode')).trim();
+  await T.click('.cw-go'); // ▶ 학생 활동 시작 (누르기 전에는 학생 화면이 기다려요)
   console.log('방 번호', code);
   const ANS = await T.evaluate(() => Object.fromEntries(GAME.map(q => [q.q, q.a])));
   const D = await T.evaluate(() => ({ H: HOOPS, P: POSTS }));

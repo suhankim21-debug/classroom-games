@@ -28,6 +28,7 @@ const team = n => Math.ceil(n / 2);
   await T.goto(URL + '#teacher');
   await T.waitForSelector('.roomcode', { timeout: 20000 });
   const code = (await T.textContent('.roomcode')).trim();
+  await T.click('.cw-go'); // ▶ 학생 활동 시작 (누르기 전에는 학생 화면이 기다려요)
   console.log('방 번호', code);
   const S = {};
   const cnt = async n => T.waitForFunction(n => /이 단계 끝 (\d+)명/.exec(document.querySelector('#cnt').textContent)?.[1] == n, n, { timeout: 15000 })
