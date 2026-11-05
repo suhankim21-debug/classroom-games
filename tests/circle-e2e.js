@@ -29,8 +29,8 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     if (!(await p.textContent('#say3')).includes('88칸보다 크고 132칸보다')) fail(`[${w}] 모눈 세기 이상: ${await p.textContent('#say3')}`);
     await p.click('nav button[data-t=s4]'); await p.click('#r4play'); await p.waitForTimeout(3000);
     if (!(await p.isVisible('#steps li:first-child'))) fail(`[${w}] 잘라 붙이기 1단계가 안 보임`);
-    for (let k = 0; k < 3; k++) await p.click('#r4next');
-    if (!(await p.isVisible('#steps li:nth-child(4)'))) fail(`[${w}] 마지막 단계가 안 보임`);
+    for (let k = 0; k < 5; k++) await p.click('#r4next');
+    if (!(await p.isVisible('#steps li:nth-child(6)'))) fail(`[${w}] 마지막 단계가 안 보임`);
     if (!(await p.textContent('#aro')).includes('78.5')) fail(`[${w}] 넓이 계산 이상`);
     await p.close();
   }
