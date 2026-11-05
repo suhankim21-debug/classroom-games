@@ -154,9 +154,11 @@ a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
     <div class="box"><h3>✏️ 원의 넓이 구하는 방법 <button id="r4next" style="float:right;font:inherit;font-size:.95rem;padding:4px 12px;border-radius:10px;border:none;background:var(--navy);color:#fff;cursor:pointer">다음 단계 ▶</button></h3>
       <ol class="steps" id="steps">
         <li>원을 <b>잘게 자를수록</b> 이어 붙인 모양이 <b>직사각형</b>에 가까워져요.</li>
-        <li>직사각형의 <span style="color:var(--red)">가로</span> = 원주의 ½ = 지름 × 3.14 × ½ = <b>반지름 × 3.14</b></li>
+        <li>원주의 절반은 위(주황), 절반은 아래(파랑)로 갔어요. 그래서 직사각형의 <span style="color:var(--red)">가로</span> = <b>원주의 ½</b></li>
+        <li>원주 = 지름 × 원주율이고, 지름 = 반지름 × 2예요.<br>그래서 <span class="hl">원주 = 반지름 × 2 × 원주율</span></li>
+        <li>가로 = 원주의 ½ = 반지름 × 2 × 원주율 × ½<br>= <b>반지름 × 원주율</b></li>
         <li>직사각형의 <span style="color:var(--blue)">세로</span> = <b>반지름</b></li>
-        <li>원의 넓이 = 가로 × 세로 = 반지름 × 3.14 × 반지름<br>= <span class="hl">반지름 × 반지름 × 3.14</span></li>
+        <li>원의 넓이 = 가로 × 세로 = 반지름 × 원주율 × 반지름<br>= <span class="hl">반지름 × 반지름 × 원주율</span> (원주율 3.14)</li>
       </ol>
     </div>
     <div class="box"><h3>🧮 바로 구해 보기</h3>
@@ -608,7 +610,7 @@ sims.s4 = (() => {
     if (anim) anim.stop = true; const from = t;
     anim = animate(2600 * Math.abs(to - from) + 1, k => { t = from + (to - from) * k; draw(); }, () => { t = to; draw(); if (to === 1 && step === 0) next(); });
   }
-  function next() { step = Math.min(4, step + 1); document.querySelectorAll('#steps li').forEach((li, i) => li.classList.toggle('show', i < step)); }
+  function next() { step = Math.min(6, step + 1); document.querySelectorAll('#steps li').forEach((li, i) => li.classList.toggle('show', i < step)); }
   $('#r4play').onclick = () => go(1);
   $('#r4back').onclick = () => go(0);
   $('#r4next').onclick = next;
