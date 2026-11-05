@@ -231,6 +231,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await T.click('#end'); await T.waitForFunction(() => RD.g.phase === 'end');
   await sleep(1000);
   await shot(T, 'tv-mafia-end');
+  if (!/밤 기록/.test(await T.textContent('#main')) || !(await T.textContent('#main')).includes('지켜 냄')) fail('끝 화면에 밤 기록이 없음');
   const pts = await T.evaluate(() => Object.fromEntries(Object.entries(RD.players).map(([n, x]) => [n, x.pt || 0])));
   if (citizens.some(n => pts[n] < pts1[n] + 2)) fail('이긴 시민 팀 점수가 이상함 ' + JSON.stringify(pts));
   if (!/승리/.test(await S[0].textContent('#app'))) fail('학생 화면에 게임 결과가 없음');
