@@ -89,6 +89,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
   const dhStored = await T.evaluate(() => localStorage.getItem('stock-dh'));
   const pubRaw = await T.evaluate(() => JSON.stringify(PUBNOW));
   check(dhStored.includes('TESTKEY') && !pubRaw.includes('TESTKEY') && !pubRaw.includes('C1'), 'API 키·학생 코드는 선생님 컴퓨터에만 있고 서버에는 없음');
+  check(await T.evaluate(() => M.cfg.maxT === 0 && M.cfg.sfee === 4 && M.cfg.awR.join() === '30,20,15' && M.cfg.awO === 7), '기본값: 거래 횟수 제한 없음, 단기 수수료 4%, 상 쿠키 30·20·15·7');
+  await T.evaluate(() => { M.cfg.maxT = 3; saveM(); publish(); }); // 하루 거래 횟수 제한도 확인해요
 
   /* ---------- 쿠키 맡기기 ---------- */
   const deposit = async (p, n) => {
@@ -275,8 +277,8 @@ const check = (c, m) => c ? ok(m) : fail(m);
   await S[0].click('[data-co="chip"]');
   await S[0].click('#sell');
   await S[0].waitForFunction(() => (myAcct().hold || {}).chip === 2);
-  const chipNow = (await M()).prices.chip, sf = Math.max(10, Math.round(chipNow * 0.04));
-  check(await S[0].evaluate(([p, f]) => myAcct().cash === 3960 + p - f, [chipNow, sf]), `1번: 산 다음 날 팔아서 단기 매매 수수료까지 4%(${sf}원)를 냄`);
+  const chipNow = (await M()).prices.chip, sf = Math.max(10, Math.round(chipNow * 0.05));
+  check(await S[0].evaluate(([p, f]) => myAcct().cash === 3960 + p - f, [chipNow, sf]), `1번: 산 다음 날 팔아서 단기 매매 수수료까지 5%(${sf}원)를 냄`);
   await S[0].click('[data-tab="cookie"]'); await S[0].click('#op'); await S[0].click('#outb');
   await S[0].waitForFunction(() => myAcct().res === 2000);
   check(await S[0].evaluate(([p, f]) => myAcct().cash === 1960 + p - f, [chipNow, sf]), '쿠키 2개로 바꾸기 신청: 돈 2,000원을 따로 둠');
@@ -393,7 +395,7 @@ const check = (c, m) => c ? ok(m) : fail(m);
   // 이익이면 올림, 손해면 반올림, 여기에 상 쿠키를 더해요
   const rounds = Object.entries(m3.acct).every(([n, a]) => { const o = m3.ops['fin' + n]; const up = a.fin.cash + (a.wd || 0) * 1000 > a.dep * 1000; const base = up ? Math.ceil(a.fin.cash / 1000) : Math.round(a.fin.cash / 1000); return a.fin.base === base && (o ? o.n : 0) === base + a.fin.bonus; });
   const ck = m3.awards.ck, first = m3.awards.rk[0].n;
-  check((ck[first] || []).some(x => x.t === '📈 수익률 1등' && x.n === 10) && Object.values(ck).flat().filter(x => /수익률/.test(x.t)).length === 3, `시상 쿠키: 수익률 1등(${first}번) 10개, 1~3등 모두 받음`);
+  check((ck[first] || []).some(x => x.t === '📈 수익률 1등' && x.n === 30) && Object.values(ck).flat().filter(x => /수익률/.test(x.t)).length === 3, `시상 쿠키: 수익률 1등(${first}번) 30개, 1~3등 모두 받음`);
   check(allSold && rounds && fin.length === 4, '끝: 모든 주식을 팔고 쿠키로 바꿔 돌려줄 목록을 만듦 ' + fin.map(o => `${o.num}번 ${o.n}개`).join(', '));
   await S[2].waitForFunction(() => PUB.phase === 'end');
   await S[2].click('[data-tab="cookie"]');

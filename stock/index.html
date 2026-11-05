@@ -647,7 +647,7 @@ function rulesBox(){
     <li>주가는 오를 수도, 내릴 수도 있어요. <b>쿠키를 잃을 수도 있어요.</b> 잃어도 괜찮은 만큼만 맡겨요.</li>
     <li>맡길 수 있는 쿠키는 남은 쿠키의 ${Math.round(c.ratio*100)}%, 모두 합쳐 최대 ${c.cap}개예요.</li>
     <li>장은 매일 아침 뉴스와 함께 열리고 <b>오후 ${esc(c.close||'1:10')}</b>에 닫혀요. 수업 시간에는 거래하지 않아요.</li>
-    <li>주식은 하루에 ${c.maxT||3}번까지만 사고팔 수 있어요. 살 때는 왜 사는지 꼭 골라요.</li>
+    <li>${c.maxT?`주식은 하루에 ${c.maxT}번까지만 사고팔 수 있어요.`:'사고파는 횟수에는 제한이 없어요. 대신 수수료를 꼭 생각해요.'} 살 때는 왜 사는지 꼭 골라요.</li>
     <li>사고팔 때마다 수수료가 붙어요. 산 지 ${c.sdays!=null?c.sdays:3}일이 안 돼서 팔면 수수료가 더 붙어요. <b>자주 사고팔면 손해</b>예요.</li>
     ${c.divRate?`<li>💰 표시가 있는 꾸준한 회사는 ${c.divEvery}일마다 <b>배당</b>(주가의 ${c.divRate}%)을 줘요. 오래 가지고 있는 친구만 받아요.</li>`:''}
     ${c.awR?`<li>🏆 마지막 날 시상식에서 <b>수익률(%) 1·2·3등은 쿠키 ${c.awR.join('·')}개</b>, 뉴스 해석왕·분산 투자왕·꾸준한 투자왕은 ${c.awO}개를 더 받아요. 맡긴 쿠키가 적어도 1등할 수 있어요. 이익이 났으면 최소 1개는 더 돌려받아요.</li>`:''}
@@ -933,8 +933,8 @@ function fixM(m){
   if(m.fx==null){m.fx=FX0;m.fxHist=[FX0];m.fxChg=0;}
   if(m.cfg.dRate==null)m.cfg.dRate=.3;if(m.cfg.sRate==null)m.cfg.sRate=3;if(m.cfg.term==null)m.cfg.term=5;
   if(m.cfg.open==null)m.cfg.open='08:30';if(m.sDate==null&&m.closeAt)m.sDate=dkey(m.closeAt);
-  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.awR==null){m.cfg.awR=[10,7,5];m.cfg.awO=3;}if(m.cfg.sideN==null)m.cfg.sideN=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
-  if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=3;if(m.cfg.sdays==null)m.cfg.sdays=3;
+  if(m.cfg.maxT==null)m.cfg.maxT=0;if(m.cfg.awR==null){m.cfg.awR=[30,20,15];m.cfg.awO=7;}if(m.cfg.sideN==null)m.cfg.sideN=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
+  if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=4;if(m.cfg.sdays==null)m.cfg.sdays=3;
   AS.forEach(c=>{if(m.prices[c.id]==null){m.prices[c.id]=c.p;m.hist[c.id]=[c.p];}});
   if(!m.mom)m.mom={};
   return m;
@@ -1408,7 +1408,7 @@ function awardWinners(){
   return {rk,pt,dv,st};
 }
 function awardCookies(){
-  const c=M.cfg,R=c.awR||[10,7,5],O=c.awO!=null?c.awO:3,{rk,pt,dv,st}=awardWinners(),out={};
+  const c=M.cfg,R=c.awR||[30,20,15],O=c.awO!=null?c.awO:7,{rk,pt,dv,st}=awardWinners(),out={};
   const add=(n,t,k)=>{if(!k)return;(out[n]=out[n]||[]).push({t,n:k});};
   rk.slice(0,3).forEach((x,i)=>add(x.n,`📈 수익률 ${i+1}등`,R[i]||0));
   if(pt[0]&&pt[0].pt>0)pt.filter(x=>x.pt===pt[0].pt).forEach(x=>add(x.n,'📰 뉴스 해석왕',O));
@@ -1668,8 +1668,8 @@ function drawSet(){
     <label class="fld"><span class="lb">단기 매매 기준 (산 지 며칠 안에 팔면)</span><input type="number" id="ssd" min="0" max="10" value="${c.sdays}"></label>
     <label class="fld"><span class="lb">예금 하루 이자 (%)</span><input type="number" id="sdr" min="0" max="10" step="0.1" value="${c.dRate}"></label>
     <label class="fld"><span class="lb">적금 만기 이자 (%)</span><input type="number" id="ssr" min="0" max="50" value="${c.sRate}"></label>
-    <label class="fld"><span class="lb">🏆 수익률 1·2·3등 상 쿠키</span><input id="sawr" value="${(c.awR||[10,7,5]).join(', ')}" placeholder="10, 7, 5"></label>
-    <label class="fld"><span class="lb">🏆 뉴스 해석왕·분산·꾸준한 투자왕 상 쿠키</span><input type="number" id="sawo" min="0" max="20" value="${c.awO!=null?c.awO:3}"></label>
+    <label class="fld"><span class="lb">🏆 수익률 1·2·3등 상 쿠키</span><input id="sawr" value="${(c.awR||[30,20,15]).join(', ')}" placeholder="30, 20, 15"></label>
+    <label class="fld"><span class="lb">🏆 뉴스 해석왕·분산·꾸준한 투자왕 상 쿠키</span><input type="number" id="sawo" min="0" max="20" value="${c.awO!=null?c.awO:7}"></label>
     <label class="fld"><span class="lb">배당 (주가의 %, 0이면 없음)</span><input type="number" id="sdv" min="0" max="10" step="0.5" value="${c.divRate}"></label>
     <label class="fld"><span class="lb">배당 주기 (며칠마다)</span><input type="number" id="sde" min="2" max="15" value="${c.divEvery}"></label>
     <label class="fld"><span class="lb">하루 작은 소식 수 (0~5)</span><input type="number" id="ssn" min="0" max="5" value="${c.sideN}"></label>
