@@ -51,7 +51,7 @@ a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
 <nav>
   <button data-t="s1" class="on">① 원 굴리기<small>원주와 지름의 관계 (2차시)</small></button>
   <button data-t="s5">🔎 왜 3.14일까?<small>지름 끈 감기 · 변 늘리기 (2~3차시)</small></button>
-  <button data-t="s2">② 원주율 찾기<small>원주율 · 원주와 지름 구하기 (3~4차시)</small></button>
+  <button data-t="s2">② 원주율 찾기<small>원주율 · 원주 공식 만들기 (3~4차시)</small></button>
   <button data-t="s3">③ 넓이 어림하기<small>모눈과 정사각형 (5차시)</small></button>
   <button data-t="s4">④ 잘라 붙이기<small>원의 넓이 구하는 방법 (6차시)</small></button>
 </nav>
@@ -108,6 +108,15 @@ a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
       <p class="mute">원주는 자로 잰 것처럼 소수 첫째 자리까지, 원주 ÷ 지름은 소수 둘째 자리까지 나타냈어요.</p>
     </div>
     <div class="box"><h3>📈 지름이 커지면 원주는?</h3><canvas id="graph"></canvas></div>
+  </div>
+  <div class="box" style="margin-top:14px" id="derive"><h3>✏️ 원주 공식 만들기 <button id="r2next" style="float:right;font:inherit;font-size:.95rem;padding:4px 12px;border-radius:10px;border:none;background:var(--navy);color:#fff;cursor:pointer">다음 단계 ▶</button> <button id="r2stepreset" class="sub" style="float:right;font:inherit;font-size:.95rem;padding:4px 12px;margin-right:6px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer">↺</button></h3>
+    <ol class="steps" id="steps2">
+      <li>어떤 원이든 (원주) ÷ (지름)은 늘 같아요. 이 값이 <b>원주율</b>이에요.<br><span class="hl">원주율 = 원주 ÷ 지름</span></li>
+      <li>나눗셈은 곱셈으로 바꿀 수 있어요. (12 ÷ 3 = 4 → 12 = 3 × 4)<br><span class="hl">원주 = 지름 × 원주율</span></li>
+      <li>원주율은 약 3.14예요. 그래서<br><span class="hl">원주 = 지름 × 3.14</span></li>
+      <li>지름은 반지름의 2배예요. (지름 = 반지름 × 2) 그래서<br><span class="hl">원주 = 반지름 × 2 × 3.14</span></li>
+      <li>거꾸로 원주를 알면 지름도 구할 수 있어요.<br><span class="hl">지름 = 원주 ÷ 3.14</span></li>
+    </ol>
   </div>
   <div class="box" style="margin-top:14px"><h3>🧮 원주율(3.14)로 구하기</h3>
     <div class="calc">지름 <input id="cd" type="number" min="0" step="0.1" value="10"> cm → 원주 = 지름 × 3.14 = <output id="cdo"></output></div>
@@ -490,6 +499,10 @@ sims.s2 = (() => {
     $('#cro').textContent = isNaN(v('#cr')) ? '' : fmt(v('#cr') * 2 * 3.14, 4) + ' cm';
   };
   ['#cd', '#cc', '#cr'].forEach(id => $(id).oninput = calc); calc(); table();
+  let step2 = 0;
+  const show2 = () => document.querySelectorAll('#steps2 li').forEach((li, i) => li.classList.toggle('show', i < step2));
+  $('#r2next').onclick = () => { step2 = Math.min(5, step2 + 1); show2(); };
+  $('#r2stepreset').onclick = () => { step2 = 0; show2(); };
   return { draw };
 })();
 
