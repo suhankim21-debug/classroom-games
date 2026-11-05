@@ -265,6 +265,7 @@ function enterRoom(){
     if(!ready)return;
     if(was!==st){cur=st;renderStage();} else drawSteps();
   });
+  listen(roomRef(me.room).child('run'),s=>{const was=ROOMV.run;ROOMV.run=s.val()||0;if(ready&&was!==ROOMV.run&&!busy)renderStage();});
   listen(roomRef(me.room).child('award'),s=>{ROOMV.award=!!s.val();if(ready&&cur===2&&ME.q&&ME.q.done)quizDone();});
 }
 let busy=false;
@@ -282,7 +283,13 @@ function shell(inner){
   drawSteps();
 }
 const wstep=sub=>ClassWatch.step(STAGES[cur].k+(sub?' · '+sub:''),{n:cur,total:2,wait:stepDone(cur)});
-function renderStage(){busy=false;clearInterval(spin);onMe=()=>drawSteps();ClassWatch.detail(null);return cur===1?stage1():stage2();}
+const started=n=>(ROOMV.run||0)>=n||(ROOMV.stage||1)>n;
+function waitView(){
+  ClassWatch.step(STAGES[cur].k+' · 기다리기',{n:cur,total:2,wait:true});
+  shell(`<div class="panel quiz pop"><div class="emoji">🧑‍🚀</div><h2 style="font-size:2rem">${esc(STAGES[cur].t)}</h2>
+   <p class="q" style="font-size:1.4rem">선생님 설명을 들어요.<br>선생님이 <b>시작</b>을 누르면 열려요.</p></div>`);
+}
+function renderStage(){busy=false;clearInterval(spin);onMe=()=>drawSteps();ClassWatch.detail(null);if(!started(cur))return waitView();return cur===1?stage1():stage2();}
 
 /* ---------- 1단계: 행성 차지하기 ---------- */
 let spin=null;
@@ -450,12 +457,12 @@ async function teacherView(){
   const tm=()=>RD.timer||{min:5,left:300,endAt:0};
   $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
   $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
-  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.update({run:RD.stage||1,timer:{min:t.min,left:l,endAt:Date.now()+l*1000}});}};
   $('#newroom').onclick=()=>{store('sp-teacher-room',null);teacherView();};
   $('#home').onclick=()=>{location.hash='';startView();};
   clearInterval(tick);tick=setInterval(renderTime,250);
 }
-function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function setStage(n){if(n===(RD.stage||1))return;roomRef(ROOM).update({stage:n,run:0,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
 function renderTime(){
   const el=$('#tm');if(!el)return clearInterval(tick);
   const t=RD.timer||{min:5,left:300,endAt:0};
@@ -474,7 +481,11 @@ function renderTV(){
   $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
   $('#ppl').innerHTML=S.map(x=>`<button data-ez="${x.n}" class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}${x.easy?' 🌟':''}</button>`).join('')||'<span class="muted">아직 아무도 없어요</span>';
   $$('#ppl button').forEach(b=>b.onclick=()=>{const n=b.dataset.ez;roomRef(ROOM).child('students/'+n+'/easy').set(!(RD.students[n]||{}).easy);});
-  return st===1?tv1(main,S):tv2(main,S);
+  st===1?tv1(main,S):tv2(main,S);
+  const go=(RD.run||0)>=st;
+  main.insertAdjacentHTML('afterbegin',go?`<div class="rules" style="border-color:var(--ok);background:#E3F1E7"><b>▶ 학생 화면이 열렸어요.</b> 시간이 멈춰도 학생은 계속할 수 있어요.</div>`
+   :`<div class="panel row" style="justify-content:space-between;border-color:var(--coral);background:#FFF4DF"><div><h2>⏸ 학생들은 기다리는 중이에요</h2><span class="muted">설명을 마치고 시작을 누르면 학생 화면이 열려요 (타이머도 같이 시작).</span></div><button class="big" id="startNow">▶ 시작</button></div>`);
+  const b=$('#startNow');if(b)b.onclick=()=>{const t=RD.timer||{min:STAGES[st].tm,left:STAGES[st].tm*60};const l=t.left>0?t.left:t.min*60;roomRef(ROOM).update({run:st,timer:{min:t.min,left:l,endAt:Date.now()+l*1000}});};
 }
 const nameList=L=>L.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ');
 function rateRow(no,title,sub,done,miss){

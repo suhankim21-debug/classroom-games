@@ -33,10 +33,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await p.fill('#cw-num', String(i + 1));
     await p.fill('#cw-name', NAMES[i]);
     await p.click('#enter');
-    await p.waitForSelector('#fly', { timeout: 15000 });
+    await p.waitForSelector('text=선생님이', { timeout: 15000 });
     S.push(p);
   }
-  ok(`학생 ${N}명 입장`);
+  ok(`학생 ${N}명 입장, 모두 기다리는 화면`);
+  if (await S[0].$('#fly')) fail('시작 전인데 활동이 보여요');
+  await shot(S[0], '0-wait');
+  await T.click('#startNow');
+  await Promise.all(S.map(p => p.waitForSelector('#fly', { timeout: 10000 })));
+  ok('선생님 시작 → 학생 화면 열림');
   await T.click(`[data-ez="${N}"]`);
   await S[N - 1].waitForSelector('.board.easy', { timeout: 8000 }).then(() => ok('🌟 쉬운 화면 켜짐')).catch(() => fail('쉬운 화면이 안 켜짐'));
   await shot(S[0], '1-ask');
@@ -69,6 +74,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (new RegExp(`끝 ${N}명`).test(done1)) ok('1단계 모두 끝: ' + done1); else fail('1단계 끝 인원: ' + done1);
   // 2단계
   await T.click('#tsteps button[data-s="2"]');
+  await Promise.all(S.map(p => p.waitForSelector('text=선생님이', { timeout: 10000 })));
+  ok('2단계 열면 다시 기다리기');
+  await T.click('#startNow');
   await Promise.all(S.map(p => p.waitForSelector('.prog', { timeout: 10000 })));
   for (let k = 0; k < 12; k++) {
     await Promise.all(S.map(async (p, i) => {
