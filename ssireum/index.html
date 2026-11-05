@@ -444,11 +444,22 @@ function enterRoom(){
     if(!ready)return;
     if(was!==st){cur=st;renderStage();} else drawSteps();
   });
+  /* 선생님이 시작을 누르기 전에는 그 단계를 대기 화면으로 보여 줘요 */
+  listen(roomRef(me.room).child('go'),s=>{
+    const g=s.val()||0;const was=ROOMV.go||0;ROOMV.go=g;
+    if(!ready)return;
+    if((cur>was)!==(cur>g))renderStage(); else drawSteps();
+  });
+}
+function waitView(){
+  ClassWatch.step('대기',{n:cur,total:NST,wait:true});
+  shell(`<div class="panel quiz pop"><div><span class="band">${cur}단계 · ${STAGES[cur].k}</span></div><div class="emoji" aria-hidden="true">👂</div>
+    <h2 style="font-size:1.8rem">선생님 설명을 들어요</h2><p>선생님이 <b>시작</b>을 누르면 활동이 열려요. 태블릿은 잠깐 내려놓아요.</p></div>`);
 }
 function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
 function drawSteps(){
   const el=$('#steps');if(!el)return;
-  el.innerHTML=[1,2,3].map(n=>`<button data-s="${n}" ${n>ROOMV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  el.innerHTML=[1,2,3].map(n=>`<button data-s="${n}" ${n>ROOMV.stage||n>(ROOMV.go||0)?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
   $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
 }
 function shell(inner){
@@ -457,6 +468,7 @@ function shell(inner){
   drawSteps();
 }
 function renderStage(){
+  if(cur>(ROOMV.go||0))return waitView();
   ClassWatch.step(STAGES[cur].k,{n:cur,total:NST,wait:stepDone(cur)});
   onMe=()=>drawSteps();
   if(cur===1)return stage1();
@@ -536,7 +548,7 @@ async function teacherView(){
   app.innerHTML=`<div class="tv">
    <div class="grid">
     <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
-    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
     <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
     <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
     <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
@@ -548,7 +560,7 @@ async function teacherView(){
   const tm=()=>RD.timer||{min:5,left:300,endAt:0};
   $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
   $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
-  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});const st=RD.stage||1;if((RD.go||0)<st)ref.child('go').set(st);}};
   $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
   $('#home').onclick=()=>{location.hash='';startView();};
   clearInterval(tick);tick=setInterval(renderTime,250);
@@ -560,7 +572,9 @@ function renderTime(){
   const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
   el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
   el.classList.toggle('end',!!t.endAt&&left===0);
-  $('#go').textContent=t.endAt?'멈춤':'시작';$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+  const waitSt=(RD.go||0)<(RD.stage||1);
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?`학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.`:`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}$('#minus').disabled=$('#plus').disabled=!!t.endAt;
 }
 const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
 

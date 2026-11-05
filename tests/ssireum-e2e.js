@@ -1,6 +1,6 @@
 // 씨름장 넓이 연구소 자동 테스트: 교사 화면 1개 + 학생 4명이 실제 Firebase 방에서 1~3단계를 끝까지 해 봐요.
 // 실행: node tests/ssireum-e2e.js   (다른 주소: URL=http://localhost:8000/ssireum/ node tests/ssireum-e2e.js)
-// 틀린 답을 일부러 골라 선생님 화면의 문제별 정답률·틀린 학생 이름이 맞게 나오는지 확인해요. 끝나면 방은 지워요.
+// 선생님이 시작을 누르기 전에는 학생이 대기하는지, 틀린 답을 일부러 골라 선생님 화면의 문제별 정답률·틀린 학생 이름이 맞게 나오는지 확인해요. 끝나면 방은 지워요.
 const { chromium } = require('playwright');
 const URL = process.env.URL || 'https://suhankim21-debug.github.io/classroom-games/ssireum/';
 const SHOTS = process.env.SHOTS || '';
@@ -52,6 +52,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await p.click('#chk'); await p.waitForSelector('#wm.ok');
     return msg;
   };
+  // 선생님이 시작을 누르기 전에는 대기
+  await sleep(1500);
+  for (const p of S) if (!(await p.locator('text=선생님 설명을 들어요').count())) fail('시작 전인데 학생 화면이 대기하지 않음');
+  await T.click('#go');
   // 1단계
   await Promise.all(S.map(async (p, k) => {
     await pickAns(p, 'a1', k === 0);
@@ -70,6 +74,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await shot(T, 'tv1');
   // 2단계
   await T.click('#tsteps button[data-s="2"]');
+  await S[1].waitForSelector('text=선생님 설명을 들어요', { timeout: 10000 });
+  await T.click('#go');
   await Promise.all(S.map(async (p, k) => {
     await p.waitForSelector('text=직사각형의 세로는', { timeout: 10000 });
     await pickAns(p, 'b1', false);
@@ -90,6 +96,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   try { await S[2].waitForSelector('text=2단계 끝', { timeout: 30000 }); } catch (e) { await shot(S[2], 'reload'); fail('새로고침 뒤 2단계 끝 화면으로 돌아오지 않음'); }
   // 3단계
   await T.click('#tsteps button[data-s="3"]');
+  await sleep(1500);
+  if (!(await S[0].locator('text=선생님 설명을 들어요').count())) fail('3단계 시작 전 대기 화면 없음');
+  await T.click('#go');
   const P = await T.evaluate(() => PROBS.map(p => ({ r: p.r, d: p.r * 2 })));
   await Promise.all(S.map(async (p, k) => {
     for (let i = 0; i < P.length; i++) {
