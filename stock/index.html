@@ -58,6 +58,7 @@ main{padding-block:18px 24px}
 .bonds .hd{display:flex;gap:8px;align-items:center;font-family:var(--display);font-size:1.15rem}.bonds .hd span{font-size:1.6rem}
 @media (max-width:700px){.bonds{grid-template-columns:1fr}}
 .anal .dvt b{display:inline}
+.awc{color:#B4691F;font-family:var(--display);font-weight:400;white-space:nowrap}
 .sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .nside{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;gap:10px;align-items:flex-start}
 .nside .se{font-size:1.8rem;line-height:1}
@@ -649,6 +650,7 @@ function rulesBox(){
     <li>주식은 하루에 ${c.maxT||3}번까지만 사고팔 수 있어요. 살 때는 왜 사는지 꼭 골라요.</li>
     <li>사고팔 때마다 수수료가 붙어요. 산 지 ${c.sdays!=null?c.sdays:3}일이 안 돼서 팔면 수수료가 더 붙어요. <b>자주 사고팔면 손해</b>예요.</li>
     ${c.divRate?`<li>💰 표시가 있는 꾸준한 회사는 ${c.divEvery}일마다 <b>배당</b>(주가의 ${c.divRate}%)을 줘요. 오래 가지고 있는 친구만 받아요.</li>`:''}
+    ${c.awR?`<li>🏆 마지막 날 시상식에서 <b>수익률(%) 1·2·3등은 쿠키 ${c.awR.join('·')}개</b>, 뉴스 해석왕·분산 투자왕·꾸준한 투자왕은 ${c.awO}개를 더 받아요. 맡긴 쿠키가 적어도 1등할 수 있어요. 이익이 났으면 최소 1개는 더 돌려받아요.</li>`:''}
     <li>한 회사에 몰지 말고 여러 회사, ETF, 금에 나누어 담아요. 🏦 은행에서 달러 환전, 예금, 적금도 할 수 있어요.</li>
     <li>친구 태블릿으로 주문하지 않아요. 내 계좌는 내 태블릿에서만 움직여요.</li></ul></div>`;
 }
@@ -905,7 +907,7 @@ function stuCookie(box,a,easy){
     <p class="muted" style="margin:0">주식을 판 돈을 쿠키로 바꿔요. 지금 ${maxOut}개까지 바꿀 수 있어요. 마지막 날에는 모두 자동으로 바꿔 줘요.</p>
     <div class="stepper" style="max-width:420px"><button class="ghost" id="om">−</button><output class="num">${NOUT}개</output><button class="ghost" id="op">＋</button></div>
     <div class="row"><button class="ghost" id="outb" ${maxOut?'':'disabled'}>${won(NOUT*c.rate)} → 쿠키 ${NOUT}개 신청</button></div></div>`}
-   <div class="panel grid"><h2>내 쿠키 신청</h2><div class="ops">${ops.map(([,o])=>`<div><span>${o.type==='in'?`맡기기 ${o.n}개`:`돌려받기 ${o.n}개`}</span><span>${stTxt[o.st]||''}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
+   <div class="panel grid"><h2>내 쿠키 신청</h2><div class="ops">${ops.map(([,o])=>`<div><span>${o.type==='in'?`맡기기 ${o.n}개`:`돌려받기 ${o.n}개${o.b?` (🏆 상 쿠키 ${o.b}개 포함)`:''}`}</span><span>${stTxt[o.st]||''}</span></div>`).join('')||'<span class="muted">아직 없어요</span>'}</div></div>`;
   if(end)return;
   $('#im').onclick=()=>{NIN--;render();};$('#ip').onclick=()=>{NIN++;render();};
   $('#om').onclick=()=>{NOUT--;render();};$('#op').onclick=()=>{NOUT++;render();};
@@ -931,7 +933,7 @@ function fixM(m){
   if(m.fx==null){m.fx=FX0;m.fxHist=[FX0];m.fxChg=0;}
   if(m.cfg.dRate==null)m.cfg.dRate=.3;if(m.cfg.sRate==null)m.cfg.sRate=3;if(m.cfg.term==null)m.cfg.term=5;
   if(m.cfg.open==null)m.cfg.open='08:30';if(m.sDate==null&&m.closeAt)m.sDate=dkey(m.closeAt);
-  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.sideN==null)m.cfg.sideN=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
+  if(m.cfg.maxT==null)m.cfg.maxT=3;if(m.cfg.awR==null){m.cfg.awR=[10,7,5];m.cfg.awO=3;}if(m.cfg.sideN==null)m.cfg.sideN=3;if(m.cfg.divRate==null){m.cfg.divRate=2;m.cfg.divEvery=5;m.cfg.divHold=3;}if(m.cfg.bTerm==null)m.cfg.bTerm=5;
   if(m.cfg.fee==null)m.cfg.fee=1;if(m.cfg.sfee==null)m.cfg.sfee=3;if(m.cfg.sdays==null)m.cfg.sdays=3;
   AS.forEach(c=>{if(m.prices[c.id]==null){m.prices[c.id]=c.p;m.hist[c.id]=[c.p];}});
   if(!m.mom)m.mom={};
@@ -1150,9 +1152,9 @@ function acctView(n,a){
 }
 function buildPub(){
   const acct={};Object.entries(M.acct).forEach(([n,a])=>acct[n]=acctView(n,a));
-  const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at});
+  const ops={};Object.entries(M.ops).forEach(([id,o])=>ops[id]={num:o.num,type:o.type,n:o.n,st:o.st,at:o.at,b:o.b||0});
   return {day:M.day,phase:M.phase,closeAt:M.closeAt,prices:M.prices,hist:M.hist,chg:M.chg,news:M.today?{e:M.today.e,t:M.today.t,b:M.today.b,src:M.today.src,day:M.today.day}:null,side:(M.side||[]).map(n=>({e:n.e,t:n.t,b:n.b,src:n.src})),reveal:M.reveal,fx:M.fx,fxHist:M.fxHist,fxChg:M.fxChg,
-    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,open:M.cfg.open,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,bTerm:M.cfg.bTerm,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays,maxT:M.cfg.maxT,divRate:M.cfg.divRate,divEvery:M.cfg.divEvery,divHold:M.cfg.divHold},acct,ops,award:!!M.award};
+    cfg:{rate:M.cfg.rate,cap:M.cfg.cap,ratio:M.cfg.ratio,close:M.cfg.close,open:M.cfg.open,days:M.cfg.days,dRate:M.cfg.dRate,sRate:M.cfg.sRate,term:M.cfg.term,bTerm:M.cfg.bTerm,fee:M.cfg.fee,sfee:M.cfg.sfee,sdays:M.cfg.sdays,maxT:M.cfg.maxT,awR:M.cfg.awR,awO:M.cfg.awO,divRate:M.cfg.divRate,divEvery:M.cfg.divEvery,divHold:M.cfg.divHold},acct,ops,award:!!M.award};
 }
 function publish(){
   if(!LEADER)return;
@@ -1397,17 +1399,34 @@ function renderTV(){
   $('#rk').onclick=()=>{M.cfg.showRank=!M.cfg.showRank;saveM();renderTV();};
   teacherTick();
 }
-function tvAward(main){
-  const rk=rankList();const p=[rk[1],rk[0],rk[2]];
-  const pt=Object.entries(M.acct).map(([n,a])=>({n:+n,name:a.name,pt:a.pt||0})).sort((a,b)=>b.pt-a.pt||a.n-b.n);
-  const dv=Object.entries(M.acct).filter(([,a])=>a.divDays).map(([n,a])=>({n:+n,name:a.name,d:a.divSum/a.divDays})).sort((a,b)=>b.d-a.d||a.n-b.n);
+/* 시상: 넣은 쿠키 양과 상관없이 잘한 친구가 상 쿠키를 받아요 */
+function awardWinners(){
+  const rk=rankList();
+  const pt=Object.entries(M.acct).filter(([,a])=>a.dep).map(([n,a])=>({n:+n,name:a.name,pt:a.pt||0})).sort((a,b)=>b.pt-a.pt||a.n-b.n);
+  const dv=Object.entries(M.acct).filter(([,a])=>a.dep&&a.divDays).map(([n,a])=>({n:+n,name:a.name,d:a.divSum/a.divDays})).sort((a,b)=>b.d-a.d||a.n-b.n);
   const st=rk.filter(x=>x.ret>0).map(x=>({...x,trades:M.acct[x.n].trades||0})).sort((a,b)=>a.trades-b.trades||b.ret-a.ret);
+  return {rk,pt,dv,st};
+}
+function awardCookies(){
+  const c=M.cfg,R=c.awR||[10,7,5],O=c.awO!=null?c.awO:3,{rk,pt,dv,st}=awardWinners(),out={};
+  const add=(n,t,k)=>{if(!k)return;(out[n]=out[n]||[]).push({t,n:k});};
+  rk.slice(0,3).forEach((x,i)=>add(x.n,`📈 수익률 ${i+1}등`,R[i]||0));
+  if(pt[0]&&pt[0].pt>0)pt.filter(x=>x.pt===pt[0].pt).forEach(x=>add(x.n,'📰 뉴스 해석왕',O));
+  if(dv[0])add(dv[0].n,'🧺 분산 투자왕',O);
+  if(st[0])add(st[0].n,'🐢 꾸준한 투자왕',O);
+  return out;
+}
+function tvAward(main){
+  const W=M.awards?{rk:M.awards.rk,pt:M.awards.pt,dv:M.awards.dv,st:M.awards.st}:awardWinners();
+  const {rk,pt,dv,st}=W;const p=[rk[1],rk[0],rk[2]];
+  const AW=(M.awards&&M.awards.ck)||{};
+  const ck=(n,t)=>{const x=(AW[n]||[]).find(y=>y.t.includes(t));return x?` <b class="awc">+🍪${x.n}</b>`:'';};
   main.innerHTML=`<div class="panel grid" id="tvb"><div class="row between"><h2 style="font-size:2rem">🏆 쿠키 증권 시상식</h2><button class="ghost" id="awoff">돌아가기</button></div>
    <h3 style="font-size:1.4rem">📈 수익률왕</h3>
-   <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${x.n} ${esc(x.name)}</span>${pctTxt(x.ret)}</div>`:'<span></span>').join('')}</div></div>
-   <div class="panel grid"><h3 style="font-size:1.4rem">📰 뉴스 해석왕 (예측을 가장 많이 맞힌 친구)</h3><div class="rank">${pt.slice(0,5).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.pt}점</span></div>`).join('')}</div></div>
-   <div class="two2"><div class="panel grid"><h3 style="font-size:1.4rem">🧺 분산 투자왕 (여러 바구니에 골고루)</h3><div class="rank">${dv.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span></span><span class="rt">${x.d.toFixed(1)}개</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div>
-    <div class="panel grid"><h3 style="font-size:1.4rem">🐢 꾸준한 투자왕 (적게 사고팔고 이익)</h3><div class="rank">${st.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}</span><span class="num muted">${x.trades}번</span><span class="rt ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div></div>
+   <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${x.n} ${esc(x.name)}</span>${pctTxt(x.ret)}${ck(x.n,'수익률')}</div>`:'<span></span>').join('')}</div></div>
+   <div class="panel grid"><h3 style="font-size:1.4rem">📰 뉴스 해석왕 (예측을 가장 많이 맞힌 친구)</h3><div class="rank">${pt.slice(0,5).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}${ck(x.n,'뉴스')}</span><span></span><span class="rt">${x.pt}점</span></div>`).join('')}</div></div>
+   <div class="two2"><div class="panel grid"><h3 style="font-size:1.4rem">🧺 분산 투자왕 (여러 바구니에 골고루)</h3><div class="rank">${dv.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}${ck(x.n,'분산')}</span><span></span><span class="rt">${x.d.toFixed(1)}개</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div>
+    <div class="panel grid"><h3 style="font-size:1.4rem">🐢 꾸준한 투자왕 (적게 사고팔고 이익)</h3><div class="rank">${st.slice(0,3).map((x,i)=>`<div class="r"><b>${i+1}</b><span>${x.n} ${esc(x.name)}${ck(x.n,'꾸준')}</span><span class="num muted">${x.trades}번</span><span class="rt ${ud(x.ret)}">${pctTxt(x.ret)}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></div></div>
    <div class="panel grid"><h3>수수료로 나간 돈</h3><p style="margin:0;font-size:1.15rem">우리 반이 프로젝트 동안 낸 수수료는 모두 <b>${won(Object.values(M.acct).reduce((s,a)=>s+(a.fee||0),0))}</b>이에요. 가장 많이 사고판 친구는 ${(()=>{const t=Object.values(M.acct).sort((x,y)=>(y.trades||0)-(x.trades||0))[0];return t?`${t.trades||0}번 거래하고 수수료 ${won(t.fee||0)}를 냈어요`:'없어요';})()}.</p></div>
    <div class="panel grid"><h3>되돌아보기</h3><p style="margin:0;font-size:1.15rem">어떤 뉴스가 가장 기억에 남나요? 오를 줄 알았는데 내린 적이 있나요? 한 회사에만 몰아서 산 친구와 여러 회사에 나누어 산 친구는 어떻게 달랐나요? 자주 사고판 친구와 오래 가진 친구는요? 처음에 정한 나의 투자 원칙을 지켰나요? 친구 따라 산 주식은 어떻게 됐나요?</p></div>`;
   $('#awoff').onclick=()=>{M.award=false;saveM();publish();};
@@ -1503,6 +1522,9 @@ async function endProject(){
   await drain();
   await applyNews();
   const rate=M.cfg.rate;
+  // 시상은 마지막 값으로 정산하기 전에 정해요 (정산해도 자산은 같아요)
+  const W=awardWinners(),AC=awardCookies();
+  M.awards={rk:W.rk.map(x=>({n:x.n,name:x.name,ret:x.ret,v:x.v,wd:x.wd})),pt:W.pt,dv:W.dv,st:W.st.map(x=>({n:x.n,name:x.name,ret:x.ret,trades:x.trades})),ck:AC};
   Object.entries(M.acct).forEach(([n,a])=>{
     AS.forEach(c=>{const q=(a.hold||{})[c.id]||0;if(q)a.cash+=q*M.prices[c.id];});
     a.hold={};a.cost={};
@@ -1512,9 +1534,12 @@ async function endProject(){
     // 만기가 안 된 채권은 빌려준 돈만 돌려줘요
     (a.bonds||[]).forEach(x=>{a.cash+=x.w;});a.bonds=[];
     if(a.sav){const p=a.sav.paid*a.sav.w;a.cash+=p+(a.sav.paid>=M.cfg.term?Math.floor(p*M.cfg.sRate/100):0);a.sav=null;}
-    const k=Math.round(a.cash/rate);
-    if(k>0)M.ops['fin'+n]={num:+n,type:'out',n:k,st:'wait',at:Date.now(),fin:true};
-    a.fin={cash:a.cash,n:k};a.cash=0;
+    // 이익이 났으면 올림(최소 1개 더), 손해면 반올림 + 상 쿠키
+    const res=resOf(n),profit=a.cash+res+(a.wd||0)*rate>(a.dep||0)*rate;
+    const base=profit?Math.ceil(a.cash/rate-1e-9):Math.round(a.cash/rate);
+    const bonus=(AC[n]||[]).reduce((t,x)=>t+x.n,0),k=base+bonus;
+    if(k>0)M.ops['fin'+n]={num:+n,type:'out',n:k,st:'wait',at:Date.now(),fin:true,b:bonus};
+    a.fin={cash:a.cash,n:k,base,bonus,aw:AC[n]||[]};a.cash=0;
     if(k>0)snapOp('fin'+n);
   });
   M.phase='end';M.today=null;M.side=[];M.closeAt=0;
@@ -1619,7 +1644,7 @@ function drawCookie(){
    <p style="margin:0">다했니에서 아래만큼 <b>빼거나(사용 처리)</b> <b>주고</b>, 확인을 눌러요. ${ready?'확인을 누르면 다했니 쿠키가 정말 바뀌었는지 API로 읽어서 맞을 때만 처리해요.':'다했니 API를 연결하지 않아서 "직접 확인"으로 처리해요. (⚙️ 설정에서 연결할 수 있어요)'}</p>
    <div class="chips"><span>빼야 할 쿠키 ${sumIn}개</span><span>줘야 할 쿠키 ${sumOut}개</span></div>
    ${G.map(g=>{const n=g.ops.reduce((s,o)=>s+o.n,0),a=M.acct[g.num]||{};const warn=g.ops.map(o=>o.warn||o.snapErr).filter(Boolean);
-     return `<div class="opg"><div class="row between"><b>${g.num} ${esc(a.name||'')} · ${g.type==='in'?`다했니에서 쿠키 <span class="down">${n}개 빼기</span> → ${won(n*M.cfg.rate)} 넣기`:`다했니에서 쿠키 <span class="up">${n}개 주기</span>${g.ops.some(o=>o.fin)?' (마지막 정산)':''}`}</b>
+     return `<div class="opg"><div class="row between"><b>${g.num} ${esc(a.name||'')} · ${g.type==='in'?`다했니에서 쿠키 <span class="down">${n}개 빼기</span> → ${won(n*M.cfg.rate)} 넣기`:`다했니에서 쿠키 <span class="up">${n}개 주기</span>${g.ops.some(o=>o.fin)?` (마지막 정산${g.ops.some(o=>o.b)?`, 상 쿠키 ${g.ops.reduce((t,o)=>t+(o.b||0),0)}개 포함`:''})`:''}`}</b>
        <div class="row">${ready&&dhReady(g.num)?`<button class="okb small" data-v="${g.num}|${g.type}">다했니에서 확인</button>`:''}<button class="${ready&&dhReady(g.num)?'ghost':'okb'} small" data-m="${g.num}|${g.type}">직접 확인</button>${g.ops.some(o=>o.fin)?'':`<button class="ghost small" data-c="${g.num}|${g.type}">취소</button>`}</div></div>
        ${warn.length?`<div class="warn" style="padding:4px 10px">${warn.map(esc).join(' · ')}</div>`:''}<div class="msg bad" style="min-height:0" id="vm${g.num}${g.type}"></div></div>`;}).join('')||'<p class="muted">지금 처리할 쿠키가 없어요.</p>'}
    <details><summary>최근 처리한 것</summary><div class="ops" style="margin-top:8px">${done.map(o=>`<div><span>${o.num} ${esc((M.acct[o.num]||{}).name||'')} · ${o.type==='in'?'맡기기':'돌려주기'} ${o.n}개</span><span>${o.st==='done'?(o.how==='api'?'✔ 다했니로 확인':'✔ 직접 확인'):'✕ 취소'}</span></div>`).join('')||'<span class="muted">없어요</span>'}</div></details></div>`;
@@ -1643,6 +1668,8 @@ function drawSet(){
     <label class="fld"><span class="lb">단기 매매 기준 (산 지 며칠 안에 팔면)</span><input type="number" id="ssd" min="0" max="10" value="${c.sdays}"></label>
     <label class="fld"><span class="lb">예금 하루 이자 (%)</span><input type="number" id="sdr" min="0" max="10" step="0.1" value="${c.dRate}"></label>
     <label class="fld"><span class="lb">적금 만기 이자 (%)</span><input type="number" id="ssr" min="0" max="50" value="${c.sRate}"></label>
+    <label class="fld"><span class="lb">🏆 수익률 1·2·3등 상 쿠키</span><input id="sawr" value="${(c.awR||[10,7,5]).join(', ')}" placeholder="10, 7, 5"></label>
+    <label class="fld"><span class="lb">🏆 뉴스 해석왕·분산·꾸준한 투자왕 상 쿠키</span><input type="number" id="sawo" min="0" max="20" value="${c.awO!=null?c.awO:3}"></label>
     <label class="fld"><span class="lb">배당 (주가의 %, 0이면 없음)</span><input type="number" id="sdv" min="0" max="10" step="0.5" value="${c.divRate}"></label>
     <label class="fld"><span class="lb">배당 주기 (며칠마다)</span><input type="number" id="sde" min="2" max="15" value="${c.divEvery}"></label>
     <label class="fld"><span class="lb">하루 작은 소식 수 (0~5)</span><input type="number" id="ssn" min="0" max="5" value="${c.sideN}"></label>
@@ -1659,7 +1686,7 @@ function drawSet(){
   $('#save').onclick=()=>{
     c.close=$('#sc').value||'13:10';c.open=$('#sop').value||'';if(c.open&&c.open>=c.close){alert('여는 시간은 마감 시간보다 빨라야 해요.');return;}c.days=Math.max(1,+$('#sd').value||20);if(!$('#sr').disabled)c.rate=Math.max(100,+$('#sr').value||1000);
     c.cap=Math.max(1,+$('#sp').value||20);c.ratio=Math.min(1,Math.max(.1,(+$('#so').value||50)/100));
-    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));c.sideN=Math.min(5,Math.max(0,Math.round(+$('#ssn').value||0)));c.divRate=Math.min(10,Math.max(0,+$('#sdv').value||0));c.divEvery=Math.min(15,Math.max(2,Math.round(+$('#sde').value||5)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
+    c.dRate=Math.min(10,Math.max(0,+$('#sdr').value||0));c.fee=Math.min(5,Math.max(0,+$('#sfe').value||0));c.sfee=Math.min(10,Math.max(0,+$('#ssf').value||0));c.sdays=Math.min(10,Math.max(0,Math.round(+$('#ssd').value||0)));c.maxT=Math.min(20,Math.max(0,Math.round(+$('#smt').value||0)));{const r=$('#sawr').value.split(/[^0-9]+/).filter(Boolean).map(x=>Math.min(50,+x)).slice(0,3);while(r.length<3)r.push(0);c.awR=r;c.awO=Math.min(20,Math.max(0,Math.round(+$('#sawo').value||0)));}c.sideN=Math.min(5,Math.max(0,Math.round(+$('#ssn').value||0)));c.divRate=Math.min(10,Math.max(0,+$('#sdv').value||0));c.divEvery=Math.min(15,Math.max(2,Math.round(+$('#sde').value||5)));c.bTerm=Math.min(15,Math.max(2,Math.round(+$('#sbt').value||5)));c.sRate=Math.min(50,Math.max(0,+$('#ssr').value||0));if(!$('#stm').disabled)c.term=Math.min(15,Math.max(2,Math.round(+$('#stm').value||5)));
     DH={key:$('#dk').value.trim(),codes:readCodes()};store('stock-dh',DH);
     saveM();publish();closeModal();
   };

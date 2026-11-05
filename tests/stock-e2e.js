@@ -390,7 +390,10 @@ const check = (c, m) => c ? ok(m) : fail(m);
   const m3 = await M();
   const fin = Object.values(m3.ops).filter(o => o.fin);
   const allSold = Object.values(m3.acct).every(a => !Object.keys(a.hold).length && a.cash === 0 && !a.usd && !a.dpst && !a.sav);
-  const rounds = Object.entries(m3.acct).every(([n, a]) => { const o = m3.ops['fin' + n]; return Math.round(a.fin.cash / 1000) === (o ? o.n : 0); });
+  // 이익이면 올림, 손해면 반올림, 여기에 상 쿠키를 더해요
+  const rounds = Object.entries(m3.acct).every(([n, a]) => { const o = m3.ops['fin' + n]; const up = a.fin.cash + (a.wd || 0) * 1000 > a.dep * 1000; const base = up ? Math.ceil(a.fin.cash / 1000) : Math.round(a.fin.cash / 1000); return a.fin.base === base && (o ? o.n : 0) === base + a.fin.bonus; });
+  const ck = m3.awards.ck, first = m3.awards.rk[0].n;
+  check((ck[first] || []).some(x => x.t === '📈 수익률 1등' && x.n === 10) && Object.values(ck).flat().filter(x => /수익률/.test(x.t)).length === 3, `시상 쿠키: 수익률 1등(${first}번) 10개, 1~3등 모두 받음`);
   check(allSold && rounds && fin.length === 4, '끝: 모든 주식을 팔고 쿠키로 바꿔 돌려줄 목록을 만듦 ' + fin.map(o => `${o.num}번 ${o.n}개`).join(', '));
   await S[2].waitForFunction(() => PUB.phase === 'end');
   await S[2].click('[data-tab="cookie"]');
