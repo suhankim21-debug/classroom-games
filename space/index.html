@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>행성 차지하기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F; --space:#22305C;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; --en:'Gowun Dodum',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--space);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.en{font-family:var(--en);font-weight:700;color:var(--blue)}
+.opts{display:grid;grid-template-columns:1fr;gap:10px;width:100%;max-width:640px}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-family:var(--en);font-weight:700;font-size:1.3rem;padding:.8em .6em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.emoji{font-size:clamp(3.5rem,12vw,5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+.say{background:#fff;border:3px dashed var(--blue2);border-radius:16px;padding:12px 16px;font-family:var(--en);font-weight:700;font-size:1.5rem;color:var(--blue)}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+/* 행성 판 */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:var(--space);border-radius:20px;padding:14px;width:100%;max-width:640px}
+.board div{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5A6FA8,#2E3E73);display:grid;place-items:center;align-content:center;gap:2px;color:#fff;font-family:var(--display);font-size:.95rem;line-height:1.1;text-align:center;border:4px solid transparent;transition:transform .08s}
+.board div .e{font-size:2.3rem}
+.board div.hot{border-color:var(--gold);transform:scale(1.08);background:radial-gradient(circle at 35% 30%,#FFE6A3,#E9B04F);color:var(--ink)}
+.board div.mine{box-shadow:0 0 0 3px var(--ok) inset}
+.board div.lucky{background:radial-gradient(circle at 35% 30%,#FFD27A,#E08A2C)}
+.board div.fail{background:radial-gradient(circle at 35% 30%,#8a8a8a,#4b4b4b)}
+.board.easy div{font-size:1.15rem}
+.ask{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#fff;border:3px solid var(--blue2);border-radius:18px;padding:10px 16px;width:100%;max-width:640px;text-align:left}
+.ask .e{font-size:3rem;line-height:1}
+.ask b{font-family:var(--en);font-size:1.4rem;color:var(--blue)}
+.ask button{font-size:1.4rem;padding:.4em .7em}
+.big{font-size:1.6rem;padding:.8em 2em}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qrp{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people button{background:var(--cream);color:var(--ink);border-radius:999px;padding:.25em .8em;font-size:1rem}
+.people button.ok{background:var(--ok);color:#fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.lanes{display:grid;gap:8px}
+.lane{display:grid;grid-template-columns:9em 1fr 3.5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px}
+.lane .nm{font-family:var(--display);font-size:1.15rem}
+.lane .road{position:relative;height:34px;background:linear-gradient(90deg,#2E3E73,#5A6FA8);border-radius:8px}
+.lane .road span{position:absolute;top:0;font-size:1.7rem;line-height:34px;transition:left .6s}
+.lane .road::after{content:'🌕';position:absolute;right:2px;top:0;font-size:1.6rem;line-height:34px}
+.lane .pt{font-family:var(--display);font-size:1.3rem;text-align:right}
+.planets{letter-spacing:2px;font-size:1.3rem}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+/* 문제별 정답률 */
+.qrate{display:grid;gap:8px}
+.qr{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qr.low{border-color:var(--bad);background:#FFF5F2}
+.qr .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qr .qb .track{height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qr .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qr.low .qb .track div{background:var(--bad)}
+.qr .pc{font-family:var(--display);font-size:1.3rem}
+.qr.low .pc{color:var(--bad)}
+@media (max-width:820px){
+  .qr,.hero,.tv,.two{grid-template-columns:1fr}
+  .choose{grid-template-columns:1fr}
+  .lane{grid-template-columns:6em 1fr 2.8em}
+}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand">🪐 행성 차지하기</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+// 영어 11단원 Do You Know about the Space Station? (YBM 최희경 6학년) 1차시, 교과서 159~161쪽
+// 1단계: Mission 1 행성 차지하기 놀이(지우개 튕기기 → 태블릿에서 로켓 멈추기)  2단계: 정리 퀴즈 우주 레이스
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let MUTE=false;
+function sayEn(t){try{if(MUTE||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+
+const STAGES=[null,{k:'행성 차지하기',t:'🪐 행성 차지하기 (Mission 1)',tm:8},{k:'정리 퀴즈',t:'🚀 정리 퀴즈 우주 레이스',tm:6}];
+const ITEMS={
+  station:{e:'🛰️',w:'the space station',k:'우주 정거장'},
+  food:{e:'🍱',w:'space food',k:'우주 식량'},
+  bag:{e:'🛌',w:'the sleeping bag',k:'침낭'}
+};
+// 교과서 161쪽 말판처럼: 세 가지 대상이 두 칸씩 + 행운 + 꽝
+const CELLS=[{id:'station'},{id:'food'},{id:'lucky'},{id:'bag'},{id:'food'},{id:'bag'},{id:'fail'},{id:'station'}];
+const ROUNDS=8;
+const YES='Yes, I know about it.', NO='No, I have no idea.';
+const ODD=['Yes, I know it about.','No, I have idea.','Yes, I know about you.'];
+const ask=id=>`Do you know about ${ITEMS[id].w}?`;
+// 정리 퀴즈 12문제 (단어 5 + 표현 3 + Fun Talk 내용 4)
+const QUIZ=[
+ {id:'w1',e:'🧑‍🚀',q:'그림에 알맞은 낱말은?',a:'astronaut',o:['sleeping bag','space food']},
+ {id:'w2',e:'🛰️',q:'그림에 알맞은 낱말은?',a:'space station',o:['astronaut','space food']},
+ {id:'w3',e:'🛌',q:'그림에 알맞은 낱말은?',a:'sleeping bag',o:['space station','know']},
+ {id:'w4',e:'🍱',q:'그림에 알맞은 낱말은?',a:'space food',o:['sleeping bag','astronaut']},
+ {id:'w5',e:'💡',q:'“알다”를 영어로 하면?',a:'know',o:['no','now']},
+ {id:'x1',e:'🙋',q:'“Do you know about the space station?” 알고 있을 때 대답은?',a:YES,o:[NO,'Yes, I know it about.']},
+ {id:'x2',e:'🤷',q:'“Do you know about space food?” 모를 때 대답은?',a:NO,o:[YES,'No, I know about it.']},
+ {id:'x3',e:'🧩',q:'빈칸에 알맞은 말은? Do you know ___ the sleeping bag?',a:'about',o:['of','to']},
+ {id:'f1',e:'👩',q:'Fun Talk: 앰버는 우주 정거장을 어떻게 설명했나요?',a:'It is a home for astronauts in space.',o:['It is a big school on the moon.','It is a park for children.']},
+ {id:'f2',e:'🛏️',q:'Fun Talk: 벨 박사는 무엇에서 잠을 자나요?',a:'a sleeping bag (침낭)',o:['a bed (침대)','a sofa (소파)']},
+ {id:'f3',e:'🙅',q:'Fun Talk: 벨 박사가 “Do you know about space food?” 하고 묻자 수호는?',a:NO,o:[YES,'Yes, I like pizza.']},
+ {id:'f4',e:'🍕',q:'Fun Talk: 벨 박사가 가장 좋아하는 우주 식량은?',a:'pizza (피자)',o:['kimchi (김치)','bread (빵)']}
+];
+const QQ=Object.fromEntries(QUIZ.map(q=>[q.id,q]));
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button></div></div>`;
+  $('#retry').onclick=()=>location.reload();
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 영어 · Lesson 11 Do You Know about the Space Station?';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>행성<br>차지하기</h1>
+   <p>로켓을 멈춰 행성에 내리고, “Do you know about …?” 질문에 알맞게 대답하면 행성을 차지해요!</p></div>
+   <div class="panel grid">${boardHTML(-1,{})}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+function cellHTML(c,easy){
+  if(c.id==='lucky')return `<span class="e">🍀</span>행운`;
+  if(c.id==='fail')return `<span class="e">💥</span>꽝`;
+  const it=ITEMS[c.id];return `<span class="e">${it.e}</span>${esc(it.w.replace('the ',''))}${easy?`<small>${it.k}</small>`:''}`;
+}
+function boardHTML(hot,mine,easy){
+  return `<div class="board${easy?' easy':''}" id="board">${CELLS.map((c,i)=>`<div class="${c.id==='lucky'?'lucky':c.id==='fail'?'fail':''}${i===hot?' hot':''}${mine[i]?' mine':''}">${cellHTML(c,easy)}</div>`).join('')}</div>`;
+}
+
+/* ---------- student: join ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store('sp-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:760px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm({});
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store('sp-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store('sp-student',null);me=null;clearOffs();return joinView();}
+    const easyWas=ME.easy;ME=v;
+    $('#sub').textContent=`${me.num}번 ${me.name}${ME.easy?' · 🌟':''}`;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(!!easyWas!==!!ME.easy&&!busy){renderStage();return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  listen(roomRef(me.room).child('run'),s=>{const was=ROOMV.run;ROOMV.run=s.val()||0;if(ready&&was!==ROOMV.run&&!busy)renderStage();});
+  listen(roomRef(me.room).child('award'),s=>{ROOMV.award=!!s.val();if(ready&&cur===2&&ME.q&&ME.q.done)quizDone();});
+}
+let busy=false;
+const meRef=k=>roomRef(me.room).child('students/'+me.num+(k?'/'+k:''));
+const stepDone=n=>n===1?!!(ME.p&&ME.p.done):!!(ME.q&&ME.q.done);
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2].map(n=>`<button data-s="${n}" ${n>ROOMV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}">${n}. ${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{if(busy)return;cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div class="row" style="justify-content:space-between"><button class="ghost" id="mute" style="font-size:.85rem;padding:.4em .8em">${MUTE?'🔇 소리 켜기':'🔊 소리 끄기'}</button><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store('sp-student',null);me=null;clearOffs();joinView();};
+  $('#mute').onclick=()=>{MUTE=!MUTE;$('#mute').textContent=MUTE?'🔇 소리 켜기':'🔊 소리 끄기';};
+  drawSteps();
+}
+const wstep=sub=>ClassWatch.step(STAGES[cur].k+(sub?' · '+sub:''),{n:cur,total:2,wait:stepDone(cur)});
+const started=n=>(ROOMV.run||0)>=n||(ROOMV.stage||1)>n;
+function waitView(){
+  ClassWatch.step(STAGES[cur].k+' · 기다리기',{n:cur,total:2,wait:true});
+  shell(`<div class="panel quiz pop"><div class="emoji">🧑‍🚀</div><h2 style="font-size:2rem">${esc(STAGES[cur].t)}</h2>
+   <p class="q" style="font-size:1.4rem">선생님 설명을 들어요.<br>선생님이 <b>시작</b>을 누르면 열려요.</p></div>`);
+}
+function renderStage(){busy=false;clearInterval(spin);onMe=()=>drawSteps();ClassWatch.detail(null);if(!started(cur))return waitView();return cur===1?stage1():stage2();}
+
+/* ---------- 1단계: 행성 차지하기 ---------- */
+let spin=null;
+function stage1(){
+  const P=ME.p||{};
+  if(P.done)return s1Done();
+  const r=P.round||0;
+  // 이번 판에 물어볼 대상 (판마다 정해져 있어 새로고침해도 같아요)
+  const order=P.order||(()=>{const o=[];for(let i=0;i<ROUNDS;i++)o.push(['station','food','bag'][i%3]);return shuffle(o);})();
+  if(!P.order)meRef('p/order').set(order);
+  const want=order[r], easy=!!ME.easy, mine=P.mine||{};
+  wstep(`${r+1}/${ROUNDS}판`);
+  ClassWatch.detail(()=>({q:ask(want)}));
+  shell(`<div class="panel quiz">
+   <div class="row" style="justify-content:space-between;width:100%;max-width:640px"><span class="band">${r+1} / ${ROUNDS}판</span><span class="score">🪐 차지한 행성 ${P.score||0}개</span></div>
+   <div class="ask"><span class="e">${ITEMS[want].e}</span><div><b>${esc(ask(want))}</b>${easy?`<br><small>${ITEMS[want].k}을(를) 알고 있나요?</small>`:''}</div><button class="ghost" id="hear" aria-label="질문 듣기">🔊</button></div>
+   ${boardHTML(-1,mine,easy)}
+   <p class="muted" style="margin:0">로켓이 행성 사이를 날아다녀요. <b>멈춰!</b>를 눌러 ${ITEMS[want].e} 행성에 내려 봐요.</p>
+   <button class="big" id="fly">🚀 발사!</button>
+   <div id="after" class="grid" style="width:100%;justify-items:center"></div></div>`);
+  sayEn(ask(want));
+  $('#hear').onclick=()=>sayEn(ask(want));
+  let pos=0,flying=false;
+  $('#fly').onclick=()=>{
+    if(!flying){
+      flying=true;busy=true;$('#fly').textContent='✋ 멈춰!';
+      const step=easy?380:200;
+      clearInterval(spin);spin=setInterval(()=>{pos=(pos+1)%CELLS.length;$$('#board div').forEach((d,i)=>d.classList.toggle('hot',i===pos));},step);
+    }else{
+      clearInterval(spin);$('#fly').disabled=true;$('#fly').textContent='착륙!';
+      landed(pos,want,r,order);
+    }
+  };
+}
+function landed(pos,want,r,order){
+  const c=CELLS[pos], P=ME.p||{}, easy=!!ME.easy;
+  const box=$('#after');
+  const finish=async(gain,line)=>{
+    const upd={round:r+1,score:(P.score||0)+gain,at:Date.now()};
+    if(gain&&c.id!=='lucky')upd['mine/'+pos]=true;
+    if(r+1>=ROUNDS)upd.done=true;
+    await meRef('p').update(upd);
+    roomRef(me.room).child('feed').push({n:me.num,name:me.name,t:line,g:gain,at:Date.now()});
+    busy=false;
+  };
+  if(c.id==='lucky'||c.id==='fail'){
+    const g=c.id==='lucky'?1:0;
+    box.innerHTML=`<div class="q pop">${c.id==='lucky'?'🍀 행운! 행성 1개':'💥 꽝! 다음 판에 다시 도전'}</div><button id="next">다음 판 ▶</button>`;
+    $('#next').onclick=async()=>{$('#next').disabled=true;await finish(g,c.id==='lucky'?'🍀 행운 칸!':'💥 꽝 칸');renderStage();};
+    return;
+  }
+  const hit=c.id===want, ans=hit?YES:NO;
+  let opts=shuffle([YES,NO,...(easy?[]:[ODD[Math.floor(Math.random()*ODD.length)]])]);
+  box.innerHTML=`<div class="q pop">${hit?`${ITEMS[want].e} 행성에 내렸어요!`:`${ITEMS[c.id].e} ${esc(ITEMS[c.id].w.replace('the ',''))} 행성이에요. ${ITEMS[want].e} 행성이 아니에요.`}</div>
+   <p style="margin:0">${hit?'알고 있다고 대답해요.':'모른다고 대답해요.'} <span class="en">${esc(ask(want))}</span></p>
+   <div class="opts" id="opts">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="msg" id="m"></div>`;
+  ClassWatch.detail(()=>({q:ask(want)+' → '+(hit?'알고 있음':'모름')}));
+  let miss=false;
+  $$('#opts button').forEach(b=>b.onclick=async()=>{
+    if(b.dataset.o!==ans){
+      b.classList.add('wrong','shake');b.disabled=true;
+      if(!miss){miss=true;await meRef('p/wrong/'+(hit?'yes':'no')).transaction(v=>(v||0)+1);}
+      $('#m').className='msg bad';$('#m').textContent=hit?'로켓이 맞는 행성에 내렸어요. 알고 있다는 대답을 골라요.':'다른 행성에 내렸어요. 모른다는 대답을 골라요.';return;
+    }
+    $$('#opts button').forEach(x=>x.disabled=true);b.classList.add('right');
+    meRef('p/tries/'+(hit?'yes':'no')).transaction(v=>(v||0)+1);
+    sayEn(ans);
+    $('#m').className='msg ok';$('#m').textContent=hit?'정답! 행성 1개를 차지했어요.':'정답! 이번 판은 점수 없이 넘어가요.';
+    box.insertAdjacentHTML('beforeend',`<div class="say">🗣️ 짝에게 소리 내어 말해요<br>“${esc(ask(want))}”<br>“${esc(ans)}”</div><button id="next">말했어요 · 다음 판 ▶</button>`);
+    $('#next').onclick=async()=>{$('#next').disabled=true;await finish(hit?1:0,`${ask(want)} → ${ans}${hit?' 🪐+1':''}`);renderStage();};
+  });
+}
+function s1Done(){
+  wstep('끝');
+  const P=ME.p||{};
+  shell(`<div class="panel quiz pop"><span class="band">미션 성공!</span><div class="emoji">🪐</div>
+   <h2 style="font-size:2rem">행성 ${P.score||0}개를 차지했어요</h2>
+   <p>선생님이 정리 퀴즈를 열 때까지 짝과 대화를 연습해요.</p>
+   <div class="say">A: Do you know about the space station?<br>B: Yes, I know about it. / No, I have no idea.</div></div>`);
+}
+
+/* ---------- 2단계: 정리 퀴즈 ---------- */
+function stage2(){
+  const Q=ME.q||{};
+  if(Q.done)return quizDone();
+  const order=Q.order||shuffle(QUIZ.map(q=>q.id));
+  if(!Q.order)meRef('q').update({order,i:0,score:0});
+  const i=Q.i||0, q=QQ[order[i]], easy=!!ME.easy;
+  wstep(`${i+1}/${QUIZ.length}번`);
+  ClassWatch.detail(()=>({q:'문제: '+q.q}));
+  const opts=shuffle([q.a,...(easy?q.o.slice(0,1):q.o)]);
+  shell(`<div class="panel quiz">
+   <div class="prog">${order.map((_,k)=>`<span class="${k<i?'on':k===i?'cur':''}"></span>`).join('')}</div>
+   <div class="row" style="justify-content:space-between;width:100%;max-width:640px"><span class="band">${i+1} / ${QUIZ.length}</span><span class="score">⭐ ${Q.score||0}점</span></div>
+   <div class="emoji">${q.e}</div><div class="q">${esc(q.q)}</div>
+   <div class="opts" id="opts">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="msg" id="m"></div></div>`);
+  const t0=Date.now();let miss=false;
+  $$('#opts button').forEach(b=>b.onclick=async()=>{
+    if(b.dataset.o!==q.a){
+      b.classList.add('wrong','shake');b.disabled=true;
+      if(!miss){miss=true;await meRef('q/wrong/'+q.id).transaction(v=>(v||0)+1);}
+      $('#m').className='msg bad';$('#m').textContent='다시 골라 봐요.';return;
+    }
+    $$('#opts button').forEach(x=>x.disabled=true);b.classList.add('right');
+    if(/[a-z]/.test(q.a)&&!/[가-힣]/.test(q.a))sayEn(q.a);
+    const gain=miss?0:100+Math.max(0,50-Math.floor((Date.now()-t0)/400));
+    $('#m').className='msg ok';$('#m').textContent=miss?'정답이에요.':`정답! +${gain}`;
+    busy=true;await wait(900);
+    const upd={i:i+1,score:(Q.score||0)+gain,at:Date.now()};
+    if(!miss)upd.box=(Q.box||0)+1;
+    if(i+1>=QUIZ.length)upd.done=true;
+    await meRef('q').update(upd);busy=false;
+    renderStage();
+  });
+}
+async function quizDone(){
+  let rankTxt='';
+  if(ROOMV.award){
+    const all=(await roomRef(me.room).child('students').get()).val()||{};
+    const L=ranking(all);const k=L.findIndex(x=>x.n===me.num);
+    if(k>=0)rankTxt=`<div class="q" style="color:var(--coral2)">우리 반 ${k+1}등!</div>`;
+  }
+  if(cur!==2)return;
+  wstep('끝');
+  const Q=ME.q||{}, W=Object.keys(Q.wrong||{}).map(k=>QQ[k]).filter(Boolean);
+  shell(`<div class="panel quiz pop"><span class="band">달 도착!</span><div class="emoji">🌕</div>
+   <div class="score" style="font-size:2rem">${Q.score||0}점 · 한 번에 맞힌 문제 ${Q.box||0}개</div>${rankTxt}
+   ${W.length?`<div class="grid" style="width:100%;max-width:640px;text-align:left"><h3>다시 볼 문제</h3><div class="list">${W.map(q=>`<div>${esc(q.q)}<br>정답: <b>${esc(q.a)}</b></div>`).join('')}</div></div>`:'<p>모두 한 번에 맞혔어요!</p>'}</div>`);
+}
+function ranking(all){
+  return Object.keys(all||{}).map(Number).map(n=>({n,...all[n]})).filter(x=>x.q&&x.q.order)
+    .sort((a,b)=>(b.q.score||0)-(a.q.score||0)||(b.q.i||0)-(a.q.i||0)||(a.q.at||9e15)-(b.q.at||9e15));
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={},showWrong=false;
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store('sp-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:'space',stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store('sp-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qrp"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div><p class="muted" style="margin:0;font-size:.9rem">이름을 누르면 🌟 쉬운 화면(보기 2개, 우리말 뜻, 느린 로켓)이 켜지고 꺼져요.</p></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.update({run:RD.stage||1,timer:{min:t.min,left:l,endAt:Date.now()+l*1000}});}};
+  $('#newroom').onclick=()=>{store('sp-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){if(n===(RD.stage||1))return;roomRef(ROOM).update({stage:n,run:0,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  $('#go').textContent=t.endAt?'멈춤':'시작';$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}>${n}. ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>st===1?!!(x.p&&x.p.done):!!(x.q&&x.q.done);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<button data-ez="${x.n}" class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}${x.easy?' 🌟':''}</button>`).join('')||'<span class="muted">아직 아무도 없어요</span>';
+  $$('#ppl button').forEach(b=>b.onclick=()=>{const n=b.dataset.ez;roomRef(ROOM).child('students/'+n+'/easy').set(!(RD.students[n]||{}).easy);});
+  st===1?tv1(main,S):tv2(main,S);
+  const go=(RD.run||0)>=st;
+  main.insertAdjacentHTML('afterbegin',go?`<div class="rules" style="border-color:var(--ok);background:#E3F1E7"><b>▶ 학생 화면이 열렸어요.</b> 시간이 멈춰도 학생은 계속할 수 있어요.</div>`
+   :`<div class="panel row" style="justify-content:space-between;border-color:var(--coral);background:#FFF4DF"><div><h2>⏸ 학생들은 기다리는 중이에요</h2><span class="muted">설명을 마치고 시작을 누르면 학생 화면이 열려요 (타이머도 같이 시작).</span></div><button class="big" id="startNow">▶ 시작</button></div>`);
+  const b=$('#startNow');if(b)b.onclick=()=>{const t=RD.timer||{min:STAGES[st].tm,left:STAGES[st].tm*60};const l=t.left>0?t.left:t.min*60;roomRef(ROOM).update({run:st,timer:{min:t.min,left:l,endAt:Date.now()+l*1000}});};
+}
+const nameList=L=>L.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ');
+function rateRow(no,title,sub,done,miss){
+  const ok=done-miss.length, rate=done?Math.round(ok/done*100):null;
+  return `<div class="qr${rate!==null&&rate<70?' low':''}"><div><b>${no}</b> ${title}<br><small class="muted">${sub}</small></div>
+   <div class="qb"><div class="track"><div style="width:${rate||0}%"></div></div><span class="pc">${rate===null?'-':rate+'%'}</span><small class="muted">${ok}/${done}명</small></div>
+   <div>${miss.length?`틀린 학생 <b>${miss.length}명</b>${showWrong?`: ${nameList(miss)}`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`;
+}
+const wrongBtn=()=>`<button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button>`;
+function bindWrong(){const b=$('#wrongT');if(b)b.onclick=()=>{showWrong=!showWrong;renderTV();};}
+function tv1(main,S){
+  const L=S.filter(x=>x.p).sort((a,b)=>(b.p.score||0)-(a.p.score||0)||(b.p.round||0)-(a.p.round||0));
+  const feed=Object.values(RD.feed||{}).sort((a,b)=>b.at-a.at).slice(0,6);
+  // 대답 고르기 정답률: 맞는 행성(알고 있음)과 다른 행성(모름)으로 나눠요
+  const by=k=>{const done=S.filter(x=>x.p&&((x.p.tries||{})[k]||0)>0);const miss=S.filter(x=>x.p&&((x.p.wrong||{})[k]||0)>0);return {done:done.length,miss};};
+  const Y=by('yes'),N=by('no');
+  main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🪐 행성 차지하기 (Mission 1)</h2><span class="muted">${ROUNDS}판 끝 ${S.filter(x=>x.p&&x.p.done).length}/${S.length}명</span></div>
+    <div class="lanes">${L.map(x=>`<div class="lane"><span class="nm">${esc(x.n)} ${esc(x.name)}${x.p.done?' 🏁':''}</span><span class="planets">${'🪐'.repeat(x.p.score||0)||'<span class="muted">·</span>'}</span><span class="pt">${x.p.round||0}/${ROUNDS}판</span></div>`).join('')||'<p class="muted">아직 시작한 친구가 없어요</p>'}</div></div>
+   <div class="two"><div class="panel grid"><h2>방금 나눈 대화</h2><div class="list">${feed.map(f=>`<div><b>${esc(f.n)} ${esc(f.name)}</b><span class="en">${esc(f.t)}</span></div>`).join('')||'<p class="muted">아직 없어요</p>'}</div></div>
+    <div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>대답 고르기 정답률</h2>${wrongBtn()}</div>
+     <p class="muted" style="margin:0">한 번에 맞힌 학생 비율이에요. 한 번이라도 틀리게 고른 학생이 틀린 학생에 들어가요.</p>
+     <div class="qrate">${rateRow('①','맞는 행성에 내렸을 때',YES,Y.done,Y.miss)}${rateRow('②','다른 행성에 내렸을 때',NO,N.done,N.miss)}</div></div></div>
+   <div class="rules"><b>놀이 방법</b><ul><li>🔊 질문을 듣고 🚀 발사! → ✋ 멈춰!로 로켓을 행성에 내려요.</li><li>질문한 행성에 내리면 <span class="en">Yes, I know about it.</span> → 행성 1개, 다른 행성이면 <span class="en">No, I have no idea.</span></li><li>🍀 행운은 1개, 💥 꽝은 0개. 대답을 고른 뒤 짝에게 소리 내어 말해요.</li></ul></div>`;
+  bindWrong();
+}
+function quizStats(S){
+  const st=S.filter(x=>x.q&&x.q.order);
+  return QUIZ.map((q,k)=>{
+    const done=st.filter(x=>x.q.order.indexOf(q.id)>-1&&x.q.order.indexOf(q.id)<(x.q.i||0));
+    const miss=done.filter(x=>((x.q.wrong||{})[q.id]||0)>0);
+    return {q,no:k+1,done:done.length,miss,rate:done.length?(done.length-miss.length)/done.length:null};
+  });
+}
+function quizBox(S){
+  const R=quizStats(S).sort((a,b)=>(a.rate??2)-(b.rate??2)||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률</h2>${wrongBtn()}</div>
+   <p class="muted" style="margin:0">한 번에 맞힌 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
+   <div class="qrate">${R.map(r=>rateRow(r.no+'번',esc(r.q.q),'정답: '+esc(r.q.a),r.done,r.miss)).join('')}</div></div>`;
+}
+function tv2(main,S){
+  const L=ranking(RD.students);
+  const wrong={};S.forEach(x=>Object.entries((x.q&&x.q.wrong)||{}).forEach(([k,v])=>wrong[k]=(wrong[k]||0)+v));
+  const hard=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>({q:QQ[k],v})).filter(x=>x.q);
+  if(RD.award){
+    const p=[L[1],L[0],L[2]];
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">🚀 우주 레이스 시상식</h2><button class="ghost" id="awoff">순위표로</button></div>
+     <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.q.score||0}점</div>`:'<span></span>').join('')}</div></div>
+     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br>정답: <b>${esc(h.q.a)}</b> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}
+     ${quizBox(S)}`;
+    $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
+  }else{
+    main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🚀 정리 퀴즈 우주 레이스</h2><button id="awon">시상식 ▶</button></div>
+     <p class="muted" style="margin:0">한 번에 맞히면 로켓이 달로 한 칸 + 100점 + 빠르기 보너스 최대 50점. ${QUIZ.length}문제.</p>
+     <div class="lanes">${L.map(x=>{const b=x.q.box||0;return `<div class="lane"><span class="nm">${esc(x.n)} ${esc(x.name)}${x.q.done?' 🏁':''}</span><div class="road"><span style="left:calc(${b/QUIZ.length*85}%)">🚀</span></div><span class="pt">${x.q.score||0}</span></div>`;}).join('')||'<p class="muted">아직 시작한 친구가 없어요</p>'}</div></div>
+     ${quizBox(S)}
+     <div class="rules"><b>약속</b><ul><li>친구 화면은 보지 않아요.</li><li>다 푼 친구는 “다시 볼 문제”를 짝과 소리 내어 읽어요.</li></ul></div>`;
+    $('#awon').onclick=()=>roomRef(ROOM).child('award').set(true);
+  }
+  bindWrong();
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
