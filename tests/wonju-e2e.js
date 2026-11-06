@@ -51,6 +51,12 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       await p.waitForSelector('#qz .q', { timeout: 15000 });
     }));
     console.log(`${N}명 입장 완료`);
+    // 선생님이 시작하기 전에는 학생 화면이 '기다려요'로 덮여 있어요
+    for (const [n, p] of Object.entries(S)) if (!(await p.isVisible('.cw-wait'))) fail(n + '번: 시작 전에 기다려요 화면이 안 보임');
+    if (!/학생 활동 시작/.test(await T.textContent('.cw-go'))) fail('선생님 화면에 시작 버튼이 안 보임');
+    await T.click('.cw-go');
+    await Promise.all(Object.entries(S).map(([n, p]) => p.waitForSelector('.cw-wait', { state: 'detached', timeout: 10000 }).catch(() => fail(n + '번: 시작했는데 기다려요 화면이 그대로'))));
+    if (!/멈추기/.test(await T.textContent('.cw-go'))) fail('시작한 뒤 멈추기 버튼으로 안 바뀜');
     // 👀 학생 화면: 선생님 화면에서 모든 학생이 번호 이름과 1단계로 보여요
     await T.click('.cw-open');
     await T.waitForFunction(n => [...document.querySelectorAll('.cw-card:not(.off)')].filter(x => /\d+번 학생\d+/.test(x.textContent) && /1\/4/.test(x.textContent)).length === n, N, { timeout: 15000 })
@@ -127,7 +133,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
     await S[1].waitForFunction(() => /등!/.test(document.body.textContent), null, { timeout: 10000 }).catch(() => fail('학생 화면에 등수가 안 나옴'));
     await shot(T, 't4-award'); await shot(S[1], 's4');
     console.log('4단계 OK');
-  } catch (e) { fail('진행 중 멈춤: ' + e.message.split('\n')[0] + ' ' + (e.stack.split('\n').find(l => /circle-e2e.js:\d+/.test(l)) || '')); for (const [n, p] of Object.entries(S)) await shot(p, 'err-' + n); await shot(T, 'err-t'); }
+  } catch (e) { fail('진행 중 멈춤: ' + e.message.split('\n')[0] + ' ' + (e.stack.split('\n').find(l => /wonju-e2e.js:\d+/.test(l)) || '')); for (const [n, p] of Object.entries(S)) await shot(p, 'err-' + n); await shot(T, 'err-t'); }
   finally {
     await T.evaluate(c => Promise.all([firebase.database().ref('rooms/' + c).remove(), firebase.database().ref('rooms/' + c + '_watch').remove()]), code).catch(() => {});
     await browser.close();
