@@ -165,9 +165,9 @@ const FIREBASE_CONFIG = {
 };
 const APP='magazine';
 const STAGES=[null,
-  {k:'기억 소환',t:'단원에서 배운 것 떠올리기',tm:5},
-  {k:'기업 계획서',t:'기업 대표가 되어 계획 세우기',tm:8},
-  {k:'잡지 표지',t:'캔바로 잡지 표지 만들기',tm:15},
+  {k:'기억 소환',t:'단원에서 배운 것 떠올리기',tm:4},
+  {k:'기업 계획서',t:'기업 대표가 되어 계획 세우기',tm:5},
+  {k:'잡지 표지',t:'캔바로 잡지 표지 만들기',tm:18},
   {k:'표지 박람회',t:'친구 표지 둘러보고 스티커 주기',tm:7}];
 const NS=4;
 /* 1단계: 단원 기억 소환 (처음 답 기록 → 선생님 화면 문제별 정답률) */
@@ -416,12 +416,12 @@ function stage3(){
   wstep(`체크 ${Object.keys(chk).length}/${TODO.length}`);
   shell(`<div class="panel grid"><span class="band">3단계 · 캔바로 잡지 표지 만들기 (교과서 113쪽)</span>
     <h2>기업의 특징이 잘 드러나도록 「이달의 기업」 잡지 표지를 완성해요</h2>
-    <div class="row"><a href="https://www.canva.com/" target="_blank" rel="noopener"><button type="button">🎨 캔바 열기</button></a><span class="muted">캔바에서 "잡지 표지"를 검색해 세로 디자인으로 시작해요.</span></div>
+    <div class="row"><a href="https://www.canva.com/" target="_blank" rel="noopener"><button type="button">🎨 캔바 열기</button></a><span class="muted">캔바가 새 탭에서 열려요. "잡지 표지"를 검색해 세로 디자인으로 시작하고, 이 탭과 오가며 만들어요.</span></div>
     ${plan?planCard(plan):'<p class="msg bad">2단계 계획서를 먼저 내요.</p>'}
     <h3>표지에 꼭 넣을 것</h3>
     <div class="check">${TODO.map(t=>`<button data-t="${t.id}" aria-pressed="${!!chk[t.id]}">${esc(t.t)}</button>`).join('')}</div>
     <h3>다 만들었으면 표지를 올려요</h3>
-    <p class="muted" style="margin:0">캔바 → 공유 → 다운로드(PNG 또는 JPG) → 아래에서 그 그림을 골라요. 안 되면 표지 화면을 캡처해서 골라요.</p>
+    <p class="muted" style="margin:0">캔바 → 공유 → 다운로드(PNG 또는 JPG) → 아래 [파일 선택]에서 <b>다운로드</b> 폴더의 그 그림을 골라요. 안 되면 표지 화면을 캡처해서 골라요.</p>
     <input type="file" id="file" accept="image/*">
     <img id="pv" class="preview" alt="내 잡지 표지 미리 보기" hidden>
     <div class="msg" id="um" role="status"></div>
