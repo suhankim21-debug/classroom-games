@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>다큐 감상실</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 우리말 지킴이 so the class sees one family of tools. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.fig{width:100%;max-width:280px;height:auto;display:block;margin:0 auto}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:.5em .9em;font-size:1.05rem}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+.roll svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.35em .8em;font-family:var(--text);font-size:1rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld label{font-family:var(--display);font-size:1.1rem}
+.unit{display:flex;align-items:center;gap:8px}
+.unit span{font-family:var(--display)}
+.meter{position:relative;height:46px;background:var(--cream);border-radius:10px;margin:26px 0 8px}
+.meter .band3{position:absolute;top:0;bottom:0;background:#DDEBE1}
+.meter .mk{position:absolute;top:-24px;transform:translateX(-50%);font-family:var(--display);font-size:.95rem;white-space:nowrap}
+.meter .ln{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.meter .dot{position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--coral2);transform:translate(-50%,-50%);border:3px solid #fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list div.out{border-left-color:var(--gold)}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(120px,15em) 1fr 3.5em;gap:10px;align-items:center}
+.bar .track{height:34px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--ok);border-radius:10px}
+.bar span{font-family:var(--display);font-size:1.1rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 9em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:1.1rem}
+.tbl th,.tbl td{background:#fff;padding:.45em .6em;text-align:center}
+.tbl thead th{background:var(--coral);color:#fff;font-family:var(--display);font-weight:400}
+.tbl tbody th{font-family:var(--display);font-weight:400;color:var(--coral2)}
+.tbl tr.outr td,.tbl tr.outr th{background:#FFF4DF}
+.okc{color:var(--ok);font-family:var(--display);font-size:1.3rem;font-weight:400}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+@media (max-width:820px){
+  .hero,.tv,.two{grid-template-columns:1fr}
+  .choose,.opts{grid-template-columns:1fr}
+  .steps button{font-size:.85rem}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+}
+/* 다큐 감상실 */
+.docu{position:relative;aspect-ratio:16/9;border-radius:14px;border:3px solid var(--ink);overflow:hidden;background:linear-gradient(#9CC6DD,#CFE3EC 45%,#4B4A46 46%,#6B665D 70%,#2F6D8C 71%);display:grid;place-items:center}
+.docu span{font-size:5rem}
+.docu .dcap{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-family:var(--display);padding:.1em .6em;border-radius:6px;width:max-content;max-width:94%;text-align:center}
+.plist{display:grid;gap:8px}
+.pcard{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px;font-family:var(--display);font-size:1.2rem}
+.pcard b{font-weight:400;color:var(--coral2)}
+.pcard small{font-family:var(--text);font-size:.9rem}
+.card2{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;font-family:var(--display);font-size:1.3rem;line-height:1.35;width:100%}
+.card2 small{display:block;font-family:var(--text);font-size:1rem;color:var(--muted)}
+.chips.big button{font-size:1.1rem;padding:.55em 1em}
+.form{display:grid;gap:12px}
+.form label{font-family:var(--display);font-size:1.1rem}
+.form .hint{font-size:.95rem;color:var(--muted);font-family:var(--text)}
+textarea{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%;resize:vertical}
+.sc{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 14px;text-align:left}
+.sc span{font-size:2.6rem;line-height:1}
+.sc b{font-family:var(--display);font-weight:400;color:var(--coral2)}
+.scs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.effs{display:flex;gap:6px;flex-wrap:wrap}
+.effs span{background:var(--cream);border-radius:999px;padding:.1em .6em;font-size:.9rem}
+.expl{background:#FFF4DF;border-radius:12px;padding:8px 14px;width:100%;text-align:left}
+.selfr{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.mount{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.mount>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;display:grid;gap:4px}
+.mount b{font-family:var(--display);font-weight:400}
+.cl{position:relative;height:120px;border-radius:10px;background:#E4F0F5}
+.cl::before{content:'';position:absolute;inset:18% 0 0;background:linear-gradient(to top,#6B665D,#8F887C);clip-path:polygon(0 100%,30% 0,70% 0,100% 100%)}
+.cl i{position:absolute;z-index:1;left:50%;transform:translateX(-50%);font-style:normal;font-size:1.6rem;transition:bottom .4s}
+@media (max-width:820px){.selfr{grid-template-columns:1fr}}
+/* 문제별 정답률 */
+.qrate{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qrow.low{border-color:var(--bad);background:#FFF5F2}
+.qrow .qt,.qrow .qw{text-align:left;justify-self:start}
+.qrow .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qrow .qb .track{width:100%;height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qrow .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qrow.low .qb .track div{background:var(--bad)}
+.qrow .pc{font-family:var(--display);font-size:1.3rem}
+.qrow.low .pc{color:var(--bad)}
+@media (max-width:820px){.qrow{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🎥</i> 다큐 감상실</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const APP='docu';
+const STAGES=[null,
+  {k:'영상 탐정',t:'「수월봉 화산 쇄설층」 내용 알기 (232쪽)',tm:7},
+  {k:'장면 탐정',t:'장면별 표현 방법과 효과 (231·233쪽)',tm:10},
+  {k:'내 영상 분석',t:'다른 교과 영상의 표현 효과 (234쪽)',tm:9},
+  {k:'정리 퀴즈',t:'정리 퀴즈 8문제 + 스스로 점검 (235쪽)',tm:6}];
+const NST=4;
+/* 1단계: 내용 알기 (232쪽) + 낱말 알기 + 내용 확인 OX (지도서 276쪽) */
+const V1=[
+  {id:'v1',q:'화산 쇄설층은 어떤 과정을 거쳐 만들어졌나요?',a:'마그마가 물과 만나 폭발한 뒤 화산재와 화산 쇄설물이 쌓여서',o:['바닷물이 얼어붙어서','강물이 모래를 실어 와 쌓여서'],
+   why:{'바닷물이 얼어붙어서':'영상에서 "폭발"이라는 말이 나왔어요. 무엇이 폭발했을까요?','강물이 모래를 실어 와 쌓여서':'강물이 아니라 화산 활동으로 생겼어요.'}},
+  {id:'v2',q:'화산 분화구의 중심을 바다 한가운데라고 추측한 까닭은?',a:'화산탄이 일정한 각도로 휘어 있어서',o:['바닷물 색이 진해서','배를 타고 직접 보아서'],
+   why:{'바닷물 색이 진해서':'영상은 절벽에 박힌 돌(화산탄)의 모양을 보여 줬어요.','배를 타고 직접 보아서':'분화구는 지금 보이지 않아요. 무엇을 보고 짐작했을까요?'}}];
+const WORDS=[
+  {id:'w1',a:'지표',m:'지구의 표면'},
+  {id:'w2',a:'분화구',m:'화산 꼭대기에 생긴 용암과 화산 가스 따위의 분출구'},
+  {id:'w3',a:'화산재',m:'화산에서 나온 용암의 부스러기 가운데 크기가 작은 알갱이'},
+  {id:'w4',a:'지층',m:'알갱이의 크기, 색, 성분 따위가 서로 달라서 위아래의 퇴적암과 구분되는 퇴적암체'}];
+const OX=[
+  {id:'x1',t:'제주 수월봉 화산 쇄설층은 천연기념물이에요.',a:'⭕'},
+  {id:'x2',t:'제주 수월봉 화산 쇄설층은 1만 8천여 년 전에 생겼어요.',a:'⭕'},
+  {id:'x3',t:'화산탄의 휜 모습으로 방향을 찾을 수 있어요.',a:'⭕'},
+  {id:'x4',t:'수월봉 일대는 제주도에서 가장 넓은 녹차 재배 지역이에요.',a:'❌'},
+  {id:'x5',t:'화산재에는 작물 재배에 도움이 되는 무기물이 들어 있어요.',a:'⭕'}];
+/* 2단계: 231쪽 장면 5개와 표현 방법 (붙임딱지 대신) */
+const SCN=[
+  {id:'c1',e:'🌊',d:'바닷가 바위길을 걷는 사람, 화면 가운데에 큰 제목 글자가 나와요.',a:'잔잔한 파도 소리와 음악이 들리며 제목이 나타나요'},
+  {id:'c2',e:'🪨',d:'길게 이어진 해안 절벽을 여러 방향에서 보여 주고, 화면 아래에 “이 수월봉은 작은 암편이나 화산재들이 쌓여 있는 단면을…” 글자가 나와요.',a:'해설자의 말을 화면에 문자(자막)로 다시 보여 줘요'},
+  {id:'c3',e:'🔍',d:'절벽에 박힌 둥근 돌(화산탄)을 사람이 가까이에서 바라봐요.',a:'새로운 탄생과 발견을 강조하려고 긴장감이 느껴지는 음악을 써요'},
+  {id:'c4',e:'🗺️',d:'하늘에서 본 바다와 섬 위에 “분화구 중심 추정 위치” 표시가 나와요.',a:'분화구 추정 위치와 주변 지역을 글과 그림으로 나타내요'},
+  {id:'c5',e:'💧',d:'절벽 화면에 “녹고물: 화산 쇄설층에 스며든 물이…” 글자만 나오고 해설자 목소리는 없어요.',a:'대상의 이름과 설명을 해설자 목소리 없이 자막으로만 보여 줘요'}];
+const ELS={a:['음성 언어 (해설자의 말)','문자 언어 (자막·제목)','음악','소리 (파도 소리)','그림 (지도 위 표시)','동영상 (장면)'],o:['냄새','점자']};
+const STARTS=['자막이 있어서','해설자의 목소리와 음악이 어우러져서','지도 위에 글과 그림으로 보여 주어서','목소리 없이 자막만 나올 때'];
+/* 3단계: 다른 교과 영상 분석 (234쪽) */
+const KINDS=['🎙 음성 언어 (해설·대사)','🔤 문자 언어 (자막·글자)','🎵 음악','🔔 소리 (효과음)','📊 그림·도표·지도','🎬 동영상 (장면)'];
+const EFF3=['…을 자막으로 보여 주어서 이해하기 쉬웠어요.','…을 글과 그림으로 함께 보여 주어서 한눈에 알 수 있었어요.','음악(소리)이 … 느낌을 주어서 집중이 잘 되었어요.','말로 설명하면서 중요한 낱말을 글자로 강조해서 기억하기 쉬웠어요.'];
+/* 4단계: 정리 퀴즈 8문제 + 스스로 점검 (235쪽) */
+const QUIZ=[
+  {id:'q1',q:'영상처럼 이미지, 소리, 자막 등이 함께 어우러져 뜻을 전달하는 매체는?',a:'영상 매체',o:['인쇄 매체','음성 매체'],ex:'영상 매체는 음성, 문자, 소리, 음악, 그림, 동영상이 함께 어우러져요.'},
+  {id:'q2',q:'「수월봉 화산 쇄설층」에서 해설자의 말을 화면에 자막으로 다시 보여 준 까닭은?',a:'내용을 쉽게 이해하도록',o:['소리를 끄려고','화면을 예쁘게 꾸미려고'],ex:'음성 언어를 문자 언어로도 보여 주면 쉽게 이해할 수 있어요. (233쪽)'},
+  {id:'q3',q:'새로운 탄생과 발견을 강조하려고 영상에서 쓴 것은?',a:'긴장감이 느껴지는 음악',o:['밝은 동요','박수 소리'],ex:'긴장감 있는 음악이 “새로운 발견”을 더 돋보이게 해요.'},
+  {id:'q4',q:'분화구 추정 위치를 알려 줄 때 쓴 표현 방법은?',a:'글과 그림 (지도 위 표시)',o:['해설자의 목소리만','음악만'],ex:'하늘에서 본 장면 위에 글과 그림으로 위치를 표시했어요.'},
+  {id:'q5',q:'해설자 목소리 없이 자막으로만 설명하는 장면의 좋은 점은?',a:'화면과 글에 집중하며 읽을 수 있어요',o:['아무 정보도 전할 수 없어요','소리가 더 크게 들려요'],ex:'음성 언어 없이 자막만 나오면 집중해서 읽게 돼요. (233쪽 예시)'},
+  {id:'q6',q:'음성 언어의 설명에서 빠진 부분을 문자 언어로 표시해 주면?',a:'내용을 정확하게 알 수 있어요',o:['더 헷갈려요','영상이 짧아져요'],ex:'말로 다 못 한 부분을 글자로 채워 주면 정확하게 알 수 있어요. (235쪽)'},
+  {id:'q7',q:'영상의 표현 효과를 알려면 무엇을 생각하며 보면 좋을까요?',a:'음성, 문자, 소리, 음악, 그림, 동영상 같은 요소',o:['나오는 사람의 옷 색깔','영상의 길이'],ex:'여러 표현 요소를 생각하며 보면 표현 효과를 알 수 있어요. (231쪽)'},
+  {id:'q8',q:'“화산 꼭대기에 생긴 용암과 화산 가스 따위의 분출구”를 뜻하는 낱말은?',a:'분화구',o:['지층','지표'],ex:'분화구: 화산 꼭대기의 분출구예요. (232쪽 낱말 알기)'}];
+const SELF=['매체에서 표현하는 내용을 확인하면서 시청했나요?','문자 언어와 음성 언어의 표현 특성을 생각하며 시청했나요?','동영상, 문자, 소리, 음악 같은 여러 표현 방법이 어떻게 어울리는지 생각하며 시청했나요?'];
+/* 문제별 정답률에 쓰는 문제 목록 (처음 답한 것이 맞았는지 기록해요) */
+const ITEMS=[
+  ...V1.map(x=>({id:x.id,st:1,q:x.q,a:x.a})),
+  ...WORDS.map(x=>({id:x.id,st:1,q:`낱말 알기: ${x.m}`,a:x.a})),
+  ...OX.map(x=>({id:x.id,st:1,q:`OX: ${x.t}`,a:x.a})),
+  ...SCN.map((x,k)=>({id:x.id,st:2,q:`장면 ${'①②③④⑤'[k]}의 표현 방법`,a:x.a})),
+  {id:'m1',st:2,q:'이 영상에 쓰인 표현 요소 (모두 고르기)',a:ELS.a.join(', ')},
+  {id:'m2',st:2,q:'음성 언어를 자막으로도 보여 주면 좋은 점',a:'음성 언어의 정보를 쉽게 이해할 수 있어요'},
+  {id:'k1',st:3,q:'영상의 표현 효과를 볼 때 살펴볼 것',a:'어떤 표현 요소를 썼고, 그것이 내용을 어떻게 도왔는지'},
+  ...QUIZ.map(x=>({id:x.id,st:4,q:x.q,a:x.a}))];
+const IQ=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- 처음 답 기록 (문제별 정답률) ---------- */
+function rec(id,ok){
+  if(!me||!id)return;
+  if(ME.ans&&ME.ans[id]!==undefined)return;
+  ME.ans={...(ME.ans||{}),[id]:ok};
+  roomRef(me.room).child(`students/${me.num}/ans/${id}`).transaction(v=>v===null?ok:undefined);
+}
+/* ---------- 공통: 고르기 문제 ---------- */
+function pick(box,{id,q,a,o,why,onOk,fig='',keep=false}){
+  const opts=keep?[a,...o].sort():shuffle([a,...o]);let first=true;
+  box.innerHTML=`<div class="quiz">${fig}<div class="q">${q}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+  $$('.opts button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';setTimeout(onOk,RM?0:650);}
+    else{b.classList.add('wrong');b.disabled=true;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');$('#pm',box).className='msg bad';$('#pm',box).innerHTML=(why&&why[b.dataset.o])||'다시 골라 봐요';}
+  });
+}
+/* 여러 개 고르기 */
+function multi(box,{id,q,a,o,onOk}){
+  const opts=shuffle([...a,...o]);let first=true;const on=new Set();
+  box.innerHTML=`<div class="quiz"><div class="q">${q}</div><p class="muted" style="margin:0">알맞은 것을 <b>모두</b> 골라요.</p><div class="chips big" style="justify-content:center">${opts.map(x=>`<button data-o="${esc(x)}" aria-pressed="false">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div></div>`;
+  $$('.chips button',box).forEach(b=>b.onclick=()=>{const x=b.dataset.o;on.has(x)?on.delete(x):on.add(x);b.setAttribute('aria-pressed',on.has(x));});
+  $('#chk',box).onclick=()=>{
+    const ok=a.every(x=>on.has(x))&&on.size===a.length;
+    if(first){rec(id,ok);first=false;}
+    if(ok){$('#chk',box).disabled=true;$$('.chips button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요! 여러 가지 표현 요소가 함께 쓰였어요.';setTimeout(onOk,RM?0:900);return;}
+    const miss=a.filter(x=>!on.has(x)).length, extra=[...on].filter(x=>!a.includes(x));
+    $('#pm',box).className='msg bad';
+    $('#pm',box).textContent=extra.length?`“${extra[0]}”은(는) 영상에 없었어요.`:`아직 ${miss}개를 더 골라야 해요. 보고 들은 것을 떠올려 봐요.`;
+    box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+  };
+}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 국어 · 5. 언어와 소통 4차시 (교과서 5~6차시)';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>다큐 감상실</h1>
+   <p>「수월봉 화산 쇄설층」 영상을 보고, 말·글·음악·그림이 어떻게 어우러져 내용을 전하는지 탐정처럼 찾아봐요.</p></div>
+   <div class="panel"><div class="docu"><span>🌊</span><div class="dcap">천연기념물 제주 수월봉 화산 쇄설층</div></div></div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* 단계 공통 */
+function saver(n,R){return async p=>{Object.assign(R,p);ME['s'+n]={...R};await roomRef(me.room).child('students/'+me.num+'/s'+n).update(p);drawSteps();};}
+function layout(n,title,side,note=''){
+  shell(`<div class="two"><div class="panel grid"><div><span class="band">${n}단계 · ${STAGES[n].k}</span></div><h2>${title}</h2>${side}${note}</div><div class="panel grid" id="work"></div></div>`);
+  return $('#work');
+}
+const nextBtn=(label,fn)=>{$('#act').innerHTML=`<button id="nx">${label}</button>`;$('#nx').onclick=fn;};
+function doneView(n,html){shell(`<div class="panel quiz pop"><div><span class="band">${n}단계 끝</span></div>${html}<p class="muted">TV를 보며 기다려요.</p></div>`);}
+const dots=(n,k)=>`<div class="prog">${Array.from({length:n},(_,i)=>`<span class="${i<k?'on':i===k?'cur':''}"></span>`).join('')}</div>`;
+
+/* ---------- 1. 영상 탐정 (232쪽 + 내용 확인) ---------- */
+function stage1(){
+  const R={ph:0,...(ME.s1||{})};
+  const save=saver(1,R),go=p=>async()=>{await save({ph:p});stage1();};
+  const N=V1.length+WORDS.length+OX.length;
+  if(R.done)return doneView(1,`<div class="big">영상 탐정 성공! 🔍</div>
+    <div class="rules" style="text-align:left;width:100%"><b>「수월봉 화산 쇄설층」 기억해요</b><ul>
+    <li>마그마가 물과 만나 폭발한 뒤 화산재와 화산 쇄설물이 쌓여 생겼어요.</li>
+    <li>화산탄이 일정한 각도로 휜 것을 보고 분화구 중심을 바다 한가운데라고 짐작했어요.</li>
+    <li>낱말: 지표 · 분화구 · 화산재 · 지층</li></ul></div>`);
+  const note=`<div class="card2">🎥 「수월봉 화산 쇄설층」<small>TV로 본 영상을 떠올려요 (교과서 231~232쪽)</small></div>`;
+  if(R.ph<V1.length){const Q=V1[R.ph];const w=layout(1,'내용 알기',note+dots(N,R.ph));
+    return pick(w,{id:Q.id,q:Q.q,a:Q.a,o:Q.o,why:Q.why,onOk:go(R.ph+1)});}
+  if(R.ph<V1.length+WORDS.length){const k=R.ph-V1.length,W=WORDS[k];
+    const w=layout(1,'낱말 알기',note+dots(N,R.ph)+`<div class="chips">${WORDS.map(x=>`<button disabled>${x.a}</button>`).join('')}</div>`);
+    return pick(w,{id:W.id,keep:true,fig:`<div class="card2">${esc(W.m)}</div>`,q:'이 뜻을 가진 낱말은?',a:W.a,o:WORDS.filter(x=>x!==W).map(x=>x.a),onOk:go(R.ph+1)});}
+  const k=R.ph-V1.length-WORDS.length,X=OX[k];
+  const w=layout(1,'영상 내용 OX',note+dots(N,R.ph));
+  pick(w,{id:X.id,keep:true,fig:`<div class="card2">${esc(X.t)}</div>`,q:'맞으면 ⭕, 틀리면 ❌',a:X.a,o:[X.a==='⭕'?'❌':'⭕'],
+    why:{'❌':'영상에서 그렇게 말했어요. 다시 떠올려 봐요.','⭕':'영상에 그런 내용은 없었어요. (수월봉은 녹차 밭이 아니에요)'},
+    onOk:k+1<OX.length?go(R.ph+1):async()=>{await save({ph:R.ph+1,done:true,at:Date.now()});stage1();}});
+}
+
+/* ---------- 2. 장면 탐정 (231·233쪽) ---------- */
+function stage2(){
+  const R={ph:0,...(ME.s2||{})};
+  const save=saver(2,R),go=p=>async()=>{await save({ph:p});stage2();};
+  if(R.done)return s2Done(R);
+  const nS=SCN.length;
+  if(R.ph<nS){const S=SCN[R.ph];
+    const w=layout(2,'이 장면은 어떻게 표현했을까?',dots(nS+3,R.ph)+`<div class="sc"><span>${S.e}</span><div><b>장면 ${'①②③④⑤'[R.ph]}</b><br>${esc(S.d)}</div></div>`,
+      `<p class="muted" style="margin:0">교과서 231쪽 붙임딱지 대신 골라요. TV의 장면 사진도 함께 봐요.</p>`);
+    const others=shuffle(SCN.filter(x=>x!==S).map(x=>x.a)).slice(0,2);
+    return pick(w,{id:S.id,q:'알맞은 표현 방법은?',a:S.a,o:others,onOk:go(R.ph+1)});}
+  if(R.ph===nS){const w=layout(2,'어떤 표현 요소가 쓰였나요?',dots(nS+3,R.ph)+`<div class="sc"><span>🎥</span><div>영상 전체를 떠올려요. 들은 것 👂 과 본 것 👀 을 모두!</div></div>`);
+    return multi(w,{id:'m1',q:'「수월봉 화산 쇄설층」에 쓰인 표현 요소는?',a:ELS.a,o:ELS.o,onOk:go(R.ph+1)});}
+  if(R.ph===nS+1){const w=layout(2,'말과 글이 함께하면?',dots(nS+3,R.ph)+`<div class="card2">🎙 해설자: “이 수월봉은 작은 암편이나 화산재들이 쌓여 있는 단면을…”<small>👀 화면 아래에도 같은 말이 글자로 나와요</small></div>`);
+    return pick(w,{id:'m2',q:'음성 언어를 자막(문자 언어)으로도 보여 주면 좋은 점은?',a:'음성 언어의 정보를 쉽게 이해할 수 있어요',o:['영상이 더 길어져요','소리를 들을 필요가 없어져요'],onOk:go(R.ph+1)});}
+  /* 233쪽 (2) 인상 깊었던 부분 설명하기 */
+  const D={sc:R.sc??null,st:R.st??null,txt:R.txt||''};
+  const w=layout(2,'인상 깊었던 장면 설명하기',dots(nS+3,R.ph)+`<div class="rules"><b>233쪽 (2)</b> 인상 깊었던 부분을 <b>언어의 표현</b>을 바탕으로 짝에게 설명해요.<br>예) 음성 언어 없이 문자 언어로 자막을 보여 줄 때 집중하며 읽을 수 있어서 인상 깊었어.</div>`);
+  w.innerHTML=`<div class="form"><label>① 인상 깊었던 장면</label><div class="chips big" id="sc">${SCN.map((s,k)=>`<button data-k="${k}" aria-pressed="${D.sc===k}">${s.e} 장면 ${'①②③④⑤'[k]}</button>`).join('')}</div>
+    <label>② 말 시작 고르기 <span class="hint">(고르면 아래 칸에 들어가요)</span></label><div class="chips big" id="stt">${STARTS.map((s,k)=>`<button data-k="${k}">${s}</button>`).join('')}</div>
+    <label for="txt">③ 내 생각 <span class="hint">(15자 이상, 80자까지)</span></label><textarea id="txt" maxlength="80" rows="3">${esc(D.txt)}</textarea>
+    <div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="send">📺 TV에 올리기</button></div></div>`;
+  $$('#sc button').forEach(b=>b.onclick=()=>{D.sc=+b.dataset.k;$$('#sc button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+  $$('#stt button').forEach(b=>b.onclick=()=>{const t=$('#txt');t.value=STARTS[+b.dataset.k]+' ';t.focus();});
+  ClassWatch.detail(()=>({q:'인상 깊었던 장면 설명하기',w:$('#txt')?$('#txt').value:''}));
+  $('#send').onclick=async()=>{
+    const bad=t=>{$('#wm').className='msg bad';$('#wm').textContent=t;};
+    const txt=$('#txt').value.trim();
+    if(D.sc===null)return bad('① 인상 깊었던 장면을 골라요.');
+    if(txt.length<15)return bad('③ 왜 인상 깊었는지 표현 방법(자막, 음악, 목소리…)을 넣어 조금 더 써요.');
+    $('#send').disabled=true;
+    await save({sc:D.sc,txt,done:true,at:Date.now()});stage2();
+  };
+}
+function s2Done(R){
+  doneView(2,`<div class="big">장면 탐정 성공! 🎬</div>
+    <div class="card2" style="text-align:left">${SCN[R.sc]?SCN[R.sc].e+' 장면 '+'①②③④⑤'[R.sc]:''}<small>${esc(R.txt||'')}</small></div>
+    <div class="rules" style="text-align:left;width:100%"><b>기억해요</b><ul><li>음성, 문자, 소리, 음악, 그림, 동영상 같은 요소를 생각하며 보면 표현 효과를 알 수 있어요.</li><li>여러 가지 표현 요소를 함께 쓰면 내용을 효과적으로 전할 수 있어요.</li></ul></div>
+    <div class="row"><button class="ghost" id="edit">✏️ 고치기</button></div>`);
+  $('#edit').onclick=async()=>{const p={done:false};Object.assign(R,p);ME.s2={...R};await roomRef(me.room).child('students/'+me.num+'/s2').update(p);stage2();};
+}
+
+/* ---------- 3. 내 영상 분석 (234쪽 다른 글과 연결하기) ---------- */
+function stage3(){
+  const R={ph:0,...(ME.s3||{})};
+  const save=saver(3,R);
+  if(R.ph===0){
+    const w=layout(3,'다른 교과 영상도 살펴봐요',`<div class="rules"><b>234쪽</b> 다른 교과 시간에 본 영상을 언어의 표현 효과를 생각하며 다시 봐요.</div>`);
+    return pick(w,{id:'k1',q:'영상의 표현 효과를 알아볼 때 무엇을 살펴보면 좋을까요?',a:'어떤 표현 요소를 썼고, 그것이 내용을 어떻게 도왔는지',o:['영상이 몇 분짜리인지','나오는 사람이 누구인지'],
+      why:{'영상이 몇 분짜리인지':'길이보다 “어떻게 표현했는지”가 중요해요.','나오는 사람이 누구인지':'누가 나오는지보다 말·글·음악을 어떻게 썼는지 살펴봐요.'},
+      onOk:async()=>{await save({ph:1});stage3();}});
+  }
+  if(R.done)return s3Done(R);
+  const D={what:R.what||'',k:R.k||[],txt:R.txt||''};
+  const vid=ROOMV.vid||'선생님이 보여 주는 다른 교과 영상';
+  shell(`<div class="two"><div class="panel grid"><div><span class="band">3단계 · 내 영상 분석</span></div><h2>영상 분석 카드</h2>
+      <div class="card2"><span id="vidT">📺 ${esc(vid)}</span><small>영상을 보면서 카드를 채워요</small></div>
+      <div class="rules"><b>예시 (235쪽)</b><ul><li>인구 변화를 알려 주는 영상 → 설명하는 음성 언어와 함께 문자로 연도를 알려 주어서 이해하기 쉽다.</li><li>과학 실험 영상 → 실험 순서와 용액의 이름을 문자 언어로 알려 주어서 이해하기 쉽다.</li></ul></div></div>
+    <div class="panel form" id="work">
+      <label for="what">① 영상 내용 <span class="hint">(무엇에 관한 영상인가요? 30자까지)</span></label><input id="what" maxlength="30" value="${esc(D.what)}" placeholder="예) 우리나라의 수출품을 알려 주는 내용">
+      <label>② 쓰인 표현 요소 <span class="hint">(모두 골라요)</span></label><div class="chips big" id="kd">${KINDS.map((x,i)=>`<button data-i="${i}" aria-pressed="${D.k.includes(i)}">${x}</button>`).join('')}</div>
+      <label>③ 언어의 표현 효과 <span class="hint">(틀을 눌러 시작하고 … 을 바꿔 써요)</span></label><div class="chips" id="ef">${EFF3.map((x,i)=>`<button data-i="${i}">${x}</button>`).join('')}</div>
+      <textarea id="txt" maxlength="90" rows="3" aria-label="언어의 표현 효과">${esc(D.txt)}</textarea>
+      <div class="msg" id="wm" role="status"></div>
+      <div class="row" id="act" style="justify-content:center"><button id="send">📺 TV에 올리기</button></div></div></div>`);
+  $$('#kd button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;D.k=D.k.includes(i)?D.k.filter(x=>x!==i):[...D.k,i];b.setAttribute('aria-pressed',D.k.includes(i));});
+  $$('#ef button').forEach(b=>b.onclick=()=>{const t=$('#txt');t.value=EFF3[+b.dataset.i];t.focus();});
+  ClassWatch.detail(()=>({q:'영상 분석 카드',w:($('#what')?$('#what').value:'')+' / '+($('#txt')?$('#txt').value:'')}));
+  $('#send').onclick=async()=>{
+    const bad=t=>{$('#wm').className='msg bad';$('#wm').textContent=t;};
+    const what=$('#what').value.trim(),txt=$('#txt').value.trim();
+    if(what.length<4)return bad('① 무엇에 관한 영상인지 써요.');
+    if(!D.k.length)return bad('② 영상에 쓰인 표현 요소를 골라요.');
+    if(txt.length<12)return bad('③ 표현 효과를 한 문장으로 써요.');
+    if(txt.includes('…'))return bad('③ 문장 속 … 부분을 내가 본 영상에 맞게 바꿔 써요.');
+    $('#send').disabled=true;
+    await save({what,k:D.k,txt,done:true,at:Date.now()});stage3();
+  };
+}
+function s3Done(R){
+  doneView(3,`<div class="big">분석 카드가 TV에 올라갔어요 📺</div>
+    <div class="card2" style="text-align:left">${esc(R.what)}<small>${esc(R.txt)}</small></div>
+    <div class="effs">${(R.k||[]).map(i=>`<span>${esc(KINDS[i])}</span>`).join('')}</div>
+    <div class="row"><button class="ghost" id="edit">✏️ 고치기</button></div>`);
+  $('#edit').onclick=async()=>{const p={done:false};Object.assign(R,p);ME.s3={...R};await roomRef(me.room).child('students/'+me.num+'/s3').update(p);stage3();};
+}
+
+/* ---------- 4. 정리 퀴즈 + 스스로 점검 ---------- */
+let qOpts={};
+function stage4(){
+  const R={i:0,score:0,...(ME.s4||{})};
+  if(R.di===R.i&&R.i<QUIZ.length)R.i++; /* 답하고 새로고침했으면 다음 문제로 */
+  const save=saver(4,R);
+  if(R.done)return shell(`<div class="panel quiz pop"><div><span class="band">정리 퀴즈 끝</span></div><div class="emoji" aria-hidden="true">🌋</div>
+      <div class="big">${QUIZ.length}문제 중 ${R.score}문제 맞혔어요!</div><p>스스로 점검: ${(R.self||[]).map(v=>'●'.repeat(v)).join(' · ')}</p><p class="muted">TV에서 우리 반 화산 탐사 결과를 봐요.</p></div>`);
+  if(R.i>=QUIZ.length){
+    const v=R.self||[0,0,0];
+    shell(`<div class="panel grid"><div><span class="band">스스로 점검 (235쪽)</span></div><h2>오늘 영상을 어떻게 시청했나요?</h2>
+      <p class="muted" style="margin:0">매우 잘함 ●●● · 잘함 ●● · 보통임 ●</p>
+      ${SELF.map((t,k)=>`<div class="selfr"><span>${esc(t)}</span><div class="seg" data-k="${k}">${[1,2,3].map(n=>`<button data-n="${n}" aria-pressed="${v[k]===n}">${'●'.repeat(n)}</button>`).join('')}</div></div>`).join('')}
+      <div class="msg" id="wm" role="status"></div><div class="row" style="justify-content:center"><button id="send">끝내기</button></div></div>`);
+    $$('.selfr .seg').forEach(s=>$$('button',s).forEach(b=>b.onclick=()=>{v[+s.dataset.k]=+b.dataset.n;$$('button',s).forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+    $('#send').onclick=async()=>{if(v.some(x=>!x)){$('#wm').className='msg bad';$('#wm').textContent='세 가지 모두 골라요.';return;}
+      $('#send').disabled=true;await save({self:v,done:true,at:Date.now()});stage4();};
+    return;
+  }
+  const Q=QUIZ[R.i];
+  const opts=qOpts[Q.id]||(qOpts[Q.id]=shuffle([Q.a,...Q.o]));
+  shell(`<div class="panel quiz"><div class="row" style="justify-content:space-between;width:100%"><span class="band">정리 퀴즈 ${R.i+1}/${QUIZ.length}</span><span class="score">🌋 ${R.score}</span></div>
+    ${dots(QUIZ.length,R.i)}
+    <div class="q">${esc(Q.q)}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    <div class="msg" id="pm" role="status"></div><div id="ex"></div><div class="row" id="act" style="justify-content:center"></div></div>`);
+  $$('.opts button').forEach(b=>b.onclick=async()=>{
+    const ok=b.dataset.o===Q.a;rec(Q.id,ok);
+    $$('.opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===Q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    $('#pm').className='msg '+(ok?'ok':'bad');$('#pm').textContent=ok?'맞았어요! 탐사대가 한 칸 올라가요 🧗':'아쉬워요. 정답을 확인해요.';
+    $('#ex').innerHTML=`<div class="expl">${esc(Q.ex)}</div>`;
+    const sc=R.score+(ok?1:0),last=R.i+1>=QUIZ.length;
+    await save({score:sc,di:R.i,...(R.i===0&&!R.startAt?{startAt:Date.now()}:{})});
+    nextBtn(last?'스스로 점검하기 ▶':'다음 문제 ▶',async()=>{await save({i:R.i+1,...(last?{qAt:Date.now()}:{})});stage4();});
+  });
+}
+
+/* ---------- student: room ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  $('#sub').textContent=`${me.num}번 ${me.name}`;
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store(APP+'-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  listen(roomRef(me.room).child('vid'),s=>{ROOMV.vid=s.val()||'';const el=$('#vidT');if(el)el.textContent='📺 '+(ROOMV.vid||'선생님이 보여 주는 다른 교과 영상');});
+  /* 선생님이 시작을 누르기 전에는 그 단계를 대기 화면으로 보여 줘요 */
+  listen(roomRef(me.room).child('go'),s=>{
+    const g=s.val()||0;const was=ROOMV.go||0;ROOMV.go=g;
+    if(!ready)return;
+    if((cur>was)!==(cur>g))renderStage(); else drawSteps();
+  });
+}
+function waitView(){
+  ClassWatch.step('대기',{n:cur,total:NST,wait:true});
+  shell(`<div class="panel quiz pop"><div><span class="band">${cur}단계 · ${STAGES[cur].k}</span></div><div class="emoji" aria-hidden="true">👂</div>
+    <h2 style="font-size:1.8rem">선생님 설명을 들어요</h2><p>선생님이 <b>시작</b>을 누르면 활동이 열려요. 태블릿은 잠깐 내려놓아요.</p></div>`);
+}
+function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n>ROOMV.stage||n>(ROOMV.go||0)?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store(APP+'-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+function renderStage(){
+  if(cur>(ROOMV.go||0))return waitView();
+  ClassWatch.step(STAGES[cur].k,{n:cur,total:NST,wait:stepDone(cur)});
+  onMe=()=>drawSteps();
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  return stage4();
+}
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store(APP+'-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm();
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store(APP+'-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store(APP+'-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:APP,stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store(APP+'-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});const st=RD.stage||1;if((RD.go||0)<st)ref.child('go').set(st);}};
+  $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  const waitSt=(RD.go||0)<(RD.stage||1);
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?`학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.`:`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+
+let tvStage=0,tvAll=false,showWrong=false,tvAns=false,tvAward=false;
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>stepDoneOf(x,st);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  const changed=tvStage!==st;tvStage=st;
+  if(changed||!$('#tvtop')){
+    tvAns=false;tvAward=false;
+    main.innerHTML=`<div id="tvtop"></div><div id="tvmid"></div><div id="tvq"></div>`;
+    tvTop(st);
+  }
+  $('#tvmid').innerHTML=st===4?climbBox(S):st===3?cardBox(S):st===2?impBox(S):progressBox(st,S);
+  $('#tvq').innerHTML=quizBox(S,st);
+  $('#wrongT').onclick=()=>{showWrong=!showWrong;renderTV();};
+  $('#allT').onclick=()=>{tvAll=!tvAll;renderTV();};
+}
+function stepDoneOf(x,n){return !!(x['s'+n]&&x['s'+n].done);}
+const TVP={
+  1:{h:'「수월봉 화산 쇄설층」 영상 탐정 (231~232쪽)',body:()=>`<div class="card2">🎥 먼저 영상을 다 함께 봐요. 무엇이 들리고, 무엇이 보이나요?<small>👂 해설자의 말, 음악, 파도 소리 · 👀 자막, 제목, 지도 위 표시를 기억해요.</small></div>`,
+     talk:['영상에서 설명하는 내용은 어디에서 일어난 일인가요?','화산 쇄설층은 어떤 과정을 거쳐 만들어졌나요?','화산 분화구의 중심을 바다 한가운데라고 추측한 까닭은?'],
+     ans:['어디: <b>제주도 수월봉</b> (천연기념물)','<b>마그마가 지표의 물과 만나 폭발</b>한 뒤 화산재와 화산 쇄설물이 쌓여 만들어졌어요.','<b>화산탄이 일정한 각도</b>로 휘어 있는 것을 보고 추측했어요.','낱말: 지표 · 분화구 · 화산재 · 지층 (232쪽)','OX: ⭕ ⭕ ⭕ ❌(녹차 재배 지역 아님) ⭕']},
+  2:{h:'장면마다 어떻게 표현했을까? (231·233쪽)',body:()=>`<div class="scs">${SCN.map((s,k)=>`<div class="sc"><span>${s.e}</span><div><b>장면 ${'①②③④⑤'[k]}</b><br>${esc(s.d)}</div></div>`).join('')}</div>`,
+     talk:['첫 번째 장면은 정보를 어떻게 전달하나요?','긴장감이 느껴지는 장면에서는 무엇을 함께 썼나요?','인상 깊었던 부분을 언어의 표현을 바탕으로 설명해 봐요.'],
+     ans:SCN.map((s,k)=>`장면 ${'①②③④⑤'[k]}: <b>${esc(s.a)}</b>`).concat(['여러 가지 표현 요소를 <b>복합적으로</b> 사용하면 내용을 효과적으로 표현할 수 있어요.'])},
+  3:{h:'다른 교과 영상의 표현 효과 (234쪽)',body:()=>`<div class="row"><label for="vidIn" style="font-family:var(--display)">오늘 볼 영상</label><input id="vidIn" maxlength="40" style="max-width:420px" placeholder="예) 사회 2단원 우리나라의 무역 영상"><button class="ghost" id="vidSet">학생 화면에 보내기</button></div>`,
+     talk:['영상에 어떤 표현 요소(음성, 문자, 음악, 소리, 그림, 동영상)가 쓰였나요?','어느 장면에서 문자 언어가 음성 언어를 도왔나요?','그 표현 덕분에 무엇을 더 쉽게 알게 되었나요?'],
+     ans:['설명하는 음성 언어와 함께 <b>문자로 연도를 알려 주어서</b> 이해하기 쉬워요. (인구 변화 영상)','실험 순서와 용액의 이름을 <b>문자 언어로 알려 주어서</b> 이해하기 쉬워요. (과학 실험 영상)','그림과 문자 언어를 함께 써서 <b>한눈에</b> 이해하기 쉬워요.']}};
+function tvTop(st){
+  if(st===4){
+    $('#tvtop').innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🌋 정리 퀴즈: 수월봉 탐사대</h2><button class="ghost" id="awT">🏆 시상식</button></div>
+      <p class="muted" style="margin:0">맞힐 때마다 탐사대가 수월봉을 한 칸씩 올라가요. 퀴즈 8문제 뒤에 스스로 점검(235쪽)을 해요.</p></div>`;
+    $('#awT').onclick=()=>{tvAward=!tvAward;$('#awT').textContent=tvAward?'탐사 보기':'🏆 시상식';renderTV();};
+    return;
+  }
+  const P=TVP[st];
+  const draw=()=>{$('#tva').innerHTML=tvAns?`<div class="plist">${P.ans.map(a=>`<div class="pcard">${a}</div>`).join('')}</div>`:'';$('#tvaT').textContent=tvAns?'정답 가리기':'정답 보기';};
+  $('#tvtop').innerHTML=`<div class="panel grid"><h2 style="font-size:1.8rem">${P.h}</h2>${P.body()}
+    <div class="rules"><b>함께 이야기해요</b><ul>${P.talk.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva"></div></div>`;
+  $('#tvaT').onclick=()=>{tvAns=!tvAns;draw();};
+  if(st===3){$('#vidIn').value=RD.vid||'';$('#vidSet').onclick=()=>{const v=$('#vidIn').value.trim();roomRef(ROOM).child('vid').set(v||null);$('#vidSet').textContent='보냈어요 ✓';};}
+  draw();
+}
+function impBox(S){
+  const W=S.filter(x=>x.s2&&x.s2.done&&x.s2.txt);
+  return `<div class="panel grid" id="imp"><div class="row" style="justify-content:space-between"><h2>💬 인상 깊었던 장면 (233쪽 2)</h2><span class="muted">${W.length}/${S.length}명</span></div>
+    <div class="plist">${W.map(x=>`<div class="pcard"><b>${SCN[x.s2.sc]?SCN[x.s2.sc].e+' 장면 '+'①②③④⑤'[x.s2.sc]:''}</b> ${esc(x.s2.txt)} <small class="muted">${x.n} ${esc(x.name)}</small></div>`).join('')||'<p class="muted">아직 올린 글이 없어요</p>'}</div></div>`;
+}
+function cardBox(S){
+  const W=S.filter(x=>x.s3&&x.s3.done);
+  const cnt=KINDS.map((_,i)=>W.filter(x=>(x.s3.k||[]).includes(i)).length);
+  return `<div class="panel grid" id="cards"><div class="row" style="justify-content:space-between"><h2>📺 우리 반 영상 분석 카드</h2><span class="muted">${W.length}/${S.length}명</span></div>
+    <div class="bars">${KINDS.map((k,i)=>`<div class="bar"><span>${k}</span><div class="track"><div style="width:${W.length?cnt[i]/W.length*100:0}%"></div></div><span>${cnt[i]}명</span></div>`).join('')}</div>
+    <div class="plist">${W.map(x=>`<div class="pcard"><b>${esc(x.s3.what)}</b> ${esc(x.s3.txt)} <small class="muted">${x.n} ${esc(x.name)}</small></div>`).join('')}</div></div>`;
+}
+function ranked(S){
+  return S.filter(x=>x.s4).map(x=>{const f=(x.s4.i||0)>=QUIZ.length||!!x.s4.done,end=x.s4.qAt||x.s4.at;return {...x,sc:x.s4.score||0,fin:f,t:f&&end?(end-(x.s4.startAt||end)):Infinity};})
+    .sort((a,b)=>b.sc-a.sc||(b.fin-a.fin)||a.t-b.t||a.n-b.n);
+}
+function climbBox(S){
+  const R=ranked(S),fin=R.filter(x=>x.fin).length;
+  const SD=S.filter(x=>x.s4&&x.s4.self);
+  const avg=k=>SD.length?(SD.reduce((s,x)=>s+(x.s4.self[k]||0),0)/SD.length).toFixed(1):'-';
+  const selfBox=`<div class="panel grid" id="selfbox"><h2>스스로 점검 (235쪽) · ${SD.length}명</h2><div class="bars">${SELF.map((t,k)=>`<div class="bar"><span>${esc(t.length>24?t.slice(0,23)+'…':t)}</span><div class="track"><div style="width:${SD.length?avg(k)/3*100:0}%"></div></div><span>${avg(k)}</span></div>`).join('')}</div><p class="muted" style="margin:0">평균 (●●● = 3). 이름은 보이지 않아요.</p></div>`;
+  if(tvAward){
+    const top=R.filter(x=>x.fin).slice(0,3);
+    const p=(x,c,m)=>x?`<div class="${c}"><b>${m}</b><span>${x.n} ${esc(x.name)}</span>🌋 ${x.sc}/${QUIZ.length}</div>`:`<div class="${c}"><b>${m}</b><span>-</span></div>`;
+    return `<div class="panel grid" id="award"><h2 style="font-size:1.8rem;text-align:center">🏆 다큐 감상실 시상식</h2>
+      <div class="podium">${p(top[1],'p2','🥈')}${p(top[0],'p1','🥇')}${p(top[2],'p3','🥉')}</div>
+      <p class="muted" style="text-align:center;margin:0">맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요.</p></div>${selfBox}`;
+  }
+  return `<div class="panel grid" id="climb"><div class="row" style="justify-content:space-between"><h2>수월봉 탐사</h2><span class="muted">퀴즈 끝 ${fin}/${S.length}명</span></div>
+    <div class="mount">${S.map(x=>{const s4=x.s4||{},sc=s4.score||0;return `<div><div class="cl"><i style="bottom:${sc/QUIZ.length*72}%">🧗</i></div><b>${x.n} ${esc(x.name)}</b><small class="muted">${sc}/${QUIZ.length}${(s4.i||0)>=QUIZ.length||s4.done?' ✓':''}</small></div>`;}).join('')||'<p class="muted">아직 아무도 없어요</p>'}</div></div>${selfBox}`;
+}
+function progressBox(st,S){
+  const its=ITEMS.filter(x=>x.st===st);
+  const has=id=>S.filter(x=>x.ans&&x.ans[id]!==undefined).length;
+  return `<div class="panel grid"><h2>얼마나 했나요?</h2><div class="bars">${its.map(q=>`<div class="bar"><span>${esc(q.q.length>26?q.q.slice(0,25)+'…':q.q)}</span><div class="track"><div style="width:${S.length?has(q.id)/S.length*100:0}%"></div></div><span>${has(q.id)}명</span></div>`).join('')}</div></div>`;
+}
+function quizStats(S,st){
+  return ITEMS.map(q=>({q,no:ITEMS.filter(x=>x.st===q.st).indexOf(q)+1})).filter(r=>tvAll||r.q.st===st).map(r=>{
+    const done=S.filter(x=>x.ans&&x.ans[r.q.id]!==undefined);
+    const miss=done.filter(x=>x.ans[r.q.id]===false);
+    const ok=done.length-miss.length;
+    return {...r,done:done.length,ok,miss,rate:done.length?Math.round(ok/done.length*100):null};
+  });
+}
+function quizBox(S,st){
+  const R=quizStats(S,st).sort((a,b)=>(a.rate??101)-(b.rate??101)||a.q.st-b.q.st||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
+   <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
+   <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
