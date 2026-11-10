@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI 미래 탐험대</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --gold:#E9B04F;
+  --say:#3D6E8C; --write:#B5652F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input,textarea{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:10px;padding:0 .35em}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 80px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .3em;font-size:.98rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+/* 고르기 */
+.quiz{display:grid;gap:14px;justify-items:center;text-align:center}
+.q{font-family:var(--display);font-size:clamp(1.4rem,4vw,1.9rem);line-height:1.3}
+.opts{display:grid;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.2rem;padding:.75em .8em;line-height:1.35;text-align:left;font-family:var(--text);font-weight:700}
+.opts.two{grid-template-columns:1fr 1fr}.opts.two button{text-align:center;font-family:var(--display);font-weight:400;font-size:1.4rem}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.card{display:grid;justify-items:center;gap:6px;background:#fff;border:3px solid var(--line);border-radius:22px;padding:16px 22px;width:min(560px,100%)}
+.card .em{font-size:3.6rem;line-height:1.1}
+.card b{font-family:var(--display);font-weight:400;font-size:clamp(1.4rem,4vw,1.9rem);line-height:1.3}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.cmp{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:1.05rem}
+.cmp th{font-family:var(--display);font-weight:400;text-align:center;padding:4px 8px;color:var(--muted)}
+.cmp td{background:#fff;padding:6px 10px;text-align:center}
+.cmp td:first-child{border-radius:12px 0 0 12px;text-align:left;font-family:var(--display)} .cmp td:last-child{border-radius:0 12px 12px 0}
+.cmp tr.avg td{background:var(--cream);font-family:var(--display)}
+.cmp small{display:block;color:var(--muted);font-size:.85rem}
+.wall{display:grid;gap:8px}
+.wall div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px;font-size:1.1rem}
+.wall b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.qrate{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qrow.low{border-color:var(--bad);background:#FFF5F2}
+.qrow .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qrow .qb .track{width:100%;height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qrow .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qrow.low .qb .track div{background:var(--bad)}
+.qrow .pc{font-family:var(--display);font-size:1.3rem}
+.qrow.low .pc{color:var(--bad)}
+.rank{display:grid;gap:6px}
+.rank div{display:grid;grid-template-columns:2.4em 1fr auto;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:6px 12px;font-family:var(--display);font-size:1.2rem}
+.podium{display:flex;gap:14px;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+.podium div{background:#fff;border:3px solid var(--gold);border-radius:16px;padding:14px 20px;text-align:center;font-family:var(--display);min-width:150px}
+.podium .p1{font-size:1.6rem;padding-block:26px}
+.livecap{background:#111;color:#fff;font-weight:700;font-size:clamp(1.8rem,4vw,2.8rem);border-radius:14px;padding:16px 22px;min-height:2.6em;text-align:center}
+/* 잡지 편집실 */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{background:#fff;color:var(--ink);border:2px solid var(--line);font-family:var(--text);font-weight:700;font-size:1rem;padding:.4em .8em;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.easy .chips button{font-size:1.2rem;padding:.6em 1em}
+.field{display:grid;gap:6px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 14px}
+.field>label{font-family:var(--display);font-size:1.2rem}
+.field.need>label::after{content:' *';color:var(--coral2)}
+.field.miss{border-color:var(--bad)}
+.ex{font-size:.92rem;color:var(--muted)}
+.plan{display:grid;gap:8px;background:#F3ECFA;border:3px solid #B9A3D6;border-radius:16px;padding:14px}
+.plan h3{font-size:1.5rem;text-align:center}
+.plan .pp{background:#fff;border:2px dashed #C9779B;border-radius:12px;padding:6px 12px}
+.plan .pp b{font-family:var(--display);font-weight:400;color:#9B4F72;display:block;font-size:.95rem}
+.check{display:grid;gap:8px}
+.check button{display:flex;gap:10px;align-items:center;text-align:left;background:#fff;color:var(--ink);border:2px solid var(--line);font-family:var(--text);font-weight:700}
+.check button::before{content:'';flex:none;width:1.4em;height:1.4em;border-radius:6px;border:2px solid var(--line)}
+.check button[aria-pressed="true"]{border-color:var(--ok);color:var(--ok)}
+.check button[aria-pressed="true"]::before{content:'✓';display:grid;place-items:center;background:var(--ok);border-color:var(--ok);color:#fff}
+.preview{max-width:100%;max-height:60vh;border-radius:12px;border:3px solid var(--line);display:block;margin:0 auto}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.gal .it{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;display:grid;gap:6px;text-align:center;font-family:var(--display);color:var(--ink)}
+.gal .it img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:var(--cream)}
+.gal .it .noimg{aspect-ratio:3/4;border-radius:10px;background:#F3ECFA;display:grid;place-items:center;padding:8px;font-size:1.05rem}
+.gal button.it{font-size:1rem}
+.gal .it.seen{border-color:var(--ok)}
+.stk{font-size:1.1rem}
+.stickers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stickers button{background:#fff;color:var(--ink);border:3px solid var(--gold);font-size:1.05rem;line-height:1.3;padding:.7em .4em}
+.stickers button b{display:block;font-size:2rem}
+.stickers button.given{background:var(--gold);color:#fff}
+.awards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.awards div{background:#fff;border:3px solid var(--gold);border-radius:16px;padding:12px;text-align:center;display:grid;gap:6px;font-family:var(--display)}
+.awards img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px}
+.awards .em{font-size:2.6rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cards .plan{padding:10px;font-size:.98rem}.cards .plan h3{font-size:1.25rem}
+.bars{display:grid;gap:6px}
+.bars div{display:grid;grid-template-columns:8em 1fr 2em;gap:8px;align-items:center;font-family:var(--display)}
+.bars i{display:block;height:16px;border-radius:999px;background:var(--blue)}
+.people button{background:var(--cream);color:var(--ink);border-radius:999px;padding:.2em .8em;font-size:1rem}
+.people button.ok{background:var(--ok);color:#fff}
+/* AI 미래 탐험대 */
+.sc{display:grid;gap:6px;justify-items:center;text-align:center;background:#fff;border:3px solid var(--line);border-radius:22px;padding:16px 22px;width:min(600px,100%)}
+.sc .em{font-size:3.4rem;line-height:1.1}
+.sc b{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,3.6vw,1.75rem);line-height:1.35}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.bins button{display:grid;gap:4px;justify-items:center;background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.15rem;line-height:1.3;padding:.9em .4em}
+.bins button span{font-size:2.2rem;line-height:1}
+.bins button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.bins button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.hint{background:#FFF4DF;border:2px solid var(--gold);border-radius:12px;padding:8px 14px;font-size:1.05rem;text-align:left;width:100%}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fields button{display:grid;gap:2px;justify-items:center;background:#fff;color:var(--ink);border:3px solid var(--line);font-size:1.2rem;padding:.8em .3em}
+.fields button span{font-size:2.2rem;line-height:1}
+.fields button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1EA}
+.jc{display:grid;gap:6px;background:#F3ECFA;border:3px solid #B9A3D6;border-radius:16px;padding:12px 14px}
+.jc h3{font-size:1.35rem}
+.jc .pp{background:#fff;border-radius:10px;padding:6px 10px}
+.jc .pp b{font-family:var(--display);font-weight:400;color:#7A5BA6;display:block;font-size:.92rem}
+.stars{display:flex;gap:6px}
+.stars button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1rem;padding:.45em .7em}
+.stars button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#fff}
+.srow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sum3 div{background:#fff;border:3px solid var(--line);border-radius:16px;padding:12px;text-align:center;font-family:var(--display);font-size:1.15rem}
+.sum3 div b{display:block;font-size:2.4rem;font-weight:400}
+@media (max-width:820px){.bins,.fields,.sum3{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🤖</i> AI 미래 탐험대</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const APP='aifuture';
+const STAGES=[null,
+  {k:'생활 속 AI',t:'생활 속 AI가 주는 영향 (교과서 77쪽)',tm:5},
+  {k:'직업의 변화',t:'AI로 바뀌는 직업 나누기',tm:5},
+  {k:'미래 직업 카드',t:'짝과 미래 직업 예측 카드 만들기',tm:6},
+  {k:'생각 넓히기',t:'생각 넓히기 + 스스로 평가 (교과서 79쪽)',tm:4}];
+const NS=4;
+/* 1단계: 장면 카드 → 영향 고르기 (교과서 77쪽 장면 4개 포함) */
+const EFF=[{k:'편리',e:'😊',t:'생활이 편리해져요'},{k:'안전',e:'🛡️',t:'사회가 안전해져요'},{k:'직업',e:'💼',t:'직업이 바뀌어요'}];
+const SCENES=[
+  {id:'a1',e:'🚒',t:'AI 화재 감지기가 불을 먼저 알아내어 신고했어요. 불이 커지기 전에 소방차가 도착했어요.',a:'안전'},
+  {id:'a2',e:'💇',t:'AI가 내 얼굴형에 어울리는 머리 모양을 추천해 줘요.',a:'편리'},
+  {id:'a3',e:'🦾',t:'AI가 기계 장치를 조정해서 사람이 하던 힘든 일을 대신해요.',a:'직업'},
+  {id:'a4',e:'🚦',t:'AI가 교통 흐름을 분석해서 교통 약자도 안전하게 길을 건너요.',a:'안전'},
+  {id:'a5',e:'🎵',t:'AI가 내가 좋아하는 음악을 알아서 골라 들려줘요.',a:'편리'},
+  {id:'a6',e:'📞',t:'고객센터 전화를 AI 상담원이 먼저 받아서 안내해요.',a:'직업'},
+  {id:'a7',e:'🌧️',t:'AI 비서가 오늘 오후 비 소식과 막히는 길을 미리 알려 줘요.',a:'편리'},
+  {id:'a8',e:'🩻',t:'AI가 엑스레이 사진을 살펴 의사가 병을 일찍 찾도록 도와요.',a:'안전'},
+  {id:'a9',e:'🗂️',t:'AI가 배울 사진에 이름표를 붙이는 "데이터 전문가"가 새로 생겼어요.',a:'직업'}];
+const CRIT=[
+  {id:'k1',q:'AI 길 안내가 공사 중인 길로 가라고 해요. 어떻게 할까요?',a:'표지판과 주변을 살피고 안전한 길로 가요',o:['AI가 말했으니 그대로 가요','길 안내를 끄고 아무 길로나 가요']},
+  {id:'k2',q:'AI가 숙제 답을 알려 줬어요. 가장 알맞은 태도는?',a:'교과서로 맞는지 확인하고 내 말로 정리해요',o:['그대로 베껴서 내요','AI는 틀리지 않으니 확인하지 않아요']}];
+/* 2단계: 직업 카드 나누기 */
+const BINS=[{k:'대신',e:'🤖',t:'AI가 많이 대신할 일'},{k:'바뀜',e:'🔄',t:'하는 일이 바뀌는 직업'},{k:'새로',e:'✨',t:'새로 생기는 직업'}];
+const JOBS=[
+  {id:'j1',e:'📞',t:'전화 상담원',d:'자주 묻는 질문에 전화로 답해요.',a:'대신',h:'정해진 질문에 답하는 일은 AI 상담원이 많이 맡아요.'},
+  {id:'j2',e:'🔩',t:'공장의 단순 조립 일',d:'같은 부품을 하루 종일 똑같이 끼워요.',a:'대신',h:'반복되는 단순한 일은 AI 로봇이 대신하기 쉬워요.'},
+  {id:'j3',e:'🌐',t:'간단한 문서 번역',d:'짧은 안내문을 다른 나라 말로 옮겨요.',a:'대신',h:'간단한 번역은 AI 번역기가 빠르게 해요.'},
+  {id:'j4',e:'🌾',t:'농부',d:'농업 로봇과 AI가 물 주기·잡초 뽑기를 해요.',a:'바뀜',h:'농부는 데이터를 분석하고 기계를 관리하는 일을 더 많이 하게 돼요.'},
+  {id:'j5',e:'🩺',t:'의사',d:'AI가 엑스레이 사진에서 병을 찾아 줘요.',a:'바뀜',h:'AI가 진단을 돕고, 의사는 환자와 이야기하며 치료를 결정해요.'},
+  {id:'j6',e:'🧾',t:'회계사',d:'AI가 영수증을 자동으로 나누어 정리해요.',a:'바뀜',h:'정리는 AI가, 회계사는 사람에게 믿음을 주는 조언을 더 많이 해요.'},
+  {id:'j7',e:'🗂️',t:'AI 학습 데이터 전문가',d:'AI가 배울 데이터를 모으고 맞는지 검사해요.',a:'새로',h:'AI가 배우려면 좋은 데이터가 꼭 필요해서 생긴 직업이에요.'},
+  {id:'j8',e:'⚖️',t:'AI 윤리·법 전문가',d:'AI가 잘못했을 때 누구 책임인지 연구해요.',a:'새로',h:'AI가 많이 쓰이면서 새로 생긴 법·윤리 문제를 다뤄요.'},
+  {id:'j9',e:'💗',t:'감성 인식 기술 전문가',d:'사람의 감정을 알아차리는 AI와 로봇을 만들어요. (교과서 77쪽)',a:'새로',h:'교과서 77쪽 진로 찾기에 나온 새로운 직업이에요.'}];
+const JQ={id:'j10',q:'인공지능 때문에 직업은 어떻게 될까요? 가장 알맞은 것은?',a:'사라지는 일도, 바뀌는 일도, 새로 생기는 일도 있어요',o:['모든 직업이 곧 사라져요','아무것도 바뀌지 않아요']};
+/* 3단계: 미래 직업 예측 카드 */
+const FIELDS=[
+  {id:'f1',e:'🌾',t:'농업',ai:['날씨·흙 데이터를 보고 물 주기','드론으로 병든 작물 찾기','로봇으로 잡초 뽑기'],hu:['어떤 작물을 기를지 정하기','기계 점검하고 고치기','소비자와 소통하기'],nj:['스마트 농장 관리사','농업 드론 조종사','작물 데이터 분석가']},
+  {id:'f2',e:'🏭',t:'공장',ai:['부품 조립하기','불량품 골라내기','기계 고장 미리 알리기'],hu:['로봇 운영하고 고치기','새 제품 아이디어 내기','안전 점검하기'],nj:['로봇 유지 보수 기술자','공장 데이터 분석가','협동 로봇 조종사']},
+  {id:'f3',e:'🏥',t:'병원',ai:['엑스레이 사진에서 병 찾기','진료 예약 안내하기','약 정리하기'],hu:['환자 마음 살피고 이야기하기','치료 방법 결정하기','수술하기'],nj:['의료 AI 전문가','원격 진료 코디네이터','건강 데이터 관리사']},
+  {id:'f4',e:'🏫',t:'학교',ai:['학생 수준에 맞는 문제 내기','받아쓰기 채점하기','통역해 주기'],hu:['친구 관계 도와주기','함께 토론하고 생각 키우기','마음 돌보기'],nj:['AI 학습 코치','교육 콘텐츠 설계자','디지털 윤리 강사']},
+  {id:'f5',e:'🚗',t:'교통',ai:['자율주행으로 운전하기','막히는 길 피해 안내하기','신호등 시간 조절하기'],hu:['비상 상황에서 판단하기','교통 약자 돕기','교통 규칙 만들기'],nj:['자율주행 관제사','교통 데이터 분석가','자율주행차 보험 전문가']},
+  {id:'f6',e:'🛒',t:'가게',ai:['무인 계산하기','손님이 좋아할 물건 추천하기','재고 세기'],hu:['손님 고민 들어 주기','가게 꾸미기','새 상품 고르기'],nj:['AI 쇼핑 큐레이터','무인 매장 관리자','고객 경험 디자이너']}];
+const FD=id=>FIELDS.find(f=>f.id===id);
+/* 4단계: 생각 넓히기 + 스스로 평가 (교과서 79쪽) */
+const THINK_A=['집안일을 대신해','공부를 내 수준에 맞게 도와','길을 빠르게 안내해','위험을 미리 알려'];
+const THINK_B=['더 편리해','더 안전해','더 건강해','더 여유로워'];
+const SELF=['디지털 데이터와 아날로그 데이터의 특징을 이해하고 있나요?','인공지능에 활용할 수 있는 데이터의 유형이나 형태를 설명할 수 있나요?','기계학습의 원리를 설명할 수 있나요?','데이터를 수집하여 인공지능 프로그램을 만들 수 있나요?','인공지능이 사회에 미치는 영향을 설명할 수 있나요?'];
+const LV=['노력 요함','보통','잘함'];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 규칙이 막고 있어요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button></div></div>`;
+  $('#retry').onclick=()=>location.reload();
+}
+window.addEventListener('unhandledrejection',ev=>{if(ev.reason&&(ev.reason.code||ev.reason.message))showError(ev.reason);});
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+let skew=0;db.ref('.info/serverTimeOffset').on('value',s=>{skew=s.val()||0;});
+const now=()=>Date.now()+skew;
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 실과 · 5. 생활 속 인공지능 · 7차시';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>인공지능이<br>사회에 미치는 영향</h1>
+   <p>생활 속 AI가 우리에게 주는 영향을 찾고, AI 때문에 <b>사라지고·바뀌고·새로 생기는 직업</b>을 알아봐요. 짝과 <b>미래 직업 예측 카드</b>도 만들어요.</p></div>
+   <div class="sc" aria-hidden="true"><span class="em">🤖🌏</span><b>인공지능의 발달이 내 생활에 어떤 영향을 줄까요?</b></div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+
+/* ---------- student ---------- */
+let me=null, RV={stage:0}, ME={}, cur=1, busy=false;
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store(APP+'-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app,gate:true});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  ClassWatch.joinForm();
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store(APP+'-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app,gate:true});ClassWatch.who(me.num,me.name);
+  $('#sub').textContent=`${me.num}번 ${me.name}`;
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;RV={stage:0};
+  const R=roomRef(me.room);
+  listen(R.child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store(APP+'-student',null);me=null;clearOffs();return joinView();}
+    const easyWas=ME.easy;ME=v;
+    $('#sub').textContent=`${me.num}번 ${me.name}${ME.easy?' · 🌟':''}`;
+    if(!ready){ready=true;if(RV.stage){cur=RV.stage;renderStage();}return;}
+    if(!!easyWas!==!!ME.easy&&!busy){renderStage();return;}
+    drawSteps();
+  });
+  listen(R.child('stage'),s=>{
+    const st=s.val()||1;const was=RV.stage;RV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+}
+const meRef=()=>roomRef(me.room).child('students/'+me.num);
+function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=Array.from({length:NS},(_,i)=>i+1).map(n=>`<button data-s="${n}" ${n>RV.stage?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid${ME.easy?' easy':''}"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}</div>`;
+  drawSteps();
+}
+const wstep=sub=>ClassWatch.step(STAGES[cur].k+(sub?' · '+sub:''),{n:cur,total:NS,wait:stepDone(cur)});
+function renderStage(){
+  busy=false;ClassWatch.detail(null);wstep();
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  return stage4();
+}
+/* 처음 답 기록 (문제별 정답률) */
+function rec(id,ok){
+  if(!me||!id)return;
+  if(ME.ans&&ME.ans[id]!==undefined)return;
+  ME.ans={...(ME.ans||{}),[id]:ok};
+  meRef().child('ans/'+id).transaction(v=>v===null?ok:undefined);
+}
+const prog=(n,k)=>`<div class="prog">${Array.from({length:n},(_,i)=>`<span class="${i<k?'on':i===k?'cur':''}"></span>`).join('')}</div>`;
+/* 보기 고르기 */
+function pick(box,{id,q,a,o,onOk,top=''}){
+  const opts=shuffle([a,...(ME.easy?o.slice(0,1):o)]);let first=true;
+  box.innerHTML=`<div class="quiz">${top}<div class="q">${esc(q)}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+  ClassWatch.detail(()=>({q:q}));
+  $$('.opts button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';setTimeout(onOk,RM?300:900);}
+    else{b.classList.add('wrong');b.disabled=true;$('#pm',box).className='msg bad';$('#pm',box).textContent='다시 생각해 봐요.';}
+  });
+}
+/* 세 칸 중 고르기 (장면·직업 카드) */
+function sort3(box,{id,e,t,d,a,bins,hint,onOk,top=''}){
+  let first=true;
+  const list=ME.easy?bins.filter((b,i)=>b.k===a||i===bins.findIndex(x=>x.k!==a)):bins;
+  box.innerHTML=`<div class="quiz">${top}<div class="sc"><span class="em">${e}</span><b>${esc(t)}</b>${d?`<span class="muted">${esc(d)}</span>`:''}</div>
+    <div class="bins" ${list.length===2?'style="grid-template-columns:1fr 1fr"':''}>${list.map(b=>`<button data-k="${b.k}"><span>${b.e}</span>${esc(b.t)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div><div id="hn"></div></div>`;
+  ClassWatch.detail(()=>({q:t}));
+  $$('.bins button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.k===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.bins button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';
+      if(hint){$('#hn',box).innerHTML=`<div class="hint">💡 ${esc(hint)}</div>`;setTimeout(onOk,RM?600:1800);}else setTimeout(onOk,RM?300:900);}
+    else{b.classList.add('wrong');b.disabled=true;$('#pm',box).className='msg bad';$('#pm',box).textContent='다시 생각해 봐요.';}
+  });
+}
+
+/* ---------- 1. 생활 속 AI ---------- */
+const Q1=[...SCENES.map(s=>({...s,kind:'s'})),...CRIT.map(c=>({...c,kind:'c'}))];
+function stage1(){
+  const S=ME.s1||{};
+  if(S.done)return s1Done();
+  const k=Q1.findIndex(q=>!S['ok_'+q.id]);
+  if(k<0){const sc=Q1.filter(q=>ME.ans&&ME.ans[q.id]===true).length;meRef().child('s1').update({done:Date.now(),score:sc});ME.s1={...S,done:Date.now(),score:sc};return s1Done();}
+  const q=Q1[k];
+  wstep(`${k+1}/${Q1.length}`);
+  shell(`<div class="panel" id="box"></div>`);
+  const next=async()=>{await meRef().child('s1/ok_'+q.id).set(true);ME.s1={...(ME.s1||{}),['ok_'+q.id]:true};stage1();};
+  const top=`<span class="band">1단계 · ${q.kind==='s'?'이 AI는 우리에게 무엇을 가져다줄까요?':'AI를 무조건 믿어도 될까요?'} ${k+1}/${Q1.length}</span>${prog(Q1.length,k)}`;
+  if(q.kind==='s')sort3($('#box'),{id:q.id,e:q.e,t:q.t,a:q.a,bins:EFF,onOk:next,top});
+  else pick($('#box'),{...q,onOk:next,top});
+}
+function s1Done(){
+  wstep('끝');ClassWatch.detail(null);
+  const miss=Q1.filter(q=>ME.ans&&ME.ans[q.id]===false);
+  shell(`<div class="panel grid"><span class="band">1단계 끝</span><h2>${Q1.length}문제 중 ${(ME.s1||{}).score??'-'}문제를 한 번에 맞혔어요!</h2>
+    <div class="sum3">${EFF.map(x=>`<div><b>${x.e}</b>${x.t}</div>`).join('')}</div>
+    ${miss.length?`<div class="rules"><b>다시 볼 문제</b><ul>${miss.map(q=>`<li>${esc(q.t||q.q)} → <b>${esc(q.kind==='s'?EFF.find(x=>x.k===q.a).t:q.a)}</b></li>`).join('')}</ul></div>`:'<p>모두 한 번에 맞혔어요! 🎉</p>'}
+    <p class="muted">AI가 준 답도 틀릴 수 있어요. 늘 한 번 더 확인해요.</p></div>`);
+}
+
+/* ---------- 2. 직업의 변화 ---------- */
+const Q2=[...JOBS.map(j=>({...j,kind:'j'})),{...JQ,kind:'c'}];
+function stage2(){
+  const S=ME.s2||{};
+  if(S.done)return s2Done();
+  const k=Q2.findIndex(q=>!S['ok_'+q.id]);
+  if(k<0){const sc=Q2.filter(q=>ME.ans&&ME.ans[q.id]===true).length;meRef().child('s2').update({done:Date.now(),score:sc});ME.s2={...S,done:Date.now(),score:sc};return s2Done();}
+  const q=Q2[k];
+  wstep(`${k+1}/${Q2.length}`);
+  shell(`<div class="panel" id="box"></div>`);
+  const next=async()=>{await meRef().child('s2/ok_'+q.id).set(true);ME.s2={...(ME.s2||{}),['ok_'+q.id]:true};stage2();};
+  const top=`<span class="band">2단계 · 직업 카드를 알맞은 곳에 ${k+1}/${Q2.length}</span>${prog(Q2.length,k)}`;
+  if(q.kind==='j')sort3($('#box'),{id:q.id,e:q.e,t:q.t,d:q.d,a:q.a,bins:BINS,hint:q.h,onOk:next,top});
+  else pick($('#box'),{...q,onOk:next,top});
+}
+function s2Done(){
+  wstep('끝');ClassWatch.detail(null);
+  shell(`<div class="panel grid"><span class="band">2단계 끝</span><h2>${Q2.length}문제 중 ${(ME.s2||{}).score??'-'}문제를 한 번에 맞혔어요!</h2>
+    <div class="sum3">${BINS.map(b=>`<div><b>${b.e}</b>${b.t}<br><small class="muted">${JOBS.filter(j=>j.a===b.k).map(j=>esc(j.t)).join(', ')}</small></div>`).join('')}</div>
+    <p class="muted" style="margin:0">직업 전체가 사라지기보다 그 직업의 <b>일부 일</b>을 AI가 맡는 경우가 많아요.</p></div>`);
+}
+
+/* ---------- 3. 미래 직업 예측 카드 ---------- */
+function stage3(){
+  const S=ME.s3||{};
+  if(S.done&&!S.edit)return s3Done();
+  if(!S.field)return chooseField();
+  writeCard();
+}
+function chooseField(){
+  wstep('분야 고르기');
+  shell(`<div class="panel grid"><span class="band">3단계 · 미래 직업 예측 카드</span><h2>짝과 함께 살펴볼 분야를 골라요</h2>
+    <p class="muted" style="margin:0">짝과 같은 분야를 골라 의논하고, 카드는 각자 써요.</p>
+    <div class="fields">${FIELDS.map(f=>`<button data-f="${f.id}" aria-pressed="${(ME.s3||{}).field===f.id}"><span>${f.e}</span>${f.t}</button>`).join('')}</div></div>`);
+  $$('.fields button').forEach(b=>b.onclick=async()=>{const f=b.dataset.f;await meRef().child('s3/field').set(f);ME.s3={...(ME.s3||{}),field:f};writeCard();});
+}
+function writeCard(){
+  busy=true;
+  const S=ME.s3||{}, f=FD(S.field), easy=!!ME.easy;
+  wstep(f.t+' 카드 쓰기');
+  const box=(id,label,list,ph,val)=>`<div class="field need" id="w${id}"><label for="i${id}">${label}</label>
+    <div class="chips" data-for="i${id}">${list.map(x=>`<button type="button" data-v="${esc(x)}" aria-pressed="${val===x}">${esc(x)}</button>`).join('')}</div>
+    <input id="i${id}" maxlength="40" placeholder="${ph}" value="${esc(val||'')}" ${easy?'readonly':''}></div>`;
+  shell(`<div class="panel grid"><span class="band">3단계 · ${f.e} ${f.t} 분야 미래 직업 예측 카드</span>
+    <p style="margin:0">${easy?'보기를 눌러 골라요.':'보기를 누르면 칸에 들어가요. 짝과 의논해 내 말로 바꾸어 써도 좋아요.'}</p>
+    ${box('ai','🤖 AI가 맡을 일',f.ai,'예) 로봇으로 잡초 뽑기',S.ai)}
+    ${box('hu','🙋 그래도 사람이 할 일',f.hu,'예) 어떤 작물을 기를지 정하기',S.hu)}
+    ${box('nj','✨ 새로 생길 직업 이름',f.nj,'예) 스마트 농장 관리사',S.nj)}
+    <div class="msg bad" id="fm" role="status"></div>
+    <div class="row"><button class="ghost" id="back">분야 바꾸기</button><button id="save">TV에 카드 보내기</button></div></div>`);
+  ClassWatch.detail(()=>({q:f.t+' 미래 직업 카드',w:['ai','hu','nj'].map(k=>($('#i'+k)||{}).value||'').filter(Boolean).join(' / ')}));
+  $$('.chips').forEach(c=>$$('button',c).forEach(b=>b.onclick=()=>{$('#'+c.dataset.for).value=b.dataset.v;$$('button',c).forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+  $('#back').onclick=async()=>{await meRef().child('s3').update({field:null,edit:null});ME.s3={...(ME.s3||{}),field:null,edit:null};busy=false;chooseField();};
+  $('#save').onclick=async()=>{
+    const v={ai:$('#iai').value.trim(),hu:$('#ihu').value.trim(),nj:$('#inj').value.trim()};
+    const miss=Object.keys(v).filter(k=>v[k].length<2);
+    $$('.field').forEach(el=>el.classList.toggle('miss',miss.includes(el.id.slice(1))));
+    if(miss.length){$('#fm').textContent='빈 칸을 채워요.';return;}
+    $('#save').disabled=true;
+    const out={field:f.id,...v,done:Date.now(),edit:null};
+    await meRef().child('s3').update(out);ME.s3={...(ME.s3||{}),...out};busy=false;s3Done();
+  };
+}
+function cardHTML(S,who=''){
+  const f=FD(S.field)||{e:'',t:''};
+  return `<div class="jc"><h3>${f.e} ${esc(f.t)} · ✨ ${esc(S.nj)}</h3>${who?`<small class="muted">${esc(who)}</small>`:''}
+    <div class="pp"><b>🤖 AI가 맡을 일</b>${esc(S.ai)}</div><div class="pp"><b>🙋 사람이 할 일</b>${esc(S.hu)}</div></div>`;
+}
+function s3Done(){
+  wstep('끝');ClassWatch.detail(null);
+  shell(`<div class="panel grid"><span class="band">3단계 끝</span><h2>내 미래 직업 카드를 TV에 보냈어요! ✨</h2>${cardHTML(ME.s3)}
+    <div class="row"><button class="ghost" id="edit">고치기</button></div></div>`);
+  $('#edit').onclick=()=>{ME.s3={...(ME.s3||{}),edit:true};writeCard();};
+}
+
+/* ---------- 4. 생각 넓히기 + 스스로 평가 ---------- */
+function stage4(){
+  const S=ME.s4||{};
+  if(S.done&&!S.edit)return s4Done();
+  busy=true;wstep('쓰기');
+  const easy=!!ME.easy, st=S.self||[];
+  shell(`<div class="panel grid"><span class="band">4단계 · 생각 넓히기 (교과서 77쪽)</span>
+    <h2>인공지능의 발달이 내 생활에 어떤 영향을 줄까요?</h2>
+    <div class="field need" id="wa"><label for="ta">인공지능이 …</label><div class="chips" data-for="ta">${THINK_A.map(x=>`<button type="button" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+      <input id="ta" maxlength="40" placeholder="예) 집안일을 대신해" value="${esc(S.a||'')}" ${easy?'readonly':''}></div>
+    <div class="field need" id="wb"><label for="tb">… 해 주어서 내 생활이 …</label><div class="chips" data-for="tb">${THINK_B.map(x=>`<button type="button" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+      <input id="tb" maxlength="40" placeholder="예) 더 편리해" value="${esc(S.b||'')}" ${easy?'readonly':''}></div>
+    <p class="muted" style="margin:0">… 질 거예요.</p>
+    <span class="band">스스로 평가 (교과서 79쪽)</span>
+    <div class="grid" style="gap:8px">${SELF.map((q,i)=>`<div class="srow" id="sr${i}"><span>${esc(q)}</span><div class="stars" data-i="${i}">${LV.map((l,k)=>`<button type="button" data-k="${k+1}" aria-pressed="${st[i]===k+1}">${'★'.repeat(k+1)} ${l}</button>`).join('')}</div></div>`).join('')}</div>
+    <div class="msg bad" id="fm" role="status"></div><div class="row"><button id="save">내기</button></div></div>`);
+  ClassWatch.detail(()=>({q:'생각 넓히기',w:[($('#ta')||{}).value,($('#tb')||{}).value].filter(Boolean).join(' / ')}));
+  $$('.chips').forEach(c=>$$('button',c).forEach(b=>b.onclick=()=>{$('#'+c.dataset.for).value=b.dataset.v;$$('button',c).forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+  const self=[...st];
+  $$('.stars').forEach(s=>$$('button',s).forEach(b=>b.onclick=()=>{self[+s.dataset.i]=+b.dataset.k;$$('button',s).forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+  $('#save').onclick=async()=>{
+    const a=$('#ta').value.trim(), b=$('#tb').value.trim();
+    if(a.length<2||b.length<2){$('#fm').textContent='문장의 빈칸을 채워요.';return;}
+    const nos=SELF.map((_,i)=>i).filter(i=>!self[i]);
+    if(nos.length){$('#fm').textContent=`스스로 평가 ${nos.map(i=>i+1).join(', ')}번을 골라요.`;return;}
+    $('#save').disabled=true;
+    const out={a,b,self:SELF.map((_,i)=>self[i]),done:Date.now(),edit:null};
+    await meRef().child('s4').update(out);ME.s4={...(ME.s4||{}),...out};busy=false;s4Done();
+  };
+}
+const sentence=S=>`인공지능이 ${S.a} 주어서 내 생활이 ${S.b}질 거예요.`;
+function s4Done(){
+  wstep('끝');ClassWatch.detail(null);
+  shell(`<div class="panel grid"><span class="band">4단계 끝</span><h2>${esc(sentence(ME.s4))}</h2>
+    <p class="muted" style="margin:0">교과서 77쪽 생각 넓히기 칸에도 이 문장을 써요.</p>
+    <div class="row"><button class="ghost" id="edit">고치기</button></div></div>`);
+  $('#edit').onclick=()=>{ME.s4={...(ME.s4||{}),edit:true};stage4();};
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={},tvAll=false,showWrong=false,showSelf=false,showAns=false,lastMain='',galF='';
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store(APP+'-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:APP,stage:1,go:false,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store(APP+'-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code,gate:true});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div><p class="muted" style="margin:0;font-size:.9rem">이름을 누르면 🌟 쉬운 화면(보기 2개, 카드는 보기에서 고르기)</p></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid"><div id="main" class="grid"></div><div id="tvq"></div></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(30,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:now()+l*1000});if(RD.go!==true)ref.child('go').set(true);}};
+  $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){showAns=false;roomRef(ROOM).update({stage:n,go:false,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  const waitSt=RD.go!==true;
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?'학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.':`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}
+  $('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=Array.from({length:NS},(_,i)=>i+1).map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>!!(x['s'+st]&&x['s'+st].done);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<button data-ez="${x.n}" class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}${x.easy?' 🌟':''}</button>`).join('')||'<span class="muted">아직 아무도 없어요</span>';
+  $$('#ppl button').forEach(b=>b.onclick=()=>{const n=b.dataset.ez;roomRef(ROOM).child('students/'+n+'/easy').set(!(RD.students[n]||{}).easy||null);});
+  const html=st===1?tv1(S):st===2?tv2(S):st===3?tv3(S):tv4(S);
+  if(html!==lastMain){main.innerHTML=html;lastMain=html;}
+  $$('#main button[data-gf]').forEach(b=>b.onclick=()=>{galF=b.dataset.gf;renderTV();});
+  const bind=(id,f)=>{const e=$('#'+id);if(e)e.onclick=f;};
+  bind('selfT',()=>{showSelf=!showSelf;renderTV();});
+  bind('ansT',()=>{showAns=!showAns;renderTV();});
+  $('#tvq').innerHTML=quizBox(S,st);
+  bind('wrongT',()=>{showWrong=!showWrong;renderTV();});
+  bind('allT',()=>{tvAll=!tvAll;renderTV();});
+}
+const progRows=(S,k,list)=>`<div class="rank">${S.filter(x=>x[k]).map(x=>`<div><span>${x[k].done?'✓':'…'}</span><span>${x.n} ${esc(x.name)}</span><span>${x[k].done?`${x[k].score}/${list.length}`:`${list.filter(q=>x[k]['ok_'+q.id]).length}/${list.length}`}</span></div>`).join('')||'<p class="muted">아직 없어요</p>'}</div>`;
+function tv1(S){
+  return `<div class="panel grid"><h2 style="font-size:1.8rem">🤖 생활 속 AI가 주는 영향 (교과서 77쪽)</h2>
+    <div class="sum3">${EFF.map(x=>`<div><b>${x.e}</b>${x.t}${showAns?`<br><small class="muted">${SCENES.filter(s=>s.a===x.k).map(s=>s.e).join(' ')}</small>`:''}</div>`).join('')}</div><div class="row"><button class="ghost" id="ansT">${showAns?'정답 가리기':'정답 보기 (활동 뒤에)'}</button></div>
+    <p style="margin:0">장면 9개를 보고 AI가 가져다주는 영향을 골라요. 마지막 2문제는 <b>AI를 무조건 믿어도 될까?</b></p>
+    ${progRows(S,'s1',Q1)}</div>`;
+}
+function tv2(S){
+  return `<div class="panel grid"><h2 style="font-size:1.8rem">💼 인공지능으로 변화하는 직업</h2>
+    <div class="sum3">${BINS.map(b=>`<div><b>${b.e}</b>${b.t}${showAns?`<br><small class="muted">${JOBS.filter(j=>j.a===b.k).map(j=>`${j.e} ${esc(j.t)}`).join('<br>')}</small>`:''}</div>`).join('')}</div><div class="row"><button class="ghost" id="ansT">${showAns?'정답 가리기':'정답 보기 (활동 뒤에)'}</button></div>
+    ${progRows(S,'s2',Q2)}</div>`;
+}
+function tv3(S){
+  const C=S.filter(x=>x.s3&&x.s3.done&&x.s3.nj);
+  const cnt={};S.forEach(x=>{if(x.s3&&x.s3.field)cnt[x.s3.field]=(cnt[x.s3.field]||0)+1;});
+  const show=C.filter(x=>!galF||x.s3.field===galF);
+  return `<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">✨ 우리 반 미래 직업 예측 카드</h2><span class="score">${C.length}장</span></div>
+    <div class="row"><button data-gf="" class="${galF?'ghost':''}">모두</button>${FIELDS.map(f=>`<button data-gf="${f.id}" class="${galF===f.id?'':'ghost'}">${f.e} ${f.t} ${cnt[f.id]||0}</button>`).join('')}</div>
+    <div class="cards">${show.map(x=>cardHTML(x.s3,`${x.n} ${x.name}`)).join('')||'<p class="muted">아직 카드가 없어요</p>'}</div></div>`;
+}
+function tv4(S){
+  const D=S.filter(x=>x.s4&&x.s4.done);
+  const avg=i=>{const v=D.map(x=>(x.s4.self||[])[i]).filter(Boolean);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;};
+  return `<div class="panel grid"><h2 style="font-size:1.8rem">💭 인공지능의 발달이 내 생활에 주는 영향</h2>
+    <div class="wall">${D.map(x=>`<div><b>${x.n} ${esc(x.name)}</b>${esc(sentence(x.s4))}</div>`).join('')||'<p class="muted">아직 없어요</p>'}</div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>스스로 평가 (교과서 79쪽) · ${D.length}명</h2><button class="ghost" id="selfT">${showSelf?'이름 가리기':'노력 요함 이름 보기'}</button></div>
+    ${SELF.map((q,i)=>{const a=avg(i);const low=D.filter(x=>(x.s4.self||[])[i]===1);
+      return `<div class="qrow${low.length?' low':''}"><div class="qt"><b>${i+1}</b> ${esc(q)}</div><div class="qb"><div class="track"><div style="width:${a?Math.round(a/3*100):0}%"></div></div><span class="pc">${a?a.toFixed(1):'-'}</span><small class="muted">평균 별 (3점 만점)</small></div>
+      <div class="qw">${low.length?`노력 요함 <b>${low.length}명</b>${showSelf?`: ${low.map(x=>`${x.n} ${esc(x.name)}`).join(', ')}`:''}`:'<span class="muted">노력 요함 없음</span>'}</div></div>`;}).join('')}</div>`;
+}
+/* 문제별 정답률 + 틀린 학생 이름 (처음 답 기준) */
+function allQ(){
+  return [...Q1.map(q=>({id:q.id,st:1,q:q.t||q.q,a:q.kind==='s'?EFF.find(x=>x.k===q.a).t:q.a})),
+          ...Q2.map(q=>({id:q.id,st:2,q:q.kind==='j'?`${q.t}: ${q.d}`:q.q,a:q.kind==='j'?BINS.find(b=>b.k===q.a).t:q.a}))];
+}
+function quizBox(S,st){
+  const AQ=allQ();
+  if(!tvAll&&!AQ.some(q=>q.st===st))return `<div class="panel row" style="justify-content:space-between"><span class="muted">이 단계에는 문제가 없어요.</span><button class="ghost" id="allT">퀴즈 정답률 보기</button></div>`;
+  const R=AQ.filter(q=>tvAll||q.st===st).map(q=>{const no=AQ.filter(x=>x.st===q.st).indexOf(q)+1;
+    const done=S.filter(x=>x.ans&&x.ans[q.id]!==undefined);const miss=done.filter(x=>x.ans[q.id]===false);const ok=done.length-miss.length;
+    return {q,no,done:done.length,ok,miss,rate:done.length?Math.round(ok/done.length*100):null};})
+    .sort((a,b)=>(a.rate??101)-(b.rate??101)||a.q.st-b.q.st||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
+   <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요.</p>
+   <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
