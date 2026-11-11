@@ -623,6 +623,22 @@ async function teacherView(){
    </div><div class="grid" id="main"><div id="stage" class="grid"></div><div id="live" class="grid"></div></div></div>`;
   if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
   tkey='';
+  // PPT 링크로 열면 게임·문장을 미리 골라 둬요: #teacher?game=cup&set=ybm-6-11&rounds=4&sec=45&spicy=0
+  const pre=new URLSearchParams(location.hash.split('?')[1]||'');
+  if(GAMES[pre.get('game')]&&SETS[pre.get('set')]&&!teacherView.preDone){
+    teacherView.preDone=true;
+    try{
+      const cur=(await withTimeout(roomRef(code).get())).val()||{};RD=cur;
+      if((cur.cfg||{}).phase!=='play'){
+        const g=pre.get('game'),opt={rounds:g==='speed'?10:8,sec:60,spicy:false,speed:'normal',storyMin:15};
+        ['rounds','sec','storyMin'].forEach(k=>{if(/^\d+$/.test(pre.get(k)||''))opt[k]=+pre.get(k);});
+        if(pre.get('spicy'))opt.spicy=pre.get('spicy')==='1';
+        if(pre.get('speed'))opt.speed=pre.get('speed');
+        store('ep-setup',{game:g,set:pre.get('set'),custom:'',opt});
+        await resetTo('lobby',{game:g,items:parseSet(SETS[pre.get('set')].text),setName:SETS[pre.get('set')].name,opt,used:null,usedW:null});
+      }
+    }catch(e){return showError(e);}
+  }
   listen(roomRef(code),s=>{RD=s.val()||{};if(!RD.cfg)return;renderTV();});
   $('#newroom').onclick=()=>{if(!confirm('새 방을 만들까요? 학생들은 새 QR로 다시 들어와야 해요.'))return;store('ep-teacher-room',null);teacherView();};
   $('#home').onclick=()=>{location.hash='';startView();};
@@ -774,7 +790,7 @@ function drawSetup(stage){
   const seg=(id,label,list,key,fmtv)=>`<div class="fld"><span class="lb">${label}</span><div class="seg" data-o="${key}">${list.map(v=>`<button data-v="${v}" aria-pressed="${String(S.opt[key])===String(v)}">${fmtv(v)}</button>`).join('')}</div></div>`;
   const drawOpts=()=>{
     let h='';
-    if(S.game==='cup')h=seg('','라운드',[6,8,10],'rounds',v=>v+'라운드')+seg('','쓰는 시간',[45,60,90],'sec',v=>v+'초')+seg('','난이도',['false','true'],'spicy',v=>v==='true'?'🌶 매운맛 (문장 가리기)':'보통 (문장 보고 쓰기)');
+    if(S.game==='cup')h=seg('','라운드',[4,6,8,10],'rounds',v=>v+'라운드')+seg('','쓰는 시간',[45,60,90],'sec',v=>v+'초')+seg('','난이도',['false','true'],'spicy',v=>v==='true'?'🌶 매운맛 (문장 가리기)':'보통 (문장 보고 쓰기)');
     if(S.game==='speed')h=seg('','문제 수',[8,10,14],'rounds',v=>v+'문제')+seg('','빠르기',['slow','normal','fast'],'speed',v=>({slow:'느리게',normal:'보통',fast:'빠르게'})[v]);
     if(S.game==='hats')h=seg('','문제 수',[6,8,10],'rounds',v=>v+'문제')+seg('','난이도',['false','true'],'spicy',v=>v==='true'?'🌶 매운맛 (빠르고 많이)':'보통');
     if(S.game==='story')h=seg('','게임 시간',[10,15,20,25],'storyMin',v=>v+'분');
@@ -783,7 +799,7 @@ function drawSetup(stage){
   };
   const pv=()=>{$('#cust').hidden=S.set!=='custom';const L=items();$('#cntv').textContent=`(${L.length}문장 · 낱말 ${wordList(L).length}개)`;
     $('#pv').innerHTML=L.map(x=>`<div>${picHtml(x.pic,'','thumb')} ${esc(x.ko)} · <span class="en">${esc(x.en).replace(/\[([^\]]+)\]/g,'<u>$1</u>')}</span></div>`).join('')||'<div class="muted">문장이 없어요</div>';};
-  $$('#gc button').forEach(b=>b.onclick=()=>{S.game=b.dataset.g;$$('#gc button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(S.game==='speed'&&![8,10,14].includes(S.opt.rounds))S.opt.rounds=10;if(S.game!=='speed'&&![6,8,10].includes(S.opt.rounds))S.opt.rounds=8;drawOpts();});
+  $$('#gc button').forEach(b=>b.onclick=()=>{S.game=b.dataset.g;$$('#gc button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(S.game==='speed'&&![8,10,14].includes(S.opt.rounds))S.opt.rounds=10;if(S.game!=='speed'&&![4,6,8,10].includes(S.opt.rounds))S.opt.rounds=8;drawOpts();});
   $$('#sets button').forEach(b=>b.onclick=()=>{S.set=b.dataset.k;$$('#sets button').forEach(x=>x.setAttribute('aria-pressed',x===b));pv();});
   $('#ct').value=S.custom||'';$('#ct').oninput=()=>{S.custom=$('#ct').value;pv();};
   const cc=$('#cancel');if(cc)cc.onclick=()=>rref().child('cfg/phase').set('lobby');
@@ -953,7 +969,7 @@ function tvAward(st){
 /* ---------- route ---------- */
 document.addEventListener('pointerdown',()=>ac(),{once:true});
 if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
-else if(location.hash==='#teacher')teacherView();
+else if(location.hash.startsWith('#teacher'))teacherView();
 else if(ROOM)joinView();
 else startView();
 </script>
