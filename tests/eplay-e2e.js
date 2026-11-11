@@ -184,6 +184,14 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await shot(T, 'story-3-award');
   ok('우주 정거장 탈출 끝');
 
+  /* PPT 링크: 게임·문장을 미리 골라 둔 선생님 화면 */
+  const P = await mk('PPT 링크', 1400, 1000);
+  await P.goto(URL + '#teacher?game=cup&set=ybm-6-11&rounds=4&sec=45');
+  await P.waitForSelector('#b-go', { timeout: 20000 }).catch(() => fail('PPT 링크로 열면 바로 게임 대기 화면이어야 해요'));
+  const pc = await P.evaluate(() => cfg());
+  if (pc.game === 'cup' && pc.opt.rounds === 4 && pc.opt.sec === 45 && /6-11/.test(pc.setName)) ok('PPT 링크 미리 고르기 (문장 응원전·11단원·4라운드·45초)'); else fail('PPT 링크 설정 ' + JSON.stringify(pc.opt));
+  await shot(P, 'preset');
+
   await browser.close();
   if (problems.length) { console.log(`\n문제 ${problems.length}개`); process.exit(1); }
   console.log('\n모두 통과');
