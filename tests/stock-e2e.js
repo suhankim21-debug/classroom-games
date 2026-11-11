@@ -315,6 +315,15 @@ const check = (c, m) => c ? ok(m) : fail(m);
   check(csvTxt.includes('총자산') && csvTxt.includes('김하나') && csvTxt.split('\n').length === 5, 'CSV로 저장 (학생 4명 + 제목 줄)');
   await T.click('#mx');
 
+  /* ---------- 선생님: 은행 상품 ---------- */
+  await T.click('#bankBtn'); await T.waitForSelector('.bkp');
+  const bkTxt = await T.textContent('#modal');
+  const bkCfg = await T.evaluate(() => M.cfg);
+  check(await T.$$eval('.bkp', r => r.length) === 6 && bkTxt.includes(`하루 +${bkCfg.dRate}%`) && bkTxt.includes(`만기 +${bkCfg.sRate}%`) && ['나라 채권', '바로마트 채권', '반짝엔터 채권'].every(n => bkTxt.includes(n)), '선생님 화면 🏦 은행 상품: 환전·예금·적금·채권 3개와 지금 이자');
+  check(!bkTxt.includes('김하나') && bkTxt.includes('예금한 학생'), '은행 상품 창은 학생 이름 없이 가입한 학생 수만');
+  await shot(T, 'tv-bank');
+  await T.click('#mx');
+
   /* ---------- 장 마감 ---------- */
   await T.click('#closeNow');
   await S[1].waitForFunction(() => !isOpen(PUB));
