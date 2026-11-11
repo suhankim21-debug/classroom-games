@@ -13,6 +13,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const browser = await chromium.launch({ proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } : undefined });
   const mk = async (label, w = 1000, h = 900) => {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, reducedMotion: 'reduce' });
+    // 음성 인식 흉내: window.__say 를 들은 말로 돌려줘요 ('__err' 이면 마이크 권한 오류)
+    await ctx.addInitScript(() => { window.SpeechRecognition = window.webkitSpeechRecognition = class { start() { setTimeout(() => { if (window.__say === '__err') { this.onerror && this.onerror({ error: 'not-allowed' }); } else { this.onresult && this.onresult({ results: [[{ transcript: window.__say || '' }]] }); } this.onend && this.onend(); }, 150); } stop() {} }; });
     const p = await ctx.newPage();
     p.on('pageerror', e => fail(`[${label}] JS 오류: ${e.message}`));
     p.on('console', m => { if (m.type() === 'error' && !/favicon|TUNNEL|tunnel via proxy|fonts|ERR_/.test(m.text())) fail(`[${label}] 콘솔 오류: ${m.text()}`); });
@@ -183,6 +185,47 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (!/김하나/.test(await T.textContent('.podium .p1'))) fail('1등이 김하나가 아님');
   await shot(T, 'story-3-award');
   ok('우주 정거장 탈출 끝');
+
+  /* 🎤 말하기 보물 대결 */
+  await T.click('#b-set');
+  await setup('duel');
+  if (await S[0].$('#sea')) fail('시작 전인데 바다가 보여요');
+  await T.click('#b-go');
+  await Promise.all(S.map(p => p.waitForSelector('#sea button', { timeout: 10000 })));
+  const pairs = await T.evaluate(() => cfg().pairs);
+  if (Object.keys(pairs).length === 4 && [1, 2, 3, 4].every(n => pairs['p' + pairs['p' + n]] === n)) ok('짝 2쌍 정함 ' + JSON.stringify(pairs)); else fail('짝 ' + JSON.stringify(pairs));
+  await shot(S[0], 'duel-1-sea');
+  const seaInfo = p => p.evaluate(() => { const sea = seaOf(duelOpp(), CF.items, me.room); return { tr: [...sea.treasure], txt: [...Array(16).keys()].map(k => plain(CF.items[sea.item(k)].en)) }; });
+  const say = async (p, k, text) => { await p.click(`#sea button[data-k="${k}"]`); await p.waitForSelector('#mic'); await p.evaluate(t => { window.__say = t; }, text); await p.click('#mic'); };
+  const i0 = await seaInfo(S[0]);
+  for (const [j, k] of i0.tr.entries()) {
+    await say(S[0], k, i0.txt[k].toLowerCase().replace(/[.?!,]/g, ''));
+    await S[0].waitForFunction(j => ((ME.d || {}).found || 0) === j + 1, j, { timeout: 8000 });
+    if (j < 3) await S[0].waitForSelector(`#sea button[data-k="${k}"].o2`, { timeout: 8000 });
+  }
+  await S[0].waitForSelector('text=보물 4개를 모두 찾았어요', { timeout: 8000 }).catch(() => fail('보물 4개 끝 화면'));
+  ok('또박또박 말해서 보물 4개 찾기');
+  const i1 = await seaInfo(S[1]);
+  const empty1 = [...Array(16).keys()].find(k => !i1.tr.includes(k));
+  await say(S[1], empty1, 'banana pizza');
+  await S[1].waitForSelector('text=조금 달라요', { timeout: 5000 }).catch(() => fail('다르게 말하면 다시 말하라고 해야 해요'));
+  await S[1].evaluate(t => { window.__say = t; }, i1.txt[empty1]); await S[1].click('#mic');
+  await S[1].waitForSelector(`#sea button[data-k="${empty1}"].o1`, { timeout: 8000 }).catch(() => fail('다시 바르게 말하면 빈 칸이 열려야 해요'));
+  const i2 = await seaInfo(S[2]);
+  await say(S[2], 0, '__err');
+  await S[2].waitForSelector('#byPal', { timeout: 5000 }).catch(() => fail('마이크가 안 되면 짝 확인 버튼'));
+  await S[2].click('#byPal');
+  await S[2].waitForSelector('#sea button[data-k="0"].o1, #sea button[data-k="0"].o2', { timeout: 8000 }).catch(() => fail('짝 확인으로 칸 열기'));
+  await sleep(800);
+  await shot(T, 'duel-2-tv'); await shot(S[1], 'duel-2-stu');
+  if (!/VS/.test(await T.textContent('#pairs'))) fail('TV 짝 대결 표');
+  if (!/0%/.test(await T.textContent('#qstat'))) fail('말하기 정답률에 틀린 문장이 안 보임'); else ok('말하기 문제별 정답률');
+  const rk = await T.evaluate(() => ranking()[0].n);
+  if (rk !== 1) fail('1등이 1번이 아님');
+  await T.evaluate(() => { window.confirm = () => true; });
+  await T.click('#b-stop'); await T.click('#b-aw');
+  await T.waitForSelector('.podium', { timeout: 5000 });
+  ok('말하기 보물 대결 끝');
 
   /* PPT 링크: 게임·문장을 미리 골라 둔 선생님 화면 */
   const P = await mk('PPT 링크', 1400, 1000);
