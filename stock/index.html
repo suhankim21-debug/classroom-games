@@ -200,6 +200,7 @@ button.co{cursor:pointer}
   .board{grid-template-columns:1fr}
   .picks{grid-template-columns:1fr 1fr}
 }
+.bkps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.bkp{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:6px;align-content:start;word-break:keep-all}.bkp .hd{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.bkp .hd b{font-size:1.2rem}.bkp .hd .big{margin-left:auto;font-size:1.15rem}.bkw{background:var(--cream,#FFF4DF);border-radius:10px;padding:6px 10px;font-size:.95rem}
 </style></head><body>
 <header class="top"><div class="wrap"><div class="brand"><i>📈</i> 우리 반 쿠키 증권</div><small id="sub"></small></div></header>
 <main class="wrap" id="app"></main>
@@ -1083,13 +1084,14 @@ async function openRoom(cerr){
     <div class="panel grid"><div class="row between"><h2>계좌</h2><span class="muted" id="cnt"></span></div><div id="reqs" class="req"></div><div class="people" id="ppl"></div></div>
     <button id="cookieBtn">🍪 쿠키 처리</button>
     <button class="ghost" id="acctBtn">👥 학생 계좌 현황</button>
+    <button class="ghost" id="bankBtn">🏦 은행 상품</button>
     <button class="ghost" id="setBtn">⚙️ 설정 · 다했니 연결</button>
     <button class="ghost" id="bakBtn">💾 장부 백업 · 다른 컴퓨터</button>
     <button class="ghost" id="home">처음으로</button>
    </div>
    <div class="grid" id="main"></div></div>`;
   if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
-  $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#acctBtn').onclick=()=>openModal('acct');$('#bakBtn').onclick=()=>openModal('backup');
+  $('#cookieBtn').onclick=()=>openModal('cookie');$('#setBtn').onclick=()=>openModal('set');$('#acctBtn').onclick=()=>openModal('acct');$('#bankBtn').onclick=()=>openModal('bank');$('#bakBtn').onclick=()=>openModal('backup');
   $('#home').onclick=()=>{location.hash='';LEADER=false;store('stock-leader',null);startView();};
   const R=roomRef(ROOM);
   if(M.cloud&&!VK){M.cloud=false;saveM();}
@@ -1547,10 +1549,29 @@ async function endProject(){
 }
 
 /* ---------- 창 (새 날 · 쿠키 처리 · 설정 · 백업) ---------- */
-function openModal(k){MODAL=k;modal.classList.add('on');({day:drawDay,cookie:drawCookie,set:drawSet,backup:drawBackup,acct:drawAcct})[k]();}
+function openModal(k){MODAL=k;modal.classList.add('on');({day:drawDay,cookie:drawCookie,set:drawSet,backup:drawBackup,acct:drawAcct,bank:drawBank})[k]();}
 function closeModal(){MODAL='';modal.classList.remove('on');modal.innerHTML='';}
 const mhead=t=>`<div class="row between"><h2 style="font-size:1.7rem">${t}</h2><button class="ghost small" id="mx">닫기 ✕</button></div>`;
 const bindClose=()=>{$('#mx').onclick=closeModal;};
+/* 🏦 은행 상품: 학생 은행 탭에 있는 상품과 지금 설정한 이자를 선생님이 언제든 봐요 (학생 이름은 안 보여요) */
+function drawBank(){
+  const c=M.cfg,bt=c.bTerm||5,ac=Object.values(M.acct),cnt=f=>ac.filter(f).length,tot=f=>ac.reduce((t,a)=>t+f(a),0);
+  const dp=cnt(a=>a.dpst>0),sv=cnt(a=>a.sav),bOk=(M.day||0)+bt<=c.days,ex=10000;
+  const card=(e,n,d,rate,how,note,who)=>`<div class="bkp"><div class="hd"><span>${e}</span><b>${n}</b><span class="big up">${rate}</span></div><div>${d}</div><div class="muted">${how}</div>${note?`<div class="muted" style="font-size:.9rem">${note}</div>`:''}<div class="bkw">${who}</div></div>`;
+  modal.innerHTML=`<div class="panel grid">${mhead('🏦 은행 상품')}
+   <p class="muted" style="margin:0">학생 화면 🏦 은행 탭에 있는 상품이에요. 이자와 기간은 ⚙️ 설정에서 바꾸면 여기와 학생 화면이 같이 바뀌어요. 지금 ${M.day||0}일째 / ${c.days}일.</p>
+   <div class="bkps">
+    ${card('💵','환전 (달러)','원화로 달러를 사고팔아요. 장이 열려 있을 때만 돼요.',`1달러 = ${won(M.fx)}`,'환율은 뉴스에 따라 매일 아침 바뀌어요. 쌀 때 사서 비쌀 때 팔면 이익이에요.','',`달러를 가진 학생 ${cnt(a=>a.usd>0)}명 · 모두 ${tot(a=>a.usd||0)}달러`)}
+    ${card('🏦','예금','언제든 넣고 빼요.',`하루 +${c.dRate}%`,`매일 아침 예금한 돈의 ${c.dRate}%가 이자로 붙고, 붙은 이자에도 다음 날 이자가 붙어요. 예) ${won(ex)}을 5일 두면 ${won(Math.floor(ex*Math.pow(1+c.dRate/100,5)))}쯤`,'',`예금한 학생 ${dp}명 · 모두 ${won(tot(a=>a.dpst||0))}`)}
+    ${card('🐷','적금','매일 같은 돈을 자동으로 모아요.',`만기 +${c.sRate}%`,`하루 500·1,000·2,000·3,000원 중에서 골라요. ${c.term}번 다 넣으면 다음 날 아침 모은 돈에 이자 ${c.sRate}%를 더해 돌려줘요. 예) 하루 1,000원 → ${won(1000*c.term+Math.floor(1000*c.term*c.sRate/100))}`,`중간에 깨면 이자 없이 모은 돈만 돌려받아요. 끝나는 날까지 ${c.term}번을 다 넣을 수 없으면 가입할 수 없어요.`,`적금 든 학생 ${sv}명 · 모은 돈 ${won(tot(a=>a.sav?a.sav.paid*a.sav.w:0))}`)}
+   </div>
+   <h3 style="margin:.4em 0 0">📜 채권 (${bt}일 뒤 만기, 중간에 못 팔아요)</h3>
+   <div class="bkps">${BONDS.map(b=>{const hs=ac.filter(a=>(a.bonds||[]).some(x=>x.k===b.id));
+     return card(b.e,esc(b.n),esc(b.d),`${bt}일 뒤 +${b.r}%`,`예) ${won(ex)}을 빌려주면 ${bt}일 뒤 ${won(ex+Math.floor(ex*b.r/100))}`,b.id==='gov'?'':`빌려준 동안 ${esc(b.n.replace(' 채권',''))} 주가가 15% 넘게 떨어지면 80%(${won(ex*.8)})만 돌려받아요.`,`가진 학생 ${hs.length}명 · 모두 ${won(hs.reduce((t,a)=>t+(a.bonds||[]).filter(x=>x.k===b.id).reduce((u,x)=>u+x.w,0),0))}`);}).join('')}</div>
+   ${bOk?'':'<div class="msg bad">이제는 끝나는 날 전에 만기가 오지 않아서 학생들이 새 채권을 살 수 없어요.</div>'}
+   <p class="muted" style="margin:0">학생마다 무엇을 가졌는지는 👥 학생 계좌 현황에서 봐요.</p></div>`;
+  bindClose();
+}
 /* 👥 학생 계좌 현황: 선생님만 보는 창 (TV에 띄워 두면 학생도 볼 수 있으니 주의) */
 let ACSORT='num',ACOPEN=null,ACHIDE=false;
 function acctRows(){
