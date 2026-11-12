@@ -326,7 +326,8 @@ function screen(v,boxW,o={}){
   if(o.blank){m.querySelectorAll('input').forEach(x=>{x.removeAttribute('value');x.removeAttribute('checked');});m.querySelectorAll('textarea').forEach(x=>{x.textContent='';});m.querySelectorAll('[style*="outline"]').forEach(x=>{x.style.outline='';});m.querySelectorAll('button[disabled]').forEach(x=>x.removeAttribute('disabled'));m.querySelectorAll('.used').forEach(x=>x.classList.remove('used'));}
   inn.appendChild(m);box.appendChild(inn);
   const fit=()=>{const h=Math.max(200,Math.ceil(inn.scrollHeight*sc));box.style.height=(o.maxH?Math.min(o.maxH,h):h)+'px';box.classList.toggle('cut',!!o.maxH&&h>o.maxH);};
-  box.style.height='400px';requestAnimationFrame(fit);setTimeout(fit,400);
+  // 다시 그릴 때는 전 화면 높이로 시작해요(높이가 잠깐 줄면 선생님이 내린 스크롤이 맨 위로 튕겨요)
+  box.style.height=o.h||'400px';requestAnimationFrame(fit);setTimeout(fit,400);
   m.querySelectorAll('img').forEach(im=>im.addEventListener('load',fit,{once:true}));
   return box;
 }
@@ -353,15 +354,25 @@ function byStep(L){
   const M=remember(L);
   return [...M.values()].map(g=>({...g,list:L.filter(v=>!v.off&&v.step===g.step)})).sort((a,b)=>(a.n||99)-(b.n||99)||a.first-b.first);
 }
+// 실시간으로 다시 그려도 선생님이 내린 스크롤 위치를 그대로 지켜요(보기마다 따로 기억해서 '← 모든 학생'으로 돌아와도 그 자리)
+function view(){return T.zoom?'z:'+T.zoom:T.tab==='steps'?'s:'+(T.stepBig||''):'cards';}
 function render(){
   if(!T.ov||!T.open)return;
+  const sp=T.scr||(T.scr={});
+  if(T.vw)sp[T.vw]=T.ov.scrollTop;
+  draw();
+  T.vw=view();const y=sp[T.vw]||0;
+  T.ov.scrollTop=y;
+  if(y)requestAnimationFrame(()=>{if(T.ov&&T.vw&&sp[T.vw]===y&&T.ov.scrollTop<y)T.ov.scrollTop=y;});
+}
+function draw(){
   const L=list(),help=L.filter(v=>v.help&&!v.off),stuck=L.filter(v=>v.stuck&&!v.help),noname=L.filter(v=>!v.name&&!v.off),on=L.filter(v=>!v.off);
   if(T.zoom){
-    const v=L.find(x=>x.k===T.zoom);if(!v){T.zoom='';return render();}
+    const v=L.find(x=>x.k===T.zoom);if(!v){T.zoom='';return draw();}
     T.ov.innerHTML=`<div class="cw-zoom"><div class="cw-bar"><h2><span class="cw-live">🔴 실시간</span> ${label(v)}의 화면 · ${stepTxt(v)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap">${v.help?'<button class="cw-ack">👍 확인했어요 (도움 끝)</button>':''}<button class="ghost cw-back">← 모든 학생</button></div></div><div class="cw-st" style="font-size:1rem">${status(v)}</div><div class="cw-ln" style="font-size:1.1rem;padding:0">${lines(v)}</div><div class="cw-slot"></div></div>`;
     const slot=T.ov.querySelector('.cw-slot');
     const key='z|'+(slot.clientWidth||900)+'|'+(v.html||'');
-    let c=T.cache[v.k];if(!c||c.key!==key)c=T.cache[v.k]={key,el:screen(v,slot.clientWidth||900)};
+    let c=T.cache[v.k];if(!c||c.key!==key)c=T.cache[v.k]={key,el:screen(v,slot.clientWidth||900,{h:c&&c.el.style.height})};
     slot.appendChild(c.el);
     T.ov.querySelector('.cw-back').onclick=()=>{T.zoom='';render();};
     const a=T.ov.querySelector('.cw-ack');if(a)a.onclick=()=>ack(v.k);
@@ -408,7 +419,7 @@ function renderSteps(body,L){
     const slot=body.querySelector('.cw-slot');
     const w=Math.min(720,(body.clientWidth||900)-60);
     const key='g|'+w+'|'+(g.ex.html||'');
-    let c=T.cache['big:'+g.step];if(!c||c.key!==key)c=T.cache['big:'+g.step]={key,el:screen(g.ex,w,{blank:true})};
+    let c=T.cache['big:'+g.step];if(!c||c.key!==key)c=T.cache['big:'+g.step]={key,el:screen(g.ex,w,{blank:true,h:c&&c.el.style.height})};
     slot.appendChild(c.el);
     body.querySelector('.cw-gback').onclick=()=>{T.stepBig='';render();};
     body.querySelector('.cw-prev').onclick=()=>{T.stepBig=G[k-1].step;render();};
@@ -420,7 +431,7 @@ function renderSteps(body,L){
     <div class="cw-flow">${G.map((g,i)=>`<button type="button" class="cw-col${g.list.length&&g.list.length===most?' most':''}" data-s="${esc(g.step)}"><div class="cw-ch"><b>${num(g,i)}</b><span>${esc(g.step)}</span><em>${g.list.length}명</em></div><div class="cw-mini"></div><div class="cw-names">${g.list.map(v=>`<span>${v.num!=null?v.num+'번':esc(v.name||'이름 없음')}</span>`).join('')||'<span class="muted">지금 없음</span>'}</div></button>`).join('<span class="cw-arrow" aria-hidden="true">→</span>')}</div>`;
   body.querySelectorAll('.cw-col').forEach((b,i)=>{
     const g=G[i],key='m|'+(g.ex.html||'');
-    let c=T.cache['mini:'+g.step];if(!c||c.key!==key)c=T.cache['mini:'+g.step]={key,el:screen(g.ex,230,{blank:true,maxH:300})};
+    let c=T.cache['mini:'+g.step];if(!c||c.key!==key)c=T.cache['mini:'+g.step]={key,el:screen(g.ex,230,{blank:true,maxH:300,h:c&&c.el.style.height})};
     b.querySelector('.cw-mini').appendChild(c.el);
     b.onclick=()=>{T.stepBig=g.step;render();};
   });
@@ -440,7 +451,7 @@ function badge(){
 function show(open){
   T.open=open;
   if(open){if(!T.ov){T.ov=document.createElement('div');T.ov.className='cw-ov';T.ov.setAttribute('role','dialog');T.ov.setAttribute('aria-label','학생 화면');document.body.appendChild(T.ov);}T.ov.hidden=false;render();}
-  else if(T.ov){T.ov.hidden=true;T.zoom='';}
+  else if(T.ov){T.ov.hidden=true;T.zoom='';T.vw='';T.scr={};}
   if(T.btn)T.btn.hidden=open&&!T.solo;
 }
 // 학생 화면이 자주 바뀌어도 TV는 0.8초에 한 번만 다시 그려요
