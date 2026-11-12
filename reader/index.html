@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>독자 맞춤 편집국</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 우리말 지킴이 so the class sees one family of tools. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.fig{width:100%;max-width:280px;height:auto;display:block;margin:0 auto}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:.5em .9em;font-size:1.05rem}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+.roll svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.35em .8em;font-family:var(--text);font-size:1rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld label{font-family:var(--display);font-size:1.1rem}
+.unit{display:flex;align-items:center;gap:8px}
+.unit span{font-family:var(--display)}
+.meter{position:relative;height:46px;background:var(--cream);border-radius:10px;margin:26px 0 8px}
+.meter .band3{position:absolute;top:0;bottom:0;background:#DDEBE1}
+.meter .mk{position:absolute;top:-24px;transform:translateX(-50%);font-family:var(--display);font-size:.95rem;white-space:nowrap}
+.meter .ln{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.meter .dot{position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--coral2);transform:translate(-50%,-50%);border:3px solid #fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list div.out{border-left-color:var(--gold)}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(120px,15em) 1fr 3.5em;gap:10px;align-items:center}
+.bar .track{height:34px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--ok);border-radius:10px}
+.bar span{font-family:var(--display);font-size:1.1rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 9em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:1.1rem}
+.tbl th,.tbl td{background:#fff;padding:.45em .6em;text-align:center}
+.tbl thead th{background:var(--coral);color:#fff;font-family:var(--display);font-weight:400}
+.tbl tbody th{font-family:var(--display);font-weight:400;color:var(--coral2)}
+.tbl tr.outr td,.tbl tr.outr th{background:#FFF4DF}
+.okc{color:var(--ok);font-family:var(--display);font-size:1.3rem;font-weight:400}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+@media (max-width:820px){
+  .hero,.tv,.two{grid-template-columns:1fr}
+  .choose,.opts{grid-template-columns:1fr}
+  .steps button{font-size:.85rem}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+}
+/* 문제별 정답률 */
+.qrate{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qrow.low{border-color:var(--bad);background:#FFF5F2}
+.qrow .qt,.qrow .qw{text-align:left;justify-self:start}
+.qrow .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qrow .qb .track{width:100%;height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qrow .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qrow.low .qb .track div{background:var(--bad)}
+.qrow .pc{font-family:var(--display);font-size:1.3rem}
+.qrow.low .pc{color:var(--bad)}
+@media (max-width:820px){.qrow{grid-template-columns:1fr}}
+/* 독자 맞춤 편집국 */
+.card2{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;font-size:1.15rem;line-height:1.5;width:100%;text-align:left}
+.card2 small{display:block;font-size:.95rem;color:var(--muted)}
+.card2 h3{font-size:1.25rem;color:var(--coral2);margin-bottom:4px}
+.bub{display:flex;gap:8px;flex-wrap:wrap}
+.bub span{background:#E7F0F5;border:2px solid var(--blue2);border-radius:16px;padding:.3em .8em;font-size:1rem}
+.chips.big button{font-size:1.1rem;padding:.55em 1em}
+.form{display:grid;gap:12px}
+.form label{font-family:var(--display);font-size:1.1rem}
+.form .hint{font-size:.95rem;color:var(--muted)}
+textarea{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%;min-height:7.5em;resize:vertical}
+.lvl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.lvl button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.15rem;padding:.8em .4em;line-height:1.3}
+.lvl button b{display:block;font-size:2.4rem;font-weight:400}
+.lvl button[aria-pressed="true"]{border-color:var(--coral);background:#FFF0EA}
+.paper{background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px 16px;text-align:left;display:grid;gap:6px}
+.paper h3{font-size:1.35rem;color:var(--ink)}
+.paper .tag{display:flex;gap:6px;flex-wrap:wrap}
+.paper .tag span{background:var(--cream);border-radius:999px;padding:.1em .6em;font-size:.9rem}
+.paper p{margin:0;white-space:pre-wrap}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.gal button{background:transparent;color:var(--ink);padding:0;text-align:left;font-family:var(--text);font-size:1rem}
+.gal button .paper{height:100%}
+.tvbig{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+.tvbig .paper{font-size:1.4rem}
+.tvbig .paper h3{font-size:1.9rem}
+.chan{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.chan>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+.chan b{display:block;font-family:var(--display);font-weight:400;font-size:1.1rem}
+.chan .tvm{height:12px;border-radius:999px;background:var(--cream);overflow:hidden;margin:6px 0}
+.chan .tvm div{height:100%;background:var(--coral)}
+.expl{background:#FFF4DF;border-radius:12px;padding:8px 14px;width:100%;text-align:left}
+.plist{display:grid;gap:8px}
+.pcard{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px;font-family:var(--display);font-size:1.2rem}
+.pcard b{font-weight:400;color:var(--coral2)}
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.flow>div{text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-size:.95rem}
+.flow>div b{display:block;font-family:var(--display);font-weight:400;font-size:1.1rem;color:var(--coral2)}
+.flow ul{margin:.2em 0 0;padding-left:1.1em}
+@media (max-width:820px){.tvbig,.flow,.lvl{grid-template-columns:1fr}}
+@media (min-width:821px){.pvbox{position:sticky;top:8px}}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>📰</i> 독자 맞춤 편집국</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const APP='reader';
+const STAGES=[null,
+  {k:'관심 온도계',t:'이야기 듣고 관심 표시하기 (생각 열기)',tm:3},
+  {k:'독자 탐정',t:'독자 반응 살펴보기 · 글 배달 (236~237쪽)',tm:8},
+  {k:'글쓰기 과정',t:'독자를 고려하는 세 단계 · 계단 글 (238~241쪽)',tm:8},
+  {k:'맞춤 편집자',t:'독자를 정해 짧은 글 쓰기 (활동 3)',tm:11},
+  {k:'구독자 퀴즈',t:'정리 퀴즈 (241쪽 7)',tm:5}];
+const NST=5;
+const STORY='그림자 술래잡기는 그림자를 밟아 잡는 놀이이다. 먼저 술래를 한 명 정한다. 술래는 친구들의 그림자를 밟으려고 따라다니고, 친구들은 자신의 그림자가 밟히지 않도록 도망 다닌다. 술래가 친구의 그림자를 밟으면 그 친구가 다음 술래가 된다. 햇빛이 있는 장소에서 하면 더욱 재미있게 놀이를 할 수 있다.';
+const LV=[['3','🙌','관심이 많다'],['2','✋','조금 관심이 있다'],['1','👇','관심 없다']];
+const HARD={t:'운동장 놀이는 학생들의 신체 발달과 정서 함양에 긍정적인 영향을 미친다. 어린이들은 신체 활동에 참여하면서 심폐 지구력을 향상할 수 있다.',b:['나는 운동장에서 할 수 있는 놀이 방법에 관심이 있는데 이 글은 관련이 없는 것 같아.','심폐 지구력은 무슨 뜻일까?']};
+const EASY={t:STORY,b:['운동장이나 놀이터에서 할 놀이를 찾고 있었는데 해 보면 재미있을 것 같아.','낱말이 쉬워서 글 내용을 이해하기 쉬워.']};
+/* 237쪽 2번 글 네 편 → 알맞은 독자에게 배달 */
+const POSTS=[
+  {k:'🚀 우주여행 이야기',d:'태양계의 여러 행성은 정말 신비로워요. 나는 우주여행을 꿈꾸고 있어요.'},
+  {k:'🦖 공룡 이야기',d:'공룡은 오래전에 지구에 살았던 거대한 파충류랍니다. 초식 공룡, 육식 공룡이 있어요.'},
+  {k:'🏰 신기한 건축물 이야기',d:'피라미드, 만리장성은 과연 어떻게 지었을까요?'},
+  {k:'🌍 기후 위기 이야기',d:'온실가스를 비롯한 환경 오염의 영향으로 기후 위기가 나타났어요.'}];
+const READERS=[
+  {id:'m1',r:'🧒 공룡 박물관에 가는 날만 기다리는 1학년 하준',a:1},
+  {id:'m2',r:'🔭 밤마다 망원경으로 별을 보는 지우',a:0},
+  {id:'m3',r:'♻️ 우리 반 분리배출 당번 도윤',a:3},
+  {id:'m4',r:'🧱 레고로 성과 탑을 쌓는 서아',a:2}];
+/* 238~239쪽 글쓰기 과정 세 단계 */
+const PROC=['① 계획 세우기','② 내용 생성·조직하기','③ 쓰고 고쳐 쓰기'];
+const PCARDS=[
+  {id:'g1',t:'독자가 누구인지, 무엇에 관심이 있는지 조사해요',a:0},
+  {id:'g2',t:'그림이나 그래프처럼 이해를 돕는 자료를 넣을 자리를 정해요',a:1},
+  {id:'g3',t:'독자가 오해할 만한 부분이 없는지 확인하고 고쳐요',a:2},
+  {id:'g4',t:'독자의 관심을 끌 수 있는 주제를 정해요',a:0},
+  {id:'g5',t:'독자가 이해하기 쉬운 표현으로 글을 써요',a:2},
+  {id:'g6',t:'독자의 관심과 흥미를 생각하며 글에 넣을 내용을 골라요',a:1}];
+/* 240~241쪽 「계단을 안전하게 이용합시다」 */
+const STAIR=`<div class="card2"><h3>계단을 안전하게 이용합시다</h3>계단에서 위험한 상황을 겪은 적이 있습니까? … 학생 50명을 조사한 결과, <b>40명</b>이나 계단에서 위험한 상황을 겪었습니다.
+<svg viewBox="0 0 300 92" style="width:100%;max-width:340px;display:block;margin:6px 0" role="img" aria-label="조사 결과 그래프: 있다 40명, 거의 없다 6명, 없다 4명"><g font-size="13" fill="#453422"><text x="0" y="20">있다</text><text x="0" y="50">거의 없다</text><text x="0" y="80">없다</text></g><rect x="70" y="8" width="200" height="18" rx="4" fill="#F98F6E"/><rect x="70" y="38" width="30" height="18" rx="4" fill="#8DB3C7"/><rect x="70" y="68" width="20" height="18" rx="4" fill="#8DB3C7"/><g font-size="13" fill="#453422"><text x="274" y="22">40명</text><text x="104" y="52">6명</text><text x="94" y="82">4명</text></g></svg>
+⭐ 뛰지 말고 천천히 걸어요! ⭐ 필요할 때에는 계단 난간을 잡아요! ⭐ 앞을 잘 보고 걸어요!<small>○○초등학교 전교 어린이회 (교과서 240쪽)</small></div>`;
+const KEEP={a:['뛰지 말고 천천히 걸어요','필요할 때에는 난간을 잡아요','앞을 잘 보고 걸어요'],o:['휴대 전화를 보며 걸어요','친구와 계단에서 장난쳐요']};
+/* 4단계: 독자를 정해 짧은 글 쓰기 */
+const TOPICS=[
+  {k:'hall',t:'🚶 복도에서 걷기',eg:'복도에서 뛰면 친구와 부딪힐 수 있어요.'},
+  {k:'food',t:'🍚 급식 남기지 않기',eg:'먹을 만큼만 받으면 남는 음식이 줄어요.'},
+  {k:'book',t:'📚 도서관 책 소중히',eg:'빌린 책은 반납하는 날까지 깨끗하게 봐요.'},
+  {k:'play',t:'⚽ 운동장 놀이 소개',eg:'그림자 술래잡기를 해 봐요.'},
+  {k:'free',t:'✏️ 직접 정하기',eg:''}];
+const WHO=[['kid','🧒 1학년 동생'],['class','🧑‍🤝‍🧑 우리 반 친구'],['family','👵 할머니·부모님']];
+const AIDS=['🖼 그림','📊 그래프','📷 사진','📋 표','⭐ 기호로 나누어 정리'];
+const DID=['쉬운 낱말로 썼어요','독자가 궁금해할 내용을 넣었어요','묻는 말로 관심을 끌었어요','이해를 돕는 자료를 넣었어요'];
+/* 5단계 정리 퀴즈 8문제 */
+const QUIZ=[
+  {id:'q1',q:'글을 읽는 사람을 무엇이라고 할까요?',a:'독자',o:['작가','편집자','기자'],ex:'글을 읽는 사람을 독자라고 해요.'},
+  {id:'q2',q:'독자를 고려한다는 것은 어떤 뜻일까요?',a:'글을 읽는 사람의 입장에서 생각해 보는 것',o:['내가 쓰고 싶은 것만 쓰는 것','어려운 낱말을 많이 쓰는 것','글을 길게 쓰는 것'],ex:'독자의 흥미, 아는 것(배경지식), 수준을 두루 생각해요.'},
+  {id:'q3',q:'글을 쓰기 전에 독자의 ( )나 관심사, 겪고 있는 문제를 조사해요. 빈칸에 알맞은 말은?',a:'흥미',o:['주제','이해','글씨'],ex:'241쪽 7번: 독자의 흥미나 관심사, 겪고 있는 문제 같은 것을 조사해요.'},
+  {id:'q4',q:'독자의 관심과 흥미를 끌 수 있는 ( )와 내용을 정해요. 빈칸에 알맞은 말은?',a:'주제',o:['흥미','이해','제목 글씨'],ex:'241쪽 7번: 독자의 관심과 흥미를 끌 수 있는 주제와 내용을 정해요.'},
+  {id:'q5',q:'글을 쓰고 고쳐 쓸 때에는 독자가 ( )하기 쉬운 표현인지 생각해요. 빈칸에 알맞은 말은?',a:'이해',o:['흥미','주제','조사'],ex:'241쪽 7번: 독자가 이해하기 쉬운 표현인지, 오해할 만한 표현은 없는지 생각해요.'},
+  {id:'q6',q:'1학년 동생에게 “심폐 지구력”을 설명할 때 알맞은 표현은?',a:'숨이 차지 않고 오래 뛰는 힘',o:['심장과 폐의 지구적 능력','심폐 지구력 그대로 쓰기','폐활량 증진 효과'],ex:'독자의 수준에 맞는 쉬운 낱말로 바꾸면 이해하기 쉬워요.'},
+  {id:'q7',q:'「계단을 안전하게 이용합시다」에서 조사 결과를 그래프로 보여 준 효과는?',a:'한눈에 보기 쉬워요',o:['글이 길어져요','내용이 어려워져요','글쓴이가 유명해져요'],ex:'그래프, 그림, 사진 같은 자료는 독자의 이해를 도와요. (241쪽 6)'},
+  {id:'q8',q:'독자를 고려해 글을 쓴다는 것과 거리가 먼 것은?',a:'내가 아는 어려운 낱말을 자랑하듯 써요',o:['독자가 궁금해할 내용을 넣어요','오해할 만한 표현을 고쳐요','그림이나 그래프를 넣어요'],ex:'어려운 낱말만 늘어놓으면 독자가 글을 어려워해요. (236쪽 1)'}];
+/* 문제별 정답률에 쓰는 문제 목록 (처음 답한 것이 맞았는지 기록해요) */
+const ITEMS=[
+  {id:'i1',st:1,q:'같은 이야기를 들어도 관심이 다른 까닭',a:'사람마다 관심사와 아는 것이 달라서'},
+  {id:'i2',st:1,q:'글을 쓸 때 꼭 생각해야 할 사람',a:'글을 읽을 사람(독자)'},
+  {id:'d1',st:2,q:'독자가 운동장 놀이 글을 어려워하는 까닭 (모두 고르기)',a:'어려운 낱말이 있어요, 독자가 궁금한 내용(놀이 방법)이 없어요'},
+  {id:'d2',st:2,q:'새로 쓴 글에서 달라진 점 (모두 고르기)',a:'쉬운 낱말로 썼어요, 독자가 궁금해하는 놀이 방법을 썼어요'},
+  {id:'d3',st:2,q:'독자의 반응이 달라진 까닭',a:'쓰는 사람이 독자를 고려해 글을 썼기 때문에'},
+  ...READERS.map(x=>({id:x.id,st:2,q:'글 배달: '+x.r,a:POSTS[x.a].k})),
+  ...PCARDS.map(x=>({id:x.id,st:3,q:x.t,a:PROC[x.a]})),
+  {id:'c1',st:3,q:'「계단을 안전하게…」 글쓴이가 학생들에게 조사한 것',a:'계단에서 위험한 상황을 겪은 적이 있는지'},
+  {id:'c2',st:3,q:'글쓴이가 지키자고 한 일 (모두 고르기)',a:KEEP.a.join(', ')},
+  {id:'c3',st:3,q:'안전 수칙을 별표(⭐)로 나누어 보여 준 효과',a:'기억하기 쉬워요'},
+  {id:'w1',st:4,q:'1학년 동생에게 “심폐 지구력”을 바꾸어 쓰면',a:'숨이 차지 않고 오래 뛰는 힘'},
+  {id:'w2',st:4,q:'반 친구 20명이 좋아하는 급식 메뉴 조사 결과를 보여 주기 좋은 자료',a:'📊 그래프'},
+  ...QUIZ.map(x=>({id:x.id,st:5,q:x.q,a:x.a}))];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- 처음 답 기록 (문제별 정답률) ---------- */
+function rec(id,ok){
+  if(!me||!id)return;
+  if(ME.ans&&ME.ans[id]!==undefined)return;
+  ME.ans={...(ME.ans||{}),[id]:ok};
+  roomRef(me.room).child(`students/${me.num}/ans/${id}`).transaction(v=>v===null?ok:undefined);
+}
+/* ---------- 공통: 고르기 문제 ---------- */
+function pick(box,{id,q,a,o,why,onOk,fig='',keep=false}){
+  const opts=keep?[a,...o].sort((x,y)=>keep.indexOf(x)-keep.indexOf(y)):shuffle([a,...o]);let first=true;
+  box.innerHTML=`<div class="quiz">${fig}<div class="q">${q}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+  $$('.opts button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';setTimeout(onOk,RM?0:650);}
+    else{b.classList.add('wrong');b.disabled=true;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');$('#pm',box).className='msg bad';$('#pm',box).innerHTML=(why&&why[b.dataset.o])||'다시 골라 봐요';}
+  });
+}
+/* 여러 개 고르기 */
+function multi(box,{id,q,a,o,onOk,fig='',okText='맞았어요!'}){
+  const opts=shuffle([...a,...o]);let first=true;const on=new Set();
+  box.innerHTML=`<div class="quiz">${fig}<div class="q">${q}</div><p class="muted" style="margin:0">알맞은 것을 <b>모두</b> 골라요.</p><div class="chips big" style="justify-content:center">${opts.map(x=>`<button data-o="${esc(x)}" aria-pressed="false">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div></div>`;
+  $$('.chips button',box).forEach(b=>b.onclick=()=>{const x=b.dataset.o;on.has(x)?on.delete(x):on.add(x);b.setAttribute('aria-pressed',on.has(x));});
+  $('#chk',box).onclick=()=>{
+    const ok=a.every(x=>on.has(x))&&on.size===a.length;
+    if(first){rec(id,ok);first=false;}
+    if(ok){$('#chk',box).disabled=true;$$('.chips button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent=okText;setTimeout(onOk,RM?0:900);return;}
+    const miss=a.filter(x=>!on.has(x)).length, extra=[...on].filter(x=>!a.includes(x));
+    $('#pm',box).className='msg bad';
+    $('#pm',box).textContent=extra.length?`“${extra[0]}”은(는) 알맞지 않아요.`:`아직 ${miss}개를 더 골라야 해요.`;
+    box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+  };
+}
+const bubbles=b=>`<div class="bub">${b.map(x=>`<span>💬 ${esc(x)}</span>`).join('')}</div>`;
+function paperHTML(v,showWho=true){
+  v=v||{};const who=(WHO.find(w=>w[0]===v.who)||[0,''])[1];
+  return `<div class="paper"><div class="tag">${showWho?`<span>읽을 사람: ${esc(who)}</span>`:'<span>읽을 사람: ❓</span>'}${v.aid?`<span>${esc(v.aid)}</span>`:''}</div><h3>${esc(v.title||'제목')}</h3><p>${esc(v.text||'')}</p></div>`;
+}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 국어 · 5. 언어와 소통 5차시 (교과서 7~8차시)';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>독자 맞춤<br>편집국</h1>
+   <p>같은 내용도 누가 읽느냐에 따라 다르게 써야 해요. 독자 탐정이 되어 살펴보고, 내가 편집자가 되어 독자에게 꼭 맞는 글을 써요.</p></div>
+   <div class="panel">${paperHTML({who:'kid',aid:'🖼 그림',title:'그림자 술래잡기를 해 봐요!',text:'술래가 친구의 그림자를 밟으면 그 친구가 다음 술래가 돼요. 해가 쨍쨍한 날 운동장에서 해 볼까요?'})}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+function saver(n,R){return async p=>{Object.assign(R,p);ME['s'+n]={...R};await roomRef(me.room).child('students/'+me.num+'/s'+n).update(p);drawSteps();};}
+function layout(n,title,side,note=''){
+  shell(`<div class="two"><div class="panel grid"><div><span class="band">${n}단계 · ${STAGES[n].k}</span></div><h2>${title}</h2>${side}${note}</div><div class="panel grid" id="work"></div></div>`);
+  return $('#work');
+}
+const nextBtn=(label,fn)=>{$('#act').innerHTML=`<button id="nx">${label}</button>`;$('#nx').onclick=fn;};
+function doneView(n,html){shell(`<div class="panel quiz pop"><div><span class="band">${n}단계 끝</span></div>${html}<p class="muted">TV를 보며 기다려요.</p></div>`);}
+
+/* ---------- 1. 관심 온도계 ---------- */
+function stage1(){
+  const R={ph:0,...(ME.s1||{})};
+  const save=saver(1,R);
+  if(R.done)return doneView(1,`<div class="big">독자마다 관심이 달라요 🌡</div><div class="rules" style="text-align:left;width:100%"><b>기억해요</b><ul><li>글을 읽는 사람을 <b>독자</b>라고 해요.</li><li>독자마다 관심사, 아는 것, 어려워하는 것이 달라요.</li></ul></div>`);
+  if(R.ph===0){
+    const w=layout(1,'이야기를 듣고 관심을 표시해요',`<div class="card2">🎧 선생님이 읽어 주는 이야기를 들어요.<small>「그림자 술래잡기」 (지도서 281쪽 참고 자료)</small></div>`);
+    w.innerHTML=`<div class="quiz"><div class="q">이 이야기에 얼마나 관심이 있나요?</div><div class="lvl">${LV.map(([k,e,t])=>`<button data-k="${k}" aria-pressed="false"><b>${e}</b>${t}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+    $$('.lvl button',w).forEach(b=>b.onclick=async()=>{$$('.lvl button',w).forEach(x=>x.disabled=true);await save({lv:+b.dataset.k,ph:1});stage1();});
+    return;
+  }
+  const side=`<div class="card2">🌡 내 관심: ${LV.find(x=>+x[0]===R.lv)?.[1]||''} ${LV.find(x=>+x[0]===R.lv)?.[2]||''}<small>TV에서 우리 반 관심 온도계를 봐요.</small></div>`;
+  if(R.ph===1){const w=layout(1,'왜 관심이 다를까?',side);
+    return pick(w,{id:'i1',q:'같은 이야기를 들어도 친구마다 관심이 다른 까닭은?',a:'사람마다 관심사와 아는 것이 달라서',o:['이야기가 틀려서','선생님 목소리가 작아서'],onOk:async()=>{await save({ph:2});stage1();}});}
+  const w=layout(1,'그렇다면 글을 쓸 때는?',side);
+  pick(w,{id:'i2',q:'글을 쓸 때 꼭 생각해야 할 사람은?',a:'글을 읽을 사람(독자)',o:['글을 쓰는 나만','글을 인쇄할 사람'],
+    why:{'글을 쓰는 나만':'나만 생각하면 읽는 사람이 어려워할 수 있어요.'},onOk:async()=>{await save({done:true,at:Date.now()});stage1();}});
+}
+
+/* ---------- 2. 독자 탐정 (236~237쪽) ---------- */
+function stage2(){
+  const R={ph:0,...(ME.s2||{})};
+  const save=saver(2,R),go=p=>async()=>{await save({ph:p});stage2();};
+  if(R.done)return doneView(2,`<div class="big">독자 탐정 성공! 🔍</div><div class="rules" style="text-align:left;width:100%"><b>독자를 고려하며 쓴 글은</b><ul><li>독자가 이해하기 쉬운 낱말로 써요.</li><li>독자가 관심 있는 내용을 써요.</li><li>그래서 독자가 흥미롭게 읽어요.</li></ul></div>`);
+  const hard=`<div class="card2"><h3>처음 쓴 글 (236쪽)</h3>${esc(HARD.t)}</div>${bubbles(HARD.b)}`;
+  const easy=`<div class="card2"><h3>다시 쓴 글 (237쪽)</h3>${esc(EASY.t)}</div>${bubbles(EASY.b)}`;
+  if(R.ph===0){const w=layout(2,'독자는 왜 어려워할까?',hard);
+    return multi(w,{id:'d1',q:'독자가 이 글을 어려워하는 까닭은?',a:['어려운 낱말이 있어요','독자가 궁금한 내용(놀이 방법)이 없어요'],o:['글씨가 너무 커요','문장이 너무 짧아요'],onOk:go(1)});}
+  if(R.ph===1){const w=layout(2,'다시 쓴 글과 비교해요',easy);
+    return multi(w,{id:'d2',q:'다시 쓴 글은 무엇이 달라졌나요?',a:['쉬운 낱말로 썼어요','독자가 궁금해하는 놀이 방법을 썼어요'],o:['어려운 낱말을 더 넣었어요','글쓴이 자랑을 넣었어요'],onOk:go(2)});}
+  if(R.ph===2){const w=layout(2,'독자의 반응이 왜 달라졌을까?',easy);
+    return pick(w,{id:'d3',q:'독자의 반응이 달라진 까닭은?',a:'쓰는 사람이 독자를 고려해 글을 썼기 때문에',o:['글을 쓴 사람이 유명해서','글이 더 길어서'],onOk:go(3)});}
+  if(R.ph<3+READERS.length){
+    const k=R.ph-3,X=READERS[k];
+    const w=layout(2,'📮 글 배달부: 누구에게 어떤 글을?',`<div class="prog">${READERS.map((_,i)=>`<span class="${i<k?'on':i===k?'cur':''}"></span>`).join('')}</div>
+      <div class="plist">${POSTS.map(p=>`<div class="pcard"><b>${esc(p.k)}</b><br><small style="font-family:var(--text)">${esc(p.d)}</small></div>`).join('')}</div>`,
+      `<p class="muted" style="margin:0">237쪽 친구들의 글이에요. 독자의 관심사에 맞는 글을 배달해요.</p>`);
+    return pick(w,{id:X.id,fig:`<div class="card2" style="font-family:var(--display);font-size:1.3rem">${esc(X.r)}</div>`,q:'이 독자가 가장 재미있게 읽을 글은?',a:POSTS[X.a].k,o:POSTS.filter((_,i)=>i!==X.a).map(p=>p.k),keep:POSTS.map(p=>p.k),
+      onOk:k===READERS.length-1?async()=>{await save({ph:R.ph+1,done:true,at:Date.now()});stage2();}:go(R.ph+1)});
+  }
+  save({done:true,at:Date.now()}).then(stage2);
+}
+
+/* ---------- 3. 글쓰기 과정 (238~241쪽) ---------- */
+function stage3(){
+  const R={ph:0,...(ME.s3||{})};
+  const save=saver(3,R),go=p=>async()=>{await save({ph:p});stage3();};
+  const flow=`<div class="flow">${PROC.map((p,i)=>`<div><b>${p}</b><ul>${PCARDS.slice(0,Math.min(R.ph,PCARDS.length)).filter(c=>c.a===i).map(c=>`<li>${esc(c.t)}</li>`).join('')}</ul></div>`).join('')}</div>`;
+  if(R.done)return doneView(3,`<div class="big">글쓰기 과정 완성! 📝</div>${flow}`);
+  if(R.ph<PCARDS.length){
+    const C=PCARDS[R.ph];
+    const w=layout(3,'이 일은 어느 단계에서 할까?',flow,`<p class="muted" style="margin:0">교과서 238~239쪽 「우리 학교 학생들이 안전하게 지내려면」 그림을 보며 생각해요.</p>`);
+    return pick(w,{id:C.id,fig:`<div class="card2" style="font-family:var(--display);font-size:1.3rem">🃏 ${esc(C.t)}</div>`,q:'어느 단계일까요?',a:PROC[C.a],o:PROC.filter((_,i)=>i!==C.a),keep:PROC,onOk:go(R.ph+1)});
+  }
+  const k=R.ph-PCARDS.length;
+  if(k===0){const w=layout(3,'과정대로 쓴 글을 읽어요 (240쪽)',STAIR);
+    return pick(w,{id:'c1',q:'글쓴이는 우리 학교 학생들에게 무엇을 조사했나요?',a:'계단에서 위험한 상황을 겪은 적이 있는지',o:['좋아하는 급식 메뉴','계단이 몇 개인지'],onOk:go(R.ph+1)});}
+  if(k===1){const w=layout(3,'과정대로 쓴 글을 읽어요 (240쪽)',STAIR);
+    return multi(w,{id:'c2',q:'글쓴이가 지키자고 한 일은?',a:KEEP.a,o:KEEP.o,onOk:go(R.ph+1)});}
+  const w=layout(3,'독자를 고려한 점의 효과 (241쪽 6)',STAIR);
+  pick(w,{id:'c3',q:'안전 수칙을 별표(⭐)로 나누어 보여 주면 어떤 효과가 있을까요?',a:'기억하기 쉬워요',o:['글이 어려워져요','읽을 사람이 줄어요'],
+    onOk:async()=>{await save({done:true,at:Date.now()});stage3();}});
+}
+
+/* ---------- 4. 맞춤 편집자: 독자를 정해 짧은 글 쓰기 ---------- */
+let draft=null;
+function stage4(){
+  const R={ph:0,...(ME.s4||{})};
+  const save=saver(4,R),go=p=>async()=>{await save({ph:p});stage4();};
+  if(R.ph===0){const w=layout(4,'편집자 연습 ①: 쉬운 말로',`<div class="card2">“어린이들은 신체 활동에 참여하면서 <b>심폐 지구력</b>을 향상할 수 있다.”<small>읽을 사람: 🧒 1학년 동생</small></div>`);
+    return pick(w,{id:'w1',q:'1학년 동생을 위해 “심폐 지구력”을 바꾸어 쓰면?',a:'숨이 차지 않고 오래 뛰는 힘',o:['심장과 폐의 지구적 능력','폐활량 증진 효과'],why:{'심장과 폐의 지구적 능력':'여전히 어려운 낱말이에요.','폐활량 증진 효과':'동생이 알기 어려운 낱말이에요.'},onOk:go(1)});}
+  if(R.ph===1){const w=layout(4,'편집자 연습 ②: 자료 고르기',`<div class="card2">“우리 반 친구 20명이 좋아하는 급식 메뉴는 떡볶이 8명, 돈가스 6명, 카레 4명, 비빔밥 2명입니다.”<small>글로만 쓰면 한눈에 비교하기 어려워요.</small></div>`);
+    return pick(w,{id:'w2',q:'이 조사 결과를 독자가 한눈에 비교하게 하려면?',a:'📊 그래프',o:['📷 사진','🔇 아무것도 넣지 않기'],onOk:go(2)});}
+  if(R.done)return s4Done(R);
+  if(!draft)draft={topic:'hall',free:'',who:'kid',aid:AIDS[0],title:'',text:'',did:[],...(R.v||{})};
+  const D=draft,T=()=>TOPICS.find(t=>t.k===D.topic)||TOPICS[0];
+  shell(`<div class="two"><div class="panel grid pvbox"><div><span class="band">4단계 · 맞춤 편집자</span></div><h2>독자에게 꼭 맞는 글</h2><div id="pv"></div>
+      <p class="muted" style="margin:0">짝에게 읽어 주고 “이 독자가 이해할 수 있을까?” 물어봐요.</p></div>
+    <div class="panel form" id="work">
+      <label>① 누가 읽을까요? (독자)</label><div class="chips big" id="wh">${WHO.map(([k,l])=>`<button data-k="${k}" aria-pressed="${k===D.who}">${l}</button>`).join('')}</div>
+      <label>② 무엇을 쓸까요? (주제)</label><div class="chips big" id="tp">${TOPICS.map(t=>`<button data-k="${t.k}" aria-pressed="${t.k===D.topic}">${t.t}</button>`).join('')}</div>
+      <div id="freeBox" ${D.topic==='free'?'':'hidden'}><input id="free" maxlength="20" placeholder="쓰고 싶은 주제 (예: 손 씻기)" value="${esc(D.free)}"></div>
+      <label>③ 독자의 이해를 돕는 자료</label><div class="chips big" id="ai">${AIDS.map(a=>`<button data-k="${esc(a)}" aria-pressed="${a===D.aid}">${esc(a)}</button>`).join('')}</div>
+      <label for="ti">④ 제목 <span class="hint">(독자의 관심을 끌게, 25자까지)</span></label><input id="ti" maxlength="25" value="${esc(D.title)}">
+      <label for="tx">⑤ 글 <span class="hint">(2~4문장, 200자까지)</span></label><textarea id="tx" maxlength="200">${esc(D.text)}</textarea>
+      <label>⑥ 독자를 위해 한 일 <span class="hint">(두 개 이상)</span></label><div class="chips big" id="dd">${DID.map((e,i)=>`<button data-i="${i}" aria-pressed="${D.did.includes(i)}">${e}</button>`).join('')}</div>
+      <div class="msg" id="wm" role="status"></div>
+      <div class="row" id="act" style="justify-content:center"><button id="send">📰 TV에 글 올리기</button></div></div></div>`);
+  const pv=()=>{$('#pv').innerHTML=paperHTML(D);};
+  const ph=()=>{$('#tx').placeholder=T().eg?'예) '+T().eg:'예) 손을 30초 동안 씻으면 감기를 막을 수 있어요.';$('#ti').placeholder=D.who==='kid'?'예) 동생들아, 이것만 지켜 줘!':D.who==='family'?'예) 할머니, 이것 아세요?':'예) 우리 반 친구들, 함께해요!';};
+  const seg=(sel,key)=>$$(sel+' button').forEach(b=>b.onclick=()=>{D[key]=b.dataset.k;$$(sel+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));ph();pv();});
+  seg('#wh','who');seg('#ai','aid');
+  $$('#tp button').forEach(b=>b.onclick=()=>{D.topic=b.dataset.k;$$('#tp button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#freeBox').hidden=D.topic!=='free';ph();pv();});
+  $$('#dd button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;D.did=D.did.includes(i)?D.did.filter(x=>x!==i):[...D.did,i];b.setAttribute('aria-pressed',D.did.includes(i));});
+  $('#ti').oninput=e=>{D.title=e.target.value;pv();};$('#tx').oninput=e=>{D.text=e.target.value;pv();};$('#free').oninput=e=>{D.free=e.target.value;};
+  ph();pv();
+  ClassWatch.detail(()=>({q:'맞춤 편집자: '+T().t,w:`${D.title} / ${D.text}`}));
+  $('#send').onclick=async()=>{
+    const bad=t=>{$('#wm').className='msg bad';$('#wm').textContent=t;};
+    const title=D.title.trim(),text=D.text.trim();
+    if(D.topic==='free'&&D.free.trim().length<2)return bad('② 쓰고 싶은 주제를 써요.');
+    if(title.length<2)return bad('④ 제목을 써요.');
+    if(text.length<30)return bad('⑤ 글을 조금 더 써요. (30자 이상, 2~4문장)');
+    if(D.did.length<2)return bad('⑥ 독자를 위해 한 일을 두 개 이상 골라요.');
+    $('#send').disabled=true;
+    const v={...D,title,text,free:D.free.trim(),topicT:D.topic==='free'?'✏️ '+D.free.trim():T().t};
+    await save({v,done:true,at:Date.now()});draft=null;stage4();
+  };
+}
+function s4Done(R){
+  const v=R.v||{};
+  doneView(4,`<div class="big">글이 TV에 올라갔어요 📰</div><div style="width:100%;max-width:560px">${paperHTML(v)}</div>
+    <div class="row">${(v.did||[]).map(i=>`<span class="band" style="background:var(--blue)">${esc(DID[i])}</span>`).join('')}</div>
+    <div class="row"><button class="ghost" id="edit">✏️ 고치기</button></div>`);
+  $('#edit').onclick=async()=>{draft={...v};const p={done:false};Object.assign(R,p);ME.s4={...R};await roomRef(me.room).child('students/'+me.num+'/s4').update(p);stage4();};
+}
+
+/* ---------- 5. 구독자 퀴즈 ---------- */
+let qOpts={};
+function stage5(){
+  const R={i:0,score:0,...(ME.s5||{})};
+  if(R.di===R.i&&!R.done)R.i++; /* 답하고 새로고침했으면 다음 문제로 */
+  const save=saver(5,R);
+  if(R.i>=QUIZ.length||R.done){
+    if(!R.done)save({i:QUIZ.length,done:true,at:Date.now()});
+    return shell(`<div class="panel quiz pop"><div><span class="band">구독자 퀴즈 끝</span></div><div class="emoji" aria-hidden="true">📰</div>
+      <div class="big">${QUIZ.length}문제 중 ${R.score}문제 맞혔어요!</div><p>내 신문 구독자 ${R.score*10}명! TV에서 우리 반 편집국을 봐요.</p></div>`);
+  }
+  const Q=QUIZ[R.i];
+  const opts=qOpts[Q.id]||(qOpts[Q.id]=shuffle([Q.a,...Q.o]));
+  shell(`<div class="panel quiz"><div class="row" style="justify-content:space-between;width:100%"><span class="band">구독자 퀴즈 ${R.i+1}/${QUIZ.length}</span><span class="score">📰 ${R.score*10}명</span></div>
+    <div class="prog">${QUIZ.map((_,k)=>`<span class="${k<R.i?'on':k===R.i?'cur':''}"></span>`).join('')}</div>
+    <div class="q">${esc(Q.q)}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    <div class="msg" id="pm" role="status"></div><div id="ex"></div><div class="row" id="act" style="justify-content:center"></div></div>`);
+  $$('.opts button').forEach(b=>b.onclick=async()=>{
+    const ok=b.dataset.o===Q.a;rec(Q.id,ok);
+    $$('.opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===Q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    $('#pm').className='msg '+(ok?'ok':'bad');$('#pm').textContent=ok?'맞았어요! 구독자 +10명 📈':'아쉬워요. 정답을 확인해요.';
+    $('#ex').innerHTML=`<div class="expl">${esc(Q.ex)}</div>`;
+    const sc=R.score+(ok?1:0),last=R.i+1>=QUIZ.length;
+    await save({score:sc,di:R.i,...(R.i===0&&!R.startAt?{startAt:Date.now()}:{})});
+    nextBtn(last?'끝! ▶':'다음 문제 ▶',async()=>{await save({i:R.i+1,...(last?{done:true,at:Date.now()}:{})});stage5();});
+  });
+}
+/* ---------- student: room ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  $('#sub').textContent=`${me.num}번 ${me.name}`;
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store(APP+'-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  /* 선생님이 시작을 누르기 전에는 그 단계를 대기 화면으로 보여 줘요 */
+  listen(roomRef(me.room).child('go'),s=>{
+    const g=s.val()||0;const was=ROOMV.go||0;ROOMV.go=g;
+    if(!ready)return;
+    if((cur>was)!==(cur>g))renderStage(); else drawSteps();
+  });
+}
+function waitView(){
+  ClassWatch.step('대기',{n:cur,total:NST,wait:true});
+  shell(`<div class="panel quiz pop"><div><span class="band">${cur}단계 · ${STAGES[cur].k}</span></div><div class="emoji" aria-hidden="true">👂</div>
+    <h2 style="font-size:1.8rem">선생님 설명을 들어요</h2><p>선생님이 <b>시작</b>을 누르면 활동이 열려요. 태블릿은 잠깐 내려놓아요.</p></div>`);
+}
+function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4,5].map(n=>`<button data-s="${n}" ${n>ROOMV.stage||n>(ROOMV.go||0)?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store(APP+'-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+function renderStage(){
+  if(cur>(ROOMV.go||0))return waitView();
+  ClassWatch.step(STAGES[cur].k,{n:cur,total:NST,wait:stepDone(cur)});
+  onMe=()=>drawSteps();
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  if(cur===4)return stage4();
+  return stage5();
+}
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store(APP+'-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm();
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store(APP+'-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store(APP+'-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:APP,stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store(APP+'-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});const st=RD.stage||1;if((RD.go||0)<st)ref.child('go').set(st);}};
+  $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  const waitSt=(RD.go||0)<(RD.stage||1);
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?`학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.`:`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+
+let tvStage=0,tvAll=false,showWrong=false,tvAns=false,tvAward=false,tvBig=0,tvWho=false;
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2,3,4,5].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>stepDoneOf(x,st);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  const changed=tvStage!==st;tvStage=st;
+  if(changed||!$('#tvtop')){
+    tvAns=false;tvAward=false;tvBig=0;tvWho=false;
+    main.innerHTML=`<div id="tvtop"></div><div id="tvmid"></div><div id="tvq"></div>`;
+    tvTop(st);
+  }
+  $('#tvmid').innerHTML=st===5?channelBox(S):st===4?galleryBox(S):st===1?meterBox(S):progressBox(st,S);
+  if(st===4){
+    $$('#gal button').forEach(b=>b.onclick=()=>{tvBig=+b.dataset.n;tvWho=false;renderTV();});
+    const wb=$('#bigWho');if(wb)wb.onclick=()=>{tvWho=!tvWho;renderTV();};
+    const cl=$('#bigClose');if(cl)cl.onclick=()=>{tvBig=0;renderTV();};
+  }
+  $('#tvq').innerHTML=quizBox(S,st);
+  $('#wrongT').onclick=()=>{showWrong=!showWrong;renderTV();};
+  $('#allT').onclick=()=>{tvAll=!tvAll;renderTV();};
+}
+function stepDoneOf(x,n){return !!(x['s'+n]&&x['s'+n].done);}
+const TVP={
+  1:{h:'🌡 관심 온도계: 「그림자 술래잡기」 (생각 열기)',body:()=>`<div class="card2" style="font-size:1.35rem">${esc(STORY)}<small>선생님이 읽어 주면, 태블릿에서 관심 정도(🙌 많다 · ✋ 조금 · 👇 없다)를 눌러요. (지도서 281쪽 참고 자료)</small></div>`,
+     talk:['관심이 많다(또는 없다)고 한 까닭은 무엇인가요?','이런 놀이를 해 본 경험이 있나요?','같은 이야기인데 왜 관심이 다를까요?'],
+     ans:['사람마다 <b>관심사와 아는 것</b>이 달라요.','글을 읽는 사람을 <b>독자</b>라고 해요.','오늘 공부할 문제: <b>독자를 고려해 글을 쓰는 방법을 알아봅시다.</b>']},
+  2:{h:'🔍 독자 탐정 (236~237쪽)',body:()=>`<div class="two"><div class="grid"><div class="card2"><h3>처음 쓴 글</h3>${esc(HARD.t)}</div>${bubbles(HARD.b)}</div><div class="grid"><div class="card2"><h3>다시 쓴 글</h3>${esc(EASY.t)}</div>${bubbles(EASY.b)}</div></div>`,
+     talk:['독자가 처음 글을 어려워한 까닭은 무엇일까요?','다시 쓴 글은 어떤 점이 달라졌나요?','글을 쓸 때 어떤 점을 고려해야 할까요?'],
+     ans:['어려워한 까닭: <b>어려운 낱말</b>(심폐 지구력)이 있고, 독자가 <b>관심 있는 내용</b>(놀이 방법)이 아니에요.','달라진 점: 독자가 <b>이해하기 쉬운 표현</b>, 독자가 <b>관심 있는 것</b>에 대해 썼어요.','반응이 달라진 까닭: 쓰는 사람이 <b>독자를 고려해</b> 글을 썼기 때문이에요.','글 배달: 하준 → 🦖 공룡, 지우 → 🚀 우주여행, 도윤 → 🌍 기후 위기, 서아 → 🏰 건축물']},
+  3:{h:'📝 독자를 고려하며 글을 쓰는 과정 (238~241쪽)',body:()=>`<div class="flow">${PROC.map((p,i)=>`<div><b>${p}</b><ul>${PCARDS.filter(c=>c.a===i).map(c=>`<li>${esc(c.t)}</li>`).join('')}</ul></div>`).join('')}</div>`,
+     talk:['「계단을 안전하게 이용합시다」에서 글쓴이는 무엇을 조사했나요?','그래프와 별표(⭐)는 독자에게 어떤 도움을 주나요?','1학년 동생들도 이 글을 잘 이해할 수 있을까요?'],
+     ans:['조사한 것: 계단에서 <b>위험한 상황을 겪은 적</b>이 있는지 (50명 중 40명)','지키자고 한 일: 뛰지 말고 천천히 걷기, 필요할 때 난간 잡기, 앞을 잘 보고 걷기','그래프: 조사 결과를 <b>한눈에</b> 보기 좋아요. 별표: 수칙을 나누어 보여 주어 <b>기억하기 쉬워요</b>.']},
+  4:{h:'📰 맞춤 편집자: 누구를 위한 글일까?',body:()=>`<div class="rules"><b>편집자의 약속</b><ul><li>먼저 <b>독자</b>를 정하고, 독자가 궁금해할 내용을 써요.</li><li>독자가 아는 낱말로 <b>쉽게</b> 써요.</li><li>그림, 그래프, 표처럼 <b>이해를 돕는 자료</b>를 정해요.</li></ul></div>`,
+     talk:['글을 크게 띄우고 “누구를 위해 쓴 글일까?” 맞혀 봐요.','독자를 위해 어떤 낱말을 골랐나요?','다른 독자에게 쓴다면 무엇을 바꾸면 좋을까요?'],
+     ans:['독자에 따라 <b>낱말</b>, <b>내용</b>, <b>자료</b>가 달라져요.','1학년 동생에게는 짧은 문장과 그림, 할머니·부모님에게는 높임말, 친구에게는 우리가 함께 겪은 일로.']}};
+function tvTop(st){
+  if(st===5){
+    $('#tvtop').innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">📰 구독자 퀴즈: 우리 반 편집국</h2><button class="ghost" id="awT">🏆 시상식</button></div>
+      <p class="muted" style="margin:0">문제를 맞힐 때마다 내 신문 구독자가 10명씩 늘어요. 241쪽 7번 정리 포함 ${QUIZ.length}문제.</p></div>`;
+    $('#awT').onclick=()=>{tvAward=!tvAward;$('#awT').textContent=tvAward?'편집국 보기':'🏆 시상식';renderTV();};
+    return;
+  }
+  const P=TVP[st];
+  const draw=()=>{$('#tva').innerHTML=tvAns?`<div class="plist">${P.ans.map(a=>`<div class="pcard">${a}</div>`).join('')}</div>`:'';$('#tvaT').textContent=tvAns?'정답 가리기':'정답 보기';};
+  $('#tvtop').innerHTML=`<div class="panel grid"><h2 style="font-size:1.8rem">${P.h}</h2>${P.body()}
+    <div class="rules"><b>함께 이야기해요</b><ul>${P.talk.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva"></div></div>`;
+  $('#tvaT').onclick=()=>{tvAns=!tvAns;draw();};
+  draw();
+}
+function meterBox(S){
+  const c=LV.map(([k,e,t])=>({e,t,n:S.filter(x=>x.s1&&x.s1.lv===+k).length}));
+  const tot=c.reduce((a,x)=>a+x.n,0);
+  return `<div class="panel grid" id="meter"><div class="row" style="justify-content:space-between"><h2>🌡 우리 반 관심 온도계</h2><span class="muted">${tot}/${S.length}명 표시</span></div>
+    <div class="bars">${c.map(x=>`<div class="bar"><span>${x.e} ${x.t}</span><div class="track"><div style="width:${tot?x.n/tot*100:0}%;background:var(--coral)"></div></div><span>${x.n}명</span></div>`).join('')}</div></div>`;
+}
+function galleryBox(S){
+  const W=S.filter(x=>x.s4&&x.s4.v&&x.s4.done);
+  const B=W.find(x=>x.n===tvBig);
+  const big=B?`<div class="tvbig"><div>${paperHTML(B.s4.v,tvWho)}</div><div class="grid"><h2>${B.n} ${esc(B.name)} 편집자</h2><p style="margin:0;font-size:1.3rem">누구를 위해 쓴 글일까요? 왜 그렇게 생각하나요?</p>
+     <div class="row">${tvWho?(B.s4.v.did||[]).map(i=>`<span class="band" style="background:var(--blue)">${esc(DID[i])}</span>`).join(''):''}</div>
+     <div class="row"><button id="bigWho">${tvWho?'독자 가리기':'👀 독자 공개'}</button><button class="ghost" id="bigClose">목록으로</button></div></div></div>`:'';
+  const cnt=WHO.map(([k,l])=>`${l} ${W.filter(x=>x.s4.v.who===k).length}`).join(' · ');
+  return `<div class="panel grid"><div class="row" style="justify-content:space-between"><h2>📰 우리 반 편집국</h2><span class="muted">올린 글 ${W.length}/${S.length}개 · ${cnt}</span></div>
+    ${big}<div class="gal" id="gal">${W.map(x=>`<button data-n="${x.n}" aria-label="${x.n}번 글 크게 보기">${paperHTML(x.s4.v,false)}</button>`).join('')||'<p class="muted">아직 올린 글이 없어요</p>'}</div></div>`;
+}
+function ranked(S){
+  return S.filter(x=>x.s5).map(x=>({...x,sc:x.s5.score||0,fin:!!x.s5.done,t:x.s5.done?(x.s5.at-(x.s5.startAt||x.s5.at)):Infinity}))
+    .sort((a,b)=>b.sc-a.sc||(b.fin-a.fin)||a.t-b.t||a.n-b.n);
+}
+function channelBox(S){
+  const R=ranked(S),tot=S.length?Math.round(R.reduce((s,x)=>s+x.sc,0)*10/S.length):0;
+  if(tvAward){
+    const top=R.filter(x=>x.fin).slice(0,3);
+    const p=(x,c,m)=>x?`<div class="${c}"><b>${m}</b><span>${x.n} ${esc(x.name)}</span>📰 ${x.sc*10}명</div>`:`<div class="${c}"><b>${m}</b><span>-</span></div>`;
+    return `<div class="panel grid" id="award"><h2 style="font-size:1.8rem;text-align:center">🏆 독자 맞춤 편집국 시상식</h2>
+      <div class="podium">${p(top[1],'p2','🥈')}${p(top[0],'p1','🥇')}${p(top[2],'p3','🥉')}</div>
+      <p class="muted" style="text-align:center;margin:0">맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요. 우리 반 평균 구독자 ${tot}명!</p></div>`;
+  }
+  return `<div class="panel grid" id="channel"><div class="row" style="justify-content:space-between"><h2>우리 반 신문 구독자</h2><span class="muted">평균 ${tot}명 · 끝 ${R.filter(x=>x.fin).length}/${S.length}명</span></div>
+    <div class="chan">${S.map(x=>{const s5=x.s5||{},sc=s5.score||0,i=Math.min(QUIZ.length,(s5.i||0)+(s5.di===s5.i?1:0));
+      return `<div><b>${x.n} ${esc(x.name)}</b>📰 ${sc*10}명<div class="tvm"><div style="width:${sc/QUIZ.length*100}%"></div></div><small class="muted">${s5.done?'끝 ✓':i+'/'+QUIZ.length+' 문제'}</small></div>`;}).join('')||'<p class="muted">아직 아무도 없어요</p>'}</div>
+    <div class="rank">${R.slice(0,5).map((x,k)=>`<div class="r"><b>${k+1}</b><span class="nm">${x.n} ${esc(x.name)}</span><span class="trk"></span><span class="pt">${x.sc*10}명</span></div>`).join('')}</div></div>`;
+}
+function progressBox(st,S){
+  const its=ITEMS.filter(x=>x.st===st);
+  const has=id=>S.filter(x=>x.ans&&x.ans[id]!==undefined).length;
+  return `<div class="panel grid"><h2>얼마나 했나요?</h2><div class="bars">${its.map(q=>`<div class="bar"><span>${esc(q.q.length>26?q.q.slice(0,25)+'…':q.q)}</span><div class="track"><div style="width:${S.length?has(q.id)/S.length*100:0}%"></div></div><span>${has(q.id)}명</span></div>`).join('')}</div></div>`;
+}
+function quizStats(S,st){
+  return ITEMS.map(q=>({q,no:ITEMS.filter(x=>x.st===q.st).indexOf(q)+1})).filter(r=>tvAll||r.q.st===st).map(r=>{
+    const done=S.filter(x=>x.ans&&x.ans[r.q.id]!==undefined);
+    const miss=done.filter(x=>x.ans[r.q.id]===false);
+    const ok=done.length-miss.length;
+    return {...r,done:done.length,ok,miss,rate:done.length?Math.round(ok/done.length*100):null};
+  });
+}
+function quizBox(S,st){
+  const R=quizStats(S,st).sort((a,b)=>(a.rate??101)-(b.rate??101)||a.q.st-b.q.st||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
+   <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
+   <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
