@@ -24,7 +24,7 @@ const fail = m => { problems.push(m); console.log('❌', m); };
   const S = [];
   for (let n = 1; n <= N; n++) {
     const p = await mk('학생' + n, 820, 1100);
-    await p.goto(URL + '?room=' + code);
+    await p.goto(URL + '?room=' + code + (n === 2 ? '&tfwait=2' : ''));
     await p.fill('#cw-num', String(n)); await p.fill('#cw-name', `학생${n}`);
     await p.click('#enter');
     S.push(p);
@@ -91,7 +91,25 @@ const fail = m => { problems.push(m); console.log('❌', m); };
       await p.fill('#q3', '');
       await p.click('#send');
       if (!/탐구 질문을 써요/.test(await p.textContent('#fm'))) fail('빈 질문 안내가 안 나옴');
-      await p.fill('#q3', k === 0 ? '대륙마다 인구가 다른 까닭은 무엇일까요' : '인구가 가장 많은 대륙은 어디일까요?');
+      if (!(await p.$('#st'))) { /* 시작 틀은 처음부터 보이지 않아야 해요 */ } else fail('시작 틀이 처음부터 보임');
+      if (k === 0) {
+        if (!(await p.$('.tf-btn[disabled]'))) fail('실마리 단추가 처음에 잠겨 있지 않음');
+        await p.fill('#q3', '세계의 인구는 어디에 분포해 있을까요');
+        await p.click('#send');
+        if (!/예시와 거의 같아요/.test(await p.textContent('#fm'))) fail('예시를 베낀 질문을 막지 않음');
+      }
+      if (k === 1) {
+        await p.waitForSelector('.tf-btn:not([disabled])', { timeout: 6000 });
+        await p.click('.tf-btn');
+        await p.waitForSelector('.tf-hint[data-lv="1"]');
+        await p.waitForSelector('.tf-btn:not([disabled])', { timeout: 6000 });
+        await p.click('.tf-btn');
+        await p.click('.tf-hint[data-lv="2"] button[data-s]');
+        if (!/…/.test(await p.inputValue('#q3'))) fail('시작 틀이 글 칸에 안 들어감');
+        await p.click('#send');
+        if (!/… 자리/.test(await p.textContent('#fm'))) fail('… 자리를 채우라는 안내가 안 나옴');
+      }
+      await p.fill('#q3', k === 0 ? '대륙마다 인구가 다른 까닭은 무엇일까요' : '인구가 많은 대륙에는 어떤 문제가 생길까요?');
     }
     if (k === 0) await shot(p, 's3-write');
     await p.click('#send');
@@ -104,6 +122,8 @@ const fail = m => { problems.push(m); console.log('❌', m); };
   await S[2].click('.qlist button[data-n="2"]');
   await T.waitForFunction(() => /⭐ 2/.test(document.querySelector('#main').textContent), null, { timeout: 10000 }).catch(() => fail('TV 별 집계가 안 맞음'));
   if (!/까닭은 무엇일까요\?/.test(await T.textContent('#main'))) fail('물음표가 붙지 않음');
+  if (!/스스로 1명 · 💡 질문 실마리 0명 · ✏️ 시작 틀 1명/.test(await T.textContent('#tfsum'))) fail('선생님 화면 실마리 사용 집계 이상: ' + await T.textContent('#tfsum'));
+  if (!/학생2 · ✏️ 시작 틀/.test(await T.textContent('#main'))) fail('실마리 쓴 학생 표시가 안 보임');
   await shot(S[0], 's3-star'); await shot(T, 't3');
   // 4단계
   await T.click('#tsteps button[data-s="4"]');

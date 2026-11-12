@@ -214,6 +214,7 @@ main{padding-block:18px 80px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../common/watch.js"></script>
+<script src="../common/think.js"></script>
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
@@ -274,6 +275,7 @@ const TOPIC=[
 /* 3단계: 탐구 질문 */
 const WORDS=['인구','분포','인구수','인구 밀도','인구 구조','대륙','나라','지구촌','문제','환경','전쟁','난민','기후 변화','지속가능한 미래','노력','실천','세계시민'];
 const STARTS=['왜 …할까요?','…은/는 어디에 …해 있을까요?','…와/과 …은/는 어떤 관계가 있을까요?','어떻게 하면 …할 수 있을까요?','…을/를 위해 우리가 할 수 있는 일은 무엇일까요?'];
+const EXQ=['세계의 인구는 어디에 분포해 있을까요?','우리 학교 급식 쓰레기를 줄이려면 어떻게 해야 할까요?'];
 const EASYQ=['세계의 인구는 어디에 많이 살까요?','인구가 가장 많은 나라는 어디일까요?','지구촌에는 어떤 문제가 있을까요?','지구를 지키려면 무엇을 할 수 있을까요?'];
 /* 4단계: 맛보기 퀴즈 */
 const QZ=[
@@ -521,12 +523,11 @@ function stage3(){
   wstep('질문 만들기');
   const d=ME.s3||{};W3=(d.words||[]).slice();
   shell(`<div class="panel grid"><span class="band">3단계 · 탐구 질문 만들기 (교과서 123쪽)</span>
-    <div class="rules"><b>예</b> 중요 단어 <b>인구, 분포</b> → 탐구 질문 <b>세계의 인구는 어디에 분포해 있을까요?</b></div>
+    <div class="rules"><b>이렇게 만들어요 (다른 주제 예)</b> 중요 단어 <b>급식, 쓰레기</b> → 탐구 질문 <b>우리 학교 급식 쓰레기를 줄이려면 어떻게 해야 할까요?</b><br>이번에는 지구촌 단어로 <b>나만의 질문</b>을 만들어요.</div>
     <div class="field"><label>① 중요하게 생각하는 단어 2개를 골라요</label><div class="chips" id="wd">${WORDS.map(w=>`<button data-w="${esc(w)}" aria-pressed="${W3.includes(w)}">${esc(w)}</button>`).join('')}</div>
       <input id="mine" placeholder="다른 단어를 직접 써도 돼요 (쓰고 ＋)" style="max-width:360px"><button class="ghost" id="add" style="justify-self:start">＋ 단어 넣기</button></div>
     ${ME.easy?`<div class="field"><label>② 궁금한 질문을 하나 골라요</label><div class="vote" id="ez">${EASYQ.map((q,i)=>`<button data-i="${i}" aria-pressed="${d.q===q}"><span>${i+1}</span>${esc(q)}</button>`).join('')}</div></div>`:
-    `<div class="field"><label>② 이렇게 시작해 볼까요? (눌러서 넣기)</label><div class="chips" id="st">${STARTS.map(s=>`<button data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div></div>
-    <div class="field"><label for="q3">③ 스스로 탐구할 수 있는 질문을 써요</label><textarea id="q3" rows="2" maxlength="80" placeholder="세계의 인구는 어디에 분포해 있을까요?">${esc(d.q||'')}</textarea></div>`}
+    `<div class="field"><label for="q3">② 고른 단어로 내가 정말 궁금한 것을 질문으로 써요</label><textarea id="q3" rows="2" maxlength="80" placeholder="내 생각으로 써요">${esc(d.q||'')}</textarea><div id="tf3"></div></div>`}
     <div class="msg bad" id="fm" role="status"></div><div class="row"><button id="send">질문 올리기</button></div></div>`);
   const drawW=()=>$$('#wd button').forEach(b=>b.setAttribute('aria-pressed',W3.includes(b.dataset.w)));
   $$('#wd button').forEach(b=>b.onclick=()=>{const w=b.dataset.w;if(W3.includes(w))W3=W3.filter(x=>x!==w);else{if(W3.length>=2)W3.shift();W3.push(w);}drawW();});
@@ -535,8 +536,11 @@ function stage3(){
     $('#mine').value='';drawW();};
   let ezq=d.q||'';
   $$('#ez button').forEach(b=>b.onclick=()=>{ezq=EASYQ[+b.dataset.i];$$('#ez button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
-  $$('#st button').forEach(b=>b.onclick=()=>{const t=$('#q3');t.value=b.dataset.s;t.focus();const i=t.value.indexOf('…');if(i>=0)t.setSelectionRange(i,i+1);});
-  ClassWatch.detail(()=>({q:'탐구 질문 만들기',w:$('#q3')?$('#q3').value:ezq}));
+  const tf=ME.easy?{level:()=>0}:ThinkFirst.mount($('#tf3'),{key:me.room+'-'+me.num+'-globe3',wait:40,
+    hints:[`<ul><li>고른 두 단어는 서로 어떤 관계일까요?</li><li>그 단어를 보면 <b>왜? 어디? 어떻게? 누가?</b> 가운데 무엇이 가장 궁금해요?</li><li>우리 생활이나 우리나라와 이어지는 점은 없을까요?</li></ul>`,
+      `<p style="margin:4px 0">눌러서 넣고 <b>…</b> 자리를 내 말로 채워요.</p><div class="chips">${STARTS.map(s=>`<button type="button" data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div>`],
+    onShow:(lv,el)=>{if(lv===2)$$('button[data-s]',el).forEach(b=>b.onclick=()=>{const t=$('#q3');t.value=b.dataset.s;t.focus();const i=t.value.indexOf('…');if(i>=0)t.setSelectionRange(i,i+1);});}});
+  ClassWatch.detail(()=>({q:'탐구 질문 만들기'+(tf.level()?' · '+ThinkFirst.tag(tf.level()):''),w:$('#q3')?$('#q3').value:ezq}));
   $('#send').onclick=async()=>{
     const q=ME.easy?ezq:$('#q3').value.trim();
     if(W3.length<1)return $('#fm').textContent='중요 단어를 골라요.';
@@ -545,10 +549,13 @@ function stage3(){
       if(/…/.test(q))return $('#fm').textContent='… 자리에 알맞은 말을 넣어요.';
       if(q.length<8)return $('#fm').textContent='조금 더 자세히 써요.';
       if(!W3.some(w=>q.replace(/\s/g,'').includes(w.replace(/\s/g,'').slice(0,2))))return $('#fm').textContent='고른 중요 단어가 질문에 들어가게 써요.';
+      if(ThinkFirst.copied(q,[...EXQ,...EASYQ]))return $('#fm').textContent='예시와 거의 같아요. 내가 정말 궁금한 것으로 바꿔 써요.';
+      const fr=Object.keys(STU).filter(n=>+n!==me.num&&STU[n].s3&&STU[n].s3.q).map(n=>STU[n].s3.q);
+      if(ThinkFirst.copied(q,fr,0.8))return $('#fm').textContent='친구 질문과 거의 같아요. 나만의 질문으로 바꿔 써요.';
     }
     const fq=/[?？]$/.test(q)?q:q+'?';
     $('#send').disabled=true;
-    const up={words:W3,q:fq,done:Date.now()};
+    const up={words:W3,q:fq,hint:tf.level(),done:Date.now()};
     await meRef().child('s3').set(up);ME.s3=up;starView();
   };
 }
@@ -679,7 +686,8 @@ function tv3(S){
   const Q=S.filter(x=>x.s3&&x.s3.q).sort((a,b)=>(c[b.n]||0)-(c[a.n]||0)||a.n-b.n);
   return `<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">❓ 우리 반 탐구 질문 (${Q.length}개)</h2><button class="ghost" id="namesT">${showNames?'이름 가리기':'이름 보기'}</button></div>
     <p style="margin:0">⭐가 많은 질문부터 보여요. 이 질문들을 단원을 공부하며 하나씩 해결해 봐요.</p>
-    <div class="qwall">${Q.map((x,i)=>`<div class="${i<3&&c[x.n]?'best':''}"><small>${esc((x.s3.words||[]).join(', '))}${showNames?` · ${x.n} ${esc(x.name)}`:''}</small><b>${esc(x.s3.q)}</b><span>⭐ ${c[x.n]||0}</span></div>`).join('')||'<p class="muted">아직 없어요</p>'}</div></div>`;
+    <p class="muted" style="margin:0" id="tfsum">${ThinkFirst.summary(Q.filter(x=>!x.easy).map(x=>x.s3.hint))}</p>
+    <div class="qwall">${Q.map((x,i)=>`<div class="${i<3&&c[x.n]?'best':''}"><small>${esc((x.s3.words||[]).join(', '))}${showNames?` · ${x.n} ${esc(x.name)}${x.s3.hint?' · '+ThinkFirst.tag(x.s3.hint):''}`:''}</small><b>${esc(x.s3.q)}</b><span>⭐ ${c[x.n]||0}</span></div>`).join('')||'<p class="muted">아직 없어요</p>'}</div></div>`;
 }
 function tv4(S){
   const P=S.filter(x=>x.s4).map(x=>({x,sc:QZ.filter(q=>x.ans&&x.ans[q.id]===true).length,n:QZ.filter(q=>x.s4['ok_'+q.id]).length,t:x.s4.done||9e15})).sort((a,b)=>b.sc-a.sc||b.n-a.n||a.t-b.t);
