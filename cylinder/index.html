@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>원기둥 연구소</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 우리말 지킴이 so the class sees one family of tools. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.fig{width:100%;max-width:280px;height:auto;display:block;margin:0 auto}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:.5em .9em;font-size:1.05rem}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+.roll svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.35em .8em;font-family:var(--text);font-size:1rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld label{font-family:var(--display);font-size:1.1rem}
+.unit{display:flex;align-items:center;gap:8px}
+.unit span{font-family:var(--display)}
+.meter{position:relative;height:46px;background:var(--cream);border-radius:10px;margin:26px 0 8px}
+.meter .band3{position:absolute;top:0;bottom:0;background:#DDEBE1}
+.meter .mk{position:absolute;top:-24px;transform:translateX(-50%);font-family:var(--display);font-size:.95rem;white-space:nowrap}
+.meter .ln{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.meter .dot{position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--coral2);transform:translate(-50%,-50%);border:3px solid #fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list div.out{border-left-color:var(--gold)}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(120px,15em) 1fr 3.5em;gap:10px;align-items:center}
+.bar .track{height:34px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--ok);border-radius:10px}
+.bar span{font-family:var(--display);font-size:1.1rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 9em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:1.1rem}
+.tbl th,.tbl td{background:#fff;padding:.45em .6em;text-align:center}
+.tbl thead th{background:var(--coral);color:#fff;font-family:var(--display);font-weight:400}
+.tbl tbody th{font-family:var(--display);font-weight:400;color:var(--coral2)}
+.tbl tr.outr td,.tbl tr.outr th{background:#FFF4DF}
+.okc{color:var(--ok);font-family:var(--display);font-size:1.3rem;font-weight:400}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+@media (max-width:820px){
+  .hero,.tv,.two{grid-template-columns:1fr}
+  .choose,.opts{grid-template-columns:1fr}
+  .steps button{font-size:.85rem}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+}
+/* 공통 모양 */
+.fig{max-width:300px}
+.eq{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-family:var(--display);font-size:1.3rem}
+.eq input{width:5.5em;text-align:center;font-size:1.25rem}
+.formula{font-family:var(--display);font-size:clamp(1.05rem,3vw,1.4rem);background:#fff;border:2px solid var(--line);border-radius:14px;padding:.4em .8em;text-align:center}
+.formula u{text-decoration:none;color:var(--coral2)}
+.plist{display:grid;gap:8px}
+.pcard{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px;font-family:var(--display);font-size:1.2rem}
+.pcard.star{border-left-color:var(--gold)}
+.pcard b{font-weight:400;color:var(--coral2);margin-right:6px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:start}
+.figs>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;font-family:var(--display)}
+.plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.plot{background:#E7F2D6;border:2px solid #B9D79A;border-radius:14px;padding:8px;text-align:center}
+.plot b{display:block;font-family:var(--display);font-weight:400;font-size:1.1rem}
+.plot .fl{font-size:1.5rem;line-height:1.3;min-height:2.6em;letter-spacing:2px}
+.plot small{color:var(--muted)}
+.expl{background:#FFF4DF;border-radius:12px;padding:8px 14px;width:100%;text-align:left}
+/* 문제별 정답률 */
+.qrate{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qrow.low{border-color:var(--bad);background:#FFF5F2}
+.qrow .qt,.qrow .qw{text-align:left;justify-self:start}
+.qrow .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qrow .qb .track{width:100%;height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qrow .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qrow.low .qb .track div{background:var(--bad)}
+.qrow .pc{font-family:var(--display);font-size:1.3rem}
+.qrow.low .pc{color:var(--bad)}
+@media (max-width:820px){.qrow{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🥫</i> 원기둥 연구소</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<script src="../common/think.js"></script>
+<style>
+/* 원기둥 연구소 */
+.shapes{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%}
+.shapes button{background:#fff;color:var(--ink);border:3px solid var(--line);padding:6px 4px;border-radius:14px;display:grid;justify-items:center;gap:2px;font-size:1.2rem}
+.shapes button svg{width:100%;max-width:120px;height:auto}
+.shapes button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1EA}
+.shapes button.right{border-color:var(--ok);background:#E3F1E7}
+@media (max-width:820px){.shapes{grid-template-columns:repeat(3,1fr)}}
+.tapfig{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.tapfig .tp{cursor:pointer}
+.concept{background:#E8F3EC;border:2px solid var(--ok);border-radius:14px;padding:10px 14px;text-align:left;width:100%}
+.concept b{color:var(--ok)}
+.rot input[type=range]{width:100%;accent-color:var(--coral)}
+textarea{font-family:var(--text);font-size:1.15rem;padding:.6em .75em;border:2px solid var(--line);border-radius:12px;width:100%;min-height:5.5em;color:var(--ink);background:#fff}
+.whys{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.whys div{background:#fff;border-left:6px solid var(--blue);border-radius:10px;padding:8px 14px;font-size:1.15rem}
+.whys small{display:block;color:var(--muted)}
+</style>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const APP='cylinder';
+const STAGES=[null,
+  {k:'기억 소환',t:'체육 교구 모양 · 각기둥과 각뿔 (128~129쪽)',tm:6},
+  {k:'원기둥 찾기',t:'입체도형 분류 · 직사각형 돌리기 (130쪽)',tm:9},
+  {k:'구성 요소',t:'밑면·옆면·높이 · 원기둥이 아닌 까닭 (131쪽)',tm:9},
+  {k:'원기둥 퀴즈',t:'정리 퀴즈 8문제 · 시상식',tm:5}];
+const NST=4;
+const QUIZ=[
+  {id:'q1',q:'원기둥에서 서로 평행하고 합동인 두 면을 무엇이라고 할까요?',a:'밑면',o:['옆면','높이','꼭짓점'],ex:'서로 평행하고 합동인 두 원이 밑면이에요. 위에 있어도 밑면이라고 해요.'},
+  {id:'q2',q:'원기둥의 옆면은 어떤 면일까요?',a:'굽은 면',o:['평평한 직사각형 면','삼각형 면','원 모양 면'],ex:'원기둥의 옆면은 두 밑면과 만나는 굽은 면이에요.'},
+  {id:'q3',q:'원기둥에서 두 밑면 사이의 거리를 무엇이라고 할까요?',a:'높이',o:['지름','모서리','반지름'],ex:'두 밑면 사이의 거리(밑면에 수직인 선분의 길이)가 높이예요.'},
+  {id:'q4',q:'원기둥의 꼭짓점은 몇 개일까요?',a:'0개',o:['2개','4개','6개'],ex:'원기둥에는 꼭짓점도 모서리도 없어요. 각기둥과 다른 점이에요.'},
+  {id:'q5',q:'직사각형의 한 변을 기준으로 한 바퀴 돌리면 어떤 입체도형이 될까요?',a:'원기둥',o:['원뿔','구','사각기둥'],ex:'직사각형을 한 변을 기준으로 돌리면 원기둥이 돼요.'},
+  {id:'q6',q:'가로 4 cm, 세로 7 cm인 직사각형을 세로를 기준으로 돌렸어요. 원기둥 밑면의 지름은?',a:'8 cm',o:['4 cm','7 cm','14 cm'],ex:'가로 4 cm가 밑면의 반지름이 돼요 → 지름 4 × 2 = 8 cm. 높이는 7 cm'},
+  {id:'q7',q:'다음 중 원기둥 모양이 아닌 것은?',a:'안전 고깔',o:['음료수 캔','계주 봉','두루마리 휴지'],ex:'안전 고깔은 뿔 모양이에요. 다음에 배울 원뿔!'},
+  {id:'q8',q:'각기둥과 원기둥의 같은 점은?',a:'두 밑면이 서로 평행하고 합동이에요',o:['옆면이 직사각형이에요','모서리가 있어요','밑면이 다각형이에요'],ex:'둘 다 기둥이라 두 밑면이 평행하고 합동이에요. 원기둥의 밑면은 원, 옆면은 굽은 면이에요.'}];
+const ITEMS=[
+  {id:'a1',st:1,q:'계주 봉의 모양',a:'기둥 모양'},
+  {id:'a2',st:1,q:'안전 고깔의 모양',a:'뿔 모양'},
+  {id:'a3',st:1,q:'배구공의 모양',a:'공 모양'},
+  {id:'a4',st:1,q:'삼각기둥 ① (구성 요소)',a:'꼭짓점'},
+  {id:'a5',st:1,q:'삼각기둥 ② (구성 요소)',a:'옆면'},
+  {id:'a6',st:1,q:'삼각기둥 ③ (구성 요소)',a:'모서리'},
+  {id:'a7',st:1,q:'사각뿔 ① (구성 요소)',a:'각뿔의 꼭짓점'},
+  {id:'a8',st:1,q:'사각뿔 ② (구성 요소)',a:'높이'},
+  {id:'a9',st:1,q:'사각뿔 ③ (구성 요소)',a:'밑면'},
+  {id:'b1',st:2,q:'가~마 중 각기둥 모두 고르기',a:'나, 라'},
+  {id:'b2',st:2,q:'가·다·마의 같은 점',a:'서로 평행한 두 면이 원이에요'},
+  {id:'b3',st:2,q:'직사각형을 돌려 만든 입체도형',a:'원기둥'},
+  {id:'b4',st:2,q:'가로 3 cm·세로 5 cm를 돌린 원기둥의 높이·밑면 지름',a:'높이 5 cm, 지름 6 cm'},
+  {id:'c1',st:3,q:'서로 평행하고 합동인 두 면 누르기',a:'위·아래 두 원'},
+  {id:'c2',st:3,q:'서로 평행하고 합동인 두 면의 이름',a:'밑면'},
+  {id:'c3',st:3,q:'두 밑면과 만나는 굽은 면의 이름',a:'옆면'},
+  {id:'c4',st:3,q:'두 밑면 사이의 거리',a:'높이'},
+  {id:'c5',st:3,q:'각기둥에는 있고 원기둥에는 없는 것',a:'꼭짓점과 모서리'},
+  {id:'c6',st:3,q:'바르게 말한 사람 (지우·희수)',a:'희수'},
+  ...QUIZ.map(x=>({id:x.id,st:4,q:x.q,a:x.a}))];
+
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const same=(a,b)=>Math.abs(a-b)<0.005;
+const num=s=>{const v=parseFloat(String(s).replace(/,/g,''));return isNaN(v)?null:v;};
+const wait=ms=>new Promise(r=>setTimeout(r,RM?0:ms));
+/* ---------- 처음 답 기록 (문제별 정답률) ---------- */
+function rec(id,ok){
+  if(!me||!id)return;
+  if(ME.ans&&ME.ans[id]!==undefined)return;
+  ME.ans={...(ME.ans||{}),[id]:ok};
+  roomRef(me.room).child(`students/${me.num}/ans/${id}`).transaction(v=>v===null?ok:undefined);
+}
+/* ---------- 공통: 고르기 문제 ---------- */
+function pick(box,{id,q,a,o,why,onOk,fig='',noShuffle}){
+  const opts=noShuffle?[a,...o].sort():shuffle([a,...o]);let first=true;
+  box.innerHTML=`<div class="quiz">${fig}<div class="q">${q}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+  $$('.opts button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';setTimeout(onOk,RM?0:650);}
+    else{b.classList.add('wrong');b.disabled=true;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');$('#pm',box).className='msg bad';$('#pm',box).innerHTML=(why&&why[b.dataset.o])||'다시 골라 봐요';}
+  });
+}
+function fillEq(box,{id,html,fields,hint,okText,onOk,solve}){
+  box.innerHTML=html+`<div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div>`;
+  let miss=0,first=true;
+  $('#chk').onclick=async()=>{
+    const v=fields.map(f=>num($('#'+f.id,box).value));
+    const bad=t=>{$('#wm',box).className='msg bad';$('#wm',box).innerHTML=t;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');};
+    if(v.some(x=>x==null))return bad('빈칸을 모두 채워요.');
+    const ok=fields.every((f,k)=>same(v[k],f.want));
+    if(first){rec(id,ok);first=false;}
+    if(!ok){miss++;return bad((hint(v)||'다시 생각해 봐요.')+(miss>=2&&solve?`<br>풀이: ${solve}`:''));}
+    $('#chk').disabled=true;$$('input',box).forEach(x=>x.disabled=true);
+    $('#wm',box).className='msg ok';$('#wm',box).innerHTML=okText;
+    onOk(miss);
+  };
+}
+
+/* ---------- 그림 (교과서 128~131쪽 모양을 본떠 그림) ---------- */
+const INK='#453422',G1='#8FD3BE',G2='#5DB89B',G3='#C9EEDF',PK='#F48FB1',PK2='#F9C6D8',OR='#F7A35C';
+const T=(x,y,s,o='')=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="18" font-family="Jua" fill="${INK}" ${o}>${s}</text>`;
+/* 서 있는 원기둥: cx 가운데, y 위 밑면 높이, rx 반지름, ry 납작한 정도, h 높이 */
+function cylPath(cx,y,rx,ry,h){return `M ${cx-rx} ${y} V ${y+h} A ${rx} ${ry} 0 0 0 ${cx+rx} ${y+h} V ${y} A ${rx} ${ry} 0 0 1 ${cx-rx} ${y} Z`;}
+function cylSVG(cx,y,rx,ry,h,{side=G1,top=G3,dash=true}={}){
+  return `<path d="${cylPath(cx,y,rx,ry,h)}" fill="${side}" stroke="${INK}" stroke-width="2.5"/>
+   ${dash?`<path d="M ${cx-rx} ${y+h} A ${rx} ${ry} 0 0 1 ${cx+rx} ${y+h}" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/>`:''}
+   <ellipse cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" fill="${top}" stroke="${INK}" stroke-width="2.5"/>`;
+}
+const svg=(vb,inner,lab,cls='fig')=>`<svg class="${cls}" viewBox="${vb}" role="img" aria-label="${lab}">${inner}</svg>`;
+const SH={
+  가:()=>svg('0 0 120 110',cylSVG(60,40,48,13,40),'가: 납작한 원기둥'),
+  나:()=>svg('0 0 120 110',`<polygon points="25,15 80,15 80,95 25,95" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><polygon points="80,15 100,30 100,105 80,95" fill="${G2}" stroke="${INK}" stroke-width="2.5"/><polygon points="25,15 80,15 100,30" fill="${G3}" stroke="${INK}" stroke-width="2.5"/><polyline points="25,95 100,105" fill="none" stroke="${INK}" stroke-width="2.5"/><line x1="25" y1="95" x2="80" y2="95" stroke="${INK}" stroke-width="1.5" stroke-dasharray="4 3"/>`,'나: 삼각기둥'),
+  다:()=>svg('0 0 120 110',cylSVG(60,14,26,8,84),'다: 길쭉한 원기둥'),
+  라:()=>svg('0 0 120 110',`<polygon points="22,22 45,12 82,12 100,22 80,32 40,32" fill="${G3}" stroke="${INK}" stroke-width="2.5"/><polygon points="22,22 40,32 40,100 22,90" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><polygon points="40,32 80,32 80,100 40,100" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><polygon points="80,32 100,22 100,90 80,100" fill="${G2}" stroke="${INK}" stroke-width="2.5"/>`,'라: 오각기둥'),
+  마:()=>svg('0 0 120 110',`<path d="M 26 25 H 108 V 85 H 26 A 14 30 0 0 1 26 25 Z" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><path d="M 26 25 A 14 30 0 0 1 26 85" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/>`,'마: 옆으로 누운 원기둥')};
+const SHK=['가','나','다','라','마'];
+function shapesRow(){return `<div class="figs" style="grid-template-columns:repeat(5,1fr)">${SHK.map(k=>`<div>${SH[k]()}${k}</div>`).join('')}</div>`;}
+function figBaton(){return svg('0 0 200 120',`<g transform="rotate(-20 100 60)">${cylSVG(100,18,14,5,90,{side:'#F2C14E',top:'#FBE3A0'})}</g>`,'계주 봉');}
+function figCone(){return svg('0 0 200 130',`<polygon points="100,10 60,110 140,110" fill="${OR}" stroke="${INK}" stroke-width="2.5"/><polygon points="88,40 112,40 120,60 80,60" fill="#fff"/><rect x="45" y="108" width="110" height="12" rx="3" fill="${OR}" stroke="${INK}" stroke-width="2.5"/>`,'안전 고깔');}
+function figBall(){return svg('0 0 200 130',`<circle cx="100" cy="65" r="52" fill="#FDF6E3" stroke="${INK}" stroke-width="2.5"/><path d="M 60 32 Q 110 60 90 116 M 50 80 Q 100 70 148 92 M 120 16 Q 115 60 150 70" fill="none" stroke="#3D6E8C" stroke-width="5"/>`,'배구공');}
+function figPrism(mark=true){
+  return svg('0 0 300 220',`<polygon points="60,40 180,40 120,80" fill="${G3}" stroke="${INK}" stroke-width="2.5"/>
+   <polygon points="60,40 120,80 120,200 60,160" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><polygon points="120,80 180,40 180,160 120,200" fill="${G2}" stroke="${INK}" stroke-width="2.5"/>
+   <line x1="60" y1="160" x2="180" y2="160" stroke="${INK}" stroke-width="1.5" stroke-dasharray="5 4"/>
+   ${mark?`<circle cx="180" cy="40" r="6" fill="#C8452D"/>${T(205,38,'①','fill="#C8452D" font-size="22"')}
+   ${T(92,128,'②','fill="#C8452D" font-size="22"')}
+   <line x1="180" y1="100" x2="230" y2="100" stroke="#C8452D" stroke-width="2"/>${T(248,106,'③','fill="#C8452D" font-size="22"')}
+   ${T(120,62,'밑면','font-size="14"')}<line x1="40" y1="40" x2="40" y2="160" stroke="${INK}" stroke-width="2"/>${T(22,105,'높이','font-size="14"')}`:''}`,'삼각기둥 그림, 구성 요소에 번호');
+}
+function figPyr(mark=true){
+  return svg('0 0 300 220',`<polygon points="150,20 60,170 150,200" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><polygon points="150,20 150,200 240,170" fill="${G2}" stroke="${INK}" stroke-width="2.5"/>
+   <polyline points="60,170 150,140 240,170" fill="none" stroke="${INK}" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="150" y1="20" x2="150" y2="140" stroke="${INK}" stroke-width="1.5" stroke-dasharray="5 4"/>
+   ${mark?`<circle cx="150" cy="20" r="6" fill="#C8452D"/>${T(178,26,'①','fill="#C8452D" font-size="22"')}
+   <line x1="150" y1="88" x2="200" y2="88" stroke="#C8452D" stroke-width="2"/><line x1="150" y1="20" x2="150" y2="140" stroke="#C8452D" stroke-width="3"/>${T(220,94,'②','fill="#C8452D" font-size="22"')}
+   ${T(110,212,'③ (아래 면)','fill="#C8452D" font-size="18"')}`:''}`,'사각뿔 그림, 구성 요소에 번호');
+}
+/* 누를 수 있는 원기둥 (3단계) */
+function figTapCyl(sel={},lab=false){
+  const cx=150,y=50,rx=90,ry=24,h=150;
+  const f=k=>sel[k]?PK:null;
+  return `<svg class="tapfig" viewBox="0 0 300 250" role="img" aria-label="원기둥: 위 원, 아래 원, 옆면을 누를 수 있어요">
+   <path class="tp" data-p="side" d="${cylPath(cx,y,rx,ry,h)}" fill="${f('side')||G1}" stroke="${INK}" stroke-width="3"/>
+   <path class="tp" data-p="bot" d="M ${cx-rx} ${y+h} A ${rx} ${ry} 0 0 0 ${cx+rx} ${y+h} A ${rx} ${ry} 0 0 0 ${cx-rx} ${y+h} Z" fill="${f('bot')||'rgba(0,0,0,0)'}" stroke="${INK}" stroke-width="2" stroke-dasharray="6 5"/>
+   <ellipse class="tp" data-p="top" cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f('top')||G3}" stroke="${INK}" stroke-width="3"/>
+   ${lab?`${T(cx,y+6,'밑면')}${T(cx,y+h+8,'밑면')}${T(cx-40,y+h/2+6,'옆면')}<line x1="${cx+rx+12}" y1="${y}" x2="${cx+rx+12}" y2="${y+h}" stroke="#C8452D" stroke-width="3"/>${T(cx+rx+36,y+h/2+6,'높이','fill="#C8452D"')}`:''}</svg>`;
+}
+function figFrustum(){
+  return svg('0 0 200 170',`<path d="M 70 30 L 30 140 A 70 18 0 0 0 170 140 L 130 30 Z" fill="${PK}" stroke="${INK}" stroke-width="2.5"/><path d="M 30 140 A 70 18 0 0 1 170 140" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/><ellipse cx="100" cy="30" rx="30" ry="9" fill="${PK2}" stroke="${INK}" stroke-width="2.5"/>`,'원기둥처럼 보이지만 위 원이 작고 아래 원이 큰 입체도형');
+}
+/* 직사각형 돌리기: 축 x=A, 직사각형 가로 w(축에서 오른쪽), 위 y0, 높이 h. th(도) 만큼 돌렸을 때 */
+function figRot(th){
+  const A=150,w=80,y0=40,h=140,k=.28,ph=th*Math.PI/180;
+  const pts=yy=>{let s='';const n=Math.max(2,Math.round(th/6));for(let i=0;i<=n;i++){const p=ph*i/n;s+=`${(A+w*Math.cos(p)).toFixed(1)},${(yy+w*k*Math.sin(p)).toFixed(1)} `;}return s;};
+  const full=th>=359.5;
+  const xw=A+w*Math.cos(ph);
+  return `<svg class="fig" viewBox="0 0 300 230" role="img" aria-label="직사각형을 세로 막대를 기준으로 ${Math.round(th)}도 돌린 모습">
+   ${full?cylSVG(A,y0,w,w*k,h,{side:'#FCE0C6',top:'#FFF1E3'}):''}
+   ${th>0&&!full?`<polyline points="${pts(y0)}" fill="none" stroke="${OR}" stroke-width="3"/><polyline points="${pts(y0+h)}" fill="none" stroke="${OR}" stroke-width="3"/>`:''}
+   ${full?'':`<polygon points="${A},${y0} ${xw.toFixed(1)},${(y0+w*k*Math.sin(ph)).toFixed(1)} ${xw.toFixed(1)},${(y0+h+w*k*Math.sin(ph)).toFixed(1)} ${A},${y0+h}" fill="${OR}" fill-opacity=".85" stroke="${INK}" stroke-width="2.5"/>`}
+   <line x1="${A}" y1="10" x2="${A}" y2="220" stroke="${INK}" stroke-width="3"/>
+   <path d="M ${A-22} 22 A 22 7 0 1 0 ${A+22} 22" fill="none" stroke="#D6336C" stroke-width="2.5"/><polygon points="${A+22},22 ${A+16},14 ${A+28},15" fill="#D6336C"/>
+   ${th===0?`${T(A+w/2,y0-8,'가로')}${T(A+w+22,y0+h/2,'세로')}`:''}</svg>`;
+}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 수학 · 6. 원기둥, 원뿔, 구 1차시';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>굽은 면이 있는<br>입체도형은?</h1>
+   <p>체육 교구에서 기둥·뿔·공 모양을 찾고, 각기둥과 비교하며 원기둥을 알아봐요. 직사각형을 돌려 원기둥을 만들고, 밑면·옆면·높이를 찾아요.</p></div>
+   <div class="panel">${shapesRow()}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+function saver(n,R){return async p=>{Object.assign(R,p);ME['s'+n]={...R};await roomRef(me.room).child('students/'+me.num+'/s'+n).update(p);drawSteps();};}
+const inp=(id,lab,w)=>`<input id="${id}" type="number" inputmode="decimal" aria-label="${lab}"${w?` style="width:${w}"`:''}>`;
+function layout(n,title,fig,note=''){
+  shell(`<div class="two"><div class="panel grid"><div><span class="band">${n}단계 · ${STAGES[n].k}</span></div><h2>${title}</h2>${fig}${note}</div><div class="panel grid" id="work"></div></div>`);
+  return $('#work');
+}
+const nextBtn=(label,fn)=>{$('#act').innerHTML=`<button id="nx">${label}</button>`;$('#nx').onclick=fn;};
+
+/* ---------- 1. 기억 소환 (교과서 128~129쪽) ---------- */
+const S1=[
+  {id:'a1',fig:figBaton,t:'체육 시간에 쓰는 교구예요.',q:'계주 봉은 어떤 모양일까요?',a:'기둥 모양',o:['뿔 모양','공 모양']},
+  {id:'a2',fig:figCone,t:'체육 시간에 쓰는 교구예요.',q:'안전 고깔은 어떤 모양일까요?',a:'뿔 모양',o:['기둥 모양','공 모양']},
+  {id:'a3',fig:figBall,t:'체육 시간에 쓰는 교구예요.',q:'배구공은 어떤 모양일까요?',a:'공 모양',o:['기둥 모양','뿔 모양']},
+  {id:'a4',fig:figPrism,t:'6학년 1학기에 배운 삼각기둥이에요.',q:'①은 무엇일까요?',a:'꼭짓점',o:['모서리','옆면','밑면'],why:{'모서리':'①은 선이 아니라 점이에요.'}},
+  {id:'a5',fig:figPrism,t:'6학년 1학기에 배운 삼각기둥이에요.',q:'②는 무엇일까요?',a:'옆면',o:['밑면','모서리','꼭짓점'],why:{'밑면':'밑면은 서로 평행하고 합동인 두 삼각형이에요. ②는 두 밑면과 만나는 면이에요.'}},
+  {id:'a6',fig:figPrism,t:'6학년 1학기에 배운 삼각기둥이에요.',q:'③이 가리키는 선은 무엇일까요?',a:'모서리',o:['높이','꼭짓점','옆면'],why:{'높이':'높이는 두 밑면 사이의 거리예요. ③은 면과 면이 만나는 선이에요.'}},
+  {id:'a7',fig:figPyr,t:'6학년 1학기에 배운 사각뿔이에요.',q:'①은 무엇일까요?',a:'각뿔의 꼭짓점',o:['꼭짓점','밑면','높이'],why:{'꼭짓점':'꼭짓점은 맞지만, 옆면이 모두 만나는 이 점은 특별한 이름이 있어요.'}},
+  {id:'a8',fig:figPyr,t:'6학년 1학기에 배운 사각뿔이에요.',q:'② 빨간 선(각뿔의 꼭짓점에서 밑면에 수직인 선분)의 길이는?',a:'높이',o:['모서리','밑면','옆면'],why:{'모서리':'모서리는 면과 면이 만나는 선이에요. 빨간 선은 각뿔 안쪽에 있어요.'}},
+  {id:'a9',fig:figPyr,t:'6학년 1학기에 배운 사각뿔이에요.',q:'③ 아래에 있는 사각형 면은?',a:'밑면',o:['옆면','높이','각뿔의 꼭짓점']}];
+function stage1(){
+  const R={i:0,...(ME.s1||{})};
+  if(R.done||R.i>=S1.length)return s1Done();
+  const save=saver(1,R);
+  const P=S1[R.i];
+  const work=layout(1,`기억 소환 ${R.i+1}/${S1.length}`,P.fig(),`<p class="muted" style="margin:0">${P.t}</p>`);
+  pick(work,{id:P.id,q:P.q,a:P.a,o:P.o,why:P.why,onOk:async()=>{const last=R.i+1>=S1.length;await save({i:R.i+1,...(last?{done:true,at:Date.now()}:{})});stage1();}});
+}
+function s1Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">1단계 끝</span></div><div class="figs" style="width:100%"><div>${figPrism()}① 꼭짓점 ② 옆면 ③ 모서리</div><div>${figPyr()}① 각뿔의 꼭짓점 ② 높이 ③ 밑면</div></div>
+   <div class="rules" style="text-align:left;width:100%"><b>오늘의 탐구 질문</b><ul><li>계주 봉·안전 고깔·공처럼 <b>굽은 면</b>이 있는 입체도형은 어떻게 분류할 수 있을까?</li></ul></div>
+   <p class="muted">선생님이 2단계를 열면 원이 있는 기둥 모양을 알아봐요.</p></div>`);
+}
+
+/* ---------- 2. 원기둥 찾기 (교과서 130쪽) ---------- */
+let rotTimer=null;
+function stage2(){
+  const R={ph:0,...(ME.s2||{})};
+  if(R.done)return s2Done();
+  const save=saver(2,R),go=p=>async()=>{await save({ph:p});stage2();};
+  if(R.ph<=1){
+    shell(`<div class="panel grid"><div><span class="band">2단계 · 원기둥 찾기</span></div><h2>입체도형을 분류해 봐요 (130쪽 1)</h2><div id="work" class="grid"></div></div>`);
+    const work=$('#work');
+    if(R.ph===0){
+      const sel=new Set();let first=true;
+      work.innerHTML=`<p style="margin:0">각기둥인 것을 <b>모두</b> 눌러요. (6학년 1학기: 두 밑면이 평행하고 합동인 다각형, 옆면이 직사각형)</p>
+        <div class="shapes">${SHK.map(k=>`<button data-k="${k}" aria-pressed="false">${SH[k]()}${k}</button>`).join('')}</div>
+        <div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div>`;
+      $$('.shapes button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));});
+      $('#chk').onclick=()=>{
+        const s=[...sel].sort().join(''),ok=s==='나라';if(first){rec('b1',ok);first=false;}
+        if(!ok){$('#wm').className='msg bad';$('#wm').innerHTML=!sel.size?'각기둥을 골라요.':[...sel].some(k=>'가다마'.includes(k))?'원이 있는 도형은 각기둥이 아니에요. 각기둥의 밑면은 다각형이에요.':'각기둥이 하나 더 있어요. 밑면이 오각형인 것도 찾아봐요.';work.classList.remove('shake');void work.offsetWidth;work.classList.add('shake');return;}
+        $$('.shapes button').forEach(b=>{b.disabled=true;if('나라'.includes(b.dataset.k))b.classList.add('right');});
+        $('#wm').className='msg ok';$('#wm').innerHTML='맞았어요! 각기둥: 나, 라 · 각기둥이 아닌 입체도형: 가, 다, 마';
+        nextBtn('다음 ▶',go(1));
+      };
+      return;
+    }
+    const box=document.createElement('div');work.appendChild(box);
+    work.insertAdjacentHTML('afterbegin',`<div class="figs" style="grid-template-columns:repeat(3,1fr)">${['가','다','마'].map(k=>`<div>${SH[k]()}${k}</div>`).join('')}</div>`);
+    return pick(box,{id:'b2',q:'각기둥이 아닌 가, 다, 마의 같은 점은?',a:'서로 평행한 두 면이 원이에요',o:['옆면이 모두 직사각형이에요','꼭짓점이 6개 있어요'],
+      why:{'옆면이 모두 직사각형이에요':'가, 다, 마의 옆면은 평평하지 않고 굽어 있어요.','꼭짓점이 6개 있어요':'가, 다, 마에는 뾰족한 꼭짓점이 없어요.'},
+      onOk:async()=>{box.insertAdjacentHTML('beforeend',`<div class="concept"><b>개념 확인</b> 가, 다, 마와 같은 입체도형을 <b>원기둥</b>이라고 해요.</div>`);await wait(1600);await save({ph:2});stage2();}});
+  }
+  if(R.ph<=3){
+    const work=layout(2,'직사각형을 돌리면 어떤 입체도형이 될까요? (130쪽 2)',`<div class="rot grid"><div id="rf">${figRot(R.turned?360:0)}</div>
+      <label class="muted" for="rs">손가락으로 밀어서 돌려 봐요</label><input type="range" id="rs" min="0" max="360" value="${R.turned?360:0}" ${R.ph===2?'disabled':''}>
+      <div class="row" style="justify-content:center"><button id="spin" ${R.ph===2?'disabled':''}>▶ 한 바퀴 돌리기</button></div></div>`);
+    const draw=v=>{$('#rf').innerHTML=figRot(+v);};
+    $('#rs').oninput=e=>{draw(e.target.value);if(+e.target.value>=360)turned();};
+    let tdone=false;const turned=()=>{if(tdone)return;tdone=true;if(R.ph===3&&!R.turned){save({turned:true});askB3();}};
+    $('#spin').onclick=()=>{clearInterval(rotTimer);let v=+$('#rs').value>=360?0:+$('#rs').value;if(RM){v=360;$('#rs').value=v;draw(v);return turned();}
+      rotTimer=setInterval(()=>{v=Math.min(360,v+6);if(!$('#rs')){clearInterval(rotTimer);return;}$('#rs').value=v;draw(v);if(v>=360){clearInterval(rotTimer);turned();}},40);};
+    if(R.ph===2){
+      /* 예상 먼저 (기록하지 않음): 돌려 보기 전에 생각해요 */
+      work.innerHTML=`<div class="quiz"><div class="q">돌리기 전에 예상해 봐요.<br>직사각형을 막대를 기준으로 한 바퀴 돌리면?</div>
+        <div class="opts">${['원기둥이 될 것 같아요','각기둥이 될 것 같아요','잘 모르겠어요'].map(x=>`<button data-o="${x}">${x}</button>`).join('')}</div></div>`;
+      $$('.opts button',work).forEach(b=>b.onclick=async()=>{await save({guess:b.dataset.o,ph:3});stage2();});
+      return;
+    }
+    const askB3=()=>{
+      work.innerHTML='';const box=document.createElement('div');work.appendChild(box);
+      pick(box,{id:'b3',q:`예상: “${esc(R.guess||'')}”<br>직접 돌려 보니 어떤 입체도형이 되었나요?`,a:'원기둥',o:['각기둥','원뿔'],
+        why:{'각기둥':'모서리와 꼭짓점이 생겼나요? 위와 아래가 원 모양이에요.','원뿔':'뿔처럼 뾰족한 곳이 있나요? 위와 아래가 같은 크기의 원이에요.'},onOk:go(4)});
+    };
+    if(R.turned)return askB3();
+    work.innerHTML=`<div class="quiz"><div class="emoji" aria-hidden="true">🔄</div><div class="q">예상: “${esc(R.guess||'')}”</div><p>왼쪽 직사각형을 <b>한 바퀴</b> 돌려 봐요. (▶ 단추 또는 밀기)</p></div>`;
+    return;
+  }
+  const work=layout(2,'직사각형을 돌려 만든 원기둥의 크기',`<div>${figRot(0)}</div>`,`<p class="muted" style="margin:0">가로 3 cm, 세로 5 cm인 직사각형을 세로(막대 쪽 변)를 기준으로 한 바퀴 돌렸어요.</p>`);
+  return fillEq(work,{id:'b4',html:`<h2>원기둥의 높이와 밑면의 지름은?</h2>
+      <div class="eq">높이 = ${inp('h','높이')} cm</div>
+      <div class="eq">밑면의 반지름 = ${inp('r','반지름')} cm</div>
+      <div class="eq">밑면의 지름 = ${inp('d','지름')} cm</div>`,
+    fields:[{id:'h',want:5},{id:'r',want:3},{id:'d',want:6}],
+    hint:v=>same(v[0],3)?'막대(기준)와 붙어 있는 세로 5 cm가 높이가 돼요.':same(v[2],3)?'가로 3 cm는 밑면의 <b>반지름</b>이에요. 돌리면 막대 양쪽으로 생기니까 지름은?':same(v[1],6)?'가로 3 cm가 막대에서 밑면 가장자리까지 → 반지름이에요.':same(v[2],5)||same(v[1],5)?'5 cm는 높이예요. 밑면은 가로 3 cm로 만들어져요.':'',
+    solve:'높이 5 cm, 반지름 3 cm, 지름 3 × 2 = <b>6</b> cm',okText:'맞았어요! 높이 5 cm, 밑면의 지름 6 cm',
+    onOk:async()=>{await wait(1300);await save({done:true,at:Date.now()});stage2();}});
+}
+function s2Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">2단계 끝</span></div>
+   <div class="figs" style="width:100%;grid-template-columns:repeat(3,1fr)">${['가','다','마'].map(k=>`<div>${SH[k]()}원기둥</div>`).join('')}</div>
+   <div class="concept"><b>꼭 기억해요</b><br>가, 다, 마와 같은 입체도형을 <b>원기둥</b>이라고 해요.<br>직사각형의 한 변을 기준으로 한 바퀴 돌리면 원기둥이 돼요. (돌린 변 → 높이, 다른 변 → 밑면의 반지름)</div>
+   <p class="muted">선생님이 3단계를 열면 원기둥의 구성 요소를 찾아요.</p></div>`);
+}
+
+/* ---------- 3. 원기둥의 구성 요소 (교과서 131쪽) ---------- */
+const HINT3=['<ul><li>원기둥의 두 밑면은 서로 어떤 관계여야 할까요? (평행? 크기?)</li><li>그림에서 위쪽 원과 아래쪽 원의 크기를 비교해 봐요.</li></ul>',
+  '원기둥은 두 밑면이 …해야 하는데, 이 입체도형은 두 밑면이 … 원기둥이 아니에요.'];
+const FRAME3=['원기둥은 두 밑면이 해야 하는데 이 입체도형은 두 밑면이 원기둥이 아니에요'];
+function stage3(){
+  const R={ph:0,...(ME.s3||{})};
+  if(R.done)return s3Done();
+  const save=saver(3,R),go=p=>async()=>{await save({ph:p});stage3();};
+  if(R.ph<=4){
+    const sel=R.ph>=1?{top:1,bot:1}:{};
+    const work=layout(3,'원기둥의 구성 요소를 알아봐요 (131쪽 3)',`<div id="cf">${figTapCyl(sel,R.ph>=4)}</div>`,
+      R.ph===0?`<p class="muted" style="margin:0">면을 누르면 색칠돼요. 다시 누르면 지워져요.</p>`:'');
+    if(R.ph===0){
+      let first=true;const s={};
+      const bind=()=>$$('#cf .tp').forEach(p=>p.onclick=()=>{const k=p.dataset.p;s[k]=!s[k];$('#cf').innerHTML=figTapCyl(s);bind();});bind();
+      work.innerHTML=`<div class="quiz"><div class="q">서로 <b>평행</b>하고 <b>합동</b>인 두 면을 눌러 색칠해요.</div><div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div></div>`;
+      $('#chk').onclick=()=>{const ok=!!(s.top&&s.bot&&!s.side);if(first){rec('c1',ok);first=false;}
+        if(!ok){$('#wm').className='msg bad';$('#wm').innerHTML=s.side?'굽은 옆면은 평평하지 않아요. 옆면은 빼요.':'평행한 두 면은 위와 아래에 있어요. 아래쪽 원(점선)도 눌러요.';return;}
+        $('#wm').className='msg ok';$('#wm').textContent='맞았어요! 위와 아래의 두 원이에요.';nextBtn('다음 ▶',go(1));};
+      return;
+    }
+    const Q={1:{id:'c2',q:'색칠한 두 면(서로 평행하고 합동인 두 면)을 무엇이라고 할까요?',a:'밑면',o:['옆면','윗면'],why:{'윗면':'위에 있어도 “기본이 되는 면”이라는 뜻으로 밑면이라고 해요.','옆면':'옆면은 두 밑면과 만나는 면이에요.'}},
+      2:{id:'c3',q:'두 밑면과 만나는 <b>굽은 면</b>을 무엇이라고 할까요?',a:'옆면',o:['밑면','곡선'],why:{'밑면':'밑면은 평행한 두 원이에요.','곡선':'곡선은 선이에요. 면의 이름을 골라요.'}},
+      3:{id:'c4',q:'두 밑면 사이의 거리를 무엇이라고 할까요?',a:'높이',o:['지름','모서리'],why:{'지름':'지름은 원(밑면) 안의 길이예요.','모서리':'원기둥에는 모서리가 없어요.'}},
+      4:{id:'c5',q:'각기둥에는 있지만 원기둥에는 <b>없는</b> 것은?',a:'꼭짓점과 모서리',o:['밑면과 옆면','높이'],why:{'밑면과 옆면':'원기둥에도 밑면 2개와 옆면 1개가 있어요.','높이':'원기둥에도 높이가 있어요.'}}}[R.ph];
+    return pick(work,{...Q,onOk:go(R.ph+1)});
+  }
+  const work=layout(3,'바르게 말한 사람을 찾고, 그 까닭을 써요 (131쪽 4)',
+    `<div class="figs" style="grid-template-columns:1fr 1.2fr 1fr;align-items:center"><div>👧 지우<br>“원기둥이네.”</div><div>${figFrustum()}</div><div>👦 희수<br>“원기둥이 아니네.”</div></div>`);
+  if(R.ph===5)return pick(work,{id:'c6',q:'바르게 말한 사람은 누구일까요?',a:'희수',o:['지우'],noShuffle:true,why:{'지우':'위의 원과 아래의 원 크기를 비교해 봐요.'},onOk:go(6)});
+  work.innerHTML=`<h2>이 입체도형이 원기둥이 <b>아닌</b> 까닭을 내 말로 써요</h2>
+    <textarea id="why" aria-label="원기둥이 아닌 까닭" maxlength="140">${esc(R.draft||'')}</textarea><div id="tf3"></div>
+    <div class="msg bad" id="fm" role="status"></div><div class="row" style="justify-content:center"><button id="send">내기</button></div>`;
+  const tf=ThinkFirst.mount($('#tf3'),{key:me.room+'-'+me.num+'-cyl3',wait:40,hints:HINT3});
+  ClassWatch.detail&&ClassWatch.detail(()=>({q:'원기둥이 아닌 까닭'+(tf.level()?' · '+ThinkFirst.tag(tf.level()):''),w:$('#why')?$('#why').value:''}));
+  $('#why').oninput=e=>{R.draft=e.target.value;};
+  $('#send').onclick=async()=>{
+    const w=$('#why').value.trim();
+    if(w.length<8)return $('#fm').textContent='조금 더 자세히 써요. (무엇이 어떻게 다른지)';
+    if(/…|\.\.\./.test(w))return $('#fm').textContent='… 부분을 내 말로 채워요.';
+    if(ThinkFirst.copied(w,FRAME3,0.85))return $('#fm').textContent='시작 틀과 거의 같아요. 내 말로 바꿔 써요.';
+    $('#send').disabled=true;
+    await save({why:w,hint:tf.level(),done:true,at:Date.now()});stage3();
+  };
+}
+function s3Done(){
+  const R=ME.s3||{};
+  shell(`<div class="panel quiz pop"><div><span class="band">3단계 끝</span></div>${figTapCyl({},true)}
+   <div class="concept"><b>꼭 기억해요</b><br>원기둥에서 서로 평행하고 합동인 두 면을 <b>밑면</b>, 두 밑면과 만나는 면을 <b>옆면</b>이라고 해요. 원기둥의 옆면은 <b>굽은 면</b>이에요. 두 밑면 사이의 거리를 <b>높이</b>라고 해요.</div>
+   <div class="expl"><b>내가 쓴 까닭</b><br>${esc(R.why||'')}</div><p class="muted">TV에서 친구들의 까닭을 함께 봐요.</p></div>`);
+}
+
+/* ---------- 4. 정리 퀴즈 ---------- */
+let qOpts={};
+function stage4(){
+  const R={i:0,score:0,...(ME.s4||{})};
+  if(R.di===R.i&&!R.done)R.i++;
+  const save=saver(4,R);
+  if(R.i>=QUIZ.length||R.done){
+    if(!R.done)save({i:QUIZ.length,done:true,at:Date.now()});
+    return shell(`<div class="panel quiz pop"><div><span class="band">원기둥 퀴즈 끝</span></div><div class="emoji" aria-hidden="true">🥫</div>
+      <div class="big">${QUIZ.length}문제 중 ${R.score}문제 맞혔어요!</div><p>TV에서 순위를 확인해요. 다음 시간에는 원기둥을 잘라 펼쳐 봐요(전개도).</p></div>`);
+  }
+  const Q=QUIZ[R.i];
+  const opts=qOpts[Q.id]||(qOpts[Q.id]=shuffle([Q.a,...Q.o]));
+  shell(`<div class="panel quiz"><div class="row" style="justify-content:space-between;width:100%"><span class="band">원기둥 퀴즈 ${R.i+1}/${QUIZ.length}</span><span class="score">🥫 ${R.score}</span></div>
+    <div class="prog">${QUIZ.map((_,k)=>`<span class="${k<R.i?'on':k===R.i?'cur':''}"></span>`).join('')}</div>
+    <div class="q">${esc(Q.q)}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    <div class="msg" id="pm" role="status"></div><div id="ex"></div><div class="row" id="act" style="justify-content:center"></div></div>`);
+  $$('.opts button').forEach(b=>b.onclick=async()=>{
+    const ok=b.dataset.o===Q.a;rec(Q.id,ok);
+    $$('.opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===Q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    $('#pm').className='msg '+(ok?'ok':'bad');$('#pm').textContent=ok?'맞았어요! 🥫 +1':'아쉬워요. 정답을 확인해요.';
+    $('#ex').innerHTML=`<div class="expl">${esc(Q.ex)}</div>`;
+    const sc=R.score+(ok?1:0),last=R.i+1>=QUIZ.length;
+    await save({score:sc,di:R.i,...(R.i===0&&!R.startAt?{startAt:Date.now()}:{})});
+    nextBtn(last?'끝! ▶':'다음 문제 ▶',async()=>{await save({i:R.i+1,...(last?{done:true,at:Date.now()}:{})});stage4();});
+  });
+}
+/* ---------- student: room ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  $('#sub').textContent=`${me.num}번 ${me.name}`;
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store(APP+'-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  /* 선생님이 시작을 누르기 전에는 그 단계를 대기 화면으로 보여 줘요 */
+  listen(roomRef(me.room).child('go'),s=>{
+    const g=s.val()||0;const was=ROOMV.go||0;ROOMV.go=g;
+    if(!ready)return;
+    if((cur>was)!==(cur>g))renderStage(); else drawSteps();
+  });
+}
+function waitView(){
+  ClassWatch.step('대기',{n:cur,total:NST,wait:true});
+  shell(`<div class="panel quiz pop"><div><span class="band">${cur}단계 · ${STAGES[cur].k}</span></div><div class="emoji" aria-hidden="true">👂</div>
+    <h2 style="font-size:1.8rem">선생님 설명을 들어요</h2><p>선생님이 <b>시작</b>을 누르면 활동이 열려요. 태블릿은 잠깐 내려놓아요.</p></div>`);
+}
+function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n>ROOMV.stage||n>(ROOMV.go||0)?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store(APP+'-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+function renderStage(){
+  if(cur>(ROOMV.go||0))return waitView();
+  ClassWatch.step(STAGES[cur].k,{n:cur,total:NST,wait:stepDone(cur)});
+  onMe=()=>drawSteps();
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  return stage4();
+}
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store(APP+'-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm();
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store(APP+'-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store(APP+'-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:APP,stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store(APP+'-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});const st=RD.stage||1;if((RD.go||0)<st)ref.child('go').set(st);}};
+  $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  const waitSt=(RD.go||0)<(RD.stage||1);
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?`학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.`:`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+
+let tvStage=0,tvAll=false,showWrong=false,tvAns=false,tvAward=false,whyNames=false;
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>stepDoneOf(x,st);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  const changed=tvStage!==st;tvStage=st;
+  if(changed||!$('#tvtop')){
+    tvAns=false;tvAward=false;
+    main.innerHTML=`<div id="tvtop"></div><div id="tvmid"></div><div id="tvq"></div>`;
+    tvTop(st);
+  }
+  $('#tvmid').innerHTML=st===4?rankBox(S):progressBox(st,S)+(st===3?whyBox(S):'');
+  $('#tvq').innerHTML=quizBox(S,st);
+  $('#wrongT').onclick=()=>{showWrong=!showWrong;renderTV();};
+  $('#allT').onclick=()=>{tvAll=!tvAll;renderTV();};
+  const wn=$('#whyN');if(wn)wn.onclick=()=>{whyNames=!whyNames;renderTV();};
+}
+function stepDoneOf(x,n){return !!(x['s'+n]&&x['s'+n].done);}
+const TVP={
+  1:{h:'굽은 면이 있는 입체도형은 어떻게 분류할 수 있을까? (교과서 128~129쪽)',figs:()=>[[figBaton(),'계주 봉'],[figCone(),'안전 고깔'],[figBall(),'배구공'],[figPrism(),'삼각기둥'],[figPyr(),'사각뿔']],
+     talk:['체육 시간에 재미있게 했던 활동은? 그때 쓴 교구는?','계주 봉·안전 고깔·공은 각각 어떤 모양인가요?','6학년 1학기에 배운 각기둥·각뿔의 구성 요소를 떠올려요'],
+     ans:['계주 봉: 기둥 모양 · 안전 고깔: 뿔 모양 · 배구공: 공 모양','삼각기둥: ① <b>꼭짓점</b> ② <b>옆면</b> ③ <b>모서리</b>','사각뿔: ① <b>각뿔의 꼭짓점</b> ② <b>높이</b> ③ <b>밑면</b>']},
+  2:{h:'원이 있는 기둥 모양을 알아볼까? (교과서 130쪽)',figs:()=>[...SHK.map(k=>[SH[k](),k]),[figRot(360),'직사각형 돌리기']],
+     talk:['가~마의 같은 점과 다른 점은? 어떤 기준으로 나눌 수 있을까요?','각기둥이 아닌 입체도형(가, 다, 마)의 특징은?','직사각형을 막대를 기준으로 한 바퀴 돌리면? 먼저 예상해요'],
+     ans:['각기둥: <b>나, 라</b> · 각기둥이 아닌 입체도형: <b>가, 다, 마</b>','가, 다, 마와 같은 입체도형을 <b>원기둥</b>이라고 합니다.','직사각형을 한 변을 기준으로 돌리면 <b>원기둥</b>','가로 3 cm·세로 5 cm → 높이 <b>5 cm</b>, 밑면의 지름 <b>6 cm</b>']},
+  3:{h:'원기둥의 구성 요소를 알아봅시다 (교과서 131쪽)',figs:()=>[[figTapCyl({},true),'원기둥의 구성 요소'],[figFrustum(),'지우: 원기둥이네. · 희수: 원기둥이 아니네.']],
+     talk:['서로 평행하고 합동인 두 면은? 그 면과 만나는 면의 특징은?','두 면 사이의 거리는 어떻게 재면 좋을까요? (자와 삼각자)','각기둥과 비교하면 원기둥에 없는 것은?'],
+     ans:['서로 평행하고 합동인 두 면: <b>밑면</b> · 두 밑면과 만나는 면: <b>옆면</b>(굽은 면)','두 밑면 사이의 거리: <b>높이</b>','원기둥에는 <b>꼭짓점과 모서리가 없어요</b>','바르게 말한 사람: <b>희수</b> · 까닭: 두 밑면이 서로 합동이 아니에요']}};
+function tvTop(st){
+  if(st===4){
+    $('#tvtop').innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🥫 원기둥 퀴즈</h2><button class="ghost" id="awT">🏆 시상식</button></div>
+      <p class="muted" style="margin:0">오늘 배운 원기둥 8문제 · 맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요.</p></div>`;
+    $('#awT').onclick=()=>{tvAward=!tvAward;$('#awT').textContent=tvAward?'순위 보기':'🏆 시상식';renderTV();};
+    return;
+  }
+  const P=TVP[st];
+  const draw=()=>{$('#tva').innerHTML=tvAns?`<div class="plist">${P.ans.map(a=>`<div class="pcard">${a}</div>`).join('')}</div>`:'';$('#tvaT').textContent=tvAns?'정답 가리기':'정답 보기';};
+  $('#tvtop').innerHTML=`<div class="panel grid"><h2 style="font-size:1.8rem">${P.h}</h2>
+    <div class="figs">${P.figs().map(([f,c])=>`<div>${f}${c}</div>`).join('')}</div>
+    <div class="rules"><b>함께 이야기해요</b><ul>${P.talk.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva"></div></div>`;
+  $('#tvaT').onclick=()=>{tvAns=!tvAns;draw();};
+  draw();
+}
+function ranked(S){
+  return S.filter(x=>x.s4).map(x=>({...x,sc:x.s4.score||0,fin:!!x.s4.done,t:x.s4.done?(x.s4.at-(x.s4.startAt||x.s4.at)):Infinity}))
+    .sort((a,b)=>b.sc-a.sc||(b.fin-a.fin)||a.t-b.t||a.n-b.n);
+}
+function rankBox(S){
+  const R=ranked(S);
+  if(tvAward){
+    const top=R.filter(x=>x.fin).slice(0,3);
+    const p=(x,c,m)=>x?`<div class="${c}"><b>${m}</b><span>${x.n} ${esc(x.name)}</span>🥫 ${x.sc}</div>`:`<div class="${c}"><b>${m}</b><span>-</span></div>`;
+    return `<div class="panel grid" id="award"><h2 style="font-size:1.8rem;text-align:center">🏆 원기둥 연구소 시상식</h2>
+      <div class="podium">${p(top[1],'p2','🥈')}${p(top[0],'p1','🥇')}${p(top[2],'p3','🥉')}</div>
+      <p class="muted" style="text-align:center;margin:0">맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요.</p></div>`;
+  }
+  return `<div class="panel grid" id="rankb"><div class="row" style="justify-content:space-between"><h2>원기둥 퀴즈 순위</h2><span class="muted">끝 ${R.filter(x=>x.fin).length}/${S.length}명</span></div>
+    <div class="rank">${R.map((x,k)=>{const s4=x.s4||{};const i=Math.min(QUIZ.length,(s4.i||0)+(s4.di===s4.i?1:0));return `<div class="r"><b>${k+1}</b><span class="nm">${x.n} ${esc(x.name)}</span><span class="trk muted">${s4.done?'끝 ✓':i+'/'+QUIZ.length+' 문제'}</span><span class="pt">🥫 ${x.sc}</span></div>`;}).join('')||'<p class="muted">아직 아무도 없어요</p>'}</div></div>`;
+}
+function whyBox(S){
+  const W=S.filter(x=>x.s3&&x.s3.why);
+  return `<div class="panel grid" id="whys"><div class="row" style="justify-content:space-between"><h2>원기둥이 아닌 까닭 (${W.length}명)</h2><button class="ghost" id="whyN">${whyNames?'이름 가리기':'이름 보기'}</button></div>
+    <p class="muted" style="margin:0" id="tfsum">${ThinkFirst.summary(W.map(x=>x.s3.hint))}</p>
+    <div class="whys">${W.map(x=>`<div>${esc(x.s3.why)}${whyNames?`<small>${x.n} ${esc(x.name)}${x.s3.hint?' · '+ThinkFirst.tag(x.s3.hint):''}</small>`:''}</div>`).join('')||'<p class="muted">아직 없어요</p>'}</div></div>`;
+}
+function progressBox(st,S){
+  const its=ITEMS.filter(x=>x.st===st);
+  const has=id=>S.filter(x=>x.ans&&x.ans[id]!==undefined).length;
+    return `<div class="panel grid"><h2>얼마나 했나요?</h2><div class="bars">${its.map((q,k)=>`<div class="bar"><span>${esc(q.q.length>26?q.q.slice(0,25)+'…':q.q)}</span><div class="track"><div style="width:${S.length?has(q.id)/S.length*100:0}%"></div></div><span>${has(q.id)}명</span></div>`).join('')}</div></div>`;
+}
+/* 문제별 정답률 + 틀린 학생 이름 (처음 답 기준) */
+function quizStats(S,st){
+  return ITEMS.map(q=>({q,no:ITEMS.filter(x=>x.st===q.st).indexOf(q)+1})).filter(r=>tvAll||r.q.st===st).map(r=>{
+    const done=S.filter(x=>x.ans&&x.ans[r.q.id]!==undefined);
+    const miss=done.filter(x=>x.ans[r.q.id]===false);
+    const ok=done.length-miss.length;
+    return {...r,done:done.length,ok,miss,rate:done.length?Math.round(ok/done.length*100):null};
+  });
+}
+function quizBox(S,st){
+  const R=quizStats(S,st).sort((a,b)=>(a.rate??101)-(b.rate??101)||a.q.st-b.q.st||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
+   <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
+   <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
