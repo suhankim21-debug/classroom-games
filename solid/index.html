@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>원기둥·원뿔·구 실험실</title>
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+:root{--bg:#F2EEE3;--card:#fff;--ink:#1D2A33;--navy:#0E3B5C;--line:#D8D1C0;--red:#E4572E;--blue:#2E86C1;--green:#2E9E5B;--orange:#F98F6E;--yellow:#F4C542}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;background:var(--navy);color:#fff}
+header h1{margin:0;font-size:1.4rem;flex:1 1 auto}
+header button{background:transparent;color:#fff;border:2px solid #ffffff88;border-radius:10px;padding:6px 12px;font:inherit;cursor:pointer}
+nav{display:flex;gap:8px;padding:12px 16px 0;flex-wrap:wrap}
+nav button{flex:1 1 180px;font:inherit;font-size:1.05rem;padding:10px 12px;border-radius:14px 14px 0 0;border:2px solid var(--line);border-bottom:none;background:#E7E1D2;color:var(--navy);cursor:pointer;text-align:left}
+nav button small{display:block;font-size:.8rem;color:#6b6457}
+nav button.on{background:var(--card);font-weight:bold}
+main{margin:0 16px 16px;background:var(--card);border:2px solid var(--line);border-radius:0 0 14px 14px;padding:14px}
+section{display:none}section.on{display:block}
+.q{font-size:1.25rem;font-weight:bold;color:var(--navy);margin:0 0 10px}
+.q span{background:var(--yellow);color:var(--ink);border-radius:8px;padding:0 8px;margin-right:6px;font-size:1rem}
+.view{position:relative;width:100%;height:min(56vh,52vw);min-height:280px;background:#FBFAF6;border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;cursor:grab}
+.view canvas{display:block;width:100%;height:100%}
+.view .lb{position:absolute;transform:translate(-50%,-50%);background:#fff;border:2px solid var(--navy);color:var(--navy);border-radius:8px;padding:1px 8px;font-weight:bold;font-size:1.05rem;white-space:nowrap;pointer-events:none}
+.view .lb.hot{background:var(--orange);border-color:var(--orange);color:#fff}
+.view .hint{position:absolute;right:10px;bottom:8px;color:#6b6457;font-size:.9rem;pointer-events:none}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:12px;font-size:1.05rem}
+.ctl button{font:inherit;font-weight:bold;padding:10px 18px;border-radius:12px;border:none;background:var(--navy);color:#fff;cursor:pointer}
+.ctl button.sub{background:#E7E1D2;color:var(--navy)}
+.ctl button.pick{background:#E7E1D2;color:var(--navy);font-weight:normal}
+.ctl button.pick.on{background:var(--orange);color:#fff;font-weight:bold}
+.ctl label{display:flex;align-items:center;gap:8px}
+.ctl input[type=range]{width:180px;accent-color:var(--navy)}
+.ctl input[type=checkbox]{width:22px;height:22px;accent-color:var(--navy)}
+.ctl b.val{min-width:3.5em;display:inline-block}
+.say{margin-top:12px;padding:12px 14px;border-radius:12px;background:#FFF6D9;font-size:1.2rem;line-height:1.6;min-height:3.2em}
+.hl{color:var(--red);font-weight:bold}
+table{width:100%;border-collapse:collapse;font-size:1.1rem;margin-top:12px}
+th,td{border:1px solid var(--line);padding:8px 6px;text-align:center}
+thead th{background:#E7E1D2;color:var(--navy)}
+td.hide{color:transparent;background:#F7F3EA;cursor:pointer}
+td.hide::after{content:'?';color:#B5AA92}
+a.home{display:inline-block;margin:0 16px 24px;color:var(--navy)}
+</style></head>
+<body>
+<header><h1>🧊 원기둥·원뿔·구 실험실</h1><button id="fs">전체 화면</button></header>
+<nav>
+  <button data-t="s1" class="on">① 돌려 만들기<small>직사각형·직각삼각형·반원 (1·4·5차시)</small></button>
+  <button data-t="s2">② 구성 요소<small>밑면·옆면·높이·모선·중심 (1·4·5차시)</small></button>
+  <button data-t="s3">③ 전개도<small>원기둥을 잘라 펼치기 (2~3차시)</small></button>
+  <button data-t="s4">④ 비교하기<small>같은 점과 다른 점 · 본 모양 (5~8차시)</small></button>
+</nav>
+<main>
+<section id="s1" class="on">
+  <p class="q"><span>①</span>평면도형을 한 변(막대)을 기준으로 돌리면 어떤 입체도형이 될까요?</p>
+  <div class="view" id="v1"><div class="hint">손가락으로 끌어서 돌려 봐요</div></div>
+  <div class="ctl">
+    <button class="pick on" data-sh="rect">직사각형</button><button class="pick" data-sh="tri">직각삼각형</button><button class="pick" data-sh="semi">반원</button>
+    <button id="r1play">▶ 한 바퀴 돌리기</button><button class="sub" id="r1reset">처음으로</button>
+  </div>
+  <div class="ctl">
+    <label>돌린 각도 <input type="range" id="r1ang" min="0" max="360" value="0"><b class="val" id="r1angv">0°</b></label>
+    <label id="r1wl">가로 <input type="range" id="r1w" min="1" max="6" step="0.5" value="3"><b class="val" id="r1wv">3 cm</b></label>
+    <label id="r1hl">세로 <input type="range" id="r1h" min="1" max="8" step="0.5" value="5"><b class="val" id="r1hv">5 cm</b></label>
+  </div>
+  <div class="say" id="say1">먼저 무엇이 될지 예상해 보고 ▶ 단추를 눌러요.</div>
+</section>
+<section id="s2">
+  <p class="q"><span>②</span>입체도형의 구성 요소를 찾아봐요. 단추를 누르면 그 부분이 색칠돼요.</p>
+  <div class="view" id="v2"><div class="hint">손가락으로 끌어서 돌려 봐요</div></div>
+  <div class="ctl"><button class="pick on" data-so="cyl">원기둥</button><button class="pick" data-so="cone">원뿔</button><button class="pick" data-so="sph">구</button></div>
+  <div class="ctl" id="parts"></div>
+  <div class="say" id="say2"></div>
+</section>
+<section id="s3">
+  <p class="q"><span>③</span>원기둥을 잘라서 펼치면 어떤 모양이 될까요?</p>
+  <div class="view" id="v3"><div class="hint">손가락으로 끌어서 돌려 봐요</div></div>
+  <div class="ctl">
+    <button id="r3play">▶ 펼치기</button><button class="sub" id="r3back">◀ 다시 접기</button>
+    <label>펼친 정도 <input type="range" id="r3t" min="0" max="100" value="0"><b class="val" id="r3tv">0%</b></label>
+  </div>
+  <div class="ctl">
+    <label>밑면의 반지름 <input type="range" id="r3r" min="1" max="4" step="0.5" value="2"><b class="val" id="r3rv">2 cm</b></label>
+    <label>높이 <input type="range" id="r3h" min="2" max="8" step="0.5" value="5"><b class="val" id="r3hv">5 cm</b></label>
+    <label><input type="checkbox" id="r3fit" checked> 옆면 가로를 밑면의 둘레와 같게</label>
+    <label id="r3ll">옆면 가로 <input type="range" id="r3l" min="6" max="26" step="0.5" value="12.56" disabled><b class="val" id="r3lv"></b></label>
+  </div>
+  <div class="say" id="say3"></div>
+</section>
+<section id="s4">
+  <p class="q"><span>④</span>원기둥, 원뿔, 구를 여러 방향에서 보고 같은 점과 다른 점을 찾아봐요.</p>
+  <div class="view" id="v4"><div class="hint">손가락으로 끌어서 돌려 봐요</div></div>
+  <div class="ctl"><button class="pick" data-cam="front">앞에서 보기</button><button class="pick" data-cam="top">위에서 보기</button><button class="pick" data-cam="side">옆에서 보기</button><button class="pick on" data-cam="free">비스듬히 보기</button><button class="sub" id="r4all">표 모두 보기</button></div>
+  <table id="tb4"><thead><tr><th></th><th>원기둥</th><th>원뿔</th><th>구</th></tr></thead><tbody>
+    <tr><th>밑면</th><td class="hide">2개 (원)</td><td class="hide">1개 (원)</td><td class="hide">없어요</td></tr>
+    <tr><th>꼭짓점</th><td class="hide">없어요</td><td class="hide">1개 (원뿔의 꼭짓점)</td><td class="hide">없어요</td></tr>
+    <tr><th>앞에서 본 모양</th><td class="hide">직사각형</td><td class="hide">삼각형</td><td class="hide">원</td></tr>
+    <tr><th>위에서 본 모양</th><td class="hide">원</td><td class="hide">원</td><td class="hide">원</td></tr>
+    <tr><th>돌려 만든 도형</th><td class="hide">직사각형</td><td class="hide">직각삼각형</td><td class="hide">반원</td></tr>
+  </tbody></table>
+  <div class="say" id="say4">칸을 누르면 답이 보여요. 같은 점: 모두 굽은 면이 있어요, 위에서 보면 모두 원이에요.</div>
+</section>
+</main>
+<a class="home" href="../">← 모든 활동</a>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C={side:0x8FD3BE,base:0xC9EEDF,hot:0xF98F6E,plane:0xF7A35C,ink:0x1D2A33,red:0xE4572E,blue:0x2E86C1};
+/* ---------- 3D 화면 하나 만들기 (끌어서 돌리기, 이름표) ---------- */
+function makeView(el,{dist=16,target=[0,2.5,0],theta=-0.6,phi=1.15}={}){
+  const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));r.setClearColor(0xFBFAF6);
+  el.prepend(r.domElement);
+  const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(35,1,0.1,200);
+  scene.add(new THREE.AmbientLight(0xffffff,.65));const dl=new THREE.DirectionalLight(0xffffff,.55);dl.position.set(-6,10,8);scene.add(dl);
+  const V={el,r,scene,cam,dist,target:new THREE.Vector3(...target),theta,phi,labels:[],fresh:true};
+  V.place=()=>{const s=Math.sin(V.phi);cam.position.set(V.target.x+V.dist*s*Math.sin(V.theta),V.target.y+V.dist*Math.cos(V.phi),V.target.z+V.dist*s*Math.cos(V.theta));cam.lookAt(V.target);};
+  let drag=null;
+  el.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,t:V.theta,p:V.phi};el.setPointerCapture(e.pointerId);el.style.cursor='grabbing';});
+  el.addEventListener('pointermove',e=>{if(!drag)return;V.theta=drag.t-(e.clientX-drag.x)*0.01;V.phi=Math.min(3.0,Math.max(0.05,drag.p-(e.clientY-drag.y)*0.01));V.onDrag&&V.onDrag();});
+  el.addEventListener('pointerup',()=>{drag=null;el.style.cursor='grab';});
+  V.label=(text,pos,hot=false)=>{const d=document.createElement('div');d.className='lb'+(hot?' hot':'');d.textContent=text;el.appendChild(d);V.labels.push({d,pos:new THREE.Vector3(...pos)});};
+  V.clearLabels=()=>{V.labels.forEach(l=>l.d.remove());V.labels=[];};
+  V.render=()=>{const w=el.clientWidth,h=el.clientHeight;if(!w)return;if(r.domElement.width!==Math.round(w*r.getPixelRatio())||V.fresh){r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();V.fresh=false;}
+    V.place();r.render(scene,cam);
+    V.labels.forEach(l=>{const p=l.pos.clone().project(cam);l.d.style.left=((p.x+1)/2*w)+'px';l.d.style.top=((1-p.y)/2*h)+'px';l.d.style.display=p.z<1?'':'none';});};
+  return V;
+}
+const mat=(c,o={})=>new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide,transparent:o.op!=null,opacity:o.op??1,depthWrite:o.op==null||o.op>0.9});
+function line(pts,color=C.ink,dashed=false){
+  const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));
+  const m=dashed?new THREE.LineDashedMaterial({color,dashSize:.25,gapSize:.18}):new THREE.LineBasicMaterial({color});
+  const L=new THREE.Line(g,m);if(dashed)L.computeLineDistances();return L;
+}
+function ring(r,y,color=C.ink,dashed=false,n=80){return line([...Array(n+1)].map((_,i)=>[r*Math.cos(i/n*2*Math.PI),y,r*Math.sin(i/n*2*Math.PI)]),color,dashed);}
+function dot(p,color=C.red,s=.12){const m=new THREE.Mesh(new THREE.SphereGeometry(s,16,12),new THREE.MeshBasicMaterial({color}));m.position.set(...p);return m;}
+function clear(g){while(g.children.length){const c=g.children.pop();c.geometry&&c.geometry.dispose();}}
+
+/* ---------- ① 돌려 만들기 ---------- */
+const V1=makeView($('#v1'),{dist:20,target:[0,2.5,0]});
+const G1=new THREE.Group();V1.scene.add(G1);
+let sh='rect',ang=0,anim1=null;
+function profile(){const w=+$('#r1w').value,h=+$('#r1h').value;
+  if(sh==='rect')return [[0,0],[w,0],[w,h],[0,h]];
+  if(sh==='tri')return [[0,0],[w,0],[0,h]];
+  const n=40;return [...Array(n+1)].map((_,i)=>{const a=i/n*Math.PI;return [w*Math.sin(a),w-w*Math.cos(a)];});}
+function draw1(){
+  clear(G1);V1.clearLabels();
+  const w=+$('#r1w').value,h=sh==='semi'?2*w:+$('#r1h').value,P=profile(),th=ang*Math.PI/180;
+  G1.add(line([[0,-1.2,0],[0,Math.max(h,2*w)+1.4,0]],C.ink));
+  if(th>0.001){
+    const lathe=new THREE.LatheGeometry(P.map(p=>new THREE.Vector2(Math.max(p[0],0.0001),p[1])),96,Math.PI/2,th);
+    G1.add(new THREE.Mesh(lathe,mat(C.side,{op:ang>=360?1:.55})));
+    if(ang>=360){if(sh==='rect'){G1.add(ring(w,0),ring(w,h));}else if(sh==='tri')G1.add(ring(w,0));}
+  }
+  if(ang<360){
+    const s=new THREE.Shape();P.forEach((p,i)=>i?s.lineTo(p[0],p[1]):s.moveTo(p[0],p[1]));
+    const m=new THREE.Mesh(new THREE.ShapeGeometry(s),mat(C.plane,{op:.95}));m.rotation.y=th;G1.add(m);
+    const o=line([...P,P[0]].map(p=>[p[0],p[1],0]),C.ink);o.rotation.y=th;G1.add(o);
+    if(ang===0){
+      if(sh!=='semi'){V1.label('가로 '+w+' cm',[w/2,-.5,0]);V1.label('세로 '+h+' cm',[sh==='rect'?w+1.3:-1.4,h/2,0]);}
+      else V1.label('반지름 '+w+' cm',[w/2,w+.5,0]);
+    }
+  }else{
+    if(sh==='rect'){V1.label('높이 '+h+' cm',[w+1.6,h/2,0]);V1.label('밑면의 반지름 '+w+' cm',[w/2,h+.6,0]);}
+    if(sh==='tri'){V1.label('높이 '+h+' cm',[-1.6,h/2,0]);V1.label('밑면의 반지름 '+w+' cm',[w/2,-.6,0]);dot&&G1.add(dot([0,h,0]));}
+    if(sh==='semi'){G1.add(dot([0,w,0]));V1.label('구의 중심',[0,w,0]);V1.label('구의 반지름 '+w+' cm',[w+1.4,w,0]);}
+  }
+  $('#r1ang').value=ang;$('#r1angv').textContent=Math.round(ang)+'°';
+  const name={rect:'원기둥',tri:'원뿔',semi:'구'}[sh];
+  $('#say1').innerHTML=ang>=360?(sh==='rect'?`직사각형을 한 변을 기준으로 돌리면 <span class="hl">원기둥</span>이 돼요. 기준이 된 세로 ${h} cm → <b>높이</b>, 가로 ${w} cm → <b>밑면의 반지름</b> (밑면의 지름 ${w*2} cm)`:
+    sh==='tri'?`직각삼각형을 한 변을 기준으로 돌리면 <span class="hl">원뿔</span>이 돼요. 기준이 된 변 ${h} cm → <b>높이</b>, 다른 변 ${w} cm → <b>밑면의 반지름</b>`:
+    `반원을 지름을 기준으로 돌리면 <span class="hl">구</span>가 돼요. 반원의 중심 → <b>구의 중심</b>, 반원의 반지름 ${w} cm → <b>구의 반지름</b>`)
+    :ang>0?`돌리는 중… 지나간 자리에 어떤 모양이 생기나요?`:`${({rect:'직사각형',tri:'직각삼각형',semi:'반원'})[sh]}을 막대를 기준으로 돌리면 무엇이 될까요? 먼저 예상해 봐요.`;
+  $('#r1hl').style.display=sh==='semi'?'none':'';$('#r1wl').firstChild.textContent=sh==='semi'?'반지름 ':'가로 ';
+  $('#r1wv').textContent=$('#r1w').value+' cm';$('#r1hv').textContent=$('#r1h').value+' cm';
+  V1.target.set(0,(sh==='semi'?w:h)/2,0);
+}
+$$('[data-sh]').forEach(b=>b.onclick=()=>{$$('[data-sh]').forEach(x=>x.classList.toggle('on',x===b));sh=b.dataset.sh;cancelAnimationFrame(anim1);ang=0;draw1();});
+$('#r1ang').oninput=e=>{cancelAnimationFrame(anim1);ang=+e.target.value;draw1();};
+['#r1w','#r1h'].forEach(s=>$(s).oninput=draw1);
+$('#r1reset').onclick=()=>{cancelAnimationFrame(anim1);ang=0;draw1();};
+$('#r1play').onclick=()=>{cancelAnimationFrame(anim1);if(ang>=360)ang=0;if(RM){ang=360;return draw1();}const st=performance.now(),a0=ang;
+  const step=now=>{ang=Math.min(360,a0+(now-st)/4000*360);draw1();if(ang<360)anim1=requestAnimationFrame(step);};anim1=requestAnimationFrame(step);};
+
+/* ---------- ② 구성 요소 ---------- */
+const V2=makeView($('#v2'),{dist:18,target:[0,2.5,0]});
+const G2=new THREE.Group();V2.scene.add(G2);
+let so='cyl',hot='all';
+const PARTS={cyl:[['all','모두 보기'],['base','밑면'],['side','옆면'],['height','높이']],
+  cone:[['all','모두 보기'],['apex','원뿔의 꼭짓점'],['base','밑면'],['side','옆면'],['slant','모선'],['many','모선 여러 개'],['height','높이']],
+  sph:[['all','모두 보기'],['center','구의 중심'],['radius','구의 반지름'],['many','반지름 여러 개']]};
+const SAY={cyl:{all:'원기둥: 밑면 2개, 옆면 1개. 꼭짓점과 모서리가 없어요.',base:'<b>밑면</b>: 서로 평행하고 합동인 두 원. 위에 있어도 밑면이라고 해요.',side:'<b>옆면</b>: 두 밑면과 만나는 <span class="hl">굽은 면</span>이에요.',height:'<b>높이</b>: 두 밑면 사이의 거리. 두 밑면에 수직인 선분의 길이를 재요.'},
+  cone:{all:'원뿔: 밑면 1개, 옆면 1개, 꼭짓점 1개(원뿔의 꼭짓점).',apex:'<b>원뿔의 꼭짓점</b>: 뾰족한 부분의 점이에요.',base:'<b>밑면</b>: 평평한 원 하나예요.',side:'<b>옆면</b>: 굽은 면이에요.',slant:'<b>모선</b>: 원뿔의 꼭짓점과 밑면인 원의 둘레의 한 점을 이은 선분이에요.',many:'모선은 셀 수 없이 많고, <span class="hl">길이가 모두 같아요</span>.',height:'<b>높이</b>: 원뿔의 꼭짓점에서 밑면에 수직인 선분의 길이예요. 모선보다 짧아요.'},
+  sph:{all:'구: 공 모양. 밑면도 꼭짓점도 없어요. 어느 방향에서 보아도 원이에요.',center:'<b>구의 중심</b>: 가장 안쪽에 있는 점이에요.',radius:'<b>구의 반지름</b>: 구의 중심에서 구의 겉면의 한 점을 이은 선분이에요.',many:'구의 반지름은 셀 수 없이 많고, <span class="hl">길이가 모두 같아요</span>.'}};
+function draw2(){
+  clear(G2);V2.clearLabels();
+  const R=2.5,H=5,on=k=>hot==='all'||hot===k;
+  const c=(k,base)=>hot===k?C.hot:base;
+  if(so==='cyl'){
+    G2.add(new THREE.Mesh(new THREE.CylinderGeometry(R,R,H,72,1,true),mat(c('side',C.side),{op:hot==='height'?.35:1})).translateY(H/2));
+    [0,H].forEach(y=>{const d=new THREE.Mesh(new THREE.CircleGeometry(R,72),mat(c('base',C.base)));d.rotation.x=-Math.PI/2;d.position.y=y+(y?0.005:-0.005);G2.add(d);G2.add(ring(R,y));});
+    G2.add(line([[R+.6,0,0],[R+.6,H,0]],hot==='height'?C.red:C.ink));G2.add(line([[R,0,0],[R+.8,0,0]]),line([[R,H,0],[R+.8,H,0]]));
+    if(on('base')){V2.label('밑면',[0,H+.1,0],hot==='base');V2.label('밑면',[0,-.1,0],hot==='base');}
+    if(on('side'))V2.label('옆면',[-R*.7,H/2,-R*.75],hot==='side');
+    if(on('height'))V2.label('높이',[R+1.5,H/2,0],hot==='height');
+  }else if(so==='cone'){
+    G2.add(new THREE.Mesh(new THREE.ConeGeometry(R,H,72,1,true),mat(c('side',C.side),{op:['height','slant','many'].includes(hot)?.35:1})).translateY(H/2));
+    const d=new THREE.Mesh(new THREE.CircleGeometry(R,72),mat(c('base',C.base)));d.rotation.x=-Math.PI/2;d.position.y=-0.005;G2.add(d);G2.add(ring(R,0));
+    G2.add(dot([0,H,0],hot==='apex'?C.hot:C.red,hot==='apex'?.2:.12));
+    if(on('apex'))V2.label('원뿔의 꼭짓점',[0,H+.7,0],hot==='apex');
+    if(on('base'))V2.label('밑면',[0,-.1,0],hot==='base');
+    if(on('side'))V2.label('옆면',[-R*.45,H*.4,-R*.6],hot==='side');
+    if(on('slant')||hot==='many'){const n=hot==='many'?16:1;for(let i=0;i<n;i++){const a=i/n*2*Math.PI+(n===1?0.0:0);G2.add(line([[0,H,0],[R*Math.cos(a),0,R*Math.sin(a)]],C.blue));}
+      const L=Math.sqrt(R*R+H*H).toFixed(1);V2.label(hot==='many'?'모선 (길이가 모두 같아요)':'모선',[R/2+.6,H/2,0],hot==='slant'||hot==='many');}
+    if(on('height')){G2.add(line([[0,H,0],[0,0,0]],C.red,true));V2.label('높이',[-.8,H/2,0],hot==='height');}
+  }else{
+    G2.add(new THREE.Mesh(new THREE.SphereGeometry(R,64,48),mat(C.side,{op:hot==='all'?.9:.35})).translateY(R));
+    G2.add(ring(R,R,C.ink,true));
+    G2.add(dot([0,R,0],hot==='center'?C.hot:C.red,hot==='center'?.2:.12));
+    if(on('center'))V2.label('구의 중심',[0,R-.6,0],hot==='center');
+    const rad=(a,b)=>[R*Math.sin(b)*Math.cos(a),R+R*Math.cos(b),R*Math.sin(b)*Math.sin(a)];
+    if(on('radius')||hot==='many'){const L=hot==='many'?[...Array(14)].map((_,i)=>[i*2.4,0.5+(i%5)*0.55]):[[0,Math.PI/2]];L.forEach(([a,b])=>G2.add(line([[0,R,0],rad(a,b)],C.blue)));
+      V2.label(hot==='many'?'반지름 (길이가 모두 같아요)':'구의 반지름',[R/2,R+.5,0],hot==='radius'||hot==='many');}
+  }
+  $('#say2').innerHTML=SAY[so][hot];
+  V2.target.set(0,so==='sph'?R:H/2,0);
+}
+function parts2(){$('#parts').innerHTML=PARTS[so].map(([k,t])=>`<button class="pick${k===hot?' on':''}" data-p="${k}">${t}</button>`).join('');
+  $$('[data-p]').forEach(b=>b.onclick=()=>{hot=b.dataset.p;parts2();draw2();});}
+$$('[data-so]').forEach(b=>b.onclick=()=>{$$('[data-so]').forEach(x=>x.classList.toggle('on',x===b));so=b.dataset.so;hot='all';parts2();draw2();});
+
+/* ---------- ③ 전개도 ---------- */
+const V3=makeView($('#v3'),{dist:26,target:[0,2.5,0],theta:-0.35,phi:1.25});
+const G3=new THREE.Group();V3.scene.add(G3);
+let t3=0,anim3=null,side3,top3,bot3,edge3;
+const NS=120;
+function build3(){
+  clear(G3);
+  const sg=new THREE.BufferGeometry();const pos=new Float32Array((NS+1)*2*3),idx=[];
+  for(let i=0;i<NS;i++){const a=i*2,b=a+1,c2=a+2,d=a+3;idx.push(a,c2,b,b,c2,d);}
+  sg.setAttribute('position',new THREE.BufferAttribute(pos,3));sg.setIndex(idx);
+  side3=new THREE.Mesh(sg,mat(C.side));G3.add(side3);
+  edge3=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:C.ink}));G3.add(edge3);
+  const R=+$('#r3r').value;
+  const disk=()=>{const g=new THREE.Group();const m=new THREE.Mesh(new THREE.CircleGeometry(R,64),mat(C.base));m.rotation.x=-Math.PI/2;m.position.z=-R;g.add(m);const o=ring(R,0);o.position.z=-R;g.add(o);return g;};
+  top3=disk();bot3=disk();G3.add(top3,bot3);
+}
+function draw3(){
+  const R=+$('#r3r').value,H=+$('#r3h').value,CIR=+(2*R*3.14).toFixed(2);
+  const L=$('#r3fit').checked?CIR:+$('#r3l').value;
+  $('#r3rv').textContent=R+' cm';$('#r3hv').textContent=H+' cm';$('#r3lv').textContent=L+' cm';$('#r3l').disabled=$('#r3fit').checked;
+  $('#r3t').value=Math.round(t3*100);$('#r3tv').textContent=Math.round(t3*100)+'%';
+  const p=side3.geometry.attributes.position.array,rho=t3>=0.999?Infinity:R/(1-t3),E=[];
+  const pt=s=>rho===Infinity?[s,0]:[rho*Math.sin(s/rho),-rho*(1-Math.cos(s/rho))];
+  for(let i=0;i<=NS;i++){const s=-L/2+L*i/NS,[x,z]=pt(s);p.set([x,0,z,x,H,z],i*6);
+    if(i<NS){const [x2,z2]=pt(-L/2+L*(i+1)/NS);E.push(x,0,z,x2,0,z2,x,H,z,x2,H,z2);}}
+  const [xa,za]=pt(-L/2),[xb,zb]=pt(L/2);E.push(xa,0,za,xa,H,za,xb,0,zb,xb,H,zb);
+  edge3.geometry.dispose();edge3.geometry=new THREE.BufferGeometry();edge3.geometry.setAttribute('position',new THREE.Float32BufferAttribute(E,3));
+  side3.geometry.attributes.position.needsUpdate=true;side3.geometry.computeVertexNormals();side3.geometry.computeBoundingSphere();
+  const a=Math.min(1,t3*1.6)*Math.PI/2;
+  top3.position.set(0,H,0);top3.rotation.x=a;bot3.position.set(0,0,0);bot3.rotation.x=-a;
+  V3.clearLabels();
+  const fits=Math.abs(L-CIR)<0.01;
+  if(t3>0.97){V3.label(`가로 ${L} cm${fits?' = 밑면의 둘레':''}`,[0,-.7-(a>1.5?2*R:0),0],true);V3.label(`세로 ${H} cm = 높이`,[L/2+2,H/2,0],true);V3.label('밑면',[0,H+R,0]);V3.label('밑면',[0,-R,0]);V3.label('옆면',[-L/4,H/2,0]);}
+  else if(t3<0.03){V3.label('밑면',[0,H+.2,-R]);V3.label('옆면',[-R*1.05,H/2,-R]);}
+  const D=(2*R).toFixed(0);
+  $('#say3').innerHTML=!fits&&t3<0.03?`옆면 가로 ${L} cm ≠ 밑면의 둘레 ${CIR} cm → 옆면이 밑면을 꼭 맞게 감싸지 ${L<CIR?'못해 틈이 생겨요':'못하고 겹쳐요'}. <span class="hl">원기둥의 전개도가 아니에요.</span>`
+    :t3>0.97?`원기둥의 전개도: 밑면 2개(원) + 옆면 1개(<span class="hl">직사각형</span>). 옆면의 가로 = 밑면의 둘레 = 지름 × 3.14 = ${D} × 3.14 = <b>${CIR} cm</b>${fits?'':` (지금은 ${L} cm라 맞지 않아요)`}, 옆면의 세로 = 높이 = <b>${H} cm</b>`
+    :t3>0?'옆면을 한 줄로 잘라 펼치는 중… 굽은 옆면이 어떤 모양이 될까요?':'원기둥의 옆면을 세로로 한 줄 잘라 펼치면 어떤 모양일까요? 먼저 예상해 봐요.';
+  V3.target.set(0,H/2,t3>0.5?0:-R);
+}
+$('#r3t').oninput=e=>{cancelAnimationFrame(anim3);t3=e.target.value/100;draw3();};
+['#r3h','#r3l'].forEach(s=>$(s).oninput=draw3);
+$('#r3r').oninput=()=>{build3();draw3();};
+$('#r3fit').onchange=()=>{if(!$('#r3fit').checked)$('#r3l').value=Math.max(6,Math.round(2*$('#r3r').value*3.14)-3);draw3();};
+const go3=to=>{cancelAnimationFrame(anim3);if(RM){t3=to;return draw3();}const st=performance.now(),f=t3;const step=n=>{t3=f+(to-f)*Math.min(1,(n-st)/3500);draw3();if(t3!==to)anim3=requestAnimationFrame(step);};anim3=requestAnimationFrame(step);};
+$('#r3play').onclick=()=>{V3.theta=0;V3.phi=1.5;go3(1);};$('#r3back').onclick=()=>go3(0);
+
+/* ---------- ④ 비교하기 ---------- */
+const V4=makeView($('#v4'),{dist:24,target:[0,1.6,0],theta:-0.5,phi:1.2});
+const G4=new THREE.Group();V4.scene.add(G4);
+(function(){const R=1.6,H=3.4;
+  const cy=new THREE.Mesh(new THREE.CylinderGeometry(R,R,H,64),mat(C.side));cy.position.set(-4.6,H/2,0);G4.add(cy);
+  const co=new THREE.Mesh(new THREE.ConeGeometry(R,H,64),mat(0xF5B7A1));co.position.set(0,H/2,0);G4.add(co);
+  const sp=new THREE.Mesh(new THREE.SphereGeometry(R,48,32),mat(0xA9CCE3));sp.position.set(4.6,R,0);G4.add(sp);
+  V4.label('원기둥',[-4.6,-.6,0]);V4.label('원뿔',[0,-.6,0]);V4.label('구',[4.6,-.6,0]);})();
+const CAM={front:[0,Math.PI/2],top:[0,0.06],side:[-Math.PI/2,Math.PI/2],free:[-0.5,1.2]};
+$$('[data-cam]').forEach(b=>b.onclick=()=>{$$('[data-cam]').forEach(x=>x.classList.toggle('on',x===b));[V4.theta,V4.phi]=CAM[b.dataset.cam];
+  $('#say4').innerHTML={front:'앞에서 보면: 원기둥 → <b>직사각형</b>, 원뿔 → <b>삼각형</b>, 구 → <b>원</b>',top:'위에서 보면: 셋 다 <b>원</b>이에요. (원뿔은 가운데에 꼭짓점이 보여요)',side:'옆에서 보면: 앞에서 본 모양과 같아요. 구는 어느 방향에서 보아도 원!',free:'칸을 누르면 답이 보여요. 같은 점: 모두 굽은 면이 있어요, 위에서 보면 모두 원이에요.'}[b.dataset.cam];});
+V4.onDrag=()=>$$('[data-cam]').forEach(x=>x.classList.toggle('on',x.dataset.cam==='free'));
+$$('#tb4 td').forEach(td=>td.onclick=()=>td.classList.remove('hide'));
+$('#r4all').onclick=()=>$$('#tb4 td').forEach(td=>td.classList.remove('hide'));
+
+/* ---------- 탭·그리기 ---------- */
+const VIEWS={s1:V1,s2:V2,s3:V3,s4:V4};let curT='s1';
+$$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('on',x===b));$$('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));curT=b.dataset.t;VIEWS[curT].fresh=true;});
+$('#fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();};
+draw1();parts2();draw2();build3();draw3();
+(function loop(){VIEWS[curT].render();requestAnimationFrame(loop);})();
+if(location.hash){const b=$(`nav button[data-t="${location.hash.slice(1)}"]`);b&&b.click();}
+</script>
+</body></html>
