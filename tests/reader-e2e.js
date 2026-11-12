@@ -32,7 +32,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const S = [];
   for (let i = 1; i <= N; i++) {
     const p = await mk(i + '번', i === 1 ? 390 : 820, 900);
-    await p.goto(URL + '?room=' + code);
+    await p.goto(URL + '?room=' + code + (i === 2 ? '&tfwait=1' : ''));
     await p.fill('#cw-name', `${i} 학생${i}`);
     await p.click('#enter');
     await p.waitForSelector('#steps button', { timeout: 15000 });
@@ -113,6 +113,17 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await p.waitForSelector('#send');
     if (k === 1) { await p.click('#wh button[data-k="family"]'); await p.click('#tp button[data-k="food"]'); }
     await p.click('#send'); await p.waitForSelector('#wm.bad');
+    if (k === 0) {
+      if (!(await p.$('.tf-btn[disabled]'))) fail('실마리 단추가 처음에 잠겨 있지 않음');
+      if (/복도에서 뛰면/.test(await p.getAttribute('#tx', 'placeholder'))) fail('글 칸에 예시 답이 보임');
+      await p.fill('#ti', '복도 이야기'); await p.fill('#tx', '복도에서 뛰면 친구와 부딪힐 수 있어요. 그러니까 조심해요.');
+      await p.click('#send');
+      if (!/예시와 거의 같아요/.test(await p.textContent('#wm'))) fail('예시를 베낀 글을 막지 않음: ' + await p.textContent('#wm'));
+    }
+    if (k === 1) {
+      await p.waitForSelector('.tf-btn:not([disabled])', { timeout: 6000 });
+      await p.click('.tf-btn'); await p.waitForSelector('.tf-hint[data-lv="1"]');
+    }
     await p.fill('#ti', `동생들아, 복도에서는 사뿐사뿐 ${k}`);
     await p.fill('#tx', '복도에서 뛰면 친구와 부딪혀서 다칠 수 있어요. 고양이처럼 사뿐사뿐 걸어 볼까요?');
     await p.click('#send'); await p.waitForSelector('#wm.bad');
@@ -126,6 +137,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const g = await T.textContent('#tvmid');
   if (!/올린 글 4\/4개/.test(g) || !/할머니·부모님 1/.test(g)) fail('TV 편집국 이상: ' + g.slice(0, 200));
   if (/읽을 사람: 🧒/.test(g)) fail('TV 목록에서 독자가 가려지지 않음');
+  if (!/스스로 3명 · 💡 질문 실마리 1명/.test(g)) fail('선생님 화면 실마리 사용 집계 이상');
   await T.click('#gal button[data-n="2"]');
   await T.waitForSelector('#bigWho');
   await T.click('#bigWho');

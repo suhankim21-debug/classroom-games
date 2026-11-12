@@ -186,6 +186,7 @@ textarea{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../common/watch.js"></script>
+<script src="../common/think.js"></script>
 <script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
@@ -240,6 +241,8 @@ const TOPICS=[
   {k:'book',t:'📚 도서관 책 소중히',eg:'빌린 책은 반납하는 날까지 깨끗하게 봐요.'},
   {k:'play',t:'⚽ 운동장 놀이 소개',eg:'그림자 술래잡기를 해 봐요.'},
   {k:'free',t:'✏️ 직접 정하기',eg:''}];
+const FRAMES=['…하면 …할 수 있어요.','왜 …해야 할까요? 그 까닭은 …때문이에요.','…할 때는 …해 보세요.','…을/를 알고 있나요?'];
+const OLDTI=['동생들아, 이것만 지켜 줘!','할머니, 이것 아세요?','우리 반 친구들, 함께해요!'];
 const WHO=[['kid','🧒 1학년 동생'],['class','🧑‍🤝‍🧑 우리 반 친구'],['family','👵 할머니·부모님']];
 const AIDS=['🖼 그림','📊 그래프','📷 사진','📋 표','⭐ 기호로 나누어 정리'];
 const DID=['쉬운 낱말로 썼어요','독자가 궁금해할 내용을 넣었어요','묻는 말로 관심을 끌었어요','이해를 돕는 자료를 넣었어요'];
@@ -415,28 +418,35 @@ function stage4(){
       <div id="freeBox" ${D.topic==='free'?'':'hidden'}><input id="free" maxlength="20" placeholder="쓰고 싶은 주제 (예: 손 씻기)" value="${esc(D.free)}"></div>
       <label>③ 독자의 이해를 돕는 자료</label><div class="chips big" id="ai">${AIDS.map(a=>`<button data-k="${esc(a)}" aria-pressed="${a===D.aid}">${esc(a)}</button>`).join('')}</div>
       <label for="ti">④ 제목 <span class="hint">(독자의 관심을 끌게, 25자까지)</span></label><input id="ti" maxlength="25" value="${esc(D.title)}">
-      <label for="tx">⑤ 글 <span class="hint">(2~4문장, 200자까지)</span></label><textarea id="tx" maxlength="200">${esc(D.text)}</textarea>
+      <label for="tx">⑤ 글 <span class="hint">(2~4문장, 200자까지)</span></label><textarea id="tx" maxlength="200">${esc(D.text)}</textarea><div id="tf4"></div>
       <label>⑥ 독자를 위해 한 일 <span class="hint">(두 개 이상)</span></label><div class="chips big" id="dd">${DID.map((e,i)=>`<button data-i="${i}" aria-pressed="${D.did.includes(i)}">${e}</button>`).join('')}</div>
       <div class="msg" id="wm" role="status"></div>
       <div class="row" id="act" style="justify-content:center"><button id="send">📰 TV에 글 올리기</button></div></div></div>`);
   const pv=()=>{$('#pv').innerHTML=paperHTML(D);};
-  const ph=()=>{$('#tx').placeholder=T().eg?'예) '+T().eg:'예) 손을 30초 동안 씻으면 감기를 막을 수 있어요.';$('#ti').placeholder=D.who==='kid'?'예) 동생들아, 이것만 지켜 줘!':D.who==='family'?'예) 할머니, 이것 아세요?':'예) 우리 반 친구들, 함께해요!';};
+  const ph=()=>{const w=(WHO.find(x=>x[0]===D.who)||WHO[0])[1];$('#tx').placeholder=`${w}이(가) 읽는다고 생각하며 내 말로 써요`;$('#ti').placeholder='독자의 관심을 끌 제목을 직접 지어요';};
+  const ins=t=>{const a=$('#tx');const v=a.value;const at=a.selectionStart??v.length;a.value=(v.slice(0,at)+(v&&!/\s$/.test(v.slice(0,at))?' ':'')+t+v.slice(at)).slice(0,200);D.text=a.value;pv();a.focus();const i=a.value.indexOf('…');if(i>=0)a.setSelectionRange(i,i+1);};
+  const tf=ThinkFirst.mount($('#tf4'),{key:me.room+'-'+me.num+'-reader4',wait:40,
+    hints:[`<ul><li>이 독자는 이 주제에 대해 무엇을 알고, 무엇을 모를까요?</li><li>독자가 어려워할 낱말은 없나요? 어떤 말로 바꾸면 될까요?</li><li>독자가 “왜?” 하고 물으면 뭐라고 대답할까요?</li></ul>`,
+      `<p style="margin:4px 0">눌러서 글에 넣고 <b>…</b> 자리를 내 말로 채워요.</p><div class="chips">${FRAMES.map(f=>`<button type="button" data-f="${esc(f)}">${esc(f)}</button>`).join('')}</div>`],
+    onShow:(lv,el)=>{if(lv===2)$$('button[data-f]',el).forEach(b=>b.onclick=()=>ins(b.dataset.f));}});
   const seg=(sel,key)=>$$(sel+' button').forEach(b=>b.onclick=()=>{D[key]=b.dataset.k;$$(sel+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));ph();pv();});
   seg('#wh','who');seg('#ai','aid');
   $$('#tp button').forEach(b=>b.onclick=()=>{D.topic=b.dataset.k;$$('#tp button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#freeBox').hidden=D.topic!=='free';ph();pv();});
   $$('#dd button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;D.did=D.did.includes(i)?D.did.filter(x=>x!==i):[...D.did,i];b.setAttribute('aria-pressed',D.did.includes(i));});
   $('#ti').oninput=e=>{D.title=e.target.value;pv();};$('#tx').oninput=e=>{D.text=e.target.value;pv();};$('#free').oninput=e=>{D.free=e.target.value;};
   ph();pv();
-  ClassWatch.detail(()=>({q:'맞춤 편집자: '+T().t,w:`${D.title} / ${D.text}`}));
+  ClassWatch.detail(()=>({q:'맞춤 편집자: '+T().t+(tf.level()?' · '+ThinkFirst.tag(tf.level()):''),w:`${D.title} / ${D.text}`}));
   $('#send').onclick=async()=>{
     const bad=t=>{$('#wm').className='msg bad';$('#wm').textContent=t;};
     const title=D.title.trim(),text=D.text.trim();
     if(D.topic==='free'&&D.free.trim().length<2)return bad('② 쓰고 싶은 주제를 써요.');
     if(title.length<2)return bad('④ 제목을 써요.');
+    if(/…/.test(title+text))return bad('… 자리에 내 말을 넣어요.');
     if(text.length<30)return bad('⑤ 글을 조금 더 써요. (30자 이상, 2~4문장)');
+    if(ThinkFirst.copied(text,TOPICS.map(t=>t.eg).filter(Boolean))||ThinkFirst.copied(title,OLDTI,0.7))return bad('예시와 거의 같아요. 독자를 떠올리며 내 말로 바꿔 써요.');
     if(D.did.length<2)return bad('⑥ 독자를 위해 한 일을 두 개 이상 골라요.');
     $('#send').disabled=true;
-    const v={...D,title,text,free:D.free.trim(),topicT:D.topic==='free'?'✏️ '+D.free.trim():T().t};
+    const v={...D,title,text,hint:tf.level(),free:D.free.trim(),topicT:D.topic==='free'?'✏️ '+D.free.trim():T().t};
     await save({v,done:true,at:Date.now()});draft=null;stage4();
   };
 }
@@ -694,11 +704,12 @@ function meterBox(S){
 function galleryBox(S){
   const W=S.filter(x=>x.s4&&x.s4.v&&x.s4.done);
   const B=W.find(x=>x.n===tvBig);
-  const big=B?`<div class="tvbig"><div>${paperHTML(B.s4.v,tvWho)}</div><div class="grid"><h2>${B.n} ${esc(B.name)} 편집자</h2><p style="margin:0;font-size:1.3rem">누구를 위해 쓴 글일까요? 왜 그렇게 생각하나요?</p>
+  const big=B?`<div class="tvbig"><div>${paperHTML(B.s4.v,tvWho)}</div><div class="grid"><h2>${B.n} ${esc(B.name)} 편집자</h2>${B.s4.v.hint?`<p class="muted" style="margin:0">${ThinkFirst.tag(B.s4.v.hint)} 사용</p>`:''}<p style="margin:0;font-size:1.3rem">누구를 위해 쓴 글일까요? 왜 그렇게 생각하나요?</p>
      <div class="row">${tvWho?(B.s4.v.did||[]).map(i=>`<span class="band" style="background:var(--blue)">${esc(DID[i])}</span>`).join(''):''}</div>
      <div class="row"><button id="bigWho">${tvWho?'독자 가리기':'👀 독자 공개'}</button><button class="ghost" id="bigClose">목록으로</button></div></div></div>`:'';
   const cnt=WHO.map(([k,l])=>`${l} ${W.filter(x=>x.s4.v.who===k).length}`).join(' · ');
   return `<div class="panel grid"><div class="row" style="justify-content:space-between"><h2>📰 우리 반 편집국</h2><span class="muted">올린 글 ${W.length}/${S.length}개 · ${cnt}</span></div>
+    <p class="muted" style="margin:0" id="tfsum">${ThinkFirst.summary(W.map(x=>x.s4.v.hint))}</p>
     ${big}<div class="gal" id="gal">${W.map(x=>`<button data-n="${x.n}" aria-label="${x.n}번 글 크게 보기">${paperHTML(x.s4.v,false)}</button>`).join('')||'<p class="muted">아직 올린 글이 없어요</p>'}</div></div>`;
 }
 function ranked(S){
