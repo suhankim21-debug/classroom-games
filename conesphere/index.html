@@ -317,9 +317,9 @@ const SA={
 const SB={
   가:()=>svg('0 0 120 110',sphereSVG(60,55,44),'가: 큰 구'),
   나:()=>svg('0 0 120 110',sphereSVG(60,62,26,{fill:'#F2C14E'}),'나: 작은 구'),
-  다:()=>svg('0 0 120 110',coneSVG(60,10,88,40,11),'다: 원뿔'),
+  다:()=>svg('0 0 120 110',cylSVG(60,20,34,10,66),'다: 원기둥'),
   라:()=>svg('0 0 120 110',sphereSVG(60,57,36,{fill:OR}),'라: 주황색 구'),
-  마:()=>svg('0 0 120 110',cylSVG(60,20,34,10,66),'마: 원기둥')};
+  마:()=>svg('0 0 120 110',coneSVG(60,10,88,40,11),'마: 원뿔')};
 const KK=['가','나','다','라','마'];
 const rowOf=(S,keys=KK)=>`<div class="figs" style="grid-template-columns:repeat(${keys.length},1fr)">${keys.map(k=>`<div>${S[k]()}${k}</div>`).join('')}</div>`;
 function figCheer(){return svg('0 0 200 130',`<g transform="rotate(-25 100 65)"><path d="M 40 65 L 160 30 A 12 35 0 0 1 160 100 Z" fill="#E86A5A" stroke="${INK}" stroke-width="2.5"/><ellipse cx="160" cy="65" rx="12" ry="35" fill="#F7B4A8" stroke="${INK}" stroke-width="2.5"/></g>`,'뿔 모양 응원 도구');}
