@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>원뿔·구 연구소</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+body{margin:0}
+/* Same classroom notice-board look as 우리말 지킴이 so the class sees one family of tools. Single light look by choice (classroom TV). */
+:root{
+  --wall:#E9DFC4; --card:#FFFDF7; --cream:#F7E8C2; --coral:#F98F6E; --coral2:#E0704F; --ink:#453422; --body:#6D4215; --muted:#8A7458;
+  --line:#DCCDA6; --ok:#3F8A5A; --bad:#C8452D; --blue:#3D6E8C; --blue2:#8DB3C7; --gold:#E9B04F;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --text:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{min-height:100%}
+body{background:var(--wall);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
+*{box-sizing:border-box}
+button{font-family:var(--display);font-size:1.05rem;border:0;border-radius:14px;padding:.7em 1.1em;cursor:pointer;background:var(--coral);color:#fff;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--coral2);border:2px solid var(--coral)}
+input{font-family:var(--text);font-size:1.1rem;padding:.55em .75em;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.top{background:var(--ink);color:#fff;padding-block:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.brand i{font-style:normal;background:var(--coral);border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center}
+.top small{opacity:.85;font-size:.95rem}
+main{padding-block:18px 48px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.grid{display:grid;gap:14px;align-content:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.band{display:inline-block;background:var(--coral);color:#fff;font-family:var(--display);padding:.15em .8em;border-radius:6px;font-size:1.05rem}
+.msg{font-family:var(--display);font-size:1.15rem;min-height:1.5em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.1}
+.hero p{font-size:1.15rem}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.choose button{font-size:1.35rem;padding:1em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.steps button{background:var(--card);color:var(--muted);border:2px solid var(--line);padding:.55em .4em;font-size:1rem;line-height:1.2}
+.steps button b{display:block;font-size:1.3rem}
+.steps button[aria-current="step"]{background:var(--coral);border-color:var(--coral);color:#fff}
+.steps button.done:not([aria-current="step"]){color:var(--ok);border-color:var(--ok)}
+.quiz{text-align:center;display:grid;gap:14px;justify-items:center}
+.quiz .q{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.opts button{background:#fff;color:var(--ink);border:2px solid var(--line);font-size:1.2rem;padding:.9em .5em;line-height:1.3}
+.opts button.wrong{background:#F6E1DB;border-color:var(--bad);color:var(--bad)}
+.opts button.right{background:#E3F1E7;border-color:var(--ok);color:var(--ok)}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog span{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.prog span.on{background:var(--ok)} .prog span.cur{background:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .shake{animation:sh .35s} @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pop .45s ease-out} @keyframes pop{from{transform:scale(.88);opacity:.3}to{transform:none;opacity:1}}
+}
+.fig{width:100%;max-width:280px;height:auto;display:block;margin:0 auto}
+.rules{background:#FFF4DF;border:2px solid var(--coral);border-radius:14px;padding:12px 16px}
+.rules ul{margin:.3em 0 0;padding-left:1.2em}
+.big{font-family:var(--display);font-size:clamp(1.6rem,4.5vw,2.4rem);color:var(--coral2);line-height:1.25}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:.5em .9em;font-size:1.05rem}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}
+.roll svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:.35em .8em;font-family:var(--text);font-size:1rem;border-radius:999px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fld{display:grid;gap:6px}
+.fld label{font-family:var(--display);font-size:1.1rem}
+.unit{display:flex;align-items:center;gap:8px}
+.unit span{font-family:var(--display)}
+.meter{position:relative;height:46px;background:var(--cream);border-radius:10px;margin:26px 0 8px}
+.meter .band3{position:absolute;top:0;bottom:0;background:#DDEBE1}
+.meter .mk{position:absolute;top:-24px;transform:translateX(-50%);font-family:var(--display);font-size:.95rem;white-space:nowrap}
+.meter .ln{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.meter .dot{position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--coral2);transform:translate(-50%,-50%);border:3px solid #fff}
+.list{display:grid;gap:8px}
+.list div{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px}
+.list div.out{border-left-color:var(--gold)}
+.list b{font-family:var(--display);font-weight:400;color:var(--coral2);margin-right:8px}
+.emoji{font-size:clamp(3rem,10vw,4.5rem);line-height:1}
+.score{font-family:var(--display);font-size:1.3rem}
+/* teacher */
+.tv{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.qr{display:grid;justify-items:center;gap:6px;text-align:center}
+#qrbox{background:#fff;padding:10px;border-radius:12px}
+#qrbox img,#qrbox canvas{display:block;max-width:100%}
+.roomcode{font-family:var(--display);font-size:2.4rem;letter-spacing:.1em;color:var(--coral2)}
+.timer{font-family:var(--display);font-size:clamp(3rem,8vw,4.6rem);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.timer.end{color:var(--bad)}
+.tsteps{display:grid;gap:8px}
+.tsteps button{text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-size:1.1rem}
+.tsteps button[aria-current="step"]{background:var(--coral);color:#fff;border-color:var(--coral)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{background:var(--cream);border-radius:999px;padding:.2em .8em;font-family:var(--display)}
+.people span.ok{background:var(--ok);color:#fff}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(120px,15em) 1fr 3.5em;gap:10px;align-items:center}
+.bar .track{height:34px;border-radius:10px;background:var(--cream);overflow:hidden}
+.bar .track div{height:100%;background:var(--ok);border-radius:10px}
+.bar span{font-family:var(--display);font-size:1.1rem}
+.rank{display:grid;gap:8px}
+.rank .r{display:grid;grid-template-columns:2.6em 9em 1fr 5em;gap:10px;align-items:center;background:#fff;border-radius:12px;padding:8px 12px}
+.rank .r b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--coral2)}
+.rank .r .nm{font-family:var(--display);font-size:1.25rem}
+.rank .r .pt{font-family:var(--display);font-size:1.4rem;text-align:right;font-variant-numeric:tabular-nums}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;text-align:center}
+.podium div{background:var(--coral);color:#fff;border-radius:16px 16px 0 0;padding:16px 8px;font-family:var(--display)}
+.podium div b{display:block;font-size:2.4rem;font-weight:400}
+.podium div span{display:block;font-size:1.6rem}
+.podium .p1{background:var(--gold);min-height:240px}.podium .p2{min-height:190px;background:var(--blue2)}.podium .p3{min-height:150px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:1.1rem}
+.tbl th,.tbl td{background:#fff;padding:.45em .6em;text-align:center}
+.tbl thead th{background:var(--coral);color:#fff;font-family:var(--display);font-weight:400}
+.tbl tbody th{font-family:var(--display);font-weight:400;color:var(--coral2)}
+.tbl tr.outr td,.tbl tr.outr th{background:#FFF4DF}
+.okc{color:var(--ok);font-family:var(--display);font-size:1.3rem;font-weight:400}
+.chart svg{width:100%;height:auto;display:block;background:#fff;border-radius:14px;border:2px solid var(--line)}
+@media (max-width:820px){
+  .hero,.tv,.two{grid-template-columns:1fr}
+  .choose,.opts{grid-template-columns:1fr}
+  .steps button{font-size:.85rem}
+  .rank .r{grid-template-columns:2.2em 1fr 4.5em}.rank .r .trk{display:none}
+}
+/* 공통 모양 */
+.fig{max-width:300px}
+.eq{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-family:var(--display);font-size:1.3rem}
+.eq input{width:5.5em;text-align:center;font-size:1.25rem}
+.formula{font-family:var(--display);font-size:clamp(1.05rem,3vw,1.4rem);background:#fff;border:2px solid var(--line);border-radius:14px;padding:.4em .8em;text-align:center}
+.formula u{text-decoration:none;color:var(--coral2)}
+.plist{display:grid;gap:8px}
+.pcard{background:#fff;border-left:6px solid var(--coral);border-radius:10px;padding:8px 14px;font-family:var(--display);font-size:1.2rem}
+.pcard.star{border-left-color:var(--gold)}
+.pcard b{font-weight:400;color:var(--coral2);margin-right:6px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:start}
+.figs>div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;font-family:var(--display)}
+.plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.plot{background:#E7F2D6;border:2px solid #B9D79A;border-radius:14px;padding:8px;text-align:center}
+.plot b{display:block;font-family:var(--display);font-weight:400;font-size:1.1rem}
+.plot .fl{font-size:1.5rem;line-height:1.3;min-height:2.6em;letter-spacing:2px}
+.plot small{color:var(--muted)}
+.expl{background:#FFF4DF;border-radius:12px;padding:8px 14px;width:100%;text-align:left}
+/* 문제별 정답률 */
+.qrate{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.qrow.low{border-color:var(--bad);background:#FFF5F2}
+.qrow .qt,.qrow .qw{text-align:left;justify-self:start}
+.qrow .qb{display:grid;grid-template-columns:minmax(0,1fr) 3.6em;gap:2px 8px;align-items:center;width:100%}
+.qrow .qb .track{width:100%;height:14px;border-radius:999px;background:var(--cream);overflow:hidden}
+.qrow .qb .track div{height:100%;background:var(--ok);border-radius:999px}
+.qrow.low .qb .track div{background:var(--bad)}
+.qrow .pc{font-family:var(--display);font-size:1.3rem}
+.qrow.low .pc{color:var(--bad)}
+@media (max-width:820px){.qrow{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top"><div class="wrap"><div class="brand"><i>🍦</i> 원뿔·구 연구소</div><small id="sub"></small></div></header>
+<main class="wrap" id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../common/watch.js"></script>
+<style>
+/* 원뿔·구 연구소 */
+.cmp select{font-family:var(--text);font-size:1.05rem;padding:.35em .4em;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+.cmp select.bad{border-color:var(--bad);background:#FFF0EC}.cmp select.good{border-color:var(--ok);background:#E3F1E7}
+.shapes{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%}
+.shapes button{background:#fff;color:var(--ink);border:3px solid var(--line);padding:6px 4px;border-radius:14px;display:grid;justify-items:center;gap:2px;font-size:1.2rem}
+.shapes button svg{width:100%;max-width:120px;height:auto}
+.shapes button[aria-pressed="true"]{border-color:var(--coral);background:#FFF1EA}
+.shapes button.right{border-color:var(--ok);background:#E3F1E7}
+@media (max-width:820px){.shapes{grid-template-columns:repeat(3,1fr)}}
+.tapfig{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.tapfig .tp{cursor:pointer}
+.concept{background:#E8F3EC;border:2px solid var(--ok);border-radius:14px;padding:10px 14px;text-align:left;width:100%}
+.concept b{color:var(--ok)}
+.rot input[type=range]{width:100%;accent-color:var(--coral)}
+textarea{font-family:var(--text);font-size:1.15rem;padding:.6em .75em;border:2px solid var(--line);border-radius:12px;width:100%;min-height:5.5em;color:var(--ink);background:#fff}
+.whys{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.whys div{background:#fff;border-left:6px solid var(--blue);border-radius:10px;padding:8px 14px;font-size:1.15rem}
+.whys small{display:block;color:var(--muted)}
+</style>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
+const APP='conesphere';
+const STAGES=[null,
+  {k:'원뿔',t:'뿔 모양 분류 · 직각삼각형 돌리기 · 구성 요소 (136~137쪽)',tm:10},
+  {k:'구',t:'공 모양 분류 · 반원 돌리기 · 중심과 반지름 (138~139쪽)',tm:8},
+  {k:'비교하기',t:'원기둥·원뿔·구 같은 점과 다른 점 (139쪽)',tm:4},
+  {k:'정리 퀴즈',t:'원뿔·구 퀴즈 6문제 · 시상식',tm:5}];
+const NST=4;
+const QUIZ=[
+  {id:'q1',q:'원뿔에서 평평한 면을 무엇이라고 할까요?',a:'밑면',o:['옆면','모선','원뿔의 꼭짓점'],ex:'원뿔의 평평한 원 모양 면이 밑면이에요. 원뿔의 밑면은 1개예요.'},
+  {id:'q2',q:'원뿔의 꼭짓점과 밑면인 원의 둘레의 한 점을 이은 선분은?',a:'모선',o:['높이','반지름','모서리'],ex:'모선이에요. 원뿔의 모선은 무수히 많고 길이가 모두 같아요.'},
+  {id:'q3',q:'직각삼각형의 한 변을 기준으로 한 바퀴 돌리면 어떤 입체도형이 될까요?',a:'원뿔',o:['원기둥','구','삼각뿔'],ex:'직각을 낀 한 변을 기준으로 돌리면 원뿔이 돼요. 직사각형 → 원기둥, 반원 → 구.'},
+  {id:'q4',q:'모선의 길이 10 cm, 밑면의 반지름 6 cm, 높이 8 cm인 원뿔이 있어요. 이 원뿔의 높이는?',a:'8 cm',o:['10 cm','6 cm','12 cm'],ex:'높이는 원뿔의 꼭짓점에서 밑면에 수직으로 내린 선분의 길이예요. 10 cm는 모선의 길이(비스듬한 선)예요.'},
+  {id:'q5',q:'구의 반지름을 바르게 설명한 것은?',a:'무수히 많고 길이가 모두 같아요',o:['1개뿐이에요','길이가 서로 달라요','구에는 반지름이 없어요'],ex:'구의 중심에서 겉면의 어느 점까지 이어도 길이가 같아요. 그런 선분은 무수히 많아요.'},
+  {id:'q6',q:'원기둥, 원뿔, 구의 같은 점은?',a:'모두 굽은 면이 있어요',o:['모두 밑면이 있어요','모두 뾰족한 점이 있어요','모두 모서리가 있어요'],ex:'셋 다 굽은 면이 있어요. 밑면은 원기둥 2개·원뿔 1개·구 0개, 뾰족한 점은 원뿔만 있어요.'}];
+const CMP_ROWS=[
+  {id:'f1',k:'밑면의 수',o:['0개','1개','2개'],a:['2개','1개','0개']},
+  {id:'f2',k:'굽은 면',o:['있어요','없어요'],a:['있어요','있어요','있어요']},
+  {id:'f3',k:'뾰족한 꼭짓점',o:['있어요','없어요'],a:['없어요','있어요','없어요']},
+  {id:'f4',k:'앞에서 본 모양',o:['원','삼각형','직사각형'],a:['직사각형','삼각형','원']},
+  {id:'f5',k:'위에서 본 모양',o:['원','삼각형','직사각형'],a:['원','원','원']}];
+const CMP_COLS=['원기둥','원뿔','구'];
+const ITEMS=[
+  {id:'d1',st:1,q:'가~마 중 원기둥 모두 고르기',a:'나, 라'},
+  {id:'d2',st:1,q:'가·다·마의 같은 점',a:'밑면이 원 1개이고 뾰족한 점이 있어요'},
+  {id:'d3',st:1,q:'직각삼각형을 돌려 만든 입체도형',a:'원뿔'},
+  {id:'d4',st:1,q:'원뿔의 평평한 면 누르기',a:'아래의 원 1개'},
+  {id:'d5',st:1,q:'④ 평평한 면의 이름',a:'밑면'},
+  {id:'d6',st:1,q:'옆을 둘러싼 굽은 면의 이름',a:'옆면'},
+  {id:'d7',st:1,q:'① 뾰족한 부분의 점',a:'원뿔의 꼭짓점'},
+  {id:'d8',st:1,q:'② 꼭짓점과 밑면 둘레의 한 점을 이은 선분',a:'모선'},
+  {id:'d9',st:1,q:'③ 꼭짓점에서 밑면에 수직으로 내린 선분의 길이',a:'높이'},
+  {id:'d10',st:1,q:'높이·모선의 길이·밑면의 지름 (137쪽)',a:'12 cm, 15 cm, 18 cm'},
+  {id:'e1',st:2,q:'가~마 중 공 모양 모두 고르기',a:'가, 나, 라'},
+  {id:'e2',st:2,q:'공 모양(가·나·라)의 특징',a:'어느 방향에서 보아도 원 모양이에요'},
+  {id:'e3',st:2,q:'반원을 돌려 만든 입체도형',a:'구'},
+  {id:'e4',st:2,q:'① 구에서 가장 안쪽에 있는 점',a:'구의 중심'},
+  {id:'e5',st:2,q:'② 중심과 겉면의 한 점을 이은 선분',a:'구의 반지름'},
+  {id:'e6',st:2,q:'구의 반지름의 특징',a:'무수히 많고 길이가 모두 같아요'},
+  {id:'e7',st:2,q:'지름 10 cm 반원을 돌린 구의 반지름',a:'5 cm'},
+  ...CMP_ROWS.map(r=>({id:r.id,st:3,q:'비교 표: '+r.k,a:CMP_COLS.map((c,k)=>c+' '+r.a[k]).join(', ')})),
+  ...QUIZ.map(x=>({id:x.id,st:4,q:x.q,a:x.a}))];
+const $=(s,el=document)=>el.querySelector(s), $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const same=(a,b)=>Math.abs(a-b)<0.005;
+const num=s=>{const v=parseFloat(String(s).replace(/,/g,''));return isNaN(v)?null:v;};
+const wait=ms=>new Promise(r=>setTimeout(r,RM?0:ms));
+/* ---------- 처음 답 기록 (문제별 정답률) ---------- */
+function rec(id,ok){
+  if(!me||!id)return;
+  if(ME.ans&&ME.ans[id]!==undefined)return;
+  ME.ans={...(ME.ans||{}),[id]:ok};
+  roomRef(me.room).child(`students/${me.num}/ans/${id}`).transaction(v=>v===null?ok:undefined);
+}
+/* ---------- 공통: 고르기 문제 ---------- */
+function pick(box,{id,q,a,o,why,onOk,fig='',noShuffle}){
+  const opts=noShuffle?[a,...o].sort():shuffle([a,...o]);let first=true;
+  box.innerHTML=`<div class="quiz">${fig}<div class="q">${q}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div><div class="msg" id="pm" role="status"></div></div>`;
+  $$('.opts button',box).forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===a;if(first){rec(id,ok);first=false;}
+    if(ok){b.classList.add('right');$$('.opts button',box).forEach(x=>x.disabled=true);$('#pm',box).className='msg ok';$('#pm',box).textContent='맞았어요!';setTimeout(onOk,RM?0:650);}
+    else{b.classList.add('wrong');b.disabled=true;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');$('#pm',box).className='msg bad';$('#pm',box).innerHTML=(why&&why[b.dataset.o])||'다시 골라 봐요';}
+  });
+}
+function fillEq(box,{id,html,fields,hint,okText,onOk,solve}){
+  box.innerHTML=html+`<div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div>`;
+  let miss=0,first=true;
+  $('#chk').onclick=async()=>{
+    const v=fields.map(f=>num($('#'+f.id,box).value));
+    const bad=t=>{$('#wm',box).className='msg bad';$('#wm',box).innerHTML=t;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');};
+    if(v.some(x=>x==null))return bad('빈칸을 모두 채워요.');
+    const ok=fields.every((f,k)=>same(v[k],f.want));
+    if(first){rec(id,ok);first=false;}
+    if(!ok){miss++;return bad((hint(v)||'다시 생각해 봐요.')+(miss>=2&&solve?`<br>풀이: ${solve}`:''));}
+    $('#chk').disabled=true;$$('input',box).forEach(x=>x.disabled=true);
+    $('#wm',box).className='msg ok';$('#wm',box).innerHTML=okText;
+    onOk(miss);
+  };
+}
+
+const INK='#453422',G1='#8FD3BE',G2='#5DB89B',G3='#C9EEDF',PK='#F48FB1',PK2='#F9C6D8',OR='#F7A35C';
+const T=(x,y,s,o='')=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="18" font-family="Jua" fill="${INK}" ${o}>${s}</text>`;
+/* 서 있는 원기둥: cx 가운데, y 위 밑면 높이, rx 반지름, ry 납작한 정도, h 높이 */
+function cylPath(cx,y,rx,ry,h){return `M ${cx-rx} ${y} V ${y+h} A ${rx} ${ry} 0 0 0 ${cx+rx} ${y+h} V ${y} A ${rx} ${ry} 0 0 1 ${cx-rx} ${y} Z`;}
+function cylSVG(cx,y,rx,ry,h,{side=G1,top=G3,dash=true}={}){
+  return `<path d="${cylPath(cx,y,rx,ry,h)}" fill="${side}" stroke="${INK}" stroke-width="2.5"/>
+   ${dash?`<path d="M ${cx-rx} ${y+h} A ${rx} ${ry} 0 0 1 ${cx+rx} ${y+h}" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/>`:''}
+   <ellipse cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" fill="${top}" stroke="${INK}" stroke-width="2.5"/>`;
+}
+const svg=(vb,inner,lab,cls='fig')=>`<svg class="${cls}" viewBox="${vb}" role="img" aria-label="${lab}">${inner}</svg>`;
+function saver(n,R){return async p=>{Object.assign(R,p);ME['s'+n]={...R};await roomRef(me.room).child('students/'+me.num+'/s'+n).update(p);drawSteps();};}
+const inp=(id,lab,w)=>`<input id="${id}" type="number" inputmode="decimal" aria-label="${lab}"${w?` style="width:${w}"`:''}>`;
+function layout(n,title,fig,note=''){
+  shell(`<div class="two"><div class="panel grid"><div><span class="band">${n}단계 · ${STAGES[n].k}</span></div><h2>${title}</h2>${fig}${note}</div><div class="panel grid" id="work"></div></div>`);
+  return $('#work');
+}
+const nextBtn=(label,fn)=>{$('#act').innerHTML=`<button id="nx">${label}</button>`;$('#nx').onclick=fn;};
+
+/* ---------- 원뿔·구 그림 (교과서 136~139쪽 모양을 본떠 그림) ---------- */
+const BL='#9CC7E4',BL2='#D5E8F5',OR2='#FBD3B0',RED='#C8452D';
+function coneSVG(cx,ay,by,rx,ry,{side=OR,dash=true}={}){
+  return `<path d="M ${cx} ${ay} L ${cx-rx} ${by} A ${rx} ${ry} 0 0 0 ${cx+rx} ${by} Z" fill="${side}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+   ${dash?`<path d="M ${cx-rx} ${by} A ${rx} ${ry} 0 0 1 ${cx+rx} ${by}" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/>`:''}`;
+}
+function sphereSVG(cx,cy,r,{fill=BL,eq=true}={}){
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${INK}" stroke-width="2.5"/>
+   ${eq?`<path d="M ${cx-r} ${cy} A ${r} ${r*.28} 0 0 0 ${cx+r} ${cy}" fill="none" stroke="${INK}" stroke-width="1.6"/><path d="M ${cx-r} ${cy} A ${r} ${r*.28} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="${INK}" stroke-width="1.4" stroke-dasharray="5 4"/>`:''}
+   <ellipse cx="${cx-r*.35}" cy="${cy-r*.4}" rx="${r*.18}" ry="${r*.1}" fill="#fff" opacity=".55"/>`;
+}
+const lyingCyl=()=>`<path d="M 26 25 H 108 V 85 H 26 A 14 30 0 0 1 26 25 Z" fill="${G1}" stroke="${INK}" stroke-width="2.5"/><path d="M 26 25 A 14 30 0 0 1 26 85" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="5 4"/><ellipse cx="108" cy="55" rx="14" ry="30" fill="${G3}" stroke="${INK}" stroke-width="2.5"/>`;
+/* 136쪽 가~마: 원기둥 나·라, 원뿔 가·다·마 */
+const SA={
+  가:()=>svg('0 0 120 110',coneSVG(60,10,88,40,11),'가: 원뿔'),
+  나:()=>svg('0 0 120 110',cylSVG(60,20,34,10,66),'나: 원기둥'),
+  다:()=>svg('0 0 120 110',coneSVG(60,6,96,20,6,{side:PK}),'다: 길쭉한 원뿔'),
+  라:()=>svg('0 0 120 110',lyingCyl(),'라: 옆으로 누운 원기둥'),
+  마:()=>svg('0 0 120 110',coneSVG(60,42,86,52,13,{side:'#F2C14E'}),'마: 납작한 원뿔')};
+/* 138쪽 가~마: 공 모양 가·나·라 */
+const SB={
+  가:()=>svg('0 0 120 110',sphereSVG(60,55,44),'가: 큰 구'),
+  나:()=>svg('0 0 120 110',sphereSVG(60,62,26,{fill:'#F2C14E'}),'나: 작은 구'),
+  다:()=>svg('0 0 120 110',coneSVG(60,10,88,40,11),'다: 원뿔'),
+  라:()=>svg('0 0 120 110',sphereSVG(60,57,36,{fill:OR}),'라: 주황색 구'),
+  마:()=>svg('0 0 120 110',cylSVG(60,20,34,10,66),'마: 원기둥')};
+const KK=['가','나','다','라','마'];
+const rowOf=(S,keys=KK)=>`<div class="figs" style="grid-template-columns:repeat(${keys.length},1fr)">${keys.map(k=>`<div>${S[k]()}${k}</div>`).join('')}</div>`;
+function figCheer(){return svg('0 0 200 130',`<g transform="rotate(-25 100 65)"><path d="M 40 65 L 160 30 A 12 35 0 0 1 160 100 Z" fill="#E86A5A" stroke="${INK}" stroke-width="2.5"/><ellipse cx="160" cy="65" rx="12" ry="35" fill="#F7B4A8" stroke="${INK}" stroke-width="2.5"/></g>`,'뿔 모양 응원 도구');}
+function figBall(){return svg('0 0 200 130',`<circle cx="100" cy="65" r="52" fill="#FDF6E3" stroke="${INK}" stroke-width="2.5"/><path d="M 60 32 Q 110 60 90 116 M 50 80 Q 100 70 148 92 M 120 16 Q 115 60 150 70" fill="none" stroke="#3D6E8C" stroke-width="5"/>`,'공');}
+/* 평면도형 돌리기: kind 'tri'(직각삼각형) 또는 'semi'(반원). 축 x=A */
+function figTurn(kind,th){
+  const A=150,k=.28,ph=th*Math.PI/180,full=th>=359.5;
+  const arc=(yy,w)=>{let s='';const n=Math.max(2,Math.round(th/6));for(let i=0;i<=n;i++){const p=ph*i/n;s+=`${(A+w*Math.cos(p)).toFixed(1)},${(yy+w*k*Math.sin(p)).toFixed(1)} `;}return s;};
+  let body='',trace='';
+  if(kind==='tri'){
+    const y0=30,yb=190,w=80;
+    if(full)body=coneSVG(A,y0,yb,w,w*k,{side:'#FCE0C6'});
+    else{const x=A+w*Math.cos(ph),y=yb+w*k*Math.sin(ph);body=`<polygon points="${A},${y0} ${x.toFixed(1)},${y.toFixed(1)} ${A},${yb}" fill="${OR}" fill-opacity=".85" stroke="${INK}" stroke-width="2.5"/>`;
+      if(th>0)trace=`<polyline points="${arc(yb,w)}" fill="none" stroke="${OR}" stroke-width="3"/>`;}
+  }else{
+    const cy=110,r=80;
+    if(full)body=sphereSVG(A,cy,r,{fill:'#CFE4F2'});
+    else{let p='';for(let i=0;i<=24;i++){const t=Math.PI*i/24;p+=`${(A+r*Math.sin(t)*Math.cos(ph)).toFixed(1)},${(cy-r*Math.cos(t)+r*k*Math.sin(t)*Math.sin(ph)).toFixed(1)} `;}
+      body=`<polygon points="${p}" fill="${BL}" fill-opacity=".9" stroke="${INK}" stroke-width="2.5"/>`;
+      if(th>0)trace=`<polyline points="${arc(cy,r)}" fill="none" stroke="${BL}" stroke-width="3"/>`;}
+  }
+  return `<svg class="fig" viewBox="0 0 300 230" role="img" aria-label="${kind==='tri'?'직각삼각형':'반원'}을 막대를 기준으로 ${Math.round(th)}도 돌린 모습">
+   ${trace}${body}<line x1="${A}" y1="10" x2="${A}" y2="220" stroke="${INK}" stroke-width="3"/>
+   <path d="M ${A-22} 18 A 22 7 0 1 0 ${A+22} 18" fill="none" stroke="#D6336C" stroke-width="2.5"/><polygon points="${A+22},18 ${A+16},10 ${A+28},11" fill="#D6336C"/></svg>`;
+}
+/* 누를 수 있는 원뿔 */
+const CN={cx:150,ay:28,by:195,rx:95,ry:25};
+function figTapCone(sel={},lab=false){
+  const {cx,ay,by,rx,ry}=CN;const f=k=>sel[k]?PK:null;
+  return `<svg class="tapfig" viewBox="0 0 300 240" role="img" aria-label="원뿔: 아래 원과 옆면을 누를 수 있어요">
+   <path class="tp" data-p="side" d="M ${cx} ${ay} L ${cx-rx} ${by} A ${rx} ${ry} 0 0 0 ${cx+rx} ${by} Z" fill="${f('side')||OR}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+   <path class="tp" data-p="bot" d="M ${cx-rx} ${by} A ${rx} ${ry} 0 0 0 ${cx+rx} ${by} A ${rx} ${ry} 0 0 0 ${cx-rx} ${by} Z" fill="${f('bot')||'rgba(0,0,0,0)'}" stroke="${INK}" stroke-width="2" stroke-dasharray="6 5"/>
+   ${lab?`<line x1="${cx}" y1="${ay}" x2="${cx}" y2="${by}" stroke="${RED}" stroke-width="3" stroke-dasharray="6 4"/>${T(cx+28,(ay+by)/2+20,'높이',`fill="${RED}"`)}
+   <line x1="${cx}" y1="${ay}" x2="${cx-rx}" y2="${by}" stroke="#2F6FB0" stroke-width="4"/>${T(cx-72,(ay+by)/2,'모선','fill="#2F6FB0"')}
+   <circle cx="${cx}" cy="${ay}" r="6" fill="${RED}"/>${T(cx+70,ay+8,'원뿔의 꼭짓점')}${T(cx+40,by+8,'밑면')}${T(cx+52,by-60,'옆면')}`:''}</svg>`;
+}
+/* 번호 붙은 원뿔: ① 꼭짓점 ② 모선 ③ 높이 ④ 밑면 */
+function figConeMarks(){
+  const {cx,ay,by,rx,ry}=CN;
+  return svg('0 0 300 240',`${coneSVG(cx,ay,by,rx,ry)}<ellipse cx="${cx}" cy="${by}" rx="${rx}" ry="${ry}" fill="${OR2}" fill-opacity=".6" stroke="none"/>
+   <circle cx="${cx}" cy="${ay}" r="6" fill="${RED}"/>${T(cx+24,ay+6,'①',`fill="${RED}" font-size="22"`)}
+   <line x1="${cx}" y1="${ay}" x2="${cx+rx}" y2="${by}" stroke="#2F6FB0" stroke-width="4"/>${T(cx+82,(ay+by)/2,'②','fill="#2F6FB0" font-size="22"')}
+   <line x1="${cx}" y1="${ay}" x2="${cx}" y2="${by}" stroke="${RED}" stroke-width="3" stroke-dasharray="6 4"/><rect x="${cx}" y="${by-12}" width="12" height="12" fill="none" stroke="${RED}" stroke-width="2"/>${T(cx-18,(ay+by)/2+20,'③',`fill="${RED}" font-size="22"`)}
+   ${T(cx-50,by+8,'④','font-size="22"')}`,'원뿔 그림, 구성 요소에 번호 ①~④');
+}
+/* 137쪽: 높이 12, 모선 15, 반지름 9 */
+function figConeLen(){
+  const {cx,ay,by,rx,ry}=CN;
+  return svg('0 0 300 240',`${coneSVG(cx,ay,by,rx,ry)}
+   <line x1="${cx}" y1="${ay}" x2="${cx}" y2="${by}" stroke="${RED}" stroke-width="3" stroke-dasharray="6 4"/>${T(cx+10,(ay+by)/2+10,'12 cm','text-anchor="start" fill="'+RED+'"')}
+   <line x1="${cx}" y1="${ay}" x2="${cx-rx}" y2="${by}" stroke="#2F6FB0" stroke-width="3"/>${T(cx-78,(ay+by)/2-4,'15 cm','fill="#2F6FB0"')}
+   <line x1="${cx}" y1="${by}" x2="${cx+rx}" y2="${by}" stroke="${INK}" stroke-width="2.5"/><circle cx="${cx}" cy="${by}" r="4" fill="${INK}"/>${T(cx+rx/2,by-6,'9 cm')}`,'원뿔: 높이 12 cm, 모선 15 cm, 밑면의 반지름 9 cm');
+}
+/* 구의 중심과 반지름 (분해된 모양) */
+function figSphereCut(lab=false){
+  const cx=150,cy=118,r=95;
+  const pts=[[-.8,-.6],[.95,-.3],[.2,.98],[-.5,.87]];
+  return svg('0 0 300 230',`${sphereSVG(cx,cy,r,{fill:BL2})}
+   <path d="M ${cx} ${cy} L ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx+r} ${cy} Z" fill="#F7A35C" fill-opacity=".55" stroke="${INK}" stroke-width="2"/>
+   ${(lab?pts:pts.slice(0,1)).map(([x,y])=>`<line x1="${cx}" y1="${cy}" x2="${(cx+x*r).toFixed(1)}" y2="${(cy+y*r).toFixed(1)}" stroke="#2F6FB0" stroke-width="3.5"/>`).join('')}
+   <circle cx="${cx}" cy="${cy}" r="6" fill="${RED}"/>
+   ${lab?`${T(cx+8,cy+26,'구의 중심','text-anchor="start" fill="'+RED+'"')}${T(cx-58,cy-30,'구의 반지름','fill="#2F6FB0"')}`:`${T(cx+16,cy+24,'①',`fill="${RED}" font-size="22"`)}${T(cx-50,cy-40,'②','fill="#2F6FB0" font-size="22"')}`}`,lab?'구의 중심과 여러 개의 반지름':'구 그림: ① 가장 안쪽의 점 ② 그 점과 겉면을 이은 선분');
+}
+/* 반원 (지름 10 cm) */
+function figSemiLen(){
+  const A=110,cy=110,r=80;let p='';for(let i=0;i<=24;i++){const t=Math.PI*i/24;p+=`${(A+r*Math.sin(t)).toFixed(1)},${(cy-r*Math.cos(t)).toFixed(1)} `;}
+  return svg('0 0 300 230',`<polygon points="${p}" fill="${BL}" stroke="${INK}" stroke-width="2.5"/><line x1="${A}" y1="10" x2="${A}" y2="220" stroke="${INK}" stroke-width="3"/>
+   <line x1="${A-14}" y1="${cy-r}" x2="${A-14}" y2="${cy+r}" stroke="${RED}" stroke-width="2.5"/>${T(A-40,cy+6,'10 cm',`fill="${RED}"`)}`,'지름 10 cm인 반원, 지름이 막대에 붙어 있어요');
+}
+function figTrio(){return `<div class="figs" style="grid-template-columns:repeat(3,1fr)"><div>${svg('0 0 120 110',cylSVG(60,18,34,10,70),'원기둥')}원기둥</div><div>${svg('0 0 120 110',coneSVG(60,8,92,38,10),'원뿔')}원뿔</div><div>${svg('0 0 120 110',sphereSVG(60,55,44),'구')}구</div></div>`;}
+
+/* ---------- start ---------- */
+function startView(){
+  clearOffs();clearInterval(tick);ClassWatch.teacherStop();
+  $('#sub').textContent='6학년 수학 · 6. 원기둥, 원뿔, 구 4차시';
+  app.innerHTML=`<section class="hero"><div class="grid"><h1>뿔 모양과<br>공 모양의 비밀</h1>
+   <p>뾰족한 뿔 모양과 둥근 공 모양을 분류하고, 직각삼각형과 반원을 돌려 원뿔과 구를 만들어요. 구성 요소를 찾고 원기둥·원뿔·구를 비교해요.</p></div>
+   <div class="panel">${figTrio()}</div></section>
+   <div class="choose"><button id="goStu">학생으로 참여하기</button><button class="ghost" id="goTv">선생님 화면 (TV)</button></div>`;
+  $('#goStu').onclick=joinView; $('#goTv').onclick=()=>{location.hash='teacher';teacherView();};
+}
+/* 공통: 모두 고르기 */
+function classify(work,{id,S,want,prompt,bad,okText,onOk}){
+  const sel=new Set();let first=true;
+  work.innerHTML=`<p style="margin:0">${prompt}</p><div class="shapes">${KK.map(k=>`<button data-k="${k}" aria-pressed="false">${S[k]()}${k}</button>`).join('')}</div>
+    <div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div>`;
+  $$('.shapes button',work).forEach(b=>b.onclick=()=>{const k=b.dataset.k;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));});
+  $('#chk').onclick=()=>{
+    const s=[...sel].sort().join(''),ok=s===want;if(first){rec(id,ok);first=false;}
+    if(!ok){$('#wm').className='msg bad';$('#wm').innerHTML=!sel.size?'모양을 골라요.':bad(sel);work.classList.remove('shake');void work.offsetWidth;work.classList.add('shake');return;}
+    $$('.shapes button',work).forEach(b=>{b.disabled=true;if(want.includes(b.dataset.k))b.classList.add('right');});
+    $('#wm').className='msg ok';$('#wm').innerHTML=okText;nextBtn('다음 ▶',onOk);
+  };
+}
+/* 공통: 예상 → 돌리기 → 확인 */
+let rotTimer=null;
+function turnStep(n,R,save,go,{kind,title,phGuess,phTurn,id,q,a,o,why,next}){
+  const work=layout(n,title,`<div class="rot grid"><div id="rf">${figTurn(kind,R.turned?360:0)}</div>
+    <label class="muted" for="rs">손가락으로 밀어서 돌려 봐요</label><input type="range" id="rs" min="0" max="360" value="${R.turned?360:0}" ${R.ph===phGuess?'disabled':''}>
+    <div class="row" style="justify-content:center"><button id="spin" ${R.ph===phGuess?'disabled':''}>▶ 한 바퀴 돌리기</button></div></div>`);
+  const draw=v=>{$('#rf').innerHTML=figTurn(kind,+v);};
+  let tdone=false;const turned=()=>{if(tdone)return;tdone=true;if(!R.turned){save({turned:true});ask();}};
+  $('#rs').oninput=e=>{draw(e.target.value);if(+e.target.value>=360)turned();};
+  $('#spin').onclick=()=>{clearInterval(rotTimer);let v=+$('#rs').value>=360?0:+$('#rs').value;if(RM){v=360;$('#rs').value=v;draw(v);return turned();}
+    rotTimer=setInterval(()=>{v=Math.min(360,v+6);if(!$('#rs')){clearInterval(rotTimer);return;}$('#rs').value=v;draw(v);if(v>=360){clearInterval(rotTimer);turned();}},40);};
+  if(R.ph===phGuess){
+    work.innerHTML=`<div class="quiz"><div class="q">돌리기 전에 예상해 봐요.<br>${kind==='tri'?'직각삼각형':'반원'}을 막대를 기준으로 한 바퀴 돌리면?</div>
+      <div class="opts">${['원기둥이 될 것 같아요','원뿔이 될 것 같아요','구가 될 것 같아요','잘 모르겠어요'].map(x=>`<button data-o="${x}">${x}</button>`).join('')}</div></div>`;
+    $$('.opts button',work).forEach(b=>b.onclick=async()=>{await save({guess:b.dataset.o,turned:false,ph:phTurn});(n===1?stage1:stage2)();});
+    return;
+  }
+  function ask(){work.innerHTML='';const box=document.createElement('div');work.appendChild(box);
+    pick(box,{id,q:`예상: “${esc(R.guess||'')}”<br>${q}`,a,o,why,onOk:go(next)});}
+  if(R.turned)return ask();
+  work.innerHTML=`<div class="quiz"><div class="emoji" aria-hidden="true">🔄</div><div class="q">예상: “${esc(R.guess||'')}”</div><p>왼쪽 ${kind==='tri'?'직각삼각형':'반원'}을 <b>한 바퀴</b> 돌려 봐요. (▶ 단추 또는 밀기)</p></div>`;
+}
+
+/* ---------- 1. 원뿔 (교과서 136~137쪽) ---------- */
+function stage1(){
+  const R={ph:0,...(ME.s1||{})};
+  if(R.done)return s1Done();
+  const save=saver(1,R),go=p=>async()=>{await save({ph:p});stage1();};
+  if(R.ph<=1){
+    shell(`<div class="panel grid"><div><span class="band">1단계 · 원뿔</span></div><h2>입체도형을 분류해 봐요 (136쪽 1)</h2><div id="work" class="grid"></div></div>`);
+    const work=$('#work');
+    if(R.ph===0)return classify(work,{id:'d1',S:SA,want:'나라',prompt:'지난 시간에 배운 <b>원기둥</b>을 <b>모두</b> 눌러요.',
+      bad:sel=>[...sel].some(k=>'가다마'.includes(k))?'뾰족한 점이 있는 것은 원기둥이 아니에요. 원기둥은 서로 평행하고 합동인 두 밑면이 있어요.':'원기둥이 하나 더 있어요. 옆으로 누운 것도 찾아봐요.',
+      okText:'맞았어요! 원기둥: 나, 라 · 원기둥이 아닌 입체도형: 가, 다, 마',onOk:go(1)});
+    const box=document.createElement('div');work.appendChild(box);
+    work.insertAdjacentHTML('afterbegin',rowOf(SA,['가','다','마']));
+    return pick(box,{id:'d2',q:'원기둥이 아닌 가, 다, 마의 같은 점은?',a:'밑면이 원 1개이고 뾰족한 점이 있어요',o:['서로 평행한 두 면이 원이에요','모서리가 6개 있어요'],
+      why:{'서로 평행한 두 면이 원이에요':'그건 원기둥이에요. 가, 다, 마의 평평한 면은 몇 개인가요?','모서리가 6개 있어요':'가, 다, 마에는 모서리가 없어요. 위쪽 모양을 봐요.'},
+      onOk:async()=>{box.insertAdjacentHTML('beforeend',`<div class="concept"><b>개념 확인</b> 가, 다, 마와 같은 입체도형을 <b>원뿔</b>이라고 해요.</div>`);await wait(1600);await save({ph:2});stage1();}});
+  }
+  if(R.ph<=3)return turnStep(1,R,save,go,{kind:'tri',title:'직각삼각형을 돌리면? (136쪽 2)',phGuess:2,phTurn:3,id:'d3',q:'직접 돌려 보니 어떤 입체도형이 되었나요?',a:'원뿔',o:['원기둥','삼각뿔'],
+    why:{'원기둥':'위와 아래가 같은 크기의 원인가요? 위쪽이 뾰족해요.','삼각뿔':'모서리가 생겼나요? 아래가 원 모양이에요.'},next:4});
+  if(R.ph===4){
+    const work=layout(1,'원뿔의 구성 요소를 알아봐요 (137쪽 3)',`<div id="cf">${figTapCone({})}</div>`,`<p class="muted" style="margin:0">면을 누르면 색칠돼요. 다시 누르면 지워져요.</p>`);
+    let first=true;const s={};
+    const bind=()=>$$('#cf .tp').forEach(p=>p.onclick=()=>{const k=p.dataset.p;s[k]=!s[k];$('#cf').innerHTML=figTapCone(s);bind();});bind();
+    work.innerHTML=`<div class="quiz"><div class="q">원뿔에서 <b>평평한 면</b>을 눌러 색칠해요.</div><div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div></div>`;
+    $('#chk').onclick=()=>{const ok=!!(s.bot&&!s.side);if(first){rec('d4',ok);first=false;}
+      if(!ok){$('#wm').className='msg bad';$('#wm').innerHTML=s.side?'옆을 둘러싼 면은 굽어 있어요. 평평한 면만 골라요.':'평평한 면은 아래쪽에 있어요. 아래쪽 원(점선)을 눌러요.';return;}
+      $('#wm').className='msg ok';$('#wm').textContent='맞았어요! 원뿔의 평평한 면은 아래의 원 1개예요.';nextBtn('다음 ▶',go(5));};
+    return;
+  }
+  if(R.ph<=9){
+    const work=layout(1,'원뿔의 구성 요소 이름 (137쪽 3)',`${figConeMarks()}`,`<p class="muted" style="margin:0">① 뾰족한 점 · ② 파란 선 · ③ 빨간 점선 · ④ 평평한 면</p>`);
+    const Q={5:{id:'d5',q:'④ 평평한 면을 무엇이라고 할까요?',a:'밑면',o:['옆면','윗면'],why:{'윗면':'원뿔의 평평한 면은 밑면이라고 해요.','옆면':'옆면은 옆을 둘러싼 굽은 면이에요.'}},
+      6:{id:'d6',q:'옆을 둘러싼 <b>굽은 면</b>을 무엇이라고 할까요?',a:'옆면',o:['밑면','모선'],why:{'밑면':'밑면은 평평한 원이에요.','모선':'모선은 선분이에요. 면의 이름을 골라요.'}},
+      7:{id:'d7',q:'① 원뿔에서 뾰족한 부분의 점을 무엇이라고 할까요?',a:'원뿔의 꼭짓점',o:['구의 중심','모서리'],why:{'구의 중심':'구의 중심은 구의 가장 안쪽 점이에요.','모서리':'모서리는 선이에요. 원뿔에는 모서리가 없어요.'}},
+      8:{id:'d8',q:'② 원뿔의 꼭짓점과 밑면인 원의 둘레의 한 점을 이은 선분은?',a:'모선',o:['높이','반지름'],why:{'높이':'높이는 밑면에 <b>수직</b>으로 내린 선분의 길이예요. 파란 선은 비스듬해요.','반지름':'반지름은 밑면인 원 안에 있어요.'}},
+      9:{id:'d9',q:'③ 원뿔의 꼭짓점에서 밑면에 <b>수직</b>으로 내린 선분의 길이는?',a:'높이',o:['모선의 길이','지름'],why:{'모선의 길이':'모선은 꼭짓점과 밑면의 <b>둘레</b>를 이어요. ③은 밑면의 가운데로 수직이에요.','지름':'지름은 밑면인 원을 가로지르는 길이예요.'}}}[R.ph];
+    return pick(work,{...Q,onOk:go(R.ph+1)});
+  }
+  const work=layout(1,'원뿔의 구성 요소의 길이 (137쪽 실력)',figConeLen(),`<p class="muted" style="margin:0">빨간 점선은 밑면에 수직이고, 파란 선은 꼭짓점과 밑면의 둘레를 이었어요.</p>`);
+  return fillEq(work,{id:'d10',html:`<h2>높이, 모선의 길이, 밑면의 지름은?</h2>
+      <div class="eq">높이 = ${inp('h','높이')} cm</div><div class="eq">모선의 길이 = ${inp('m','모선의 길이')} cm</div><div class="eq">밑면의 지름 = ${inp('d','밑면의 지름')} cm</div>`,
+    fields:[{id:'h',want:12},{id:'m',want:15},{id:'d',want:18}],
+    hint:v=>same(v[0],15)||same(v[1],12)?'높이(밑면에 수직, 빨강)와 모선(비스듬, 파랑)을 바꿔 썼어요.':same(v[2],9)?'9 cm는 밑면의 <b>반지름</b>이에요. 지름은 반지름의 2배!':'',
+    solve:'높이 12 cm, 모선의 길이 15 cm, 지름 9 × 2 = <b>18</b> cm',okText:'맞았어요! 높이 12 cm, 모선 15 cm, 지름 18 cm',
+    onOk:async()=>{await wait(1300);await save({done:true,at:Date.now()});stage1();}});
+}
+function s1Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">1단계 끝</span></div>${figTapCone({},true)}
+   <div class="concept"><b>꼭 기억해요</b><br>원뿔에서 평평한 면을 <b>밑면</b>, 옆을 둘러싼 굽은 면을 <b>옆면</b>, 뾰족한 부분의 점을 <b>원뿔의 꼭짓점</b>이라고 해요. 원뿔의 꼭짓점과 밑면인 원의 둘레의 한 점을 이은 선분을 <b>모선</b>, 원뿔의 꼭짓점에서 밑면에 수직으로 내린 선분의 길이를 <b>높이</b>라고 해요.</div>
+   <p class="muted">선생님이 2단계를 열면 공 모양을 알아봐요.</p></div>`);
+}
+
+/* ---------- 2. 구 (교과서 138~139쪽) ---------- */
+function stage2(){
+  const R={ph:0,...(ME.s2||{})};
+  if(R.done)return s2Done();
+  const save=saver(2,R),go=p=>async()=>{await save({ph:p});stage2();};
+  if(R.ph<=1){
+    shell(`<div class="panel grid"><div><span class="band">2단계 · 구</span></div><h2>입체도형을 분류해 봐요 (138쪽 1)</h2><div id="work" class="grid"></div></div>`);
+    const work=$('#work');
+    if(R.ph===0)return classify(work,{id:'e1',S:SB,want:'가나라',prompt:'<b>공 모양</b>인 입체도형을 <b>모두</b> 눌러요.',
+      bad:sel=>[...sel].some(k=>'다마'.includes(k))?'평평한 면이 있는 것은 공 모양이 아니에요.':'공 모양이 더 있어요. 크기와 색은 달라도 모양을 봐요.',
+      okText:'맞았어요! 공 모양: 가, 나, 라 · 공 모양이 아닌 입체도형: 다, 마',onOk:go(1)});
+    const box=document.createElement('div');work.appendChild(box);
+    work.insertAdjacentHTML('afterbegin',rowOf(SB,['가','나','라']));
+    return pick(box,{id:'e2',q:'공 모양인 가, 나, 라의 특징은?',a:'어느 방향에서 보아도 원 모양이에요',o:['평평한 면이 1개 있어요','뾰족한 점이 1개 있어요'],
+      why:{'평평한 면이 1개 있어요':'가, 나, 라를 평평한 곳에 세울 수 있을까요? 모두 굽은 면이에요.','뾰족한 점이 1개 있어요':'뾰족한 점이 있는 것은 원뿔이에요.'},
+      onOk:async()=>{box.insertAdjacentHTML('beforeend',`<div class="concept"><b>개념 확인</b> 가, 나, 라와 같은 입체도형을 <b>구</b>라고 해요.</div>`);await wait(1600);await save({ph:2});stage2();}});
+  }
+  if(R.ph<=3)return turnStep(2,R,save,go,{kind:'semi',title:'반원을 돌리면? (138쪽 2)',phGuess:2,phTurn:3,id:'e3',q:'직접 돌려 보니 어떤 입체도형이 되었나요?',a:'구',o:['원뿔','원기둥'],
+    why:{'원뿔':'뾰족한 점이 생겼나요? 어느 쪽에서 보아도 둥글어요.','원기둥':'평평한 밑면이 생겼나요?'},next:4});
+  if(R.ph<=6){
+    const lab=R.ph===6;
+    const work=layout(2,'구의 구성 요소 (139쪽 3)',figSphereCut(lab),`<p class="muted" style="margin:0">${lab?'구를 잘라 안쪽을 본 모양이에요. 파란 선분을 여러 개 그었어요.':'구를 잘라 안쪽을 본 모양이에요. 수박을 잘랐을 때를 떠올려요.'}</p>`);
+    const Q={4:{id:'e4',q:'① 구에서 가장 안쪽에 있는 점을 무엇이라고 할까요?',a:'구의 중심',o:['원뿔의 꼭짓점','밑면'],why:{'원뿔의 꼭짓점':'원뿔의 꼭짓점은 원뿔의 뾰족한 점이에요.','밑면':'구에는 평평한 밑면이 없어요.'}},
+      5:{id:'e5',q:'② 구의 중심에서 구의 겉면의 한 점을 이은 선분은?',a:'구의 반지름',o:['모선','높이'],why:{'모선':'모선은 원뿔의 꼭짓점과 밑면의 둘레를 이은 선분이에요.','높이':'구에는 밑면이 없어서 높이를 말하지 않아요.'}},
+      6:{id:'e6',q:'구의 반지름은 어떤 특징이 있을까요?',a:'무수히 많고 길이가 모두 같아요',o:['1개뿐이에요','길이가 서로 달라요'],why:{'1개뿐이에요':'중심에서 겉면의 어느 점으로든 이을 수 있어요. 몇 개나 그을 수 있을까요?','길이가 서로 달라요':'중심에서 겉면까지의 거리는 어디든 같아요. 그래서 둥글어요.'}}}[R.ph];
+    return pick(work,{...Q,onOk:go(R.ph+1)});
+  }
+  const work=layout(2,'반원을 돌려 만든 구의 크기',figSemiLen(),`<p class="muted" style="margin:0">지름이 10 cm인 반원을 지름(막대)을 기준으로 한 바퀴 돌렸어요.</p>`);
+  return fillEq(work,{id:'e7',html:`<h2>만들어진 구의 지름과 반지름은?</h2>
+      <div class="eq">구의 지름 = ${inp('d','구의 지름')} cm</div><div class="eq">구의 반지름 = ${inp('r','구의 반지름')} cm</div>`,
+    fields:[{id:'d',want:10},{id:'r',want:5}],
+    hint:v=>same(v[1],10)?'10 cm는 반원의 <b>지름</b>이에요. 구의 반지름은 그 절반!':same(v[1],20)||same(v[0],20)?'돌려도 길이는 2배가 되지 않아요. 반원의 지름이 그대로 구의 지름이에요.':'',
+    solve:'구의 지름 = 반원의 지름 10 cm, 반지름 10 ÷ 2 = <b>5</b> cm',okText:'맞았어요! 구의 지름 10 cm, 반지름 5 cm',
+    onOk:async()=>{await wait(1300);await save({done:true,at:Date.now()});stage2();}});
+}
+function s2Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">2단계 끝</span></div>${figSphereCut(true)}
+   <div class="concept"><b>꼭 기억해요</b><br>구에서 가장 안쪽에 있는 점을 <b>구의 중심</b>, 구의 중심에서 구의 겉면의 한 점을 이은 선분을 <b>구의 반지름</b>이라고 해요. 구의 반지름은 무수히 많고 길이가 모두 같아요.</div>
+   <p class="muted">선생님이 3단계를 열면 원기둥·원뿔·구를 비교해요.</p></div>`);
+}
+
+/* ---------- 3. 비교하기 (교과서 139쪽) ---------- */
+function stage3(){
+  const R={ph:0,...(ME.s3||{})};
+  if(R.done)return s3Done();
+  const save=saver(3,R);
+  if(R.ph===0){
+    shell(`<div class="panel grid"><div><span class="band">3단계 · 비교하기</span></div><h2>원기둥, 원뿔, 구를 비교해 표를 채워요</h2>${figTrio()}<div id="work" class="grid"></div></div>`);
+    const work=$('#work');const first={};
+    work.innerHTML=`<div style="overflow-x:auto"><table class="tbl cmp"><thead><tr><th></th>${CMP_COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>
+      ${CMP_ROWS.map(r=>`<tr data-r="${r.id}"><th>${r.k}</th>${CMP_COLS.map((c,k)=>`<td><select id="${r.id}_${k}" aria-label="${c} ${r.k}"><option value="">고르기</option>${r.o.map(o=>`<option>${o}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <div class="msg" id="wm" role="status"></div><div class="row" id="act" style="justify-content:center"><button id="chk">확인하기</button></div>`;
+    $('#chk').onclick=()=>{
+      let empty=false,allOk=true;
+      CMP_ROWS.forEach(r=>{let rowOk=true;CMP_COLS.forEach((c,k)=>{const el=$('#'+r.id+'_'+k);if(!el.value)empty=true;const ok=el.value===r.a[k];if(!ok)rowOk=false;el.classList.toggle('bad',!!el.value&&!ok);el.classList.toggle('good',ok);});
+        if(!empty&&first[r.id]===undefined){first[r.id]=rowOk;rec(r.id,rowOk);}if(!rowOk)allOk=false;});
+      if(empty){$('#wm').className='msg bad';$('#wm').textContent='빈칸을 모두 골라요.';return;}
+      if(!allOk){$('#wm').className='msg bad';$('#wm').innerHTML='빨간 칸을 다시 생각해 봐요. 그림을 보며 앞·위에서 본 모양을 떠올려요.';work.classList.remove('shake');void work.offsetWidth;work.classList.add('shake');return;}
+      $$('select',work).forEach(x=>x.disabled=true);
+      $('#wm').className='msg ok';$('#wm').textContent='맞았어요! 표를 보며 짝과 이야기해요.';
+      nextBtn('다음 ▶',async()=>{await save({ph:1});stage3();});
+    };
+    return;
+  }
+  shell(`<div class="panel quiz pop"><div><span class="band">3단계 · 짝과 이야기해요</span></div>${figTrio()}
+    <div class="rules" style="text-align:left;width:100%"><b>태블릿을 내려놓고 짝을 보고 말해요</b><ul><li>원기둥, 원뿔, 구의 <b>같은 점</b> 1가지</li><li>원기둥, 원뿔, 구의 <b>다른 점</b> 2가지</li></ul></div>
+    <div class="row" style="justify-content:center"><button id="talked">짝과 이야기했어요 ✓</button></div></div>`);
+  $('#talked').onclick=async()=>{$('#talked').disabled=true;await save({done:true,at:Date.now()});stage3();};
+}
+function s3Done(){
+  shell(`<div class="panel quiz pop"><div><span class="band">3단계 끝</span></div>${figTrio()}
+   <div class="concept"><b>꼭 기억해요</b><br>같은 점: 셋 다 <b>굽은 면</b>이 있고, 위에서 보면 원 모양이에요.<br>다른 점: 밑면이 원기둥 2개·원뿔 1개·구 <b>없음</b>. 뾰족한 꼭짓점은 <b>원뿔</b>만 있어요. 앞에서 본 모양은 직사각형·삼각형·원이에요.</div>
+   <p class="muted">선생님이 4단계를 열면 정리 퀴즈를 풀어요.</p></div>`);
+}
+
+/* ---------- 4. 정리 퀴즈 ---------- */
+let qOpts={};
+function stage4(){
+  const R={i:0,score:0,...(ME.s4||{})};
+  if(R.di===R.i&&!R.done)R.i++;
+  const save=saver(4,R);
+  if(R.i>=QUIZ.length||R.done){
+    if(!R.done)save({i:QUIZ.length,done:true,at:Date.now()});
+    return shell(`<div class="panel quiz pop"><div><span class="band">원뿔·구 퀴즈 끝</span></div><div class="emoji" aria-hidden="true">🍦</div>
+      <div class="big">${QUIZ.length}문제 중 ${R.score}문제 맞혔어요!</div><p>TV에서 순위를 확인해요. 이제 수학익힘을 풀어요.</p></div>`);
+  }
+  const Q=QUIZ[R.i];
+  const opts=qOpts[Q.id]||(qOpts[Q.id]=shuffle([Q.a,...Q.o]));
+  shell(`<div class="panel quiz"><div class="row" style="justify-content:space-between;width:100%"><span class="band">원뿔·구 퀴즈 ${R.i+1}/${QUIZ.length}</span><span class="score">🍦 ${R.score}</span></div>
+    <div class="prog">${QUIZ.map((_,k)=>`<span class="${k<R.i?'on':k===R.i?'cur':''}"></span>`).join('')}</div>
+    <div class="q">${esc(Q.q)}</div><div class="opts">${opts.map(x=>`<button data-o="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    <div class="msg" id="pm" role="status"></div><div id="ex"></div><div class="row" id="act" style="justify-content:center"></div></div>`);
+  $$('.opts button').forEach(b=>b.onclick=async()=>{
+    const ok=b.dataset.o===Q.a;rec(Q.id,ok);
+    $$('.opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===Q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    $('#pm').className='msg '+(ok?'ok':'bad');$('#pm').textContent=ok?'맞았어요! 🍦 +1':'아쉬워요. 정답을 확인해요.';
+    $('#ex').innerHTML=`<div class="expl">${esc(Q.ex)}</div>`;
+    const sc=R.score+(ok?1:0),last=R.i+1>=QUIZ.length;
+    await save({score:sc,di:R.i,...(R.i===0&&!R.startAt?{startAt:Date.now()}:{})});
+    nextBtn(last?'끝! ▶':'다음 문제 ▶',async()=>{await save({i:R.i+1,...(last?{done:true,at:Date.now()}:{})});stage4();});
+  });
+}
+/* ---------- student: room ---------- */
+let me=null, ROOMV={}, ME={}, cur=1, onMe=null;
+function enterRoom(){
+  clearOffs();ClassWatch.student({db,room:me.room,root:app});ClassWatch.who(me.num,me.name);
+  $('#sub').textContent=`${me.num}번 ${me.name}`;
+  app.innerHTML='<div class="panel"><h2>들어가는 중…</h2></div>';
+  let ready=false;ROOMV={};onMe=null;
+  listen(roomRef(me.room).child('students/'+me.num),s=>{
+    const v=s.val();
+    if(!v){store(APP+'-student',null);me=null;clearOffs();return joinView();}
+    ME=v;
+    if(!ready){ready=true;if(ROOMV.stage){cur=ROOMV.stage;renderStage();}return;}
+    if(typeof onMe==='function')onMe();
+  });
+  listen(roomRef(me.room).child('stage'),s=>{
+    const st=s.val()||1;const was=ROOMV.stage;ROOMV.stage=st;
+    if(!ready)return;
+    if(was!==st){cur=st;renderStage();} else drawSteps();
+  });
+  /* 선생님이 시작을 누르기 전에는 그 단계를 대기 화면으로 보여 줘요 */
+  listen(roomRef(me.room).child('go'),s=>{
+    const g=s.val()||0;const was=ROOMV.go||0;ROOMV.go=g;
+    if(!ready)return;
+    if((cur>was)!==(cur>g))renderStage(); else drawSteps();
+  });
+}
+function waitView(){
+  ClassWatch.step('대기',{n:cur,total:NST,wait:true});
+  shell(`<div class="panel quiz pop"><div><span class="band">${cur}단계 · ${STAGES[cur].k}</span></div><div class="emoji" aria-hidden="true">👂</div>
+    <h2 style="font-size:1.8rem">선생님 설명을 들어요</h2><p>선생님이 <b>시작</b>을 누르면 활동이 열려요. 태블릿은 잠깐 내려놓아요.</p></div>`);
+}
+function stepDone(n){return !!(ME['s'+n]&&ME['s'+n].done);}
+function drawSteps(){
+  const el=$('#steps');if(!el)return;
+  el.innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n>ROOMV.stage||n>(ROOMV.go||0)?'disabled':''} ${n===cur?'aria-current="step"':''} class="${stepDone(n)?'done':''}"><b>${n}</b>${STAGES[n].k}${stepDone(n)?' ✓':''}</button>`).join('');
+  $$('#steps button').forEach(b=>b.onclick=()=>{cur=+b.dataset.s;renderStage();});
+}
+function shell(inner){
+  app.innerHTML=`<div class="grid"><nav class="steps" id="steps" aria-label="활동 단계"></nav>${inner}<div style="text-align:right"><button class="ghost" id="relog" style="font-size:.85rem;padding:.4em .8em">다른 이름으로 들어가기</button></div></div>`;
+  $('#relog').onclick=()=>{store(APP+'-student',null);me=null;clearOffs();joinView();};
+  drawSteps();
+}
+function renderStage(){
+  if(cur>(ROOMV.go||0))return waitView();
+  ClassWatch.step(STAGES[cur].k,{n:cur,total:NST,wait:stepDone(cur)});
+  onMe=()=>drawSteps();
+  if(cur===1)return stage1();
+  if(cur===2)return stage2();
+  if(cur===3)return stage3();
+  return stage4();
+}
+
+function withTimeout(pr,ms=10000){return Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT')),ms))]);}
+function showError(e){
+  const m=String(e&&(e.code||e.message)||e);
+  let why='알 수 없는 오류가 났어요.';
+  if(/permission/i.test(m)) why='Firebase 데이터베이스의 <b>규칙</b>이 막고 있어요. Realtime Database → 규칙 탭을 확인해 주세요.';
+  else if(/TIMEOUT/.test(m)) why='Firebase 서버에 10초 동안 연결되지 않았어요. 학교 인터넷이 Firebase를 막고 있을 수 있어요.';
+  $('#sub').textContent='연결 문제';
+  app.innerHTML=`<div class="panel grid"><h2 style="color:var(--bad)">서버에 연결하지 못했어요</h2><p>${why}</p><p class="muted">오류 내용: <code>${esc(m)}</code></p><div class="row"><button id="retry">다시 시도</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  $('#retry').onclick=()=>location.reload(); $('#home').onclick=()=>{location.hash='';startView();};
+}
+window.addEventListener('unhandledrejection',ev=>showError(ev.reason));
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.database();
+const roomRef=c=>db.ref('rooms/'+c);
+const params=new URLSearchParams(location.search);
+let ROOM=params.get('room')||'';
+let offs=[];const clearOffs=()=>{offs.forEach(f=>f());offs=[];};
+function listen(ref,cb){const h=ref.on('value',cb);offs.push(()=>ref.off('value',h));}
+
+function parseName(s){const m=String(s).trim().match(/^(\d{1,2})\s*[번.]?\s*(.+)$/);return m?{num:+m[1],name:m[2].trim()}:null;}
+function joinView(){
+  clearOffs();
+  const saved=store(APP+'-student');
+  if(saved&&ROOM&&saved.room===ROOM){me=saved;return enterRoom();}
+  $('#sub').textContent='학생 화면';
+  ClassWatch.student({db,room:ROOM,root:app});ClassWatch.step('들어가기');
+  app.innerHTML=`<div class="grid" style="max-width:560px;margin:0 auto">
+   <div class="panel grid"><h2>방 번호</h2><input id="rm" inputmode="numeric" maxlength="4" placeholder="TV에 보이는 4자리" value="${esc(ROOM)}"></div>
+   <div class="panel grid"><h2>"번호 이름"을 써요</h2><input id="nm" placeholder="예) 7 김민수" autocomplete="off"></div>
+   <div class="msg bad" id="jm" role="status"></div>
+   <div class="row"><button id="enter" disabled>들어가기</button><button class="ghost" id="home">처음으로</button></div></div>`;
+  const chk=()=>{$('#enter').disabled=!(/^\d{4}$/.test($('#rm').value)&&parseName($('#nm').value));};
+  $('#rm').oninput=chk;$('#nm').oninput=chk;
+  $('#home').onclick=startView;
+  ClassWatch.joinForm();
+  $('#enter').onclick=async()=>{
+    const code=$('#rm').value, p=parseName($('#nm').value);
+    $('#enter').disabled=true;
+    try{
+      const open=await withTimeout(roomRef(code).child('open').get());
+      if(!open.exists()){$('#jm').textContent='방 번호를 다시 확인해요.';return chk();}
+      const r=await withTimeout(roomRef(code).child('students/'+p.num).transaction(c=>c?undefined:{name:p.name,joinedAt:Date.now()},undefined,false));
+      if(!r.committed){const c=r.snapshot.val();
+        if(!(c&&c.name===p.name)){$('#jm').textContent=`${p.num}번은 이미 "${c.name}" 이름으로 들어와 있어요. 번호를 확인해요.`;return chk();}}
+    }catch(e){$('#jm').textContent='연결 문제: '+(e.code||e.message);return chk();}
+    ROOM=code;me={room:code,num:p.num,name:p.name};store(APP+'-student',me);
+    history.replaceState(null,'','?room='+code);
+    enterRoom();
+  };
+}
+
+/* ---------- teacher ---------- */
+let tick=null,RD={};
+async function teacherView(){
+  clearOffs();
+  $('#sub').textContent='선생님 화면 · 연결 중';
+  app.innerHTML='<div class="panel grid" style="text-align:center"><h2>방을 만드는 중이에요…</h2></div>';
+  let code=store(APP+'-teacher-room');
+  try{
+    if(!code||!(await withTimeout(roomRef(code).child('open').get())).exists()){
+      code=String(Math.floor(1000+Math.random()*9000));
+      await withTimeout(roomRef(code).set({open:Date.now(),app:APP,stage:1,timer:{min:STAGES[1].tm,left:STAGES[1].tm*60,endAt:0}}));
+      store(APP+'-teacher-room',code);
+    }
+  }catch(e){return showError(e);}
+  ROOM=code;
+  ClassWatch.teacher({db,room:code});
+  const url=location.origin+location.pathname+'?room='+code;
+  $('#sub').textContent='선생님 화면 · TV에 띄워 주세요';
+  app.innerHTML=`<div class="tv">
+   <div class="grid">
+    <div class="panel qr"><h2>태블릿으로 접속</h2><div id="qrbox"></div><div>방 번호 <span class="roomcode">${code}</span></div><p class="muted" style="word-break:break-all;font-size:.75rem;margin:0">${esc(url)}</p></div>
+    <div class="panel grid"><div class="timer" id="tm">5:00</div><div class="row" style="justify-content:center"><button class="ghost" id="minus" aria-label="1분 줄이기">－1</button><button id="go">시작</button><button class="ghost" id="plus" aria-label="1분 늘리기">＋1</button></div><div class="msg" id="gostat" role="status" style="text-align:center;font-size:1rem"></div></div>
+    <div class="panel grid"><h2>단계 열기</h2><div class="tsteps" id="tsteps"></div></div>
+    <div class="panel grid"><div class="row" style="justify-content:space-between"><h2>참여</h2><span class="muted" id="cnt"></span></div><div class="people" id="ppl"></div></div>
+    <div class="row"><button class="ghost" id="newroom">새 방</button><button class="ghost" id="home">처음으로</button></div>
+   </div>
+   <div class="grid" id="main"></div></div>`;
+  if(window.QRCode){try{new QRCode($('#qrbox'),{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+  const ref=roomRef(code);
+  listen(ref,s=>{RD=s.val()||{};renderTV();});
+  const tm=()=>RD.timer||{min:5,left:300,endAt:0};
+  $('#minus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.max(1,t.min-1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#plus').onclick=()=>{const t=tm();if(!t.endAt){const m=Math.min(20,t.min+1);ref.child('timer').set({min:m,left:m*60,endAt:0});}};
+  $('#go').onclick=()=>{const t=tm();if(t.endAt)ref.child('timer').set({min:t.min,left:Math.max(0,Math.round((t.endAt-Date.now())/1000)),endAt:0});else{const l=t.left>0?t.left:t.min*60;ref.child('timer').set({min:t.min,left:l,endAt:Date.now()+l*1000});const st=RD.stage||1;if((RD.go||0)<st)ref.child('go').set(st);}};
+  $('#newroom').onclick=()=>{store(APP+'-teacher-room',null);teacherView();};
+  $('#home').onclick=()=>{location.hash='';startView();};
+  clearInterval(tick);tick=setInterval(renderTime,250);
+}
+function setStage(n){roomRef(ROOM).update({stage:n,timer:{min:STAGES[n].tm,left:STAGES[n].tm*60,endAt:0}});}
+function renderTime(){
+  const el=$('#tm');if(!el)return clearInterval(tick);
+  const t=RD.timer||{min:5,left:300,endAt:0};
+  const left=t.endAt?Math.max(0,Math.round((t.endAt-Date.now())/1000)):t.left;
+  el.textContent=left===0&&t.endAt?'시간 끝!':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  el.classList.toggle('end',!!t.endAt&&left===0);
+  const waitSt=(RD.go||0)<(RD.stage||1);
+  $('#go').textContent=t.endAt?'멈춤':waitSt?'▶ 활동 시작':'시작';
+  const gs=$('#gostat');if(gs){gs.textContent=waitSt?`학생들은 대기 중이에요. 설명을 마치면 [▶ 활동 시작]을 눌러요.`:`${RD.stage||1}단계 활동이 열려 있어요.`;gs.className='msg '+(waitSt?'bad':'ok');}$('#minus').disabled=$('#plus').disabled=!!t.endAt;
+}
+const students=()=>{const s=RD.students||{};return Object.keys(s).map(Number).sort((a,b)=>a-b).map(n=>({n,...s[n]}));};
+
+let tvStage=0,tvAll=false,showWrong=false,tvAns=false,tvAward=false,whyNames=false;
+function renderTV(){
+  const main=$('#main');if(!main)return;
+  const st=RD.stage||1, S=students();
+  $('#tsteps').innerHTML=[1,2,3,4].map(n=>`<button data-s="${n}" ${n===st?'aria-current="step"':''}><b>${n}</b> ${STAGES[n].t}</button>`).join('');
+  $$('#tsteps button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  const doneIn=x=>stepDoneOf(x,st);
+  $('#cnt').textContent=`${S.length}명 · 이 단계 끝 ${S.filter(doneIn).length}명`;
+  $('#ppl').innerHTML=S.map(x=>`<span class="${doneIn(x)?'ok':''}">${x.n} ${esc(x.name)}</span>`).join('')||'<span class="muted" style="background:none">아직 아무도 없어요</span>';
+  const changed=tvStage!==st;tvStage=st;
+  if(changed||!$('#tvtop')){
+    tvAns=false;tvAward=false;
+    main.innerHTML=`<div id="tvtop"></div><div id="tvmid"></div><div id="tvq"></div>`;
+    tvTop(st);
+  }
+  $('#tvmid').innerHTML=st===4?rankBox(S):progressBox(st,S);
+  $('#tvq').innerHTML=quizBox(S,st);
+  $('#wrongT').onclick=()=>{showWrong=!showWrong;renderTV();};
+  $('#allT').onclick=()=>{tvAll=!tvAll;renderTV();};
+  const wn=$('#whyN');if(wn)wn.onclick=()=>{whyNames=!whyNames;renderTV();};
+}
+function stepDoneOf(x,n){return !!(x['s'+n]&&x['s'+n].done);}
+const TVP={
+  1:{h:'뿔 모양은 어떤 특징이 있을까? (교과서 136~137쪽)',figs:()=>[[figCheer(),'응원 도구'],...KK.map(k=>[SA[k](),k]),[figTurn('tri',360),'직각삼각형 돌리기'],[figConeMarks(),'원뿔의 구성 요소 ①~④']],
+     talk:['응원 도구는 어떤 모양인가요? 뿔 모양의 특징은?','가~마 중 원기둥은? 원기둥이 아닌 가·다·마의 같은 점은?','직각삼각형을 돌리면? 먼저 예상해요','꼭짓점과 밑면 사이의 거리는 어떻게 잴까요? (자와 삼각자를 직각으로)'],
+     ans:['원기둥: <b>나, 라</b> · 가, 다, 마와 같은 입체도형을 <b>원뿔</b>이라고 합니다.','직각삼각형을 한 변을 기준으로 돌리면 <b>원뿔</b>','평평한 면: <b>밑면</b> · 옆을 둘러싼 굽은 면: <b>옆면</b> · 뾰족한 점: <b>원뿔의 꼭짓점</b>','꼭짓점과 밑면 둘레의 한 점을 이은 선분: <b>모선</b> · 꼭짓점에서 밑면에 수직으로 내린 선분의 길이: <b>높이</b>','137쪽: 높이 <b>12 cm</b>, 모선 <b>15 cm</b>, 밑면의 지름 <b>18 cm</b>']},
+  2:{h:'공 모양은 어떤 특징이 있을까? (교과서 138~139쪽)',figs:()=>[[figBall(),'공'],...KK.map(k=>[SB[k](),k]),[figTurn('semi',360),'반원 돌리기'],[figSphereCut(true),'구의 중심과 반지름']],
+     talk:['공은 왜 손으로 잡기 쉽지 않을까요? 공 모양의 특징은?','반원을 돌리면? 먼저 예상해요','수박을 반으로 잘랐을 때 가장 안쪽 점은 어디일까요?'],
+     ans:['공 모양: <b>가, 나, 라</b> · 가, 나, 라와 같은 입체도형을 <b>구</b>라고 합니다.','반원을 지름을 기준으로 돌리면 <b>구</b>','가장 안쪽의 점: <b>구의 중심</b> · 중심과 겉면의 한 점을 이은 선분: <b>구의 반지름</b>','구의 반지름은 <b>무수히 많고 길이가 모두 같아요</b> · 지름 10 cm 반원 → 반지름 <b>5 cm</b>']},
+  3:{h:'원기둥, 원뿔, 구를 비교해 봅시다 (교과서 139쪽)',figs:()=>[[figTrio(),'']],
+     talk:['표를 채운 뒤 태블릿을 내려놓아요','짝에게 같은 점 1가지, 다른 점 2가지를 말해요','앞에서 본 모양이 모두 다른 까닭은?'],
+     ans:['같은 점: 모두 <b>굽은 면</b>이 있어요 · 위에서 본 모양은 모두 <b>원</b>','밑면: 원기둥 <b>2개</b> · 원뿔 <b>1개</b> · 구 <b>없음</b>','뾰족한 꼭짓점: <b>원뿔만</b> 있어요','앞에서 본 모양: 원기둥 <b>직사각형</b> · 원뿔 <b>삼각형</b> · 구 <b>원</b>']}};
+function tvTop(st){
+  if(st===4){
+    $('#tvtop').innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:1.8rem">🍦 원뿔·구 퀴즈</h2><button class="ghost" id="awT">🏆 시상식</button></div>
+      <p class="muted" style="margin:0">오늘 배운 원뿔·구 6문제 · 맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요.</p></div>`;
+    $('#awT').onclick=()=>{tvAward=!tvAward;$('#awT').textContent=tvAward?'순위 보기':'🏆 시상식';renderTV();};
+    return;
+  }
+  const P=TVP[st];
+  const draw=()=>{$('#tva').innerHTML=tvAns?`<div class="plist">${P.ans.map(a=>`<div class="pcard">${a}</div>`).join('')}</div>`:'';$('#tvaT').textContent=tvAns?'정답 가리기':'정답 보기';};
+  $('#tvtop').innerHTML=`<div class="panel grid"><h2 style="font-size:1.8rem">${P.h}</h2>
+    <div class="figs">${P.figs().map(([f,c])=>`<div>${f}${c}</div>`).join('')}</div>
+    <div class="rules"><b>함께 이야기해요</b><ul>${P.talk.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva"></div></div>`;
+  $('#tvaT').onclick=()=>{tvAns=!tvAns;draw();};
+  draw();
+}
+function ranked(S){
+  return S.filter(x=>x.s4).map(x=>({...x,sc:x.s4.score||0,fin:!!x.s4.done,t:x.s4.done?(x.s4.at-(x.s4.startAt||x.s4.at)):Infinity}))
+    .sort((a,b)=>b.sc-a.sc||(b.fin-a.fin)||a.t-b.t||a.n-b.n);
+}
+function rankBox(S){
+  const R=ranked(S);
+  if(tvAward){
+    const top=R.filter(x=>x.fin).slice(0,3);
+    const p=(x,c,m)=>x?`<div class="${c}"><b>${m}</b><span>${x.n} ${esc(x.name)}</span>🍦 ${x.sc}</div>`:`<div class="${c}"><b>${m}</b><span>-</span></div>`;
+    return `<div class="panel grid" id="award"><h2 style="font-size:1.8rem;text-align:center">🏆 원뿔·구 연구소 시상식</h2>
+      <div class="podium">${p(top[1],'p2','🥈')}${p(top[0],'p1','🥇')}${p(top[2],'p3','🥉')}</div>
+      <p class="muted" style="text-align:center;margin:0">맞힌 문제가 같으면 빨리 끝낸 친구가 앞이에요.</p></div>`;
+  }
+  return `<div class="panel grid" id="rankb"><div class="row" style="justify-content:space-between"><h2>원뿔·구 퀴즈 순위</h2><span class="muted">끝 ${R.filter(x=>x.fin).length}/${S.length}명</span></div>
+    <div class="rank">${R.map((x,k)=>{const s4=x.s4||{};const i=Math.min(QUIZ.length,(s4.i||0)+(s4.di===s4.i?1:0));return `<div class="r"><b>${k+1}</b><span class="nm">${x.n} ${esc(x.name)}</span><span class="trk muted">${s4.done?'끝 ✓':i+'/'+QUIZ.length+' 문제'}</span><span class="pt">🍦 ${x.sc}</span></div>`;}).join('')||'<p class="muted">아직 아무도 없어요</p>'}</div></div>`;
+}
+function progressBox(st,S){
+  const its=ITEMS.filter(x=>x.st===st);
+  const has=id=>S.filter(x=>x.ans&&x.ans[id]!==undefined).length;
+    return `<div class="panel grid"><h2>얼마나 했나요?</h2><div class="bars">${its.map((q,k)=>`<div class="bar"><span>${esc(q.q.length>26?q.q.slice(0,25)+'…':q.q)}</span><div class="track"><div style="width:${S.length?has(q.id)/S.length*100:0}%"></div></div><span>${has(q.id)}명</span></div>`).join('')}</div></div>`;
+}
+/* 문제별 정답률 + 틀린 학생 이름 (처음 답 기준) */
+function quizStats(S,st){
+  return ITEMS.map(q=>({q,no:ITEMS.filter(x=>x.st===q.st).indexOf(q)+1})).filter(r=>tvAll||r.q.st===st).map(r=>{
+    const done=S.filter(x=>x.ans&&x.ans[r.q.id]!==undefined);
+    const miss=done.filter(x=>x.ans[r.q.id]===false);
+    const ok=done.length-miss.length;
+    return {...r,done:done.length,ok,miss,rate:done.length?Math.round(ok/done.length*100):null};
+  });
+}
+function quizBox(S,st){
+  const R=quizStats(S,st).sort((a,b)=>(a.rate??101)-(b.rate??101)||a.q.st-b.q.st||a.no-b.no);
+  return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
+   <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
+   <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+}
+
+/* ---------- route ---------- */
+if(location.hash==='#watch'&&ROOM){$('#sub').textContent='학생 화면 보기 · 선생님 전용';ClassWatch.teacher({db,room:ROOM,solo:true});}
+else if(location.hash==='#teacher')teacherView();
+else if(ROOM)joinView();
+else startView();
+</script>
+</body></html>
