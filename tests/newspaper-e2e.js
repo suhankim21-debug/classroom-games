@@ -36,11 +36,11 @@ const A4 = { w: 595, h: 842 };
   await p.fill('#body', [para, para, '인터뷰에 응한 한 학생은 "친구들과 함께해서 이긴 것보다 더 기뻤다."라고 말했다.', para].join('\n'));
   await p.setInputFiles('#img1', { name: 'a.png', mimeType: 'image/png', buffer: await png(1600, 1000, '#3D6E8C') });
   await p.waitForSelector('#pFig1:not([hidden])');
-  // 가로 대표 사진은 폭에 꽉 차요.
+  // 대표 사진은 알맞은 크기(높이 70mm 이하, 폭 62% 이하)로 왼쪽에, 전문은 오른쪽에 와요.
   await p.waitForTimeout(300);
-  const wide = await p.evaluate(() => { const i = document.querySelector('#pImg1'), f = document.querySelector('#pFig1'); return { cls: i.classList.contains('wide'), r: i.getBoundingClientRect().width / f.getBoundingClientRect().width }; });
-  console.log('가로 대표 사진 폭 비율', wide.r.toFixed(3));
-  if (!wide.cls || wide.r < 0.99) fail('가로 대표 사진이 꽉 차지 않음: ' + JSON.stringify(wide));
+  const hero = await p.evaluate(() => { const i = document.querySelector('#pImg1'), pp = document.querySelector('#paper_el'), mm = pp.getBoundingClientRect().width / 210; const r = i.getBoundingClientRect(); return { h: r.height / mm, w: r.width / mm, ratio: (r.width / r.height) / (i.naturalWidth / i.naturalHeight) }; });
+  console.log('대표 사진 크기(mm)', hero.w.toFixed(0), 'x', hero.h.toFixed(0));
+  if (hero.h > 71 || hero.w > 117 || Math.abs(hero.ratio - 1) > 0.03) fail('대표 사진 크기가 알맞지 않음: ' + JSON.stringify(hero));
   await p.fill('#cap1', '운동회에서 줄다리기를 하는 6학년 학생들');
   await p.setInputFiles('#img2', { name: 'b.png', mimeType: 'image/png', buffer: await png(800, 800, '#E0704F') });
   await p.waitForSelector('#pCols figure img');
@@ -52,6 +52,7 @@ const A4 = { w: 595, h: 842 };
   await p.waitForSelector('#pCols figure.survey img');
   if (!/설문 조사 결과/.test(await p.textContent('#pCols figure.survey .tag'))) fail('설문 사진 표시가 없음');
 
+  if (!/지난 10일/.test(await p.textContent('#pLeadSide'))) fail('전문이 대표 사진 옆에 안 나옴');
   const txt = await p.textContent('#paper_el');
   for (const s of ['봄빛 어린이 신문', '학교 소식', '6학년, 운동회에서', '줄다리기 역전승', '김하늘 기자', '6학년 2반', '운동회에서 줄다리기를 하는', '지난 10일'])
     if (!txt.includes(s)) fail('미리 보기에 안 나옴: ' + s);
@@ -163,7 +164,7 @@ const A4 = { w: 595, h: 842 };
   await T.waitForFunction(() => document.querySelector('#pTitle').textContent === '2조 기사', null, { timeout: 15000 }).catch(() => fail('선생님 화면에 2조 표제가 안 보임'));
   await T.waitForSelector('#pFig1:not([hidden])', { timeout: 15000 }).catch(() => fail('선생님 화면에 2조 사진이 안 보임'));
   await p.fill('#lead', '실시간으로 보이는 전문입니다.');
-  await T.waitForFunction(() => /실시간으로 보이는 전문/.test(document.querySelector('#pCols').textContent), null, { timeout: 15000 }).catch(() => fail('학생이 쓴 전문이 선생님 화면에 바로 안 보임'));
+  await T.waitForFunction(() => /실시간으로 보이는 전문/.test(document.querySelector('#paper_el').textContent), null, { timeout: 15000 }).catch(() => fail('학생이 쓴 전문이 선생님 화면에 바로 안 보임'));
   if (!/2조/.test(await T.textContent('.tcard[data-t="2"]')) || !/방금/.test(await T.textContent('.tcard[data-t="2"]'))) fail('조 카드에 방금 표시가 없음');
   if (SHOTS) await T.screenshot({ path: `${SHOTS}/teacher.png` });
   await T.emulateMedia({ media: null });

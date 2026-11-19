@@ -40,7 +40,13 @@ legend{font-weight:bold;padding:0 4px}
 .deck{font-size:13.5pt;font-weight:700;line-height:1.4;color:#333;border-left:4px solid #B3261E;padding-left:3mm;margin:1mm 0 2mm}
 .deck div{margin:.6mm 0}
 .byline{font-size:9.5pt;text-align:right;border-bottom:1px solid #111;padding-bottom:1.5mm;margin-bottom:3mm}
-.hero{margin:0 0 3mm}
+.heroRow{display:flex;gap:5mm;align-items:flex-start;margin:0 0 3mm}
+.heroRow .hero{flex:0 1 auto;max-width:62%;margin:0}
+.heroRow .hero img{max-height:calc(70mm * var(--hk,1));margin:0}
+.heroRow .leadSide{flex:1 1 0;min-width:0;font-size:calc(var(--fs) * 1.08);line-height:1.6;font-weight:700;border-top:2px solid #111;padding-top:2mm}
+.heroRow .leadSide p{margin:0 0 .5em}
+.heroRow .leadSide:empty{display:none}
+.heroRow.solo .hero{max-width:100%;margin:0 auto}
 .paper figure{margin:0}
 .paper figure img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(85mm * var(--ik,1));margin:0 auto;object-fit:contain}
 .paper figcaption{font-size:8.5pt;color:#444;padding-top:1mm;line-height:1.4}
@@ -48,11 +54,9 @@ legend{font-weight:bold;padding:0 4px}
 .cols p{margin:0 0 .5em;text-indent:1em}
 .cols .lead{font-weight:700;text-indent:0}
 .cols figure{break-inside:avoid;margin:1mm 0 3mm}
-.cols figure img{max-height:calc(48mm * var(--ik,1))}
-.paper figure img.wide{width:calc(100% * var(--ik,1));max-width:100%;max-height:none}
-.paper .hero img.wide{width:calc(100% * var(--hk,1))}
+.cols figure img{max-height:calc(42mm * var(--ik,1))}
 .cols figure.survey{border:1px solid #999;padding:1.5mm;background:#fff}
-.cols figure.survey img{object-fit:contain;max-height:calc(65mm * var(--ik,1))}
+.cols figure.survey img{object-fit:contain;max-height:calc(55mm * var(--ik,1))}
 .chart{display:grid;gap:1.2mm;margin:1mm 0}
 .chart .q{font-weight:700;font-size:9.5pt;line-height:1.35}
 .chart .bar{display:grid;grid-template-columns:24mm 1fr;gap:2mm;align-items:center;font-size:8.5pt;line-height:1.25}
@@ -165,7 +169,7 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
       <h2 class="head" id="pTitle"></h2>
       <div class="deck" id="pDeck"></div>
       <div class="byline" id="pBy"></div>
-      <figure class="hero" id="pFig1" hidden><img id="pImg1" alt=""><figcaption id="pCap1"></figcaption></figure>
+      <div class="heroRow" id="pHero" hidden><figure class="hero" id="pFig1" hidden><img id="pImg1" alt=""><figcaption id="pCap1"></figcaption></figure><div class="leadSide" id="pLeadSide"></div></div>
       <div class="cols" id="pCols"></div>
       <footer class="foot"><span id="pFootL"></span><span>6학년 국어 · 기사문 쓰기</span></footer>
     </article>
@@ -366,12 +370,15 @@ function render() {
   $('pBy').textContent = v('reporter') ? v('reporter') + ' 기자' : '';
   $('pFootL').textContent = (team ? team + '조 · ' : '') + (v('reporter') ? '글·사진: ' + v('reporter') + ' 기자' : '');
   // 사진 1
-  $('pFig1').hidden = !img[1];
+  $('pFig1').hidden = $('pHero').hidden = !img[1];
   if (img[1]) { if ($('pImg1').getAttribute('src') !== img[1]) { $('pImg1').classList.remove('wide'); $('pImg1').src = img[1]; } markWide($('pImg1')); $('pCap1').textContent = v('cap1'); $('pCap1').hidden = !v('cap1'); }
   // 본문(다단)
   const cols = $('pCols'); cols.replaceChildren();
   const lead = paras($('lead').value), body = paras($('body').value);
-  lead.forEach(x => cols.append(el('p', 'lead', x)));
+  // 대표 사진이 있으면 전문은 사진 오른쪽에(신문처럼), 없으면 본문 맨 앞에.
+  const side = $('pLeadSide'); side.replaceChildren();
+  lead.forEach(x => (img[1] ? side : cols).append(el('p', 'lead', x)));
+  $('pHero').classList.toggle('solo', !lead.length);
   const half = Math.ceil(body.length / 2);
   body.forEach((x, i) => {
     if (img[2] && i === half) cols.append(fig(2));
