@@ -101,16 +101,18 @@ const A4 = { w: 595, h: 842 };
 
   // 조 편성 링크: 조를 고르면 기자 이름이 들어가고, 조마다 따로 저장돼요.
   await p.setViewportSize({ width: 1300, height: 900 });
-  await p.goto(URL + '#teams=' + encodeURIComponent('가나·다라|마바·사아'));
+  const tag = Math.random().toString(36).slice(2, 7);
+  const TEAMSTR = encodeURIComponent(`가나${tag}·다라|마바·사아${tag}`);
+  await p.goto(URL + '#teams=' + TEAMSTR);
   await p.waitForSelector('#teamBox:not([hidden])').catch(() => fail('조 고르기가 안 보임'));
   await p.selectOption('#team', '2');
-  if (await p.inputValue('#reporter') !== '마바·사아') fail('조를 골라도 기자 이름이 안 들어감');
-  if (!/마바·사아 기자/.test(await p.textContent('#pBy'))) fail('기자 이름이 신문에 안 나옴');
+  if (await p.inputValue('#reporter') !== `마바·사아${tag}`) fail('조를 골라도 기자 이름이 안 들어감');
+  if (!(await p.textContent('#pBy')).includes(`마바·사아${tag} 기자`)) fail('기자 이름이 신문에 안 나옴');
   if (!/2조/.test(await p.textContent('#pFootL'))) fail('꼬리에 조가 안 나옴');
   await p.fill('#title', '2조 기사');
   await p.selectOption('#team', '1');
   if (await p.inputValue('#title') !== '') fail('다른 조로 바꿨는데 2조 글이 보임');
-  if (await p.inputValue('#reporter') !== '가나·다라') fail('1조 기자 이름이 안 들어감');
+  if (await p.inputValue('#reporter') !== `가나${tag}·다라`) fail('1조 기자 이름이 안 들어감');
   await p.selectOption('#team', '2');
   if (await p.inputValue('#title') !== '2조 기사') fail('2조 글이 저장되지 않음');
   await p.reload(); await p.waitForSelector('#teamBox:not([hidden])');
@@ -123,6 +125,37 @@ const A4 = { w: 595, h: 842 };
     document.querySelector('#fs1').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
   }, b64);
   await p.waitForSelector('#pFig1:not([hidden])', { timeout: 5000 }).catch(() => fail('끌어다 놓은 사진이 안 들어감'));
+
+  // 선생님 실시간 보기
+  await p.waitForFunction(() => /저장됨/.test(document.querySelector('#sync').textContent), null, { timeout: 15000 }).catch(() => fail('인터넷 저장 표시가 안 나옴'));
+  const tctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  const T = await tctx.newPage();
+  T.on('pageerror', e => fail('[교사] JS 오류: ' + e.message));
+  await T.goto(URL + '#teams=' + TEAMSTR + '&teacher');
+  await T.waitForSelector('.tcard', { timeout: 15000 }).catch(() => fail('선생님 화면에 조 카드가 없음'));
+  if (await T.isVisible('#f')) fail('선생님 화면에 입력 칸이 보임');
+  await T.click('.tcard[data-t="2"]');
+  await T.waitForFunction(() => document.querySelector('#pTitle').textContent === '2조 기사', null, { timeout: 15000 }).catch(() => fail('선생님 화면에 2조 표제가 안 보임'));
+  await T.waitForSelector('#pFig1:not([hidden])', { timeout: 15000 }).catch(() => fail('선생님 화면에 2조 사진이 안 보임'));
+  await p.fill('#lead', '실시간으로 보이는 전문입니다.');
+  await T.waitForFunction(() => /실시간으로 보이는 전문/.test(document.querySelector('#pCols').textContent), null, { timeout: 15000 }).catch(() => fail('학생이 쓴 전문이 선생님 화면에 바로 안 보임'));
+  if (!/2조/.test(await T.textContent('.tcard[data-t="2"]')) || !/방금/.test(await T.textContent('.tcard[data-t="2"]'))) fail('조 카드에 방금 표시가 없음');
+  if (SHOTS) await T.screenshot({ path: `${SHOTS}/teacher.png` });
+  await T.emulateMedia({ media: null });
+  const tpdf = await T.pdf({ preferCSSPageSize: true, printBackground: true });
+  if (pdfPages(tpdf) !== 1) fail('선생님 화면에서 조 신문 인쇄가 한 장이 아님: ' + pdfPages(tpdf));
+
+  // 컴퓨터가 초기화돼도(빈 브라우저) 같은 조를 고르면 인터넷에서 불러와요.
+  const nctx = await browser.newContext({ viewport: { width: 1300, height: 900 } });
+  const N = await nctx.newPage();
+  await N.goto(URL + '#teams=' + TEAMSTR);
+  await N.waitForSelector('#teamBox:not([hidden])');
+  await N.selectOption('#team', '2');
+  await N.waitForFunction(() => document.querySelector('#title').value === '2조 기사', null, { timeout: 15000 }).catch(() => fail('새 컴퓨터에서 2조 글을 못 불러옴'));
+  await N.waitForSelector('#pFig1:not([hidden])', { timeout: 15000 }).catch(() => fail('새 컴퓨터에서 2조 사진을 못 불러옴'));
+  // 테스트 방 지우기
+  await N.evaluate(() => cloud.remove(''));
+  await tctx.close(); await nctx.close();
 
   await browser.close();
   console.log(problems.length ? `\n문제 ${problems.length}개` : '\n✅ 모두 통과');
