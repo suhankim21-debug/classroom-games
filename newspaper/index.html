@@ -194,6 +194,9 @@ const TEAMS = (() => {
 let team = '';
 const HASH = new URLSearchParams(location.hash.slice(1));
 const TEACHER = HASH.has('teacher');
+// 선생님 실시간 보기를 한 번 연 컴퓨터는 '선생님 컴퓨터'로 기억해요. 여기서 학생 주소를 열면 예시 모드(인터넷에 저장 안 함).
+if (TEACHER) { try { localStorage.setItem('newspaper-teacher-device', '1'); } catch (e) {} }
+const DEMO = !TEACHER && !HASH.has('student') && (() => { try { return localStorage.getItem('newspaper-teacher-device') === '1'; } catch (e) { return false; } })();
 // 조 편성 주소가 있으면 그 주소로 방이 정해져요(같은 주소 = 같은 반). #room=으로 직접 정할 수도 있어요.
 const ROOM = (() => {
   const r = HASH.get('room'); if (r) return r.replace(/[^\w-]/g, '').slice(0, 30);
@@ -271,27 +274,39 @@ function save(changedImg) {
 // 인터넷에도 저장해서 선생님 화면에 바로 보이고, 컴퓨터가 꺼져도 남아요.
 let pushTimer = null;
 function textData() { const d = { t: localT || Date.now() }; FIELDS.forEach(k => d[k] = $(k).value); return d; }
+let histT = 0;
 function push(changedImg) {
   if (!db || !team) return;
+  if (DEMO) { setSync('👩‍🏫 선생님 컴퓨터: 예시 모드라 인터넷(학생 조)에는 저장하지 않아요'); return; }
   if (changedImg) cloud.set('img/' + team + '/' + changedImg, img[changedImg] || null).catch(() => setSync('⚠️ 사진을 인터넷에 저장하지 못했어요', true));
   setSync('☁️ 저장 중…');
   clearTimeout(pushTimer);
   pushTimer = setTimeout(() => {
+    // 2분마다 글만 따로 남겨 둬요(잘못 덮어써도 되살릴 수 있게).
+    if (Date.now() - histT > 120000) { histT = Date.now(); cloud.set('hist/' + team + '/' + histT, textData()).catch(() => {}); }
     cloud.set('teams/' + team, textData())
       .then(() => setSync('☁️ 저장됨 (선생님 화면에 보여요)'))
       .catch(() => setSync('⚠️ 인터넷 저장 실패, 이 컴퓨터에는 저장됐어요', true));
   }, 700);
 }
 // 조를 고르면 인터넷에 있는 글과 이 컴퓨터의 글 중 더 최근 것을 써요.
+const same = (a, b) => ['title', 'deck', 'lead', 'body'].every(k => (a[k] || '').trim() === (b[k] || '').trim());
+const cloudHas = c => c && ['title', 'deck', 'lead', 'body'].some(k => (c[k] || '').trim());
 async function pullTeam() {
   if (!db || !team) return;
+  if (DEMO) { setSync('👩‍🏫 선생님 컴퓨터: 예시 모드라 인터넷(학생 조)에는 저장하지 않아요'); return; }
   const tm = team;
   setSync('☁️ 불러오는 중…');
   try {
     const [c0, ci0] = await Promise.all([cloud.get('teams/' + tm), cloud.get('img/' + tm)]);
     if (tm !== team) return;
     const c = c0, ci = ci0 || {};
-    if (c && (c.t || 0) > localT) {
+    let useCloud = c && (c.t || 0) > localT;
+    // 이 컴퓨터에도 글이 있고 인터넷 글과 다르면 그냥 덮어쓰지 않고 물어봐요.
+    if (cloudHas(c) && hasContent() && !same(c, textData())) {
+      useCloud = confirm(`이 조에 다른 컴퓨터에서 쓴 글이 있어요.\n\n인터넷 글: "${c.title || '(표제 없음)'}" (${ago(c.t)})\n이 컴퓨터 글: "${$('title').value || '(표제 없음)'}"\n\n[확인] 인터넷 글 불러오기\n[취소] 이 컴퓨터 글로 계속 쓰기`);
+    }
+    if (useCloud) {
       applyData(c, ci[1], ci[2], ci[3]); localT = c.t;
       NS.forEach(showThumb); render(); saveLocal();
       setSync('☁️ 인터넷에 저장된 글을 불러왔어요');
@@ -501,6 +516,10 @@ const norm = x => { const o = {}; if (x && typeof x === 'object') Object.keys(x)
 function startTeacher() {
   document.body.classList.add('teacher');
   $('topTitle').textContent = '📰 신문 편집기 · 선생님 실시간 보기';
+  const demo = el('a', 'note', '👩‍🏫 예시 보여 주기: 이 컴퓨터에서 학생 화면을 열어요. 학생 조에는 저장되지 않아요.');
+  demo.href = location.pathname + '#' + [...HASH].filter(([k]) => k !== 'teacher').map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
+  demo.target = '_blank'; demo.style.color = 'inherit';
+  $('tlist').append(demo);
   const list = $('tlist');
   if (!db) { list.append(el('div', 'note warn', '조 편성 주소(#teams=…)에 &teacher를 붙여 열어 주세요. 인터넷 연결도 필요해요.')); return; }
   const data = {}, pics = {};
