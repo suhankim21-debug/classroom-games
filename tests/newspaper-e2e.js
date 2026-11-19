@@ -170,6 +170,18 @@ const A4 = { w: 595, h: 842 };
   const tpdf = await T.pdf({ preferCSSPageSize: true, printBackground: true });
   if (pdfPages(tpdf) !== 1) fail('선생님 화면에서 조 신문 인쇄가 한 장이 아님: ' + pdfPages(tpdf));
 
+  // 선생님 컴퓨터에서 학생 주소로 예시를 보여 줘도 학생 조 글은 그대로예요.
+  const D = await tctx.newPage();
+  D.on('dialog', d => d.dismiss());
+  await D.goto(URL + '#teams=' + TEAMSTR);
+  await D.waitForSelector('#teamBox:not([hidden])');
+  await D.selectOption('#team', '2');
+  await D.fill('#title', '선생님 예시 표제');
+  await D.waitForTimeout(1500);
+  if (!/예시 모드/.test(await D.textContent('#sync'))) fail('선생님 컴퓨터인데 예시 모드 표시가 없음');
+  if (await T.textContent('#pTitle') !== '2조 기사') fail('선생님 예시가 학생 조 글을 덮어씀');
+  await D.close();
+
   // 컴퓨터가 초기화돼도(빈 브라우저) 같은 조를 고르면 인터넷에서 불러와요.
   const nctx = await browser.newContext({ viewport: { width: 1300, height: 900 } });
   const N = await nctx.newPage();
@@ -178,6 +190,20 @@ const A4 = { w: 595, h: 842 };
   await N.selectOption('#team', '2');
   await N.waitForFunction(() => document.querySelector('#title').value === '2조 기사', null, { timeout: 15000 }).catch(() => fail('새 컴퓨터에서 2조 글을 못 불러옴'));
   await N.waitForSelector('#pFig1:not([hidden])', { timeout: 15000 }).catch(() => fail('새 컴퓨터에서 2조 사진을 못 불러옴'));
+  // 이 컴퓨터 글과 인터넷 글이 다르면 물어보고, 취소하면 이 컴퓨터 글을 지켜요.
+  const cctx = await browser.newContext();
+  const C = await cctx.newPage();
+  let asked = false;
+  C.on('dialog', d => { asked = true; d.dismiss(); });
+  await C.goto(URL + '#teams=' + TEAMSTR + '&student');
+  await C.waitForSelector('#teamBox:not([hidden])');
+  await C.evaluate(() => localStorage.setItem('newspaper-draft-v1-t2', JSON.stringify({ title: '이 컴퓨터 글', body: '본문', t: 1 })));
+  await C.selectOption('#team', '1'); await C.selectOption('#team', '2');
+  await C.waitForTimeout(2500);
+  if (!asked) fail('글이 서로 다른데 묻지 않음');
+  if (await C.inputValue('#title') !== '이 컴퓨터 글') fail('취소했는데 이 컴퓨터 글이 사라짐');
+  await cctx.close();
+
   // 테스트 방 지우기
   await N.evaluate(() => cloud.remove(''));
   await tctx.close(); await nctx.close();
