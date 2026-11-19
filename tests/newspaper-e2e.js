@@ -99,6 +99,31 @@ const A4 = { w: 595, h: 842 };
   if (await p.inputValue('#title') !== '') fail('새로 쓰기가 안 됨');
   if (await p.isVisible('#pFig1')) fail('새로 쓰기 뒤 사진이 남음');
 
+  // 조 편성 링크: 조를 고르면 기자 이름이 들어가고, 조마다 따로 저장돼요.
+  await p.setViewportSize({ width: 1300, height: 900 });
+  await p.goto(URL + '#teams=' + encodeURIComponent('가나·다라|마바·사아'));
+  await p.waitForSelector('#teamBox:not([hidden])').catch(() => fail('조 고르기가 안 보임'));
+  await p.selectOption('#team', '2');
+  if (await p.inputValue('#reporter') !== '마바·사아') fail('조를 골라도 기자 이름이 안 들어감');
+  if (!/마바·사아 기자/.test(await p.textContent('#pBy'))) fail('기자 이름이 신문에 안 나옴');
+  if (!/2조/.test(await p.textContent('#pFootL'))) fail('꼬리에 조가 안 나옴');
+  await p.fill('#title', '2조 기사');
+  await p.selectOption('#team', '1');
+  if (await p.inputValue('#title') !== '') fail('다른 조로 바꿨는데 2조 글이 보임');
+  if (await p.inputValue('#reporter') !== '가나·다라') fail('1조 기자 이름이 안 들어감');
+  await p.selectOption('#team', '2');
+  if (await p.inputValue('#title') !== '2조 기사') fail('2조 글이 저장되지 않음');
+  await p.reload(); await p.waitForSelector('#teamBox:not([hidden])');
+  if (await p.inputValue('#team') !== '2' || await p.inputValue('#title') !== '2조 기사') fail('새로고침 뒤 조·글이 이어지지 않음');
+  // Ctrl+V 붙여 넣기 대신: 끌어다 놓기로 사진 넣기
+  const b64 = (await png(600, 400, '#3F8A5A')).toString('base64');
+  await p.evaluate(b64 => {
+    const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const dt = new DataTransfer(); dt.items.add(new File([u], 'c.png', { type: 'image/png' }));
+    document.querySelector('#fs1').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+  }, b64);
+  await p.waitForSelector('#pFig1:not([hidden])', { timeout: 5000 }).catch(() => fail('끌어다 놓은 사진이 안 들어감'));
+
   await browser.close();
   console.log(problems.length ? `\n문제 ${problems.length}개` : '\n✅ 모두 통과');
   process.exit(problems.length ? 1 : 0);
