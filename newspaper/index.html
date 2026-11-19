@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리 반 신문 편집기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Gowun+Dodum&display=swap">
+<style>/* 줄은 어절 단위로만 바꿔요 */ html{word-break:keep-all;overflow-wrap:break-word}
+*{box-sizing:border-box}
+body{margin:0;background:#E9E5DA;color:#222;font-family:'Gowun Dodum','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;font-size:16px}
+.top{background:#222;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.top h1{margin:0;font-size:1.3rem}
+.top button{font-size:1.05rem}
+button{font-family:inherit;font-size:1rem;border:0;border-radius:10px;padding:.55em 1em;cursor:pointer;background:#B3261E;color:#fff}
+button.ghost{background:#fff;color:#333;border:2px solid #bbb}
+.layout{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.form{background:#fff;border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start}
+label{display:grid;gap:4px;font-weight:bold}
+label small{font-weight:normal;color:#666}
+input[type=text],input:not([type]),textarea,select{font:inherit;font-weight:normal;padding:.5em .6em;border:2px solid #ccc;border-radius:8px;width:100%;background:#fff;color:#222}
+textarea{resize:vertical;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+fieldset{border:2px dashed #ccc;border-radius:10px;padding:10px;display:grid;gap:8px;margin:0}
+legend{font-weight:bold;padding:0 4px}
+.photo-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.photo-row img{width:64px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ccc}
+.note{background:#FFF5D6;border-radius:8px;padding:8px 10px;font-size:.95rem;line-height:1.5}
+.note.warn{background:#FCE3DE;color:#8A1C14}
+.count{font-weight:normal;color:#666;font-size:.9rem}
+.stage{overflow:hidden}
+.scaler{transform-origin:top left}
+
+/* ---- 신문 한 장 ---- */
+.paper{width:210mm;height:297mm;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.25);padding:12mm 13mm;overflow:hidden;display:flex;flex-direction:column;
+  font-family:'Noto Serif KR','Batang','AppleMyungjo',serif;color:#111;--fs:11pt}
+.paper.grow{height:auto;min-height:297mm}
+.mast{text-align:center;border-bottom:3px double #111;padding-bottom:2mm}
+.mast .name{font-size:34pt;font-weight:900;letter-spacing:.06em;line-height:1.15}
+.mast .sub{display:flex;justify-content:space-between;border-top:1.5px solid #111;margin-top:2mm;padding-top:1.2mm;font-size:9.5pt}
+.sect{display:inline-block;background:#111;color:#fff;font-size:9.5pt;padding:.5mm 2.5mm;margin-top:4mm;align-self:flex-start;font-weight:700}
+.head{font-size:26pt;font-weight:900;line-height:1.25;margin:2.5mm 0 1.5mm;text-wrap:balance}
+.deck{font-size:13.5pt;font-weight:700;line-height:1.4;color:#333;border-left:4px solid #B3261E;padding-left:3mm;margin:1mm 0 2mm}
+.deck div{margin:.6mm 0}
+.byline{font-size:9.5pt;text-align:right;border-bottom:1px solid #111;padding-bottom:1.5mm;margin-bottom:3mm}
+.hero{margin:0 0 3mm}
+.paper figure{margin:0}
+.paper figure img{width:100%;display:block;object-fit:cover;max-height:85mm}
+.paper figcaption{font-size:8.5pt;color:#444;padding-top:1mm;line-height:1.4}
+.cols{font-size:var(--fs);line-height:1.65;column-gap:6mm;column-rule:1px solid #bbb}
+.cols p{margin:0 0 .5em;text-indent:1em}
+.cols .lead{font-weight:700;text-indent:0}
+.cols figure{break-inside:avoid;margin:1mm 0 3mm}
+.cols figure img{max-height:55mm}
+.empty{color:#aaa}
+.foot{margin-top:auto;border-top:1px solid #111;padding-top:1.2mm;font-size:8.5pt;display:flex;justify-content:space-between;color:#444}
+
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}
+  .top,.form,.noprint{display:none!important}
+  .layout{display:block;padding:0;margin:0;max-width:none}
+  .stage{overflow:visible;height:auto!important}
+  .scaler{transform:none!important}
+  .paper{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .paper.grow{height:auto}
+}
+</style></head>
+<body>
+<div class="top"><h1>📰 우리 반 신문 편집기</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
+<div class="layout">
+  <form class="form" id="f" autocomplete="off" onsubmit="return false">
+    <div class="note">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 기기에 저절로 저장돼요.</div>
+    <div class="two">
+      <label>신문 이름<input id="paperName" maxlength="20" value="우리 반 신문"></label>
+      <label>분야<input id="section" maxlength="10" list="sections" placeholder="학교 소식"></label>
+    </div>
+    <datalist id="sections"><option>학교 소식</option><option>우리 반 소식</option><option>체험 학습</option><option>행사</option><option>환경</option><option>스포츠</option><option>인터뷰</option></datalist>
+    <div class="two">
+      <label>발행 날짜<input id="date" type="date"></label>
+      <label>펴낸 곳<input id="pub" maxlength="20" placeholder="6학년 ○반"></label>
+    </div>
+    <label>표제 (제목)<small>기사 내용을 한눈에 알 수 있게 짧게</small><input id="title" maxlength="40"></label>
+    <label>부제<small>표제를 보충해요. 두 줄이면 줄을 바꿔 쓰세요.</small><textarea id="deck" rows="2" maxlength="120"></textarea></label>
+    <div class="two">
+      <label>기자 이름<input id="reporter" maxlength="20" placeholder="홍길동"></label>
+      <label>단 나누기<select id="ncols"><option value="0">자동</option><option value="1">1단</option><option value="2">2단</option><option value="3">3단</option></select></label>
+    </div>
+    <label>전문<small>육하원칙(누가·언제·어디서·무엇을·어떻게·왜)이 들어간 첫 문단</small><textarea id="lead" rows="3" maxlength="400"></textarea></label>
+    <label>본문 <span class="count" id="count"></span><small>문단을 나누려면 줄을 바꾸세요.</small><textarea id="body" rows="10" maxlength="3000"></textarea></label>
+    <fieldset><legend>사진 1 (크게, 제목 아래)</legend>
+      <div class="photo-row"><input type="file" id="img1" accept="image/*"><img id="th1" alt="" hidden><button type="button" class="ghost" id="del1" hidden>빼기</button></div>
+      <label>사진 설명<input id="cap1" maxlength="80" placeholder="예) 운동회에서 줄다리기를 하는 6학년 학생들"></label>
+    </fieldset>
+    <fieldset><legend>사진 2 (작게, 본문 안)</legend>
+      <div class="photo-row"><input type="file" id="img2" accept="image/*"><img id="th2" alt="" hidden><button type="button" class="ghost" id="del2" hidden>빼기</button></div>
+      <label>사진 설명<input id="cap2" maxlength="80"></label>
+    </fieldset>
+    <div class="note" id="fit"></div>
+    <div class="note">인쇄 창에서 용지는 <b>A4</b>, 여백은 <b>없음</b>(또는 기본), 배율은 <b>100%</b>로 두세요. 파일로 내려면 프린터에서 <b>PDF로 저장</b>을 고르면 돼요.</div>
+  </form>
+  <div class="stage" id="stage"><div class="scaler" id="scaler">
+    <article class="paper" id="paper">
+      <header class="mast"><div class="name" id="pName"></div>
+        <div class="sub"><span id="pDate"></span><span id="pPub"></span></div></header>
+      <span class="sect" id="pSect"></span>
+      <h2 class="head" id="pTitle"></h2>
+      <div class="deck" id="pDeck"></div>
+      <div class="byline" id="pBy"></div>
+      <figure class="hero" id="pFig1" hidden><img id="pImg1" alt=""><figcaption id="pCap1"></figcaption></figure>
+      <div class="cols" id="pCols"></div>
+      <footer class="foot"><span id="pFootL"></span><span>6학년 국어 · 기사문 쓰기</span></footer>
+    </article>
+  </div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 'newspaper-draft-v1';
+const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2'];
+const img = { 1: '', 2: '' };
+const todayStr = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+
+function load() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (s) { FIELDS.forEach(k => { if (s[k] != null) $(k).value = s[k]; }); img[1] = s.img1 || ''; img[2] = s.img2 || ''; }
+  if (!$('date').value) $('date').value = todayStr();
+}
+function save() {
+  const s = {}; FIELDS.forEach(k => s[k] = $(k).value);
+  s.img1 = img[1]; s.img2 = img[2];
+  try { localStorage.setItem(KEY, JSON.stringify(s)); }
+  catch (e) { try { s.img2 = ''; localStorage.setItem(KEY, JSON.stringify(s)); } catch (e2) {} }
+}
+
+function fmtDate(v) {
+  if (!v) return '';
+  const d = new Date(v + 'T00:00');
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`;
+}
+function paras(text) {
+  return text.split(/\n+/).map(t => t.trim()).filter(Boolean);
+}
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function render() {
+  const v = k => $(k).value.trim();
+  $('pName').textContent = v('paperName') || '우리 반 신문';
+  $('pDate').textContent = fmtDate($('date').value);
+  $('pPub').textContent = v('pub') ? '펴낸 곳: ' + v('pub') : '';
+  $('pSect').textContent = v('section'); $('pSect').hidden = !v('section');
+  const t = $('pTitle'); t.textContent = v('title') || '표제를 쓰세요'; t.classList.toggle('empty', !v('title'));
+  const deck = $('pDeck'); deck.replaceChildren(...paras($('deck').value).map(x => el('div', '', x))); deck.hidden = !deck.childElementCount;
+  $('pBy').textContent = v('reporter') ? v('reporter') + ' 기자' : '';
+  $('pFootL').textContent = v('reporter') ? '글·사진: ' + v('reporter') + ' 기자' : '';
+  // 사진 1
+  $('pFig1').hidden = !img[1];
+  if (img[1]) { $('pImg1').src = img[1]; $('pCap1').textContent = v('cap1'); $('pCap1').hidden = !v('cap1'); }
+  // 본문(다단)
+  const cols = $('pCols'); cols.replaceChildren();
+  const lead = paras($('lead').value), body = paras($('body').value);
+  lead.forEach(x => cols.append(el('p', 'lead', x)));
+  const half = Math.ceil(body.length / 2);
+  body.forEach((x, i) => {
+    if (img[2] && i === half) cols.append(fig2());
+    cols.append(el('p', '', x));
+  });
+  if (img[2] && body.length <= 1) cols.append(fig2());
+  if (!lead.length && !body.length) cols.append(el('p', 'empty', '전문과 본문을 쓰면 여기에 신문처럼 나와요.'));
+  const chars = (lead.join('') + body.join('')).length;
+  $('count').textContent = chars ? `(${chars}자)` : '';
+  let n = +$('ncols').value;
+  if (!n) n = chars < 250 ? 1 : chars < 700 ? 2 : 3;
+  cols.style.columnCount = n;
+  // 표제 길이에 맞춰 글자 크기
+  const tl = (v('title') || '').length;
+  t.style.fontSize = tl > 26 ? '20pt' : tl > 16 ? '23pt' : '26pt';
+  $('paper').dataset.chars = chars;
+  fit();
+  scale();
+}
+function fig2() {
+  const f = el('figure'); const i = el('img'); i.src = img[2]; i.alt = ''; f.append(i);
+  const c = $('cap2').value.trim(); if (c) f.append(el('figcaption', '', c));
+  return f;
+}
+
+// A4 한 장에 들어가도록 본문 글자 크기를 줄여요(11pt → 8.5pt). 그래도 넘치면 2쪽으로.
+function fit() {
+  const p = $('paper'), cols = $('pCols');
+  p.classList.remove('grow');
+  const over = () => p.scrollHeight > p.clientHeight + 1;
+  const chars = +p.dataset.chars || 0;
+  let fs = 11;
+  if (chars < 300) fs = 13; else if (chars < 600) fs = 12;
+  p.style.setProperty('--fs', fs + 'pt');
+  while (over() && fs > 8.5) { fs = Math.round((fs - 0.25) * 100) / 100; p.style.setProperty('--fs', fs + 'pt'); }
+  const note = $('fit');
+  if (over()) {
+    p.classList.add('grow');
+    note.className = 'note warn';
+    note.textContent = '글이 길어서 A4 한 장에 다 들어가지 않아요. 2쪽으로 인쇄돼요. 사진을 하나 빼거나 글을 조금 줄이면 한 장에 들어가요.';
+  } else {
+    note.className = 'note';
+    note.textContent = `A4 한 장에 딱 맞게 편집했어요. (본문 글자 크기 ${fs}pt)`;
+  }
+  p.dataset.fs = fs;
+}
+// 화면 폭에 맞게 미리 보기 크기를 줄여요(인쇄에는 영향 없음).
+function scale() {
+  const st = $('stage'), sc = $('scaler'), p = $('paper');
+  const k = Math.min(1, st.clientWidth / p.offsetWidth);
+  sc.style.transform = `scale(${k})`;
+  st.style.height = p.offsetHeight * k + 'px';
+}
+
+// 사진은 서버로 보내지 않고 이 브라우저에서만 줄여서 써요.
+function readImage(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = rej;
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = rej;
+      im.onload = () => {
+        const max = 1400, k = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', 0.82));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function showThumb(n) {
+  $('th' + n).hidden = $('del' + n).hidden = !img[n];
+  if (img[n]) $('th' + n).src = img[n];
+}
+[1, 2].forEach(n => {
+  $('img' + n).addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { img[n] = await readImage(f); } catch (err) { alert('사진을 읽지 못했어요. 다른 사진을 골라 보세요.'); return; }
+    showThumb(n); render(); save();
+  });
+  $('del' + n).addEventListener('click', () => { img[n] = ''; $('img' + n).value = ''; showThumb(n); render(); save(); });
+});
+$('f').addEventListener('input', () => { render(); save(); });
+$('f').addEventListener('change', () => { render(); save(); });
+$('print').addEventListener('click', () => window.print());
+$('reset').addEventListener('click', () => {
+  if (!confirm('쓴 내용과 사진을 모두 지우고 새로 쓸까요?')) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
+  img[1] = img[2] = ''; [1, 2].forEach(n => { $('img' + n).value = ''; showThumb(n); }); render();
+});
+window.addEventListener('resize', scale);
+window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'none'; });
+window.addEventListener('afterprint', scale);
+// 사진이 다 그려진 뒤 다시 맞춰요.
+document.getElementById('paper').addEventListener('load', () => { fit(); scale(); }, true);
+load(); showThumb(1); showThumb(2); render();
+if (document.fonts) document.fonts.ready.then(render);
+</script>
+</body></html>
