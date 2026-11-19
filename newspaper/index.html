@@ -111,6 +111,9 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
     <label>부제<small>표제를 보충해요. 두 줄이면 줄을 바꿔 쓰세요.</small><textarea id="deck" rows="2" maxlength="120"></textarea></label>
     <div class="two">
       <label>기자 이름<input id="reporter" maxlength="20" placeholder="홍길동"></label>
+      <label>용지<select id="paper"><option value="A4">A4 (기본)</option><option value="B4">B4 (A4보다 조금 큼)</option><option value="A3">A3 (A4 두 배)</option></select></label>
+    </div>
+    <div class="two">
       <label>단 나누기<select id="ncols"><option value="0">자동</option><option value="1">1단</option><option value="2">2단</option><option value="3">3단</option></select></label>
     </div>
     <label>전문<small>육하원칙(누가·언제·어디서·무엇을·어떻게·왜)이 들어간 첫 문단</small><textarea id="lead" rows="3" maxlength="400"></textarea></label>
@@ -138,10 +141,10 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
     </fieldset>
     <div class="note">사진은 파일을 고르거나, 사진 칸에 끌어다 놓거나, 복사한 뒤 <b>Ctrl+V</b>로 붙여 넣어도 돼요.</div>
     <div class="note" id="fit"></div>
-    <div class="note">인쇄 창에서 용지는 <b>A4</b>, 여백은 <b>없음</b>(또는 기본), 배율은 <b>100%</b>로 두세요. 파일로 내려면 프린터에서 <b>PDF로 저장</b>을 고르면 돼요.</div>
+    <div class="note">인쇄 창에서 용지는 위에서 고른 용지(<b id="pSizeNote">A4</b>)와 같게, 여백은 <b>없음</b>(또는 기본), 배율은 <b>100%</b>로 두세요. 파일로 내려면 프린터에서 <b>PDF로 저장</b>을 고르면 돼요.</div>
   </form>
   <div class="stage" id="stage"><div class="scaler" id="scaler">
-    <article class="paper" id="paper">
+    <article class="paper" id="paper_el">
       <header class="mast"><div class="name" id="pName"></div>
         <div class="sub"><span id="pDate"></span><span id="pPub"></span></div></header>
       <span class="sect" id="pSect"></span>
@@ -166,9 +169,22 @@ const FIREBASE_CONFIG = {
 };
 const $ = id => document.getElementById(id);
 const KEY = 'newspaper-draft-v1';
-const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2','cap3','svQ','svWho','sl1','sn1','sl2','sn2','sl3','sn3','sl4','sn4','sl5','sn5'];
+const FIELDS = ['paper','paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2','cap3','svQ','svWho','sl1','sn1','sl2','sn2','sl3','sn3','sl4','sn4','sl5','sn5'];
 const img = { 1: '', 2: '', 3: '' };
 const NS = [1, 2, 3];
+// 용지 크기(mm). A4 편집을 그대로 확대해서 B4·A3에 맞춰요.
+const PAPERS = { A4: [210, 297], B4: [257, 364], A3: [297, 420] };
+const pageStyle = document.createElement('style'); document.head.append(pageStyle);
+function applyPaper() {
+  const name = PAPERS[$('paper').value] ? $('paper').value : 'A4';
+  const [W, H] = PAPERS[name], k = W / 210, p = $('paper_el');
+  p.style.zoom = k;
+  p.style.height = p.classList.contains('grow') ? 'auto' : (H / k).toFixed(2) + 'mm';
+  p.style.minHeight = (H / k).toFixed(2) + 'mm';
+  pageStyle.textContent = `@page{size:${W}mm ${H}mm;margin:0}`;
+  $('pSizeNote').textContent = name;
+  return name;
+}
 // 조 편성은 주소 뒤 #teams=이름·이름|이름·이름 으로 받아요(서버로 가지 않음, 레포에 이름을 적지 않음).
 const TEAMS = (() => {
   const m = /(?:^#|&)teams=([^&]*)/.exec(location.hash);
@@ -234,11 +250,12 @@ function applyData(s, i1, i2, i3) {
   FIELDS.forEach(k => { $(k).value = s[k] != null ? s[k] : ''; });
   if (!$('paperName').value) $('paperName').value = '우리 반 신문';
   if (!$('ncols').value) $('ncols').value = '0';
+  if (!PAPERS[$('paper').value]) $('paper').value = 'A4';
   img[1] = i1 || ''; img[2] = i2 || ''; img[3] = i3 || '';
 }
 function hasContent() { return ['title', 'deck', 'lead', 'body'].some(k => $(k).value.trim()) || img[1] || img[2] || img[3]; }
 function clearFields() {
-  FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
+  FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('paper').value = 'A4'; $('date').value = todayStr();
   img[1] = img[2] = img[3] = ''; NS.forEach(n => { $('img' + n).value = ''; });
 }
 function save(changedImg) {
@@ -336,7 +353,7 @@ function render() {
   // 표제 길이에 맞춰 글자 크기
   const tl = (v('title') || '').length;
   t.style.fontSize = tl > 26 ? '20pt' : tl > 16 ? '23pt' : '26pt';
-  $('paper').dataset.chars = chars;
+  $('paper_el').dataset.chars = chars;
   fit();
   scale();
 }
@@ -374,8 +391,9 @@ function fig(n) {
 
 // A4 한 장에 들어가도록 본문 글자 크기를 줄여요(11pt → 8.5pt). 그래도 넘치면 2쪽으로.
 function fit() {
-  const p = $('paper'), cols = $('pCols');
+  const p = $('paper_el'), cols = $('pCols');
   p.classList.remove('grow');
+  const name = applyPaper(), zk = PAPERS[name][0] / 210;
   const over = () => p.scrollHeight > p.clientHeight + 1;
   const chars = +p.dataset.chars || 0;
   let fs = 11;
@@ -389,21 +407,23 @@ function fit() {
   while (over() && fs > 8.5) down();
   const note = $('fit');
   if (over()) {
-    p.classList.add('grow');
+    p.classList.add('grow'); applyPaper();
     note.className = 'note warn';
-    note.textContent = '글이 길어서 A4 한 장에 다 들어가지 않아요. 2쪽으로 인쇄돼요. 사진을 하나 빼거나 글을 조금 줄이면 한 장에 들어가요.';
+    note.textContent = `글이 길어서 ${name} 한 장에 다 들어가지 않아요. 2쪽으로 인쇄돼요. 사진을 하나 빼거나 글을 조금 줄이면 한 장에 들어가요. 더 큰 용지(B4·A3)를 골라도 돼요.`;
   } else {
     note.className = 'note';
-    note.textContent = `A4 한 장에 딱 맞게 편집했어요. (본문 글자 크기 ${fs}pt)`;
+    note.textContent = `${name} 한 장에 딱 맞게 편집했어요. (본문 글자 크기 ${Math.round(fs * zk * 10) / 10}pt)`;
   }
   p.dataset.fs = fs;
 }
 // 화면 폭에 맞게 미리 보기 크기를 줄여요(인쇄에는 영향 없음).
 function scale() {
-  const st = $('stage'), sc = $('scaler'), p = $('paper');
-  const k = Math.min(1, st.clientWidth / p.offsetWidth);
+  const st = $('stage'), sc = $('scaler'), p = $('paper_el');
+  sc.style.transform = 'none';
+  const rc = p.getBoundingClientRect();
+  const k = Math.min(1, st.clientWidth / rc.width);
   sc.style.transform = `scale(${k})`;
-  st.style.height = p.offsetHeight * k + 'px';
+  st.style.height = rc.height * k + 'px';
 }
 
 // 사진은 서버로 보내지 않고 이 브라우저에서만 줄여서 써요.
@@ -471,7 +491,7 @@ window.addEventListener('hashchange', () => location.reload());
 window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'none'; });
 window.addEventListener('afterprint', scale);
 // 사진이 다 그려진 뒤 다시 맞춰요.
-document.getElementById('paper').addEventListener('load', () => { fit(); scale(); }, true);
+document.getElementById('paper_el').addEventListener('load', () => { fit(); scale(); }, true);
 function ago(t) {
   if (!t) return '';
   const s = Math.max(0, Math.round((Date.now() - t) / 1000));

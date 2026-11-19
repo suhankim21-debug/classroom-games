@@ -15,7 +15,7 @@ const A4 = { w: 595, h: 842 };
   p.on('console', m => { if (m.type() === 'error' && !/favicon|TUNNEL|tunnel via proxy|fonts/.test(m.text())) fail('콘솔 오류: ' + m.text()); });
   p.on('dialog', d => d.accept());
   await p.goto(URL);
-  await p.waitForSelector('#paper');
+  await p.waitForSelector('#paper_el');
   if (!/표제를 쓰세요/.test(await p.textContent('#pTitle'))) fail('빈 상태 안내가 없음');
 
   // 사진으로 쓸 그림을 브라우저에서 만들어요.
@@ -52,14 +52,14 @@ const A4 = { w: 595, h: 842 };
   if (!(w[0] > w[1] && w[1] > w[2])) fail('막대 길이가 응답 수 순서와 다름: ' + w);
   await p.setInputFiles('#img3', { name: 's.png', mimeType: 'image/png', buffer: await png(900, 600, '#888') });
   await p.waitForSelector('#pCols figure.survey img');
-  const txt = await p.textContent('#paper');
+  const txt = await p.textContent('#paper_el');
   for (const s of ['봄빛 어린이 신문', '학교 소식', '6학년, 운동회에서', '줄다리기 역전승', '김하늘 기자', '6학년 2반', '운동회에서 줄다리기를 하는', '지난 10일'])
     if (!txt.includes(s)) fail('미리 보기에 안 나옴: ' + s);
   const info = await p.evaluate(() => ({
     cols: getComputedStyle(document.querySelector('#pCols')).columnCount,
-    wb: getComputedStyle(document.querySelector('#paper')).wordBreak,
-    over: document.querySelector('#paper').scrollHeight > document.querySelector('#paper').clientHeight + 1,
-    grow: document.querySelector('#paper').classList.contains('grow'),
+    wb: getComputedStyle(document.querySelector('#paper_el')).wordBreak,
+    over: document.querySelector('#paper_el').scrollHeight > document.querySelector('#paper_el').clientHeight + 1,
+    grow: document.querySelector('#paper_el').classList.contains('grow'),
     big: document.querySelector('#pImg1').naturalWidth,
   }));
   console.log('다단', info.cols, '줄바꿈', info.wb, '사진 폭', info.big);
@@ -80,15 +80,28 @@ const A4 = { w: 595, h: 842 };
   const box = pdf.toString('latin1').match(/\/MediaBox\s*\[\s*0 0 ([\d.]+) ([\d.]+)/);
   if (!box || Math.abs(box[1] - A4.w) > 2 || Math.abs(box[2] - A4.h) > 2) fail('용지가 A4가 아님: ' + (box && box.slice(1)));
 
+  // B4·A3 용지: 같은 기사가 그 용지 한 장에 맞게 커져요.
+  for (const [name, w, h] of [['B4', 728.5, 1031.8], ['A3', 841.9, 1190.6]]) {
+    await p.selectOption('#paper', name);
+    await p.waitForTimeout(300);
+    const pp = await p.pdf({ preferCSSPageSize: true, printBackground: true });
+    const mb = pp.toString('latin1').match(/\/MediaBox\s*\[\s*0 0 ([\d.]+) ([\d.]+)/);
+    console.log(name, 'PDF 쪽수', pdfPages(pp), mb && mb.slice(1).join('x'));
+    if (pdfPages(pp) !== 1) fail(name + ' 한 장으로 인쇄되지 않음: ' + pdfPages(pp));
+    if (!mb || Math.abs(mb[1] - w) > 3 || Math.abs(mb[2] - h) > 3) fail(name + ' 용지 크기가 아님: ' + (mb && mb.slice(1)));
+    if (SHOTS) require('fs').writeFileSync(`${SHOTS}/${name}.pdf`, pp);
+    if (!(await p.textContent('#fit')).includes(name + ' 한 장에')) fail(name + ' 안내 문구가 없음');
+  }
+  await p.selectOption('#paper', 'A4');
   // 새로고침해도 남아 있어요.
   await p.reload(); await p.waitForSelector('#pFig1:not([hidden])', { timeout: 5000 }).catch(() => fail('새로고침 뒤 사진이 사라짐'));
   if (await p.inputValue('#title') !== '6학년, 운동회에서 하나 된 마음 보여') fail('새로고침 뒤 표제가 사라짐');
 
   // 조금 긴 글은 글자를 줄여 한 장에 맞춰요.
   await p.fill('#body', Array(9).fill(para).join('\n'));
-  const fs = +(await p.getAttribute('#paper', 'data-fs'));
+  const fs = +(await p.getAttribute('#paper_el', 'data-fs'));
   console.log('긴 글 본문 글자 크기', fs);
-  if (await p.evaluate(() => document.querySelector('#paper').classList.contains('grow'))) fail('조금 긴 글이 한 장에 안 들어감');
+  if (await p.evaluate(() => document.querySelector('#paper_el').classList.contains('grow'))) fail('조금 긴 글이 한 장에 안 들어감');
   pdf = await p.pdf({ preferCSSPageSize: true, printBackground: true });
   if (pdfPages(pdf) !== 1) fail('조금 긴 글이 한 장으로 인쇄되지 않음');
 
