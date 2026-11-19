@@ -48,9 +48,11 @@ legend{font-weight:bold;padding:0 4px}
 .cols p{margin:0 0 .5em;text-indent:1em}
 .cols .lead{font-weight:700;text-indent:0}
 .cols figure{break-inside:avoid;margin:1mm 0 3mm}
-.cols figure img{max-height:calc(55mm * var(--ik,1))}
+.cols figure img{max-height:calc(48mm * var(--ik,1))}
+.paper figure img.wide{width:calc(100% * var(--ik,1));max-width:100%;max-height:none}
+.paper .hero img.wide{width:calc(100% * var(--hk,1))}
 .cols figure.survey{border:1px solid #999;padding:1.5mm;background:#fff}
-.cols figure.survey img{object-fit:contain;max-height:calc(80mm * var(--ik,1))}
+.cols figure.survey img{object-fit:contain;max-height:calc(65mm * var(--ik,1))}
 .chart{display:grid;gap:1.2mm;margin:1mm 0}
 .chart .q{font-weight:700;font-size:9.5pt;line-height:1.35}
 .chart .bar{display:grid;grid-template-columns:24mm 1fr;gap:2mm;align-items:center;font-size:8.5pt;line-height:1.25}
@@ -108,6 +110,7 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
   <form class="form" id="f" autocomplete="off" onsubmit="return false">
     <div class="note" id="intro">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 컴퓨터에 저절로 저장돼요.</div>
     <div id="rvBox" hidden></div>
+    <div id="demoEval" class="tpanel" hidden style="border:3px dashed #1A4F8B"></div>
     <label id="teamBox" hidden>우리 조<select id="team"><option value="">조를 고르세요</option></select><small>조를 고르면 기자 이름이 저절로 들어가요.</small></label>
     <div class="two">
       <label>신문 이름<input id="paperName" maxlength="20" value="우리 반 신문"></label>
@@ -137,7 +140,7 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
       <div class="photo-row"><input type="file" id="img2" accept="image/*"><img id="th2" alt="" hidden><button type="button" class="ghost" id="del2" hidden>빼기</button></div>
       <label>사진 설명<input id="cap2" maxlength="80"></label>
     </fieldset>
-    <fieldset id="svBox"><legend>📊 설문 조사 결과 그래프 (본문 끝)</legend>
+    <fieldset id="svBox" hidden><legend>📊 설문 조사 결과 그래프 (본문 끝)</legend>
       <small style="color:#666">질문과 항목, 응답 수만 쓰면 막대그래프가 저절로 그려져요.</small>
       <label>설문 질문<input id="svQ" maxlength="50" placeholder="예) 영랑호 체험에서 가장 기억에 남는 활동은?"></label>
       <label>조사 대상<input id="svWho" maxlength="40" placeholder="예) 6학년 ○반 학생"></label>
@@ -145,7 +148,7 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
       <div class="srow"><input id="sl1" maxlength="16" placeholder="항목 1"><input id="sn1" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl2" maxlength="16" placeholder="항목 2"><input id="sn2" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl3" maxlength="16" placeholder="항목 3"><input id="sn3" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl4" maxlength="16" placeholder="항목 4"><input id="sn4" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl5" maxlength="16" placeholder="항목 5"><input id="sn5" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div>
       <div class="count" id="svSum"></div>
     </fieldset>
-    <fieldset id="fs3"><legend>📷 설문 결과 사진 (설문지·표를 찍었다면, 없어도 돼요)</legend>
+    <fieldset id="fs3"><legend>📊 설문 조사 결과 사진 (본문 끝)</legend>
       <small style="color:#666">설문지, 결과 표, 그래프를 찍은 사진을 넣어요. 글자가 잘리지 않게 그대로 보여 줘요.</small>
       <div class="photo-row"><input type="file" id="img3" accept="image/*"><img id="th3" alt="" hidden><button type="button" class="ghost" id="del3" hidden>빼기</button></div>
       <label>설문 내용<small>누구에게, 무엇을 물었는지</small><input id="cap3" maxlength="80" placeholder="예) 6학년 ○반 학생 ○명에게 가장 기억에 남는 활동을 물었어요"></label>
@@ -364,7 +367,7 @@ function render() {
   $('pFootL').textContent = (team ? team + '조 · ' : '') + (v('reporter') ? '글·사진: ' + v('reporter') + ' 기자' : '');
   // 사진 1
   $('pFig1').hidden = !img[1];
-  if (img[1]) { $('pImg1').src = img[1]; $('pCap1').textContent = v('cap1'); $('pCap1').hidden = !v('cap1'); }
+  if (img[1]) { if ($('pImg1').getAttribute('src') !== img[1]) { $('pImg1').classList.remove('wide'); $('pImg1').src = img[1]; } markWide($('pImg1')); $('pCap1').textContent = v('cap1'); $('pCap1').hidden = !v('cap1'); }
   // 본문(다단)
   const cols = $('pCols'); cols.replaceChildren();
   const lead = paras($('lead').value), body = paras($('body').value);
@@ -375,7 +378,6 @@ function render() {
     cols.append(el('p', '', x));
   });
   if (img[2] && body.length <= 1) cols.append(fig(2));
-  const sv = survey(); if (sv) cols.append(sv);
   if (img[3]) cols.append(fig(3));
   if (!lead.length && !body.length) cols.append(el('p', 'empty', '전문과 본문을 쓰면 여기에 신문처럼 나와요.'));
   const chars = (lead.join('') + body.join('')).length;
@@ -419,8 +421,8 @@ function survey() {
 }
 function fig(n) {
   const f = el('figure', n === 3 ? 'survey' : '');
-  if (n === 3) f.append(el('span', 'tag', '📷 설문 자료'));
-  const i = el('img'); i.src = img[n]; i.alt = n === 3 ? '설문 조사 결과' : ''; f.append(i);
+  if (n === 3) f.append(el('span', 'tag', '📊 설문 조사 결과'));
+  const i = el('img'); i.src = img[n]; i.alt = n === 3 ? '설문 조사 결과' : ''; f.append(i); markWide(i);
   const c = $('cap' + n).value.trim(); if (c) f.append(el('figcaption', '', c));
   return f;
 }
@@ -436,11 +438,19 @@ function fit() {
   if (chars < 300) fs = 13; else if (chars < 600) fs = 12;
   p.style.setProperty('--fs', fs + 'pt');
   // 글자를 10pt까지 줄이고, 그래도 넘치면 사진을 반까지 줄이고, 마지막으로 글자를 8.5pt까지 줄여요.
-  let ik = 1; p.style.setProperty('--ik', 1);
+  let ik = 1, hk = 1; p.style.setProperty('--ik', 1); p.style.setProperty('--hk', 1);
   const down = () => { fs = Math.round((fs - 0.25) * 100) / 100; p.style.setProperty('--fs', fs + 'pt'); };
   while (over() && fs > 10) down();
-  while (over() && ik > 0.5) { ik = Math.round((ik - 0.05) * 100) / 100; p.style.setProperty('--ik', ik); }
+  while (over() && ik > 0.4) { ik = Math.round((ik - 0.05) * 100) / 100; p.style.setProperty('--ik', ik); }
   while (over() && fs > 8.5) down();
+  // 그래도 넘치면 마지막으로 가로 대표 사진을 줄여요.
+  while (over() && hk > 0.6) { hk = Math.round((hk - 0.05) * 100) / 100; p.style.setProperty('--hk', hk); }
+  // 다단은 사진 때문에 높이가 들쑥날쑥해서, 줄인 뒤 남는 자리가 있으면 다시 키워 봐요(대표 사진 → 다른 사진 → 글자).
+  const grow = (get, set, max, step) => { while (!over() && get() < max) { const old = get(); set(Math.min(max, Math.round((old + step) * 100) / 100)); if (over()) { set(old); break; } } };
+  const fs0 = chars < 300 ? 13 : chars < 600 ? 12 : 11;
+  grow(() => hk, v => { hk = v; p.style.setProperty('--hk', v); }, 1, 0.05);
+  grow(() => fs, v => { fs = v; p.style.setProperty('--fs', v + 'pt'); }, fs0, 0.25);
+  grow(() => ik, v => { ik = v; p.style.setProperty('--ik', v); }, 1, 0.05);
   const note = $('fit');
   if (over()) {
     p.classList.add('grow'); applyPaper();
@@ -515,7 +525,8 @@ $('f').addEventListener('input', () => { render(); save(); });
 $('f').addEventListener('change', () => { render(); save(); });
 $('print').addEventListener('click', () => window.print());
 $('submit').addEventListener('click', async () => {
-  if (!canSubmit() || !db || !team || DEMO) return;
+  if (DEMO) { if (canSubmit()) { review = { status: 'submitted', n: ((review && review.n) || 0) + 1 }; showReview(); drawDemoEval(); } return; }
+  if (!canSubmit() || !db || !team) return;
   const b = $('submit'); b.disabled = true;
   try {
     clearTimeout(pushTimer);
@@ -545,11 +556,12 @@ window.addEventListener('hashchange', () => location.reload());
 window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'none'; });
 window.addEventListener('afterprint', scale);
 // 사진이 다 그려진 뒤 다시 맞춰요.
-document.getElementById('paper_el').addEventListener('load', () => { fit(); scale(); }, true);
+document.getElementById('paper_el').addEventListener('load', e => { markWide(e.target); fit(); scale(); }, true);
+function markWide(i) { if (i && i.tagName === 'IMG' && i.naturalWidth) i.classList.toggle('wide', i.naturalWidth >= i.naturalHeight); }
 function canSubmit() { return countChars($('lead').value) >= CFG.minLead && countChars($('body').value) >= CFG.minBody && $('title').value.trim(); }
 function updateSubmit() {
   const b = $('submit'); if (!b) return;
-  b.hidden = TEACHER || DEMO || !db || !team;
+  b.hidden = TEACHER || (!DEMO && (!db || !team));
   const okk = canSubmit();
   b.disabled = !okk;
   b.title = okk ? '' : `표제를 쓰고 전문 ${CFG.minLead}자, 본문 ${CFG.minBody}자 이상 써야 제출할 수 있어요.`;
@@ -564,8 +576,47 @@ function showReview() {
   const kids = [el('b', '', head)];
   if (st !== 'submitted' && review.total != null) kids.push(el('span', '', `점수: ${review.total} / ${RUBRIC.length * 3}점`));
   if (st !== 'submitted' && review.feedback) kids.push(el('span', '', '선생님 피드백: ' + review.feedback));
+  if (DEMO) kids.push(el('span', '', '(👩‍🏫 예시 화면이에요. 실제로는 선생님이 평가하면 이렇게 보여요.)'));
   box.className = cls; box.replaceChildren(...kids);
   updateSubmit();
+}
+// 예시 모드에서 선생님이 평가하는 과정을 그대로 보여 줘요(인터넷에 저장 안 함).
+function drawDemoEval() {
+  const box = $('demoEval');
+  if (!DEMO || !review || review.status !== 'submitted') { box.hidden = true; return; }
+  box.hidden = false;
+  const sels = [], rub = el('div', 'rub');
+  RUBRIC.forEach((name, k) => {
+    const sl = document.createElement('select');
+    sl.append(new Option('-', ''), ...[3, 2, 1].map(v => new Option(v + '점', v)));
+    sels.push(sl); rub.append(el('span', '', `${k + 1}. ${name}`), sl);
+  });
+  const tot = el('b'), sugg = el('span');
+  const fb = document.createElement('textarea'); fb.rows = 3; fb.id = 'dFeedback'; fb.placeholder = '학생에게 보낼 피드백';
+  const passB = el('button', '', '✅ 통과'), retB = el('button', '', '↩️ 반려 (다시 쓰기)');
+  passB.type = retB.type = 'button'; passB.style.background = '#2E7D32';
+  const calc = () => {
+    const v = sels.map(x => +x.value || 0), t = v.reduce((a, b) => a + b, 0), all = v.every(Boolean);
+    const okk = all && t >= CFG.pass && v[1] > 1 && v[2] > 1;
+    tot.textContent = `총점 ${t} / ${RUBRIC.length * 3}점 (통과 기준 ${CFG.pass}점, ②·③이 1점이면 반려)`;
+    sugg.textContent = !all ? '항목마다 점수를 골라요.' : okk ? '→ 기준을 넘었어요. 통과!' : '→ 기준에 못 미쳐요. 반려하고 피드백을 줘요.';
+    sugg.className = !all ? '' : okk ? 'okc' : 'need';
+    return { v, t, all };
+  };
+  sels.forEach(x => x.onchange = calc);
+  const decide = status => {
+    const { v, t, all } = calc();
+    if (!all) { alert('모든 항목에 점수를 골라 주세요.'); return; }
+    review = { status, scores: v, total: t, feedback: fb.value.trim(), n: review.n };
+    showReview(); drawDemoEval();
+    $('rvBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  passB.onclick = () => decide('passed'); retB.onclick = () => decide('returned');
+  const row = el('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap'; row.append(passB, retB);
+  box.replaceChildren(el('h3', '', '👩‍🏫 선생님은 이렇게 평가해요 (예시, 저장 안 됨)'),
+    el('span', '', '제출된 기사를 아래 6가지 기준으로 3·2·1점을 매겨요. 기준을 넘으면 통과, 못 넘으면 피드백과 함께 반려돼요.'),
+    rub, tot, sugg, el('label', '', '피드백'), fb, row);
+  calc();
 }
 let reviewES = null, cfgES = null;
 function watchReview() {
