@@ -170,6 +170,48 @@ const A4 = { w: 595, h: 842 };
   const tpdf = await T.pdf({ preferCSSPageSize: true, printBackground: true });
   if (pdfPages(tpdf) !== 1) fail('선생님 화면에서 조 신문 인쇄가 한 장이 아님: ' + pdfPages(tpdf));
 
+  // 글자 수 제한·제출·반려·피드백·통과, 붙여 넣기 기록
+  if (!(await p.isDisabled('#submit'))) fail('글자 수가 모자란데 제출 단추가 눌림');
+  if (!/\/ 60자 이상/.test(await p.textContent('#leadCount'))) fail('전문 글자 수 안내가 없음');
+  const LEAD = '지난 11월 18일 수요일, 6학년 학생들이 속초 영랑호에서 습지의 소중함을 알아보려고 해설사의 설명을 들으며 습지 체험학습을 했다.';
+  const BODY = Array(7).fill('이날 학생들은 호숫가 산책길을 걸으며 물새와 갈대를 관찰하고 활동지에 기록했다. 해설사는 습지가 물을 깨끗하게 해 준다고 설명했다.').join('\n');
+  await p.fill('#lead', LEAD);
+  await p.evaluate(t => { const dt = new DataTransfer(); dt.setData('text/plain', t); document.querySelector('#body').dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }, BODY);
+  await p.fill('#body', BODY);
+  if (await p.isDisabled('#submit')) fail('글자 수를 채웠는데 제출이 안 됨');
+  await p.click('#submit');
+  await p.waitForSelector('#rvBox:not([hidden])', { timeout: 10000 }).catch(() => fail('제출 뒤 학생 화면에 안내가 없음'));
+  const card2 = '.tcard[data-t="2"]';
+  await T.waitForFunction(s => /제출함/.test(document.querySelector(s).textContent), card2, { timeout: 15000 }).catch(() => fail('선생님 카드에 제출함이 안 보임'));
+  await T.waitForFunction(s => /붙여 넣기 1번/.test(document.querySelector(s).textContent), card2, { timeout: 15000 }).catch(() => fail('붙여 넣기 기록이 안 보임'));
+  if (!/붙여 넣기 기록 1번/.test(await T.textContent('.tpanel'))) fail('평가 칸에 붙여 넣기 기록이 없음');
+  const setScores = async v => { const s2 = await T.$$('.rub select'); for (let k = 0; k < s2.length; k++) await s2[k].selectOption(String(v[k])); };
+  await setScores([3, 1, 2, 2, 2, 2]);
+  if (!/반려를 추천/.test(await T.textContent('.tpanel'))) fail('②가 1점인데 반려 추천이 아님');
+  await T.fill('#tFeedback', '전문에 누가 무엇을 했는지 더 분명하게 써 보세요.');
+  await T.click('text=↩️ 반려 (다시 쓰기)');
+  await p.waitForFunction(() => /반려/.test(document.querySelector('#rvBox').textContent) && /더 분명하게/.test(document.querySelector('#rvBox').textContent), null, { timeout: 15000 }).catch(() => fail('학생 화면에 반려·피드백이 안 보임'));
+  if (!/12 \/ 18점/.test(await p.textContent('#rvBox'))) fail('학생 화면에 점수가 안 보임: ' + await p.textContent('#rvBox'));
+  if (!/다시 제출/.test(await p.textContent('#submit'))) fail('반려 뒤 다시 제출 단추가 아님');
+  await p.click('#submit');
+  await T.waitForFunction(s => /제출함/.test(document.querySelector(s).textContent), card2, { timeout: 15000 }).catch(() => fail('다시 제출이 선생님 화면에 안 보임'));
+  await T.click(card2);
+  await setScores([3, 3, 3, 3, 2, 2]);
+  if (!/통과를 추천/.test(await T.textContent('.tpanel'))) fail('16점인데 통과 추천이 아님');
+  await T.click('text=✅ 통과');
+  await p.waitForFunction(() => /통과/.test(document.querySelector('#rvBox').textContent), null, { timeout: 15000 }).catch(() => fail('학생 화면에 통과가 안 보임'));
+  // 기준 글자 수 바꾸기
+  const minBody = (await T.$$('.tpanel input[type=number]'))[1];
+  await minBody.fill('900'); await minBody.dispatchEvent('change');
+  await p.waitForFunction(() => /\/ 900자 이상/.test(document.querySelector('#count').textContent), null, { timeout: 15000 }).catch(() => fail('선생님이 바꾼 글자 수 기준이 학생 화면에 안 보임'));
+  if (!(await p.isDisabled('#submit'))) fail('바뀐 기준보다 짧은데 제출이 됨');
+  if (SHOTS) await T.screenshot({ path: `${SHOTS}/teacher-review.png`, fullPage: true });
+  // 세로 사진도 잘리지 않아요.
+  await p.setInputFiles('#img1', { name: 'tall.png', mimeType: 'image/png', buffer: await png(600, 1000, '#555') });
+  await p.waitForTimeout(800);
+  const ratio = await p.evaluate(() => { const i = document.querySelector('#pImg1'); const r = i.getBoundingClientRect(); return (r.width / r.height) / (i.naturalWidth / i.naturalHeight); });
+  if (Math.abs(ratio - 1) > 0.03) fail('사진이 잘리거나 늘어남: ' + ratio);
+
   // 선생님 컴퓨터에서 학생 주소로 예시를 보여 줘도 학생 조 글은 그대로예요.
   const D = await tctx.newPage();
   D.on('dialog', d => d.dismiss());

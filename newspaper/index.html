@@ -42,7 +42,7 @@ legend{font-weight:bold;padding:0 4px}
 .byline{font-size:9.5pt;text-align:right;border-bottom:1px solid #111;padding-bottom:1.5mm;margin-bottom:3mm}
 .hero{margin:0 0 3mm}
 .paper figure{margin:0}
-.paper figure img{width:100%;display:block;object-fit:cover;max-height:calc(85mm * var(--ik,1))}
+.paper figure img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(85mm * var(--ik,1));margin:0 auto;object-fit:contain}
 .paper figcaption{font-size:8.5pt;color:#444;padding-top:1mm;line-height:1.4}
 .cols{font-size:var(--fs);line-height:1.65;column-gap:6mm;column-rule:1px solid #bbb}
 .cols p{margin:0 0 .5em;text-indent:1em}
@@ -66,6 +66,16 @@ legend{font-weight:bold;padding:0 4px}
 [hidden]{display:none!important}
 .srow{display:grid;grid-template-columns:1fr 90px;gap:6px}
 .srow.head{font-weight:bold;font-size:.9rem;color:#555}
+.rv{border-radius:10px;padding:10px 12px;line-height:1.5;display:grid;gap:4px}
+.rv.sub{background:#E8F0FB}.rv.ret{background:#FCE3DE;color:#8A1C14}.rv.pass{background:#E3F1E7;color:#1E5C2E}
+.rv b{font-size:1.05rem}
+.need{color:#B3261E;font-weight:bold}.okc{color:#2E7D32;font-weight:bold}
+.tpanel{background:#fff;border-radius:12px;padding:12px;display:grid;gap:8px}
+.tpanel h3{margin:0;font-size:1.1rem}
+.rub{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;font-size:.95rem}
+.rub select{width:auto}
+.badge{display:inline-block;border-radius:6px;padding:0 6px;font-size:.85rem;font-weight:bold;margin-right:4px}
+.badge.sub{background:#D6E4F7;color:#1A4F8B}.badge.ret{background:#FCE3DE;color:#8A1C14}.badge.pass{background:#DDF0E1;color:#1E5C2E}.badge.warn{background:#FFE6A8;color:#7A4B00}
 .sync{font-size:.95rem;font-weight:normal}
 .sync.bad{color:#B3261E}
 /* 선생님 실시간 보기 */
@@ -92,11 +102,12 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
 </style></head>
 <body>
 <div class="top"><h1 id="topTitle">📰 우리 반 신문 편집기</h1>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sync" id="sync"></span><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sync" id="sync"></span><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="submit" type="button" hidden style="background:#1A4F8B">📮 제출하기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
 <div class="layout">
   <div class="tlist" id="tlist"><div class="note">조를 누르면 오른쪽에 그 조 신문이 크게 보여요. 학생이 쓰는 대로 바로 바뀌어요. 🖨️ 인쇄하기를 누르면 고른 조 신문이 인쇄돼요.</div></div>
   <form class="form" id="f" autocomplete="off" onsubmit="return false">
     <div class="note" id="intro">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 컴퓨터에 저절로 저장돼요.</div>
+    <div id="rvBox" hidden></div>
     <label id="teamBox" hidden>우리 조<select id="team"><option value="">조를 고르세요</option></select><small>조를 고르면 기자 이름이 저절로 들어가요.</small></label>
     <div class="two">
       <label>신문 이름<input id="paperName" maxlength="20" value="우리 반 신문"></label>
@@ -116,7 +127,7 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
     <div class="two">
       <label>단 나누기<select id="ncols"><option value="0">자동</option><option value="1">1단</option><option value="2">2단</option><option value="3">3단</option></select></label>
     </div>
-    <label>전문<small>육하원칙(누가·언제·어디서·무엇을·어떻게·왜)이 들어간 첫 문단</small><textarea id="lead" rows="3" maxlength="400"></textarea></label>
+    <label>전문 <span class="count" id="leadCount"></span><small>육하원칙(누가·언제·어디서·무엇을·어떻게·왜)이 들어간 첫 문단</small><textarea id="lead" rows="3" maxlength="400"></textarea></label>
     <label>본문 <span class="count" id="count"></span><small>문단을 나누려면 줄을 바꾸세요.</small><textarea id="body" rows="10" maxlength="3000"></textarea></label>
     <fieldset id="fs1"><legend>사진 1 (크게, 제목 아래)</legend>
       <div class="photo-row"><input type="file" id="img1" accept="image/*"><img id="th1" alt="" hidden><button type="button" class="ghost" id="del1" hidden>빼기</button></div>
@@ -208,9 +219,16 @@ const ROOM = (() => {
 const db = ROOM && window.fetch ? FIREBASE_CONFIG.databaseURL + '/rooms/news-' + ROOM : '';
 const url = p => db + (p ? '/' + p : '') + '.json';
 const ok = r => { if (!r.ok) throw new Error(r.status); return r.json(); };
+// 평가 설정(선생님 화면에서 바꿔요)
+const CFG = { minLead: 60, minBody: 400, pass: 12 };
+const RUBRIC = ['기사문의 짜임 (표제·부제·전문·본문)', '전문과 육하원칙', '사실 전달 (인터뷰는 그대로, 느낌·짐작 없음)', '독자를 고려한 자료 활용 (사진·그래프)', '독자를 고려한 표현 (쉬운 말·순서·분량)', '바른 문장 (맞춤법·띄어쓰기·호응)'];
+const countChars = t => t.replace(/\s+/g, ' ').trim().length;
+let review = null;
 const cloud = {
   set: (p, v) => fetch(url(p), { method: 'PUT', body: JSON.stringify(v == null ? null : v) }).then(ok),
   get: p => fetch(url(p)).then(ok),
+  patch: (p, v) => fetch(url(p), { method: 'PATCH', body: JSON.stringify(v) }).then(ok),
+  post: (p, v) => fetch(url(p), { method: 'POST', body: JSON.stringify(v) }).then(ok),
   remove: p => fetch(url(p), { method: 'DELETE' }).then(ok),
   // 바뀔 때마다 전체 값을 cb로 알려 줘요.
   listen(p, cb, onErr) {
@@ -361,7 +379,10 @@ function render() {
   if (img[3]) cols.append(fig(3));
   if (!lead.length && !body.length) cols.append(el('p', 'empty', '전문과 본문을 쓰면 여기에 신문처럼 나와요.'));
   const chars = (lead.join('') + body.join('')).length;
-  $('count').textContent = chars ? `(${chars}자)` : '';
+  const lc = countChars($('lead').value), bc = countChars($('body').value);
+  $('leadCount').replaceChildren(el('span', lc >= CFG.minLead ? 'okc' : 'need', `${lc} / ${CFG.minLead}자 이상`));
+  $('count').replaceChildren(el('span', bc >= CFG.minBody ? 'okc' : 'need', `${bc} / ${CFG.minBody}자 이상`));
+  updateSubmit();
   let n = +$('ncols').value;
   if (!n) n = chars < 250 ? 1 : chars < 700 ? 2 : 3;
   cols.style.columnCount = n;
@@ -488,11 +509,29 @@ $('team').addEventListener('change', e => {
   e.stopPropagation();
   team = e.target.value;
   try { localStorage.setItem(KEY + '-team', team); } catch (err) {}
-  load(); render(); pullTeam();
+  load(); render(); pullTeam(); watchReview();
 });
 $('f').addEventListener('input', () => { render(); save(); });
 $('f').addEventListener('change', () => { render(); save(); });
 $('print').addEventListener('click', () => window.print());
+$('submit').addEventListener('click', async () => {
+  if (!canSubmit() || !db || !team || DEMO) return;
+  const b = $('submit'); b.disabled = true;
+  try {
+    clearTimeout(pushTimer);
+    await cloud.set('teams/' + team, textData());
+    await cloud.patch('review/' + team, { status: 'submitted', submittedAt: Date.now(), n: ((review && review.n) || 0) + 1 });
+    setSync('📮 제출했어요');
+  } catch (e) { setSync('⚠️ 제출하지 못했어요. 인터넷 연결을 확인해 주세요.', true); }
+  updateSubmit();
+});
+// 붙여 넣기 기록(선생님 화면에 보여요)
+$('f').addEventListener('paste', e => {
+  const t = e.target; if (!t || !/^(TEXTAREA|INPUT)$/.test(t.tagName) || t.type === 'file') return;
+  const txt = (e.clipboardData && e.clipboardData.getData('text')) || '';
+  if (!db || !team || DEMO || countChars(txt) < 15) return;
+  cloud.post('paste/' + team, { t: Date.now(), f: t.id, n: countChars(txt), s: txt.slice(0, 80) }).catch(() => {});
+});
 $('reset').addEventListener('click', () => {
   if (!confirm('쓴 내용과 사진을 모두 지우고 새로 쓸까요?')) return;
   try { localStorage.removeItem(key()); } catch (e) {}
@@ -507,6 +546,36 @@ window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'no
 window.addEventListener('afterprint', scale);
 // 사진이 다 그려진 뒤 다시 맞춰요.
 document.getElementById('paper_el').addEventListener('load', () => { fit(); scale(); }, true);
+function canSubmit() { return countChars($('lead').value) >= CFG.minLead && countChars($('body').value) >= CFG.minBody && $('title').value.trim(); }
+function updateSubmit() {
+  const b = $('submit'); if (!b) return;
+  b.hidden = TEACHER || DEMO || !db || !team;
+  const okk = canSubmit();
+  b.disabled = !okk;
+  b.title = okk ? '' : `표제를 쓰고 전문 ${CFG.minLead}자, 본문 ${CFG.minBody}자 이상 써야 제출할 수 있어요.`;
+  b.textContent = review && review.status === 'returned' ? '📮 고쳐서 다시 제출' : review && review.status === 'submitted' ? '📮 다시 제출(고친 글)' : '📮 제출하기';
+}
+function showReview() {
+  const box = $('rvBox');
+  if (TEACHER || !review || !review.status) { box.hidden = true; updateSubmit(); return; }
+  box.hidden = false;
+  const st = review.status, cls = st === 'returned' ? 'rv ret' : st === 'passed' ? 'rv pass' : 'rv sub';
+  const head = st === 'returned' ? '↩️ 반려되었어요. 피드백을 보고 고쳐서 다시 제출해 주세요.' : st === 'passed' ? '🎉 통과! 인쇄해도 좋아요.' : '📮 제출했어요. 선생님 평가를 기다려요. 고칠 곳이 있으면 고친 뒤 다시 제출해도 돼요.';
+  const kids = [el('b', '', head)];
+  if (st !== 'submitted' && review.total != null) kids.push(el('span', '', `점수: ${review.total} / ${RUBRIC.length * 3}점`));
+  if (st !== 'submitted' && review.feedback) kids.push(el('span', '', '선생님 피드백: ' + review.feedback));
+  box.className = cls; box.replaceChildren(...kids);
+  updateSubmit();
+}
+let reviewES = null, cfgES = null;
+function watchReview() {
+  if (!db || TEACHER) return;
+  if (!cfgES) cfgES = cloud.listen('config', v => { Object.assign(CFG, norm(v)); render(); });
+  if (reviewES) { reviewES.close(); reviewES = null; }
+  review = null; showReview();
+  if (DEMO || !team) return;
+  reviewES = cloud.listen('review/' + team, v => { review = v && typeof v === 'object' ? v : null; showReview(); });
+}
 function ago(t) {
   if (!t) return '';
   const s = Math.max(0, Math.round((Date.now() - t) / 1000));
@@ -522,13 +591,16 @@ function startTeacher() {
   $('tlist').append(demo);
   const list = $('tlist');
   if (!db) { list.append(el('div', 'note warn', '조 편성 주소(#teams=…)에 &teacher를 붙여 열어 주세요. 인터넷 연결도 필요해요.')); return; }
-  const data = {}, pics = {};
-  let sel = '';
+  const data = {}, pics = {}, reviews = {}, pastes = {};
+  let sel = '', dirty = false;
   const cards = {};
+  const cardBox = el('div'); cardBox.style.cssText = 'display:grid;gap:10px';
+  const panel = el('div', 'tpanel'); const setBox = el('div', 'tpanel');
+  list.append(cardBox, panel, setBox);
   const mk = i => {
     const b = el('button', 'tcard'); b.type = 'button'; b.dataset.t = i;
-    b.onclick = () => { sel = String(i); Object.values(cards).forEach(c => c.setAttribute('aria-pressed', c === b)); show(); };
-    list.append(b); cards[i] = b; return b;
+    b.onclick = () => { sel = String(i); dirty = false; Object.values(cards).forEach(c => c.setAttribute('aria-pressed', c === b)); show(); drawPanel(); };
+    cardBox.append(b); cards[i] = b; return b;
   };
   TEAMS.forEach((_, i) => mk(i + 1));
   const draw = i => {
@@ -536,12 +608,80 @@ function startTeacher() {
     const names = TEAMS[i - 1] ? TEAMS[i - 1].join('·') : '';
     const chars = d ? (paras(d.lead || '').join('') + paras(d.body || '').join('')).length : 0;
     const np = pics[i] ? Object.keys(pics[i]).length : 0;
-    b.replaceChildren(el('b', '', `${i}조 ${names}`),
+    const rv = reviews[i] || {}, ps = Object.values(pastes[i] || {});
+    const badges = el('span');
+    if (rv.status) badges.append(el('span', 'badge ' + ({ submitted: 'sub', returned: 'ret', passed: 'pass' })[rv.status], ({ submitted: '📮 제출함', returned: '↩️ 반려', passed: '✅ 통과' })[rv.status] + (rv.total != null && rv.status !== 'submitted' ? ` ${rv.total}점` : '')));
+    const big = ps.filter(p => p.n >= 50);
+    if (big.length) badges.append(el('span', 'badge warn', `⚠️ 붙여 넣기 ${big.length}번`));
+    if (rv.draft && rv.draft.ai) badges.append(el('span', 'badge warn', '🤖 AI 확인 필요'));
+    b.replaceChildren(badges, el('b', '', `${i}조 ${names}`),
       el('span', '', d ? (d.title || '(표제 아직 없음)') : '아직 쓰지 않았어요'),
       el('span', 'meta', d ? `글자 ${chars}자 · 사진 ${np}장 · ` : ''));
     if (d) { const lv = el('span', Date.now() - d.t < 90000 ? 'live' : '', ago(d.t)); b.lastChild.append(lv); }
     b.setAttribute('aria-pressed', sel === String(i));
   };
+  // 선택한 조 평가 칸
+  const drawPanel = () => {
+    if (!sel) { panel.replaceChildren(); return; }
+    const rv = reviews[sel] || {}, dr = rv.draft || {};
+    const sc = rv.scores || dr.scores || [];
+    const kids = [el('h3', '', `📝 ${sel}조 평가`)];
+    const stText = { submitted: `📮 제출함 (${ago(rv.submittedAt)}${rv.n > 1 ? `, ${rv.n}번째` : ''})`, returned: '↩️ 반려함 (학생이 고치는 중)', passed: '✅ 통과' }[rv.status] || '✏️ 아직 제출 전';
+    kids.push(el('span', '', stText));
+    const ps = Object.values(pastes[sel] || {}).sort((a, b) => a.t - b.t);
+    if (ps.length) {
+      const pl = el('div', 'note warn');
+      pl.append(el('b', '', `붙여 넣기 기록 ${ps.length}번 (모두 ${ps.reduce((a, p) => a + p.n, 0)}자)`));
+      ps.slice(-5).forEach(p => pl.append(el('div', '', `· ${ago(p.t)} ${({ lead: '전문', body: '본문', title: '표제', deck: '부제' })[p.f] || p.f}에 ${p.n}자: "${p.s}${p.n > 80 ? '…' : ''}"`)));
+      kids.push(pl);
+    }
+    if (dr.ai) kids.push(el('div', 'note warn', '🤖 Claude 확인 필요: ' + dr.ai));
+    if (dr.feedback && !rv.feedback) kids.push(el('div', 'note', '💡 Claude 채점 초안이 아래에 들어가 있어요. 고친 뒤 통과·반려를 눌러 주세요.'));
+    const rub = el('div', 'rub'); const sels = [];
+    RUBRIC.forEach((name, k) => {
+      const sl = document.createElement('select');
+      sl.append(new Option('-', ''), ...[3, 2, 1].map(v => new Option(v + '점', v)));
+      sl.value = sc[k] || ''; sl.dataset.k = k; sels.push(sl);
+      rub.append(el('span', '', `${k + 1}. ${name}`), sl);
+    });
+    const tot = el('b'), sugg = el('span');
+    const fb = document.createElement('textarea'); fb.rows = 4; fb.id = 'tFeedback'; fb.placeholder = '학생에게 보낼 피드백';
+    fb.value = rv.feedback || dr.feedback || '';
+    const calc = () => {
+      const v = sels.map(x => +x.value || 0), t = v.reduce((a, b) => a + b, 0), all = v.every(Boolean);
+      tot.textContent = `총점 ${t} / ${RUBRIC.length * 3}점 (통과 기준 ${CFG.pass}점)`;
+      const okk = all && t >= CFG.pass && v[1] > 1 && v[2] > 1;
+      sugg.textContent = !all ? '모든 항목에 점수를 매겨 주세요.' : okk ? '→ 기준을 넘었어요. 통과를 추천해요.' : `→ 기준에 못 미쳐요(${CFG.pass}점 미만이거나 ②·③이 1점). 반려를 추천해요.`;
+      sugg.className = !all ? '' : okk ? 'okc' : 'need';
+      passB.style.outline = all && okk ? '3px solid #2E7D32' : ''; retB.style.outline = all && !okk ? '3px solid #B3261E' : '';
+      return { v, t, all };
+    };
+    const passB = el('button', '', '✅ 통과'), retB = el('button', '', '↩️ 반려 (다시 쓰기)');
+    passB.type = retB.type = 'button'; passB.style.background = '#2E7D32';
+    const decide = async status => {
+      const { v, t, all } = calc();
+      if (!all) { alert('모든 항목에 점수를 매겨 주세요.'); return; }
+      if (status === 'returned' && !fb.value.trim()) { alert('반려할 때는 피드백을 써 주세요.'); fb.focus(); return; }
+      passB.disabled = retB.disabled = true;
+      try { await cloud.patch('review/' + sel, { status, scores: v, total: t, feedback: fb.value.trim(), at: Date.now() }); dirty = false; }
+      catch (e) { alert('저장하지 못했어요. 인터넷 연결을 확인해 주세요.'); }
+      passB.disabled = retB.disabled = false;
+    };
+    passB.onclick = () => decide('passed'); retB.onclick = () => decide('returned');
+    sels.forEach(x => x.onchange = () => { dirty = true; calc(); });
+    fb.oninput = () => { dirty = true; };
+    const row = el('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap'; row.append(passB, retB);
+    kids.push(rub, tot, sugg, el('label', '', '피드백'), fb, row);
+    panel.replaceChildren(...kids); calc();
+  };
+  const drawSettings = () => {
+    const mk2 = (lab, k) => { const i = document.createElement('input'); i.type = 'number'; i.min = 0; i.value = CFG[k]; i.style.width = '90px';
+      i.onchange = () => cloud.patch('config', { [k]: Math.max(0, +i.value || 0) }).catch(() => alert('저장하지 못했어요.'));
+      const l = el('label', '', lab); l.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:space-between'; l.append(i); return l; };
+    setBox.replaceChildren(el('h3', '', '⚙️ 기준 바꾸기 (모든 조에 바로 적용)'), mk2('전문 최소 글자 수', 'minLead'), mk2('본문 최소 글자 수', 'minBody'), mk2('통과 점수 (18점 만점)', 'pass'));
+  };
+  drawSettings();
+  const panelBusy = () => panel.contains(document.activeElement) || dirty;
   const show = () => {
     if (!sel) return;
     team = sel;
@@ -555,7 +695,7 @@ function startTeacher() {
     Object.keys(data).forEach(k => { if (!v[k]) delete data[k]; });
     Object.assign(data, v);
     new Set([...Object.keys(cards), ...Object.keys(v)]).forEach(draw);
-    if (!sel) { const first = Object.keys(cards)[0]; if (first) { sel = first; draw(first); } }
+    if (!sel) { const first = Object.keys(cards)[0]; if (first) { sel = first; draw(first); drawPanel(); } }
     show(); setSync('🟢 실시간 연결됨');
   }, () => setSync('⚠️ 연결이 끊겨 다시 잇는 중…', true));
   cloud.listen('img', iv => {
@@ -563,6 +703,15 @@ function startTeacher() {
     Object.keys(pics).forEach(k => delete pics[k]); Object.assign(pics, v);
     Object.keys(cards).forEach(draw); show();
   });
+  cloud.listen('review', v => {
+    Object.keys(reviews).forEach(k => delete reviews[k]); Object.assign(reviews, norm(v));
+    Object.keys(cards).forEach(draw); if (!panelBusy()) drawPanel();
+  });
+  cloud.listen('paste', v => {
+    Object.keys(pastes).forEach(k => delete pastes[k]); Object.assign(pastes, norm(v));
+    Object.keys(cards).forEach(draw); if (!panelBusy()) drawPanel();
+  });
+  cloud.listen('config', v => { Object.assign(CFG, norm(v)); if (!setBox.contains(document.activeElement)) drawSettings(); if (!panelBusy()) drawPanel(); });
   setInterval(() => Object.keys(cards).forEach(draw), 30000);
 }
 if (TEAMS.length) {
@@ -572,7 +721,7 @@ if (TEAMS.length) {
   $('team').value = team;
 }
 if (TEACHER) startTeacher();
-else { load(); render(); pullTeam(); if (ROOM && !db) setSync('⚠️ 인터넷 저장을 쓸 수 없어 이 컴퓨터에만 저장돼요', true); }
+else { load(); render(); pullTeam(); watchReview(); if (ROOM && !db) setSync('⚠️ 인터넷 저장을 쓸 수 없어 이 컴퓨터에만 저장돼요', true); }
 if (document.fonts) document.fonts.ready.then(render);
 </script>
 </body></html>
