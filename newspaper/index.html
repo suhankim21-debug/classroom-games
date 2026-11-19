@@ -68,7 +68,8 @@ legend{font-weight:bold;padding:0 4px}
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
 <div class="layout">
   <form class="form" id="f" autocomplete="off" onsubmit="return false">
-    <div class="note">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 기기에 저절로 저장돼요.</div>
+    <div class="note">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 컴퓨터에 저절로 저장돼요.</div>
+    <label id="teamBox" hidden>우리 조<select id="team"><option value="">조를 고르세요</option></select><small>조를 고르면 기자 이름이 저절로 들어가요.</small></label>
     <div class="two">
       <label>신문 이름<input id="paperName" maxlength="20" value="우리 반 신문"></label>
       <label>분야<input id="section" maxlength="10" list="sections" placeholder="학교 소식"></label>
@@ -86,14 +87,15 @@ legend{font-weight:bold;padding:0 4px}
     </div>
     <label>전문<small>육하원칙(누가·언제·어디서·무엇을·어떻게·왜)이 들어간 첫 문단</small><textarea id="lead" rows="3" maxlength="400"></textarea></label>
     <label>본문 <span class="count" id="count"></span><small>문단을 나누려면 줄을 바꾸세요.</small><textarea id="body" rows="10" maxlength="3000"></textarea></label>
-    <fieldset><legend>사진 1 (크게, 제목 아래)</legend>
+    <fieldset id="fs1"><legend>사진 1 (크게, 제목 아래)</legend>
       <div class="photo-row"><input type="file" id="img1" accept="image/*"><img id="th1" alt="" hidden><button type="button" class="ghost" id="del1" hidden>빼기</button></div>
       <label>사진 설명<input id="cap1" maxlength="80" placeholder="예) 운동회에서 줄다리기를 하는 6학년 학생들"></label>
     </fieldset>
-    <fieldset><legend>사진 2 (작게, 본문 안)</legend>
+    <fieldset id="fs2"><legend>사진 2 (작게, 본문 안)</legend>
       <div class="photo-row"><input type="file" id="img2" accept="image/*"><img id="th2" alt="" hidden><button type="button" class="ghost" id="del2" hidden>빼기</button></div>
       <label>사진 설명<input id="cap2" maxlength="80"></label>
     </fieldset>
+    <div class="note">사진은 파일을 고르거나, 사진 칸에 끌어다 놓거나, 복사한 뒤 <b>Ctrl+V</b>로 붙여 넣어도 돼요.</div>
     <div class="note" id="fit"></div>
     <div class="note">인쇄 창에서 용지는 <b>A4</b>, 여백은 <b>없음</b>(또는 기본), 배율은 <b>100%</b>로 두세요. 파일로 내려면 프린터에서 <b>PDF로 저장</b>을 고르면 돼요.</div>
   </form>
@@ -116,19 +118,34 @@ const $ = id => document.getElementById(id);
 const KEY = 'newspaper-draft-v1';
 const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2'];
 const img = { 1: '', 2: '' };
+// 조 편성은 주소 뒤 #teams=이름·이름|이름·이름 으로 받아요(서버로 가지 않음, 레포에 이름을 적지 않음).
+const TEAMS = (() => {
+  const m = /(?:^#|&)teams=([^&]*)/.exec(location.hash);
+  if (!m) return [];
+  try { return decodeURIComponent(m[1]).split('|').map(t => t.split(/[·,]/).map(x => x.trim()).filter(Boolean)).filter(t => t.length); } catch (e) { return []; }
+})();
+let team = '';
+const key = () => KEY + (team ? '-t' + team : '');
 const todayStr = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 
 function load() {
   let s = null;
-  try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  try { s = JSON.parse(localStorage.getItem(key()) || 'null'); } catch (e) {}
+  clearFields();
   if (s) { FIELDS.forEach(k => { if (s[k] != null) $(k).value = s[k]; }); img[1] = s.img1 || ''; img[2] = s.img2 || ''; }
   if (!$('date').value) $('date').value = todayStr();
+  if (team && !$('reporter').value) $('reporter').value = TEAMS[team - 1].join('·');
+  [1, 2].forEach(showThumb);
+}
+function clearFields() {
+  FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
+  img[1] = img[2] = ''; [1, 2].forEach(n => { $('img' + n).value = ''; });
 }
 function save() {
   const s = {}; FIELDS.forEach(k => s[k] = $(k).value);
   s.img1 = img[1]; s.img2 = img[2];
-  try { localStorage.setItem(KEY, JSON.stringify(s)); }
-  catch (e) { try { s.img2 = ''; localStorage.setItem(KEY, JSON.stringify(s)); } catch (e2) {} }
+  try { localStorage.setItem(key(), JSON.stringify(s)); }
+  catch (e) { try { s.img2 = ''; localStorage.setItem(key(), JSON.stringify(s)); } catch (e2) {} }
 }
 
 function fmtDate(v) {
@@ -150,7 +167,7 @@ function render() {
   const t = $('pTitle'); t.textContent = v('title') || '표제를 쓰세요'; t.classList.toggle('empty', !v('title'));
   const deck = $('pDeck'); deck.replaceChildren(...paras($('deck').value).map(x => el('div', '', x))); deck.hidden = !deck.childElementCount;
   $('pBy').textContent = v('reporter') ? v('reporter') + ' 기자' : '';
-  $('pFootL').textContent = v('reporter') ? '글·사진: ' + v('reporter') + ' 기자' : '';
+  $('pFootL').textContent = (team ? team + '조 · ' : '') + (v('reporter') ? '글·사진: ' + v('reporter') + ' 기자' : '');
   // 사진 1
   $('pFig1').hidden = !img[1];
   if (img[1]) { $('pImg1').src = img[1]; $('pCap1').textContent = v('cap1'); $('pCap1').hidden = !v('cap1'); }
@@ -235,29 +252,55 @@ function showThumb(n) {
   $('th' + n).hidden = $('del' + n).hidden = !img[n];
   if (img[n]) $('th' + n).src = img[n];
 }
+async function setImage(n, f) {
+  if (!f || !/^image\//.test(f.type)) return;
+  try { img[n] = await readImage(f); } catch (err) { alert('사진을 읽지 못했어요. 다른 사진을 골라 보세요.'); return; }
+  showThumb(n); render(); save();
+}
 [1, 2].forEach(n => {
-  $('img' + n).addEventListener('change', async e => {
-    const f = e.target.files[0]; if (!f) return;
-    try { img[n] = await readImage(f); } catch (err) { alert('사진을 읽지 못했어요. 다른 사진을 골라 보세요.'); return; }
-    showThumb(n); render(); save();
-  });
+  $('img' + n).addEventListener('change', e => setImage(n, e.target.files[0]));
+  const fs = $('fs' + n);
+  fs.addEventListener('dragover', e => { e.preventDefault(); fs.style.borderColor = '#B3261E'; });
+  fs.addEventListener('dragleave', () => { fs.style.borderColor = ''; });
+  fs.addEventListener('drop', e => { e.preventDefault(); fs.style.borderColor = ''; setImage(n, e.dataTransfer.files[0]); });
   $('del' + n).addEventListener('click', () => { img[n] = ''; $('img' + n).value = ''; showThumb(n); render(); save(); });
+});
+document.addEventListener('paste', e => {
+  const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+  if (!it) return;
+  e.preventDefault();
+  const inPhoto2 = document.activeElement && $('fs2').contains(document.activeElement);
+  setImage(inPhoto2 || img[1] ? 2 : 1, it.getAsFile());
+});
+$('team').addEventListener('change', e => {
+  e.stopPropagation();
+  team = e.target.value;
+  try { localStorage.setItem(KEY + '-team', team); } catch (err) {}
+  load(); render();
 });
 $('f').addEventListener('input', () => { render(); save(); });
 $('f').addEventListener('change', () => { render(); save(); });
 $('print').addEventListener('click', () => window.print());
 $('reset').addEventListener('click', () => {
   if (!confirm('쓴 내용과 사진을 모두 지우고 새로 쓸까요?')) return;
-  try { localStorage.removeItem(KEY); } catch (e) {}
-  FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
-  img[1] = img[2] = ''; [1, 2].forEach(n => { $('img' + n).value = ''; showThumb(n); }); render();
+  try { localStorage.removeItem(key()); } catch (e) {}
+  clearFields();
+  if (team) $('reporter').value = TEAMS[team - 1].join('·');
+  [1, 2].forEach(showThumb); render();
 });
 window.addEventListener('resize', scale);
+window.addEventListener('hashchange', () => location.reload());
 window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'none'; });
 window.addEventListener('afterprint', scale);
 // 사진이 다 그려진 뒤 다시 맞춰요.
 document.getElementById('paper').addEventListener('load', () => { fit(); scale(); }, true);
-load(); showThumb(1); showThumb(2); render();
+if (TEAMS.length) {
+  $('teamBox').hidden = false;
+  TEAMS.forEach((t, i) => $('team').append(new Option(`${i + 1}조 (${t.join('·')})`, i + 1)));
+  try { const t = localStorage.getItem(KEY + '-team'); if (t && TEAMS[t - 1]) team = t; } catch (e) {}
+  $('team').value = team;
+}
+load(); render();
 if (document.fonts) document.fonts.ready.then(render);
 </script>
 </body></html>
