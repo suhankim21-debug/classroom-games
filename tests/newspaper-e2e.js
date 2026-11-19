@@ -40,6 +40,18 @@ const A4 = { w: 595, h: 842 };
   await p.setInputFiles('#img2', { name: 'b.png', mimeType: 'image/png', buffer: await png(800, 800, '#E0704F') });
   await p.waitForSelector('#pCols figure img');
 
+  // 설문 결과: 항목·응답 수만 쓰면 막대그래프
+  await p.fill('#svQ', '가장 기억에 남는 활동은?');
+  await p.fill('#svWho', '6학년 2반 학생');
+  for (const [i, l, n] of [[1, '줄다리기', 12], [2, '이어달리기', 6], [3, '응원전', 2]]) { await p.fill('#sl' + i, l); await p.fill('#sn' + i, String(n)); }
+  const bars = await p.$$eval('#pCols .chart .bar', b => b.map(x => x.textContent));
+  console.log('설문 막대', bars);
+  if (bars.length !== 3 || !/줄다리기12명 \(60%\)/.test(bars[0])) fail('설문 그래프가 맞지 않음: ' + bars);
+  if (!/조사 대상: 6학년 2반 학생 20명/.test(await p.textContent('#pCols .chart'))) fail('조사 대상·인원이 안 나옴');
+  const w = await p.$$eval('#pCols .chart .fill', f => f.map(x => x.getBoundingClientRect().width));
+  if (!(w[0] > w[1] && w[1] > w[2])) fail('막대 길이가 응답 수 순서와 다름: ' + w);
+  await p.setInputFiles('#img3', { name: 's.png', mimeType: 'image/png', buffer: await png(900, 600, '#888') });
+  await p.waitForSelector('#pCols figure.survey img');
   const txt = await p.textContent('#paper');
   for (const s of ['봄빛 어린이 신문', '학교 소식', '6학년, 운동회에서', '줄다리기 역전승', '김하늘 기자', '6학년 2반', '운동회에서 줄다리기를 하는', '지난 10일'])
     if (!txt.includes(s)) fail('미리 보기에 안 나옴: ' + s);
