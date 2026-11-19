@@ -42,17 +42,30 @@ legend{font-weight:bold;padding:0 4px}
 .byline{font-size:9.5pt;text-align:right;border-bottom:1px solid #111;padding-bottom:1.5mm;margin-bottom:3mm}
 .hero{margin:0 0 3mm}
 .paper figure{margin:0}
-.paper figure img{width:100%;display:block;object-fit:cover;max-height:85mm}
+.paper figure img{width:100%;display:block;object-fit:cover;max-height:calc(85mm * var(--ik,1))}
 .paper figcaption{font-size:8.5pt;color:#444;padding-top:1mm;line-height:1.4}
 .cols{font-size:var(--fs);line-height:1.65;column-gap:6mm;column-rule:1px solid #bbb}
 .cols p{margin:0 0 .5em;text-indent:1em}
 .cols .lead{font-weight:700;text-indent:0}
 .cols figure{break-inside:avoid;margin:1mm 0 3mm}
-.cols figure img{max-height:55mm}
+.cols figure img{max-height:calc(55mm * var(--ik,1))}
+.cols figure.survey{border:1px solid #999;padding:1.5mm;background:#fff}
+.cols figure.survey img{object-fit:contain;max-height:calc(80mm * var(--ik,1))}
+.chart{display:grid;gap:1.2mm;margin:1mm 0}
+.chart .q{font-weight:700;font-size:9.5pt;line-height:1.35}
+.chart .bar{display:grid;grid-template-columns:24mm 1fr;gap:2mm;align-items:center;font-size:8.5pt;line-height:1.25}
+.chart .track{display:flex;align-items:center;gap:1.5mm}
+.chart .fill{height:4.2mm;background:#B3261E;border-radius:0 1mm 1mm 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.chart .bar.best .fill{background:#7A120D}
+.chart .num{white-space:nowrap;font-weight:700}
+.chart .src{font-size:8pt;color:#555}
+.cols figure.survey .tag{display:block;font-weight:700;font-size:9pt;margin-bottom:1mm}
 .empty{color:#aaa}
 .foot{margin-top:auto;border-top:1px solid #111;padding-top:1.2mm;font-size:8.5pt;display:flex;justify-content:space-between;color:#444}
 
 [hidden]{display:none!important}
+.srow{display:grid;grid-template-columns:1fr 90px;gap:6px}
+.srow.head{font-weight:bold;font-size:.9rem;color:#555}
 .sync{font-size:.95rem;font-weight:normal}
 .sync.bad{color:#B3261E}
 /* 선생님 실시간 보기 */
@@ -110,6 +123,19 @@ body.teacher .tlist{display:grid;gap:10px;align-content:start}
       <div class="photo-row"><input type="file" id="img2" accept="image/*"><img id="th2" alt="" hidden><button type="button" class="ghost" id="del2" hidden>빼기</button></div>
       <label>사진 설명<input id="cap2" maxlength="80"></label>
     </fieldset>
+    <fieldset id="svBox"><legend>📊 설문 조사 결과 그래프 (본문 끝)</legend>
+      <small style="color:#666">질문과 항목, 응답 수만 쓰면 막대그래프가 저절로 그려져요.</small>
+      <label>설문 질문<input id="svQ" maxlength="50" placeholder="예) 영랑호 체험에서 가장 기억에 남는 활동은?"></label>
+      <label>조사 대상<input id="svWho" maxlength="40" placeholder="예) 6학년 ○반 학생"></label>
+      <div class="srow head"><span>항목</span><span>응답 수</span></div>
+      <div class="srow"><input id="sl1" maxlength="16" placeholder="항목 1"><input id="sn1" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl2" maxlength="16" placeholder="항목 2"><input id="sn2" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl3" maxlength="16" placeholder="항목 3"><input id="sn3" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl4" maxlength="16" placeholder="항목 4"><input id="sn4" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div><div class="srow"><input id="sl5" maxlength="16" placeholder="항목 5"><input id="sn5" type="number" min="0" max="999" inputmode="numeric" placeholder="명"></div>
+      <div class="count" id="svSum"></div>
+    </fieldset>
+    <fieldset id="fs3"><legend>📷 설문 결과 사진 (설문지·표를 찍었다면, 없어도 돼요)</legend>
+      <small style="color:#666">설문지, 결과 표, 그래프를 찍은 사진을 넣어요. 글자가 잘리지 않게 그대로 보여 줘요.</small>
+      <div class="photo-row"><input type="file" id="img3" accept="image/*"><img id="th3" alt="" hidden><button type="button" class="ghost" id="del3" hidden>빼기</button></div>
+      <label>설문 내용<small>누구에게, 무엇을 물었는지</small><input id="cap3" maxlength="80" placeholder="예) 6학년 ○반 학생 ○명에게 가장 기억에 남는 활동을 물었어요"></label>
+    </fieldset>
     <div class="note">사진은 파일을 고르거나, 사진 칸에 끌어다 놓거나, 복사한 뒤 <b>Ctrl+V</b>로 붙여 넣어도 돼요.</div>
     <div class="note" id="fit"></div>
     <div class="note">인쇄 창에서 용지는 <b>A4</b>, 여백은 <b>없음</b>(또는 기본), 배율은 <b>100%</b>로 두세요. 파일로 내려면 프린터에서 <b>PDF로 저장</b>을 고르면 돼요.</div>
@@ -140,8 +166,9 @@ const FIREBASE_CONFIG = {
 };
 const $ = id => document.getElementById(id);
 const KEY = 'newspaper-draft-v1';
-const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2'];
-const img = { 1: '', 2: '' };
+const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2','cap3','svQ','svWho','sl1','sn1','sl2','sn2','sl3','sn3','sl4','sn4','sl5','sn5'];
+const img = { 1: '', 2: '', 3: '' };
+const NS = [1, 2, 3];
 // 조 편성은 주소 뒤 #teams=이름·이름|이름·이름 으로 받아요(서버로 가지 않음, 레포에 이름을 적지 않음).
 const TEAMS = (() => {
   const m = /(?:^#|&)teams=([^&]*)/.exec(location.hash);
@@ -196,32 +223,32 @@ function load() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(key()) || 'null'); } catch (e) {}
   clearFields();
-  if (s) applyData(s, s.img1 || '', s.img2 || '');
+  if (s) applyData(s, s.img1 || '', s.img2 || '', s.img3 || '');
   localT = (s && s.t) || 0;
   if (!$('date').value) $('date').value = todayStr();
   if (team && !$('reporter').value) $('reporter').value = TEAMS[team - 1].join('·');
-  [1, 2].forEach(showThumb);
+  NS.forEach(showThumb);
 }
 let localT = 0;
-function applyData(s, i1, i2) {
+function applyData(s, i1, i2, i3) {
   FIELDS.forEach(k => { $(k).value = s[k] != null ? s[k] : ''; });
   if (!$('paperName').value) $('paperName').value = '우리 반 신문';
   if (!$('ncols').value) $('ncols').value = '0';
-  img[1] = i1 || ''; img[2] = i2 || '';
+  img[1] = i1 || ''; img[2] = i2 || ''; img[3] = i3 || '';
 }
-function hasContent() { return ['title', 'deck', 'lead', 'body'].some(k => $(k).value.trim()) || img[1] || img[2]; }
+function hasContent() { return ['title', 'deck', 'lead', 'body'].some(k => $(k).value.trim()) || img[1] || img[2] || img[3]; }
 function clearFields() {
   FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
-  img[1] = img[2] = ''; [1, 2].forEach(n => { $('img' + n).value = ''; });
+  img[1] = img[2] = img[3] = ''; NS.forEach(n => { $('img' + n).value = ''; });
 }
 function save(changedImg) {
   if (TEACHER) return;
   const s = {}; FIELDS.forEach(k => s[k] = $(k).value);
   s.t = localT = Date.now();
-  s.img1 = img[1]; s.img2 = img[2];
+  s.img1 = img[1]; s.img2 = img[2]; s.img3 = img[3];
   push(changedImg);
   try { localStorage.setItem(key(), JSON.stringify(s)); }
-  catch (e) { try { s.img2 = ''; localStorage.setItem(key(), JSON.stringify(s)); } catch (e2) {} }
+  catch (e) { try { s.img2 = s.img3 = ''; localStorage.setItem(key(), JSON.stringify(s)); } catch (e2) {} }
 }
 
 // 인터넷에도 저장해서 선생님 화면에 바로 보이고, 컴퓨터가 꺼져도 남아요.
@@ -248,19 +275,20 @@ async function pullTeam() {
     if (tm !== team) return;
     const c = c0, ci = ci0 || {};
     if (c && (c.t || 0) > localT) {
-      applyData(c, ci[1], ci[2]); localT = c.t;
-      [1, 2].forEach(showThumb); render(); saveLocal();
+      applyData(c, ci[1], ci[2], ci[3]); localT = c.t;
+      NS.forEach(showThumb); render(); saveLocal();
       setSync('☁️ 인터넷에 저장된 글을 불러왔어요');
     } else if (hasContent()) {
       if (img[1]) cloud.set('img/' + tm + '/1', img[1]);
       if (img[2]) cloud.set('img/' + tm + '/2', img[2]);
+      if (img[3]) cloud.set('img/' + tm + '/3', img[3]);
       await cloud.set('teams/' + tm, textData());
       setSync('☁️ 저장됨 (선생님 화면에 보여요)');
     } else setSync('☁️ 인터넷 저장 켜짐');
   } catch (e) { setSync('⚠️ 인터넷에 연결되지 않아 이 컴퓨터에만 저장돼요', true); }
 }
 function saveLocal() {
-  const s = textData(); s.img1 = img[1]; s.img2 = img[2];
+  const s = textData(); s.img1 = img[1]; s.img2 = img[2]; s.img3 = img[3];
   try { localStorage.setItem(key(), JSON.stringify(s)); } catch (e) {}
 }
 
@@ -293,10 +321,12 @@ function render() {
   lead.forEach(x => cols.append(el('p', 'lead', x)));
   const half = Math.ceil(body.length / 2);
   body.forEach((x, i) => {
-    if (img[2] && i === half) cols.append(fig2());
+    if (img[2] && i === half) cols.append(fig(2));
     cols.append(el('p', '', x));
   });
-  if (img[2] && body.length <= 1) cols.append(fig2());
+  if (img[2] && body.length <= 1) cols.append(fig(2));
+  const sv = survey(); if (sv) cols.append(sv);
+  if (img[3]) cols.append(fig(3));
   if (!lead.length && !body.length) cols.append(el('p', 'empty', '전문과 본문을 쓰면 여기에 신문처럼 나와요.'));
   const chars = (lead.join('') + body.join('')).length;
   $('count').textContent = chars ? `(${chars}자)` : '';
@@ -310,9 +340,35 @@ function render() {
   fit();
   scale();
 }
-function fig2() {
-  const f = el('figure'); const i = el('img'); i.src = img[2]; i.alt = ''; f.append(i);
-  const c = $('cap2').value.trim(); if (c) f.append(el('figcaption', '', c));
+// 설문 결과 막대그래프
+function survey() {
+  const rows = [1, 2, 3, 4, 5].map(i => ({ l: $('sl' + i).value.trim(), n: Math.max(0, Math.round(+$('sn' + i).value || 0)) })).filter(x => x.l);
+  const total = rows.reduce((a, x) => a + x.n, 0);
+  $('svSum').textContent = rows.length ? `모두 ${total}명` : '';
+  if (!rows.length) return null;
+  const max = Math.max(1, ...rows.map(x => x.n));
+  const f = el('figure', 'survey');
+  f.append(el('span', 'tag', '📊 설문 조사 결과'));
+  const c = el('div', 'chart');
+  const q = $('svQ').value.trim(); if (q) c.append(el('div', 'q', 'Q. ' + q));
+  rows.forEach(x => {
+    const b = el('div', 'bar' + (x.n === max && total ? ' best' : ''));
+    b.append(el('span', '', x.l));
+    const t = el('div', 'track'), fl = el('div', 'fill');
+    fl.style.width = `calc(${(x.n / max) * 100}% - 14mm)`; if (!x.n) fl.style.width = '0';
+    t.append(fl, el('span', 'num', `${x.n}명` + (total ? ` (${Math.round(x.n / total * 100)}%)` : '')));
+    b.append(t); c.append(b);
+  });
+  const who = $('svWho').value.trim();
+  c.append(el('div', 'src', `조사 대상: ${who ? who + ' ' : ''}${total}명`));
+  f.append(c);
+  return f;
+}
+function fig(n) {
+  const f = el('figure', n === 3 ? 'survey' : '');
+  if (n === 3) f.append(el('span', 'tag', '📷 설문 자료'));
+  const i = el('img'); i.src = img[n]; i.alt = n === 3 ? '설문 조사 결과' : ''; f.append(i);
+  const c = $('cap' + n).value.trim(); if (c) f.append(el('figcaption', '', c));
   return f;
 }
 
@@ -325,7 +381,12 @@ function fit() {
   let fs = 11;
   if (chars < 300) fs = 13; else if (chars < 600) fs = 12;
   p.style.setProperty('--fs', fs + 'pt');
-  while (over() && fs > 8.5) { fs = Math.round((fs - 0.25) * 100) / 100; p.style.setProperty('--fs', fs + 'pt'); }
+  // 글자를 10pt까지 줄이고, 그래도 넘치면 사진을 반까지 줄이고, 마지막으로 글자를 8.5pt까지 줄여요.
+  let ik = 1; p.style.setProperty('--ik', 1);
+  const down = () => { fs = Math.round((fs - 0.25) * 100) / 100; p.style.setProperty('--fs', fs + 'pt'); };
+  while (over() && fs > 10) down();
+  while (over() && ik > 0.5) { ik = Math.round((ik - 0.05) * 100) / 100; p.style.setProperty('--ik', ik); }
+  while (over() && fs > 8.5) down();
   const note = $('fit');
   if (over()) {
     p.classList.add('grow');
@@ -373,7 +434,7 @@ async function setImage(n, f) {
   try { img[n] = await readImage(f); } catch (err) { alert('사진을 읽지 못했어요. 다른 사진을 골라 보세요.'); return; }
   showThumb(n); render(); save(n);
 }
-[1, 2].forEach(n => {
+NS.forEach(n => {
   $('img' + n).addEventListener('change', e => setImage(n, e.target.files[0]));
   const fs = $('fs' + n);
   fs.addEventListener('dragover', e => { e.preventDefault(); fs.style.borderColor = '#B3261E'; });
@@ -385,8 +446,8 @@ document.addEventListener('paste', e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
   if (!it) return;
   e.preventDefault();
-  const inPhoto2 = document.activeElement && $('fs2').contains(document.activeElement);
-  setImage(inPhoto2 || img[1] ? 2 : 1, it.getAsFile());
+  const a = document.activeElement, inFs = n => a && $('fs' + n).contains(a);
+  setImage(inFs(3) ? 3 : inFs(2) ? 2 : inFs(1) ? 1 : !img[1] ? 1 : !img[2] ? 2 : 3, it.getAsFile());
 });
 $('team').addEventListener('change', e => {
   e.stopPropagation();
@@ -402,7 +463,7 @@ $('reset').addEventListener('click', () => {
   try { localStorage.removeItem(key()); } catch (e) {}
   clearFields();
   if (team) $('reporter').value = TEAMS[team - 1].join('·');
-  [1, 2].forEach(showThumb); render();
+  NS.forEach(showThumb); render();
   if (db && team) { cloud.remove('img/' + team).catch(() => {}); save(); }
 });
 window.addEventListener('resize', scale);
@@ -446,7 +507,7 @@ function startTeacher() {
     if (!sel) return;
     team = sel;
     const d = data[sel];
-    if (d) applyData(d, pics[sel] && pics[sel][1], pics[sel] && pics[sel][2]);
+    if (d) applyData(d, pics[sel] && pics[sel][1], pics[sel] && pics[sel][2], pics[sel] && pics[sel][3]);
     else { clearFields(); $('reporter').value = TEAMS[sel - 1] ? TEAMS[sel - 1].join('·') : ''; }
     render();
   };
