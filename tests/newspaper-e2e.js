@@ -36,22 +36,22 @@ const A4 = { w: 595, h: 842 };
   await p.fill('#body', [para, para, '인터뷰에 응한 한 학생은 "친구들과 함께해서 이긴 것보다 더 기뻤다."라고 말했다.', para].join('\n'));
   await p.setInputFiles('#img1', { name: 'a.png', mimeType: 'image/png', buffer: await png(1600, 1000, '#3D6E8C') });
   await p.waitForSelector('#pFig1:not([hidden])');
+  // 가로 대표 사진은 폭에 꽉 차요.
+  await p.waitForTimeout(300);
+  const wide = await p.evaluate(() => { const i = document.querySelector('#pImg1'), f = document.querySelector('#pFig1'); return { cls: i.classList.contains('wide'), r: i.getBoundingClientRect().width / f.getBoundingClientRect().width }; });
+  console.log('가로 대표 사진 폭 비율', wide.r.toFixed(3));
+  if (!wide.cls || wide.r < 0.99) fail('가로 대표 사진이 꽉 차지 않음: ' + JSON.stringify(wide));
   await p.fill('#cap1', '운동회에서 줄다리기를 하는 6학년 학생들');
   await p.setInputFiles('#img2', { name: 'b.png', mimeType: 'image/png', buffer: await png(800, 800, '#E0704F') });
   await p.waitForSelector('#pCols figure img');
 
-  // 설문 결과: 항목·응답 수만 쓰면 막대그래프
-  await p.fill('#svQ', '가장 기억에 남는 활동은?');
-  await p.fill('#svWho', '6학년 2반 학생');
-  for (const [i, l, n] of [[1, '줄다리기', 12], [2, '이어달리기', 6], [3, '응원전', 2]]) { await p.fill('#sl' + i, l); await p.fill('#sn' + i, String(n)); }
-  const bars = await p.$$eval('#pCols .chart .bar', b => b.map(x => x.textContent));
-  console.log('설문 막대', bars);
-  if (bars.length !== 3 || !/줄다리기12명 \(60%\)/.test(bars[0])) fail('설문 그래프가 맞지 않음: ' + bars);
-  if (!/조사 대상: 6학년 2반 학생 20명/.test(await p.textContent('#pCols .chart'))) fail('조사 대상·인원이 안 나옴');
-  const w = await p.$$eval('#pCols .chart .fill', f => f.map(x => x.getBoundingClientRect().width));
-  if (!(w[0] > w[1] && w[1] > w[2])) fail('막대 길이가 응답 수 순서와 다름: ' + w);
+  // 설문 조사 결과는 사진으로만 넣어요(그래프 칸 없음).
+  if (await p.isVisible('#svBox')) fail('설문 그래프 칸이 아직 보임');
+  if (!/설문 조사 결과 사진/.test(await p.textContent('#fs3 legend'))) fail('설문 조사 결과 사진 칸 이름이 다름');
   await p.setInputFiles('#img3', { name: 's.png', mimeType: 'image/png', buffer: await png(900, 600, '#888') });
   await p.waitForSelector('#pCols figure.survey img');
+  if (!/설문 조사 결과/.test(await p.textContent('#pCols figure.survey .tag'))) fail('설문 사진 표시가 없음');
+
   const txt = await p.textContent('#paper_el');
   for (const s of ['봄빛 어린이 신문', '학교 소식', '6학년, 운동회에서', '줄다리기 역전승', '김하늘 기자', '6학년 2반', '운동회에서 줄다리기를 하는', '지난 10일'])
     if (!txt.includes(s)) fail('미리 보기에 안 나옴: ' + s);
@@ -219,6 +219,20 @@ const A4 = { w: 595, h: 842 };
   await D.waitForSelector('#teamBox:not([hidden])');
   await D.selectOption('#team', '2');
   await D.fill('#title', '선생님 예시 표제');
+  // 예시 모드: 제출 → 선생님 평가 과정(루브릭) → 반려 안내를 이 화면에서만 보여 줘요.
+  await D.fill('#lead', '지난 11월 18일 수요일, 6학년 학생들이 속초 영랑호에서 습지의 소중함을 알아보려고 해설사의 설명을 들으며 습지 체험학습을 했다.');
+  await D.fill('#body', Array(7).fill('이날 학생들은 호숫가 산책길을 걸으며 물새와 갈대를 관찰하고 활동지에 기록했다. 해설사는 습지가 물을 깨끗하게 해 준다고 설명했다.').join('\n'));
+  if (!(await D.isVisible('#submit'))) fail('예시 화면에 제출 단추가 없음');
+  await D.click('#submit');
+  await D.waitForSelector('#demoEval:not([hidden])', { timeout: 5000 }).catch(() => fail('예시 평가 과정 칸이 안 나옴'));
+  const ds = await D.$$('#demoEval select');
+  if (ds.length !== 6) fail('예시 평가 칸 루브릭이 6개가 아님: ' + ds.length);
+  for (const [k, v] of [3, 1, 2, 2, 2, 2].entries()) await ds[k].selectOption(String(v));
+  if (!/반려하고 피드백/.test(await D.textContent('#demoEval'))) fail('예시 평가에서 반려 안내가 없음');
+  await D.fill('#dFeedback', '전문에 왜 했는지를 넣어 보세요.');
+  await D.click('#demoEval >> text=↩️ 반려 (다시 쓰기)');
+  if (!/반려/.test(await D.textContent('#rvBox')) || !/왜 했는지/.test(await D.textContent('#rvBox'))) fail('예시 반려 안내·피드백이 학생 화면에 안 보임');
+  if (await D.isVisible('#demoEval')) fail('반려 뒤에도 예시 평가 칸이 남음');
   await D.waitForTimeout(1500);
   if (!/예시 모드/.test(await D.textContent('#sync'))) fail('선생님 컴퓨터인데 예시 모드 표시가 없음');
   if (await T.textContent('#pTitle') !== '2조 기사') fail('선생님 예시가 학생 조 글을 덮어씀');
