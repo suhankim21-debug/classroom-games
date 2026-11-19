@@ -52,10 +52,24 @@ legend{font-weight:bold;padding:0 4px}
 .empty{color:#aaa}
 .foot{margin-top:auto;border-top:1px solid #111;padding-top:1.2mm;font-size:8.5pt;display:flex;justify-content:space-between;color:#444}
 
+[hidden]{display:none!important}
+.sync{font-size:.95rem;font-weight:normal}
+.sync.bad{color:#B3261E}
+/* 선생님 실시간 보기 */
+body.teacher .form,body.teacher #reset{display:none}
+body.teacher .layout{grid-template-columns:minmax(280px,360px) 1fr}
+@media (max-width:900px){body.teacher .layout{grid-template-columns:1fr}}
+.tlist{display:none}
+body.teacher .tlist{display:grid;gap:10px;align-content:start}
+.tcard{background:#fff;border-radius:12px;padding:12px;border:3px solid transparent;cursor:pointer;display:grid;gap:4px;text-align:left;color:#222;font-size:1rem}
+.tcard[aria-pressed="true"]{border-color:#B3261E}
+.tcard b{font-size:1.15rem}
+.tcard .meta{color:#666;font-size:.9rem}
+.tcard .live{color:#2E7D32;font-weight:bold}
 @page{size:A4 portrait;margin:0}
 @media print{
   body{background:#fff}
-  .top,.form,.noprint{display:none!important}
+  .top,.form,.noprint,.tlist{display:none!important}
   .layout{display:block;padding:0;margin:0;max-width:none}
   .stage{overflow:visible;height:auto!important}
   .scaler{transform:none!important}
@@ -64,11 +78,12 @@ legend{font-weight:bold;padding:0 4px}
 }
 </style></head>
 <body>
-<div class="top"><h1>📰 우리 반 신문 편집기</h1>
-  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
+<div class="top"><h1 id="topTitle">📰 우리 반 신문 편집기</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sync" id="sync"></span><button class="ghost" id="reset" type="button">새로 쓰기</button><button id="print" type="button">🖨️ 인쇄하기</button></div></div>
 <div class="layout">
+  <div class="tlist" id="tlist"><div class="note">조를 누르면 오른쪽에 그 조 신문이 크게 보여요. 학생이 쓰는 대로 바로 바뀌어요. 🖨️ 인쇄하기를 누르면 고른 조 신문이 인쇄돼요.</div></div>
   <form class="form" id="f" autocomplete="off" onsubmit="return false">
-    <div class="note">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 컴퓨터에 저절로 저장돼요.</div>
+    <div class="note" id="intro">칸에 내용만 쓰면 오른쪽에 신문처럼 바로 편집돼요. 쓴 내용은 이 컴퓨터에 저절로 저장돼요.</div>
     <label id="teamBox" hidden>우리 조<select id="team"><option value="">조를 고르세요</option></select><small>조를 고르면 기자 이름이 저절로 들어가요.</small></label>
     <div class="two">
       <label>신문 이름<input id="paperName" maxlength="20" value="우리 반 신문"></label>
@@ -114,6 +129,15 @@ legend{font-weight:bold;padding:0 4px}
   </div></div>
 </div>
 <script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCSSwT67k7lXoYDz4qsmHHDRXUqTS0Zh14",
+  authDomain: "classroom-games-7ae7d.firebaseapp.com",
+  databaseURL: "https://classroom-games-7ae7d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "classroom-games-7ae7d",
+  storageBucket: "classroom-games-7ae7d.firebasestorage.app",
+  messagingSenderId: "433158756735",
+  appId: "1:433158756735:web:254d9b0b2e36502b4de24a"
+};
 const $ = id => document.getElementById(id);
 const KEY = 'newspaper-draft-v1';
 const FIELDS = ['paperName','section','date','pub','title','deck','reporter','ncols','lead','body','cap1','cap2'];
@@ -125,6 +149,46 @@ const TEAMS = (() => {
   try { return decodeURIComponent(m[1]).split('|').map(t => t.split(/[·,]/).map(x => x.trim()).filter(Boolean)).filter(t => t.length); } catch (e) { return []; }
 })();
 let team = '';
+const HASH = new URLSearchParams(location.hash.slice(1));
+const TEACHER = HASH.has('teacher');
+// 조 편성 주소가 있으면 그 주소로 방이 정해져요(같은 주소 = 같은 반). #room=으로 직접 정할 수도 있어요.
+const ROOM = (() => {
+  const r = HASH.get('room'); if (r) return r.replace(/[^\w-]/g, '').slice(0, 30);
+  const t = HASH.get('teams'); if (!t) return '';
+  let h = 2166136261; for (const c of t) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  return h.toString(36);
+})();
+// Firebase Realtime Database를 REST로 써요(라이브러리 없이 fetch·EventSource만).
+const db = ROOM && window.fetch ? FIREBASE_CONFIG.databaseURL + '/rooms/news-' + ROOM : '';
+const url = p => db + (p ? '/' + p : '') + '.json';
+const ok = r => { if (!r.ok) throw new Error(r.status); return r.json(); };
+const cloud = {
+  set: (p, v) => fetch(url(p), { method: 'PUT', body: JSON.stringify(v == null ? null : v) }).then(ok),
+  get: p => fetch(url(p)).then(ok),
+  remove: p => fetch(url(p), { method: 'DELETE' }).then(ok),
+  // 바뀔 때마다 전체 값을 cb로 알려 줘요.
+  listen(p, cb, onErr) {
+    let tree = null;
+    const at = (path, data, merge) => {
+      const keys = path.split('/').filter(Boolean);
+      if (!keys.length) { tree = merge ? Object.assign(tree || {}, data) : data; return; }
+      if (!tree || typeof tree !== 'object') tree = {};
+      let o = tree;
+      keys.slice(0, -1).forEach(k => { if (!o[k] || typeof o[k] !== 'object') o[k] = {}; o = o[k]; });
+      const last = keys[keys.length - 1];
+      if (merge) o[last] = Object.assign(o[last] || {}, data);
+      else if (data == null) delete o[last]; else o[last] = data;
+    };
+    const es = new EventSource(url(p));
+    const on = merge => e => { try { const m = JSON.parse(e.data); at(m.path, m.data, merge); cb(tree); } catch (err) {} };
+    es.addEventListener('put', on(false));
+    es.addEventListener('patch', on(true));
+    es.onerror = () => onErr && onErr();
+    es.onopen = () => {};
+    return es;
+  }
+};
+function setSync(text, bad) { const e = $('sync'); e.textContent = text; e.className = 'sync' + (bad ? ' bad' : ''); }
 const key = () => KEY + (team ? '-t' + team : '');
 const todayStr = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 
@@ -132,20 +196,72 @@ function load() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(key()) || 'null'); } catch (e) {}
   clearFields();
-  if (s) { FIELDS.forEach(k => { if (s[k] != null) $(k).value = s[k]; }); img[1] = s.img1 || ''; img[2] = s.img2 || ''; }
+  if (s) applyData(s, s.img1 || '', s.img2 || '');
+  localT = (s && s.t) || 0;
   if (!$('date').value) $('date').value = todayStr();
   if (team && !$('reporter').value) $('reporter').value = TEAMS[team - 1].join('·');
   [1, 2].forEach(showThumb);
 }
+let localT = 0;
+function applyData(s, i1, i2) {
+  FIELDS.forEach(k => { $(k).value = s[k] != null ? s[k] : ''; });
+  if (!$('paperName').value) $('paperName').value = '우리 반 신문';
+  if (!$('ncols').value) $('ncols').value = '0';
+  img[1] = i1 || ''; img[2] = i2 || '';
+}
+function hasContent() { return ['title', 'deck', 'lead', 'body'].some(k => $(k).value.trim()) || img[1] || img[2]; }
 function clearFields() {
   FIELDS.forEach(k => $(k).value = ''); $('paperName').value = '우리 반 신문'; $('ncols').value = '0'; $('date').value = todayStr();
   img[1] = img[2] = ''; [1, 2].forEach(n => { $('img' + n).value = ''; });
 }
-function save() {
+function save(changedImg) {
+  if (TEACHER) return;
   const s = {}; FIELDS.forEach(k => s[k] = $(k).value);
+  s.t = localT = Date.now();
   s.img1 = img[1]; s.img2 = img[2];
+  push(changedImg);
   try { localStorage.setItem(key(), JSON.stringify(s)); }
   catch (e) { try { s.img2 = ''; localStorage.setItem(key(), JSON.stringify(s)); } catch (e2) {} }
+}
+
+// 인터넷에도 저장해서 선생님 화면에 바로 보이고, 컴퓨터가 꺼져도 남아요.
+let pushTimer = null;
+function textData() { const d = { t: localT || Date.now() }; FIELDS.forEach(k => d[k] = $(k).value); return d; }
+function push(changedImg) {
+  if (!db || !team) return;
+  if (changedImg) cloud.set('img/' + team + '/' + changedImg, img[changedImg] || null).catch(() => setSync('⚠️ 사진을 인터넷에 저장하지 못했어요', true));
+  setSync('☁️ 저장 중…');
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    cloud.set('teams/' + team, textData())
+      .then(() => setSync('☁️ 저장됨 (선생님 화면에 보여요)'))
+      .catch(() => setSync('⚠️ 인터넷 저장 실패, 이 컴퓨터에는 저장됐어요', true));
+  }, 700);
+}
+// 조를 고르면 인터넷에 있는 글과 이 컴퓨터의 글 중 더 최근 것을 써요.
+async function pullTeam() {
+  if (!db || !team) return;
+  const tm = team;
+  setSync('☁️ 불러오는 중…');
+  try {
+    const [c0, ci0] = await Promise.all([cloud.get('teams/' + tm), cloud.get('img/' + tm)]);
+    if (tm !== team) return;
+    const c = c0, ci = ci0 || {};
+    if (c && (c.t || 0) > localT) {
+      applyData(c, ci[1], ci[2]); localT = c.t;
+      [1, 2].forEach(showThumb); render(); saveLocal();
+      setSync('☁️ 인터넷에 저장된 글을 불러왔어요');
+    } else if (hasContent()) {
+      if (img[1]) cloud.set('img/' + tm + '/1', img[1]);
+      if (img[2]) cloud.set('img/' + tm + '/2', img[2]);
+      await cloud.set('teams/' + tm, textData());
+      setSync('☁️ 저장됨 (선생님 화면에 보여요)');
+    } else setSync('☁️ 인터넷 저장 켜짐');
+  } catch (e) { setSync('⚠️ 인터넷에 연결되지 않아 이 컴퓨터에만 저장돼요', true); }
+}
+function saveLocal() {
+  const s = textData(); s.img1 = img[1]; s.img2 = img[2];
+  try { localStorage.setItem(key(), JSON.stringify(s)); } catch (e) {}
 }
 
 function fmtDate(v) {
@@ -255,7 +371,7 @@ function showThumb(n) {
 async function setImage(n, f) {
   if (!f || !/^image\//.test(f.type)) return;
   try { img[n] = await readImage(f); } catch (err) { alert('사진을 읽지 못했어요. 다른 사진을 골라 보세요.'); return; }
-  showThumb(n); render(); save();
+  showThumb(n); render(); save(n);
 }
 [1, 2].forEach(n => {
   $('img' + n).addEventListener('change', e => setImage(n, e.target.files[0]));
@@ -263,7 +379,7 @@ async function setImage(n, f) {
   fs.addEventListener('dragover', e => { e.preventDefault(); fs.style.borderColor = '#B3261E'; });
   fs.addEventListener('dragleave', () => { fs.style.borderColor = ''; });
   fs.addEventListener('drop', e => { e.preventDefault(); fs.style.borderColor = ''; setImage(n, e.dataTransfer.files[0]); });
-  $('del' + n).addEventListener('click', () => { img[n] = ''; $('img' + n).value = ''; showThumb(n); render(); save(); });
+  $('del' + n).addEventListener('click', () => { img[n] = ''; $('img' + n).value = ''; showThumb(n); render(); save(n); });
 });
 document.addEventListener('paste', e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
@@ -276,7 +392,7 @@ $('team').addEventListener('change', e => {
   e.stopPropagation();
   team = e.target.value;
   try { localStorage.setItem(KEY + '-team', team); } catch (err) {}
-  load(); render();
+  load(); render(); pullTeam();
 });
 $('f').addEventListener('input', () => { render(); save(); });
 $('f').addEventListener('change', () => { render(); save(); });
@@ -287,6 +403,7 @@ $('reset').addEventListener('click', () => {
   clearFields();
   if (team) $('reporter').value = TEAMS[team - 1].join('·');
   [1, 2].forEach(showThumb); render();
+  if (db && team) { cloud.remove('img/' + team).catch(() => {}); save(); }
 });
 window.addEventListener('resize', scale);
 window.addEventListener('hashchange', () => location.reload());
@@ -294,13 +411,68 @@ window.addEventListener('beforeprint', () => { $('scaler').style.transform = 'no
 window.addEventListener('afterprint', scale);
 // 사진이 다 그려진 뒤 다시 맞춰요.
 document.getElementById('paper').addEventListener('load', () => { fit(); scale(); }, true);
+function ago(t) {
+  if (!t) return '';
+  const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+  return s < 60 ? '방금' : s < 3600 ? Math.floor(s / 60) + '분 전' : new Date(t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+const norm = x => { const o = {}; if (x && typeof x === 'object') Object.keys(x).forEach(k => { if (x[k] != null) o[k] = x[k]; }); return o; };
+function startTeacher() {
+  document.body.classList.add('teacher');
+  $('topTitle').textContent = '📰 신문 편집기 · 선생님 실시간 보기';
+  const list = $('tlist');
+  if (!db) { list.append(el('div', 'note warn', '조 편성 주소(#teams=…)에 &teacher를 붙여 열어 주세요. 인터넷 연결도 필요해요.')); return; }
+  const data = {}, pics = {};
+  let sel = '';
+  const cards = {};
+  const mk = i => {
+    const b = el('button', 'tcard'); b.type = 'button'; b.dataset.t = i;
+    b.onclick = () => { sel = String(i); Object.values(cards).forEach(c => c.setAttribute('aria-pressed', c === b)); show(); };
+    list.append(b); cards[i] = b; return b;
+  };
+  TEAMS.forEach((_, i) => mk(i + 1));
+  const draw = i => {
+    const d = data[i], b = cards[i] || mk(i);
+    const names = TEAMS[i - 1] ? TEAMS[i - 1].join('·') : '';
+    const chars = d ? (paras(d.lead || '').join('') + paras(d.body || '').join('')).length : 0;
+    const np = pics[i] ? Object.keys(pics[i]).length : 0;
+    b.replaceChildren(el('b', '', `${i}조 ${names}`),
+      el('span', '', d ? (d.title || '(표제 아직 없음)') : '아직 쓰지 않았어요'),
+      el('span', 'meta', d ? `글자 ${chars}자 · 사진 ${np}장 · ` : ''));
+    if (d) { const lv = el('span', Date.now() - d.t < 90000 ? 'live' : '', ago(d.t)); b.lastChild.append(lv); }
+    b.setAttribute('aria-pressed', sel === String(i));
+  };
+  const show = () => {
+    if (!sel) return;
+    team = sel;
+    const d = data[sel];
+    if (d) applyData(d, pics[sel] && pics[sel][1], pics[sel] && pics[sel][2]);
+    else { clearFields(); $('reporter').value = TEAMS[sel - 1] ? TEAMS[sel - 1].join('·') : ''; }
+    render();
+  };
+  cloud.listen('teams', tv => {
+    const v = norm(tv);
+    Object.keys(data).forEach(k => { if (!v[k]) delete data[k]; });
+    Object.assign(data, v);
+    new Set([...Object.keys(cards), ...Object.keys(v)]).forEach(draw);
+    if (!sel) { const first = Object.keys(cards)[0]; if (first) { sel = first; draw(first); } }
+    show(); setSync('🟢 실시간 연결됨');
+  }, () => setSync('⚠️ 연결이 끊겨 다시 잇는 중…', true));
+  cloud.listen('img', iv => {
+    const v = norm(iv);
+    Object.keys(pics).forEach(k => delete pics[k]); Object.assign(pics, v);
+    Object.keys(cards).forEach(draw); show();
+  });
+  setInterval(() => Object.keys(cards).forEach(draw), 30000);
+}
 if (TEAMS.length) {
   $('teamBox').hidden = false;
   TEAMS.forEach((t, i) => $('team').append(new Option(`${i + 1}조 (${t.join('·')})`, i + 1)));
   try { const t = localStorage.getItem(KEY + '-team'); if (t && TEAMS[t - 1]) team = t; } catch (e) {}
   $('team').value = team;
 }
-load(); render();
+if (TEACHER) startTeacher();
+else { load(); render(); pullTeam(); if (ROOM && !db) setSync('⚠️ 인터넷 저장을 쓸 수 없어 이 컴퓨터에만 저장돼요', true); }
 if (document.fonts) document.fonts.ready.then(render);
 </script>
 </body></html>
