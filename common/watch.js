@@ -15,7 +15,11 @@
      gate:true 를 student·teacher 둘 다에 넣으면 '시작 전 대기': 선생님이 ▶ 학생 활동 시작을 누르기 전까지
        들어간 학생 화면은 '기다려요' 화면으로 덮여요. 시작한 뒤에는 ⏸ 잠깐 멈추기로 다시 멈출 수 있어요(rooms/<방>/go).
      ClassWatch.steps(['들어가기','조 고르기','기다리기','게임'], 1)  학생 화면 위에 붙일 단계 표시 HTML
-     ClassWatch.joinForm({checks:[{label:'나라 고르기', ok:()=>!!pick}]})  들어가기 화면을 그린 뒤 */
+     ClassWatch.joinForm({checks:[{label:'나라 고르기', ok:()=>!!pick}]})  들어가기 화면을 그린 뒤
+   - 답 가리기 (선생님 화면 공통): ClassWatch.teacher를 부르면 오른쪽 아래에 🙈 답 가리기 버튼이 생겨요.
+     처음에는 늘 가려져 있어요. 정답·정답률·틀린 학생 이름처럼 답을 드러내는 곳에 class="cw-ans"만 붙이면
+     가려지고, 버튼을 누르면 보였다가 다시 누르면 가려져요(해설할 때). 새 활동도 cw-ans만 붙이면 돼요.
+     ClassWatch.answers(true|false) 로 코드에서 보이기·가리기, ClassWatch.answers() 는 지금 보이는지(true/false). */
 (function(){
 const TS=()=>firebase.database.ServerValue.TIMESTAMP;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -54,7 +58,14 @@ const CSS=`
 .cw-go.on{background:#fff;color:var(--ink,#333);border:2px solid var(--line,#ddd);font-size:1rem}
 .cw-open .cw-badge{display:inline-block;background:var(--bad,#C8452D);color:#fff;border-radius:999px;padding:0 .5em;margin-left:.4em}
 @media (prefers-reduced-motion:no-preference){.cw-open.alert{animation:cwp 1s ease-in-out infinite alternate}@keyframes cwp{to{transform:scale(1.06)}}}
-.cw-ov,.cw-toast,.cw-steps,.cw-todo,.cw-help,.cw-open,.cw-who,.cw-roomok{word-break:keep-all;overflow-wrap:break-word}
+.cw-ov,.cw-toast,.cw-steps,.cw-todo,.cw-help,.cw-open,.cw-who,.cw-roomok,.cw-ansbtn{word-break:keep-all;overflow-wrap:break-word}
+/* 답 가리기 */
+.cw-ansbtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:80;font-family:var(--display,system-ui);font-size:1.05rem;border-radius:999px;padding:.6em 1.1em;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.2);background:#5B4A3A;color:#fff;border:2px solid #5B4A3A}
+.cw-ansbtn.show{background:#fff;color:var(--ink,#333);border-color:var(--gold,#E9B04F)}
+html.cw-hide .cw-ans{position:relative}
+html.cw-hide small.cw-ans,html.cw-hide span.cw-ans{display:inline-block;min-width:6em}
+html.cw-hide .cw-ans:empty::after{display:none}
+html.cw-hide .cw-ans::after{content:'🙈 가림';position:absolute;inset:-2px;z-index:2;display:flex;align-items:center;justify-content:center;background:#E6E0D6;color:#7A6F62;border-radius:8px;font-size:.9rem;font-weight:400;font-style:normal;white-space:nowrap;pointer-events:auto}
 .cw-ov{position:fixed;inset:0;z-index:100;background:var(--wall,#EEE);overflow:auto;padding:12px max(12px,env(safe-area-inset-right,0px)) 40px max(12px,env(safe-area-inset-left,0px))}
 .cw-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}
 .cw-bar h2{font-family:var(--display,system-ui);font-weight:400;margin:0;font-size:1.6rem}
@@ -460,6 +471,7 @@ function teacher(o){
   css();
   if(T.off&&T.room===String(o.room))return;
   teacherStop();
+  if(!o.solo)answerBtn();
   Object.assign(T,{db:o.db,room:String(o.room),data:{},seen:new Set(),solo:!!o.solo,zoom:'',qr:'',cache:{},stepMem:new Map(),stepBig:''});
   trackSkew(T.db);
   let first=true;
@@ -487,8 +499,22 @@ function teacher(o){
     draw();document.body.appendChild(g);
   }
 }
+/* 답 가리기: 처음엔 늘 가림. html.cw-hide 가 붙어 있으면 .cw-ans 위에 덮개가 씌워져요(화면을 다시 그려도 그대로). */
+const A={btn:null,show:false};
+function answers(v){
+  if(v===undefined)return A.show;
+  A.show=!!v;document.documentElement.classList.toggle('cw-hide',!A.show);
+  if(A.btn){A.btn.className='cw-ansbtn'+(A.show?' show':'');A.btn.textContent=A.show?'🙈 답 가리기':'👀 답 보기';A.btn.title=A.show?'누르면 정답·정답률·틀린 학생 이름을 다시 가려요':'지금은 답이 가려져 있어요. 해설할 때 누르세요';A.btn.setAttribute('aria-pressed',String(A.show));}
+  return A.show;
+}
+function answerBtn(){
+  css();
+  if(!A.btn){A.btn=document.createElement('button');A.btn.type='button';A.btn.onclick=()=>{answers(!A.show);toast(A.show?'👀 답이 보여요':'🙈 답을 가렸어요');};}
+  if(!A.btn.isConnected)document.body.appendChild(A.btn);
+  answers(A.show);
+}
 function teacherStop(){T.offGo&&T.offGo();T.offGo=null;T.go&&T.go.remove();T.go=null;T.off&&T.off();T.off=null;clearInterval(T.tick);T.btn&&T.btn.remove();T.btn=null;T.ov&&T.ov.remove();T.ov=null;T.open=false;}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&T.open&&!T.solo){if(T.zoom){T.zoom='';render();}else if(T.stepBig){T.stepBig='';render();}else show(false);}});
 
-window.ClassWatch={student,stop,who,step,detail:setDetail,steps,joinForm,teacher,teacherStop,show,toast,_S:S,_T:T,cleanHtml};
+window.ClassWatch={student,stop,who,step,detail:setDetail,steps,joinForm,teacher,teacherStop,show,toast,answers,_S:S,_T:T,cleanHtml};
 })();

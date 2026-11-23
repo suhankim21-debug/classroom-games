@@ -621,7 +621,7 @@ function tv4(main,S){
     const p=[L[1],L[0],L[2]];
     main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">원주율 대결 시상식</h2><button class="ghost" id="awoff">순위표로</button></div>
      <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.game.score||0}점</div>`:'<span></span>').join('')}</div></div>
-     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br>정답: <b>${esc(h.q.a)}</b> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}`;
+     ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 틀린 문제</h2><div class="list">${hard.map(h=>`<div><b>${h.q.e}</b>${esc(h.q.q)}<br><span class="cw-ans">정답: <b>${esc(h.q.a)}</b></span> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}`;
     $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
     return;
   }

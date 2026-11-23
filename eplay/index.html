@@ -1089,9 +1089,9 @@ function rateBox(){
     .filter(x=>x.done>0).sort((a,b)=>(a.rate??2)-(b.rate??2)||a.i-b.i);
   return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률</h2><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div>
    <p class="muted" style="margin:0">처음 답(한 번에 맞혔는지) 기준이에요. 낮은 문제부터 보여요.</p>
-   <div class="qrate">${rows.map(x=>{const ok=x.done-x.miss.length,rt=Math.round(x.rate*100);return `<div class="qrow${rt<70?' low':''}"><div><b>${esc(x.q.t)}</b><br><small class="en">${esc(x.q.a)}</small></div>
-     <div class="qb"><div class="track"><div style="width:${rt}%"></div></div><span class="pc">${rt}%</span><small class="muted">${ok}/${x.done}명</small></div>
-     <div>${x.miss.length?`틀린 학생 <b>${x.miss.length}명</b>${showWrong?`: ${nameList(x.miss)}`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`;}).join('')||'<p class="muted">아직 푼 문제가 없어요</p>'}</div></div>`;
+   <div class="qrate">${rows.map(x=>{const ok=x.done-x.miss.length,rt=Math.round(x.rate*100);return `<div class="qrow${rt<70?' low':''}"><div><b>${esc(x.q.t)}</b><br><small class="en cw-ans">${esc(x.q.a)}</small></div>
+     <div class="qb cw-ans"><div class="track"><div style="width:${rt}%"></div></div><span class="pc">${rt}%</span><small class="muted">${ok}/${x.done}명</small></div>
+     <div class="cw-ans">${x.miss.length?`틀린 학생 <b>${x.miss.length}명</b>${showWrong?`: ${nameList(x.miss)}`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`;}).join('')||'<p class="muted">아직 푼 문제가 없어요</p>'}</div></div>`;
 }
 function rankBox(){
   const L=ranking();

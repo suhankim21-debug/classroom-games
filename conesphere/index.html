@@ -790,7 +790,7 @@ function tvTop(st){
   $('#tvtop').innerHTML=`<div class="panel grid"><h2 style="font-size:1.8rem">${P.h}</h2>
     <div class="figs">${P.figs().map(([f,c])=>`<div>${f}${c}</div>`).join('')}</div>
     <div class="rules"><b>함께 이야기해요</b><ul>${P.talk.map(t=>`<li>${t}</li>`).join('')}</ul></div>
-    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva"></div></div>`;
+    <div class="row"><button class="ghost" id="tvaT"></button></div><div id="tva" class="cw-ans"></div></div>`;
   $('#tvaT').onclick=()=>{tvAns=!tvAns;draw();};
   draw();
 }
@@ -829,9 +829,9 @@ function quizBox(S,st){
   return `<div class="panel grid" id="qstat"><div class="row" style="justify-content:space-between"><h2>문제별 정답률 ${tvAll?'(모든 단계)':`(${st}단계)`}</h2><div class="row"><button class="ghost" id="allT">${tvAll?'이 단계만':'모든 단계 보기'}</button><button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button></div></div>
    <p class="muted" style="margin:0">처음 답한 것이 맞은 비율이에요. 낮은 문제부터 보여요. 다시 골라서 맞힌 학생도 틀린 학생에 들어가요.</p>
    <div class="qrate">${R.map(r=>`<div class="qrow${r.rate!==null&&r.rate<70?' low':''}" data-q="${r.q.id}">
-     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted">정답: ${esc(r.q.a)}</small></div>
-     <div class="qb"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
-     <div class="qw">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
+     <div class="qt"><b>${r.q.st}-${r.no}</b> ${esc(r.q.q)}<br><small class="muted cw-ans">정답: ${esc(r.q.a)}</small></div>
+     <div class="qb cw-ans"><div class="track"><div style="width:${r.rate||0}%"></div></div><span class="pc">${r.rate===null?'-':r.rate+'%'}</span><small class="muted">${r.ok}/${r.done}명</small></div>
+     <div class="qw cw-ans">${r.miss.length?`틀린 학생 <b>${r.miss.length}명</b>${showWrong?`: <span class="who">${r.miss.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ')}</span>`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`).join('')}</div></div>`;
 }
 
 /* ---------- route ---------- */

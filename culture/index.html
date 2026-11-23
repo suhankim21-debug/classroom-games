@@ -435,9 +435,9 @@ function renderTV(){
 const nameList=L=>L.map(x=>`<span style="white-space:nowrap">${esc(x.n)} ${esc(x.name)}</span>`).join(', ');
 function rateRow(no,title,sub,done,miss){
   const ok=done-miss.length, rate=done?Math.round(ok/done*100):null;
-  return `<div class="qr${rate!==null&&rate<70?' low':''}"><div><b>${no}</b> ${title}<br><small class="muted">${sub}</small></div>
-   <div class="qb"><div class="track"><div style="width:${rate||0}%"></div></div><span class="pc">${rate===null?'-':rate+'%'}</span><small class="muted">${ok}/${done}명</small></div>
-   <div>${miss.length?`틀린 학생 <b>${miss.length}명</b>${showWrong?`: ${nameList(miss)}`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`;
+  return `<div class="qr${rate!==null&&rate<70?' low':''}"><div><b>${no}</b> ${title}<br><small class="muted cw-ans">${sub}</small></div>
+   <div class="qb cw-ans"><div class="track"><div style="width:${rate||0}%"></div></div><span class="pc">${rate===null?'-':rate+'%'}</span><small class="muted">${ok}/${done}명</small></div>
+   <div class="cw-ans">${miss.length?`틀린 학생 <b>${miss.length}명</b>${showWrong?`: ${nameList(miss)}`:''}`:'<span class="muted">틀린 학생 없음</span>'}</div></div>`;
 }
 const wrongBtn=()=>`<button class="ghost" id="wrongT">${showWrong?'이름 가리기':'틀린 학생 이름 보기'}</button>`;
 function bindWrong(){const b=$('#wrongT');if(b)b.onclick=()=>{showWrong=!showWrong;renderTV();};}
@@ -469,7 +469,7 @@ function tvAward(main,S){
   const hard=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>({r:ROWS.find(r=>r.id===k),v})).filter(x=>x.r);
   main.innerHTML=`<div class="panel grid"><div class="row" style="justify-content:space-between"><h2 style="font-size:2rem">🏯 한국 문화 해설사 시상식</h2><button class="ghost" id="awoff">놀이 화면으로</button></div>
    <div class="podium">${p.map((x,k)=>x?`<div class="p${[2,1,3][k]} pop"><b>${[2,1,3][k]}등</b><span>${esc(x.n)} ${esc(x.name)}</span>${x.p.best||x.p.flips||0}번 뒤집기</div>`:'<span></span>').join('')}</div></div>
-   ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 헷갈린 말</h2><div class="list">${hard.map(h=>`<div><b>${esc(h.r.t)}</b><br>정답: <span class="en">${esc(h.r.a)}</span> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}
+   ${hard.length?`<div class="panel grid"><h2>우리 반이 가장 많이 헷갈린 말</h2><div class="list">${hard.map(h=>`<div><b>${esc(h.r.t)}</b><br><span class="cw-ans">정답: <span class="en">${esc(h.r.a)}</span></span> <span class="muted">(틀린 횟수 ${h.v})</span></div>`).join('')}</div></div>`:''}
    ${rateBox(S)}`;
   $('#awoff').onclick=()=>roomRef(ROOM).child('award').set(false);
   bindWrong();
